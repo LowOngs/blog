@@ -75,7 +75,10 @@ for (const baseName of files) {
   // URL/이미지/시간
   const siteBase = process.env.SITE_BASE || "https://your-domain.example";
   const slug = outName(data, path.basename(baseName, ".json"));
-  const canonicalUrl = `${siteBase}/${slug}.html`;
+  const canonicalUrl =
+  data.canonical_url ||
+  (meta && meta.canonical) ||
+  siteBase;  // 퍼머링크 모르면 안전하게 홈 도메인
 
   const cdnBase = (process.env.CDN_BASE || "").replace(/\/+$/,"");
   const ogImage = meta?.og?.image || data.og_image || (cdnBase ? `${cdnBase}/og/default_1200x630.jpg` : "");
@@ -125,3 +128,4 @@ for (const baseName of files) {
 }
 
 console.log(`✅ 렌더 완료: ${rendered} 파일`);
+
