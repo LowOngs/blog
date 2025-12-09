@@ -1,0 +1,30 @@
+{
+  "label": "smart-savings",
+  "trendLimit": 80,
+  "evergreenLimit": 80,
+  "trend": [
+    {
+      "id": "save-trend-001",
+      "title": "Cutting cloud storage costs with a hybrid S3 + R2 setup",
+      "angle": "Keep hot data on S3 and cold backups on R2 to control egress and storage costs.",
+      "audience": "Individuals and small operators trying to lower monthly infra bills",
+      "intent": "savings",
+      "priority": 1,
+      "createdAt": "2025-11-20T00:00:00+09:00",
+      "expiresAt": "2026-03-20T00:00:00+09:00",
+      "notes": "Explain the concept in a way that remains valid even if exact pricing changes."
+    }
+  ],
+  "evergreen": [
+    {
+      "id": "save-ever-001",
+      "title": "Yearly subscription expense review checklist",
+      "angle": "A once-a-year routine to find and cut underused subscriptions.",
+      "audience": "Users who feel their monthly subscription spending is out of control",
+      "intent": "savings",
+      "priority": 1,
+      "createdAt": "2025-11-20T00:00:00+09:00",
+      "notes": "Good to cross-link from many subscription-related posts as a ‘reset’ guide."
+    }
+  ]
+}

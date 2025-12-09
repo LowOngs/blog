@@ -1,0 +1,226 @@
+name: Publish Blog (Blogger)
+
+on:
+  # 수동 실행 + 입력값 (GitHub Actions UI)
+  workflow_dispatch:
+    inputs:
+      category:
+        description: "수동 발급 라벨 선택(0: 자동, 1~6: 블로그 라벨)"
+        required: true
+        default: "0: 자동 스케줄"
+        type: choice
+        options:
+          - "0: 자동 스케줄"
+          - "1: App Reviews (app-reviews)"
+          - "2: Device Reviews (device-reviews)"
+          - "3: Subscription Services (subscription-services)"
+          - "4: How-to Playbooks (how-to-playbooks)"
+          - "5: Smart Savings (smart-savings)"
+          - "6: Templates & Checklists (templates-checklists)"
+      dry_run:
+        description: "true = 발행 시도만 로그, 실제 Blogger 게시 없음 / false = 실제 발행"
+        required: true
+        default: "true"
+
+  # 자동 실행(스케줄) — UTC 기준! (예: 매일 00:30 UTC = KST 오전 9:30)
+  schedule:
+    - cron: "30 0 * * *"
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    env:
+      # ===== Site/CDN/AIO =====
+      SITE_NAME:       "Ongs Blog"
+      SITE_BASE:       https://ongsblog.com
+      CANONICAL_BASE:  ${{ secrets.CANONICAL_BASE }}
+      CDN_BASE:        ${{ secrets.CDN_BASE }}
+      TIME_ZONE:       America/Los_Angeles
+      AOIA_ENABLE:     "false"
+
+      # 스케줄 기본 발행 파라미터
+      SCHEDULE_LABEL:         ""
+      SCHEDULE_MAX_POSTS:     "3"
+      SCHEDULE_DRY_RUN:       "false"
+
+      # 로컬 이미지 소스폴더
+      IMAGES_DIR:      System_files/assets/images
+
+      # ===== R2 / CDN =====
+      R2_ACCOUNT_ID:         ${{ secrets.R2_ACCOUNT_ID }}
+      R2_ACCESS_KEY_ID:      ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY:  ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_BUCKET:             ${{ secrets.R2_BUCKET }}
+      R2_ENDPOINT:           ${{ secrets.R2_ENDPOINT }}
+
+      # ===== Blogger / Google =====
+      BLOGGER_BLOG_ID:       ${{ secrets.BLOGGER_BLOG_ID }}
+      GOOGLE_CLIENT_ID:      ${{ secrets.GOOGLE_CLIENT_ID }}
+      GOOGLE_CLIENT_SECRET:  ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      GOOGLE_REFRESH_TOKEN:  ${{ secrets.GOOGLE_REFRESH_TOKEN }}
+
+      # ===== Page ID 시퀀스 =====
+      PAGEID_SECRET:         ${{ secrets.PAGEID_SECRET }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      # 수동 실행 inputs 처리
+      - name: Resolve inputs (dispatch vs schedule)
+        run: |
+          echo "event_name=${{ github.event_name }}"
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            RAW_CATEGORY="${{ github.event.inputs.category }}"
+            RAW_DRY_RUN="${{ github.event.inputs.dry_run }}"
+
+            CATEGORY_NUM="${RAW_CATEGORY%%:*}"
+
+            LABEL_VALUE=""
+            case "$CATEGORY_NUM" in
+              "1") LABEL_VALUE="app-reviews" ;;
+              "2") LABEL_VALUE="device-reviews" ;;
+              "3") LABEL_VALUE="subscription-services" ;;
+              "4") LABEL_VALUE="how-to-playbooks" ;;
+              "5") LABEL_VALUE="smart-savings" ;;
+              "6") LABEL_VALUE="templates-checklists" ;;
+              "0"|*) LABEL_VALUE="" ;;
+            esac
+
+            if [ "$CATEGORY_NUM" = "0" ]; then
+              MAX_POSTS_VALUE=""
+            else
+              MAX_POSTS_VALUE="1"
+            fi
+
+            echo "LABEL=$LABEL_VALUE" >> $GITHUB_ENV
+            echo "MAX_POSTS=$MAX_POSTS_VALUE" >> $GITHUB_ENV
+            echo "DRY_RUN=$RAW_DRY_RUN" >> $GITHUB_ENV
+            echo "CATEGORY_RAW=$RAW_CATEGORY" >> $GITHUB_ENV
+          else
+            echo "LABEL=${{ env.SCHEDULE_LABEL }}" >> $GITHUB_ENV
+            echo "MAX_POSTS=${{ env.SCHEDULE_MAX_POSTS }}" >> $GITHUB_ENV
+            echo "DRY_RUN=${{ env.SCHEDULE_DRY_RUN }}" >> $GITHUB_ENV
+            echo "CATEGORY_RAW=Schedule(default)" >> $GITHUB_ENV
+          fi
+
+          echo "Resolved:"
+          echo "  LABEL=$LABEL"
+          echo "  CATEGORY_RAW=$CATEGORY_RAW"
+          echo "  MAX_POSTS=$MAX_POSTS"
+          echo "  DRY_RUN=$DRY_RUN"
+
+      - name: Verify required files exist
+        run: |
+          set -e
+          test -f System_files/templates/post.html
+          test -f System_files/scripts/build/render-posts.cjs
+          test -f System_files/scripts/build/validate-repair.cjs
+          test -f System_files/scripts/publish/blogger.cjs
+          test -f System_files/scripts/build/seed-scheduler.cjs
+          test -f System_files/scripts/build/queue-to-posts.cjs
+          test -f System_files/scripts/build/images-renew.cjs
+          test -f System_files/scripts/build/images-build-og.cjs
+          test -f System_files/scripts/build/lib/page-ids.cjs
+          ls -la System_files/content/posts || true
+          echo "✅ required files OK"
+
+      # === 오늘 발행할 시드 선정 ===
+      - name: Plan today posts from seedpool
+        run: node System_files/scripts/build/seed-scheduler.cjs
+
+      - name: Generate posts from today queue
+        run: node System_files/scripts/build/queue-to-posts.cjs
+
+      # === 렌더 → 본문 문단 정규화 → 툴 복사 ===
+      - name: Render posts (JSON → HTML)
+        run: npm run posts:render
+
+      - name: Normalize article body paragraphs
+        run: node System_files/scripts/build/normalize-body.cjs
+
+      - name: Copy tools (edit-request UI)
+        run: node System_files/scripts/build/copy-tools.cjs
+
+      # === OG 이미지 / 이미지 파이프라인 (로컬 루프와 동기화) ===
+      - name: Renew OG manifest from rendered posts
+        run: npm run images:renew
+
+      - name: Build OG images (with pageId sequence)
+        run: npm run images:build:og
+
+      - name: Upload images to R2
+        run: |
+          if npm run | grep -q "images:upload"; then
+            npm run images:upload
+          else
+            node System_files/scripts/build/r2-upload.js
+          fi
+
+      - name: Rewrite image URLs in posts (body images → CDN)
+        run: |
+          if npm run | grep -q "images:rewrite"; then
+            npm run images:rewrite
+          else
+            node System_files/scripts/build/rewrite-images.js
+          fi
+
+      # === AIO/SEO 밸리데이트 & 자동 교정 ===
+      - name: Validate & auto-repair (AIO/SEO)
+        run: npm run posts:validate
+
+      - name: List rendered outputs
+        run: ls -la System_files/dist/posts || true
+
+      # === Blogger 발행 전 토큰 체크 ===
+      - name: Token refresh check
+        env:
+          C_ID:     ${{ secrets.GOOGLE_CLIENT_ID }}
+          C_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          R_TOKEN:  ${{ secrets.GOOGLE_REFRESH_TOKEN }}
+        run: |
+          echo "Refreshing access token…"
+          RESP=$(curl -s -X POST https://oauth2.googleapis.com/token \
+            -d client_id="$C_ID" \
+            -d client_secret="$C_SECRET" \
+            -d refresh_token="$R_TOKEN" \
+            -d grant_type=refresh_token)
+          echo "$RESP" | grep -q access_token && echo "✅ access_token issued" || (echo "❌ token refresh failed"; echo "$RESP"; exit 1)
+
+      - name: Check BLOGGER_BLOG_ID
+        env:
+          BLOG_ID: ${{ secrets.BLOGGER_BLOG_ID }}
+        run: |
+          test -n "$BLOG_ID" || (echo "❌ BLOGGER_BLOG_ID is empty"; exit 1)
+          echo "✅ BLOGGER_BLOG_ID set (masked)."
+
+      - name: Publish to Blogger (respecting LABEL/MAX_POSTS/DRY_RUN)
+        env:
+          LABEL:      ${{ env.LABEL }}
+          MAX_POSTS:  ${{ env.MAX_POSTS }}
+          DRY_RUN:    ${{ env.DRY_RUN }}
+        run: |
+          echo "LABEL=$LABEL MAX_POSTS=$MAX_POSTS DRY_RUN=$DRY_RUN"
+          npm run publish:blogger
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-outputs
+          path: |
+            System_files/logs/**
+            System_files/dist/posts/**
+          if-no-files-found: warn
+          retention-days: 7

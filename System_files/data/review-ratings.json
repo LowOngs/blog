@@ -1,0 +1,43 @@
+
+{
+  "app-20251121-001": {
+    "snapshotDate": "2025-11-21",
+    "snapshotSource": "Google Play & App Store (combined)",
+    "apps": [
+      {
+        "name": "Todoist",
+        "rating": 4.6,
+        "votes": 245312,
+        "stars": { "5": 72, "4": 18, "3": 5, "2": 3, "1": 2 }
+      },
+      {
+        "name": "Microsoft OneNote",
+        "rating": 4.4,
+        "votes": 198430,
+        "stars": { "5": 65, "4": 22, "3": 7, "2": 3, "1": 3 }
+      },
+      {
+        "name": "Google Calendar",
+        "rating": 4.7,
+        "votes": 305120,
+        "stars": { "5": 78, "4": 15, "3": 4, "2": 2, "1": 1 }
+      },
+      {
+        "name": "Notion",
+        "rating": 4.5,
+        "votes": 167890,
+        "stars": { "5": 70, "4": 18, "3": 6, "2": 3, "1": 3 }
+      },
+      {
+        "name": "Dropbox",
+        "rating": 4.3,
+        "votes": 220450,
+        "stars": { "5": 60, "4": 23, "3": 9, "2": 4, "1": 4 }
+      }
+    ],
+    "insights": [
+      "Google Calendar shows the highest overall satisfaction among daily-schedule users.",
+      "Todoist and Notion are favored by power users who manage complex projects across devices."
+    ]
+  }
+}

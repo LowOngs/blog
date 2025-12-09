@@ -1,0 +1,30 @@
+{
+  "label": "how-to-playbooks",
+  "trendLimit": 200,
+  "evergreenLimit": 200,
+  "trend": [
+    {
+      "id": "howto-trend-001",
+      "title": "Safely migrating blog images to Cloudflare R2 without breaking links",
+      "angle": "Stage-by-stage migration plan that avoids 404s while switching image origins.",
+      "audience": "Blog owners moving from old image hosting to R2",
+      "intent": "how-to",
+      "priority": 1,
+      "createdAt": "2025-11-20T00:00:00+09:00",
+      "expiresAt": "2026-03-20T00:00:00+09:00",
+      "notes": "Can reuse Ongs Blog’s real migration steps as a reference pattern."
+    }
+  ],
+  "evergreen": [
+    {
+      "id": "howto-ever-001",
+      "title": "Setting up Node.js and Git on Windows and cloning your first repo",
+      "angle": "Beginner-friendly path from zero to having the blog repo on their machine.",
+      "audience": "People creating their first development environment",
+      "intent": "how-to",
+      "priority": 1,
+      "createdAt": "2025-11-20T00:00:00+09:00",
+      "notes": "Foundation article referenced by many later setup and automation guides."
+    }
+  ]
+}

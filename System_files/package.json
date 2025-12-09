@@ -1,0 +1,20 @@
+{
+  "name": "ongs-google-blog",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "images:upload": "node System_files/scripts/build/r2-upload.js",
+    "images:rewrite": "node System_files/scripts/build/rewrite-images.js",
+    "posts:render": "node ./System_files/scripts/build/render-posts.cjs",
+    "posts:validate": "node ./System_files/scripts/build/validate-repair.cjs",
+    "posts:images-manifest": "node ./System_files/scripts/build/images-manifest.cjs",
+    "publish:blogger": "node System_files/scripts/publish/blogger.cjs",
+    "build": "npm run posts:render && npm run posts:validate",
+    "deploy": "npm run images:upload && npm run images:rewrite && npm run build"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.654.0",
+    "dotenv": "^16.4.5",
+    "fast-glob": "^3.3.2"
+  }
+}

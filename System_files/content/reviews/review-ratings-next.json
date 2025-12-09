@@ -1,0 +1,19 @@
+{
+  "bySlug": {
+    "app-20251121-001": {
+      "slug": "app-20251121-001",
+      "name": "5 must-have productivity apps in 2025",
+      "label": "app-reviews",
+      "store": "multi",
+      "lastChecked": "2025-12-01T00:00:00+09:00",
+      "ratingCurrent": 4.4,
+      "ratingPrevious": 4.3,
+      "ratingDiff": 0.1,
+      "votesCurrent": 200000,
+      "votesPrevious": 180000,
+      "votesDiff": 20000,
+      "status": "steady",
+      "note": "Seed sample for app-20251121-001. Replace with real crawled values later."
+    }
+  }
+}

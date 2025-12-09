@@ -1,0 +1,30 @@
+{
+  "label": "subscription-services",
+  "trendLimit": 60,
+  "evergreenLimit": 60,
+  "trend": [
+    {
+      "id": "sub-trend-001",
+      "title": "Cloud storage subscriptions: 2025 price and storage comparison",
+      "angle": "Compare a few major services like Google Drive, OneDrive, Dropbox on price and capacity.",
+      "audience": "Users who store lots of photos and documents online",
+      "intent": "review",
+      "priority": 1,
+      "createdAt": "2025-11-20T00:00:00+09:00",
+      "expiresAt": "2026-03-20T00:00:00+09:00",
+      "notes": "Assume prices may shift; design the article to be refreshed every 4–6 months."
+    }
+  ],
+  "evergreen": [
+    {
+      "id": "sub-ever-001",
+      "title": "What to check before you cancel any subscription",
+      "angle": "Backup data, remaining period, refunds, account sign-in and integration cleanup.",
+      "audience": "Users with multiple streaming, cloud, and software subscriptions",
+      "intent": "review",
+      "priority": 1,
+      "createdAt": "2025-11-20T00:00:00+09:00",
+      "notes": "Useful as a standard ‘offboarding’ checklist linked from many subscription articles."
+    }
+  ]
+}

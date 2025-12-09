@@ -1,0 +1,7 @@
+node_modules/
+.env
+System_files/dist/
+System_files/logs/
+.DS_Store
+Thumbs.db
+블로그 관련 자료/

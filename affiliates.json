@@ -1,0 +1,126 @@
+{
+  "updated_at": "2025-09-28 22:49 KST",
+  "disclosure": "일부 링크는 제휴 링크입니다. 링크를 통해 구매하시면 운영자가 추가 비용 없이 소정의 수수료를 받을 수 있습니다.",
+  "partners": [
+    {
+      "key": "amazon",
+      "label": "Amazon",
+      "track": "#",
+      "deal": {
+        "active": false,
+        "url": "",
+        "text": ""
+      }
+    },
+    {
+      "key": "ebay",
+      "label": "eBay",
+      "track": "#",
+      "deal": {
+        "active": false,
+        "url": "",
+        "text": ""
+      }
+    },
+    {
+      "key": "target",
+      "label": "Target",
+      "track": "#",
+      "deal": {
+        "active": false,
+        "url": "",
+        "text": ""
+      }
+    },
+    {
+      "key": "mercado-libre",
+      "label": "Mercado Libre",
+      "track": "#",
+      "deal": {
+        "active": false,
+        "url": "",
+        "text": ""
+      }
+    },
+    {
+      "key": "flipkart",
+      "label": "Flipkart",
+      "track": "#",
+      "deal": {
+        "active": false,
+        "url": "",
+        "text": ""
+      }
+    },
+    {
+      "key": "amazon-india",
+      "label": "Amazon India",
+      "track": "#",
+      "deal": {
+        "active": false,
+        "url": "",
+        "text": ""
+      }
+    },
+    {
+      "key": "shopee",
+      "label": "Shopee",
+      "track": "#",
+      "deal": {
+        "active": false,
+        "url": "",
+        "text": ""
+      }
+    },
+    {
+      "key": "lazada",
+      "label": "Lazada",
+      "track": "#",
+      "deal": {
+        "active": false,
+        "url": "",
+        "text": ""
+      }
+    },
+    {
+      "key": "aliexpress",
+      "label": "AliExpress",
+      "track": "#",
+      "deal": {
+        "active": false,
+        "url": "",
+        "text": ""
+      }
+    },
+    {
+      "key": "otto",
+      "label": "Otto",
+      "track": "#",
+      "deal": {
+        "active": false,
+        "url": "",
+        "text": ""
+      }
+    },
+    {
+      "key": "zalando",
+      "label": "Zalando",
+      "track": "#",
+      "deal": {
+        "active": false,
+        "url": "",
+        "text": ""
+      }
+    },
+    {
+      "key": "allegro",
+      "label": "Allegro",
+      "track": "#",
+      "deal": {
+        "active": false,
+        "url": "",
+        "text": ""
+      }
+    }
+  ]
+}

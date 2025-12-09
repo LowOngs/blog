@@ -1,0 +1,83 @@
+import fs from "fs";
+import path from "path";
+import fg from "fast-glob";
+
+const ROOT = process.cwd();
+const POSTS_DIR = path.join(ROOT, "content", "posts");
+const TPL_PATH  = path.join(ROOT, "System_files", "templates", "post.html");
+const OUT_DIR   = path.join(ROOT, "System_files", "dist", "posts");
+
+const read = p => fs.promises.readFile(p, "utf8");
+const write = (p,c) => fs.promises.writeFile(p, c, "utf8");
+const ensureDir = async p => fs.promises.mkdir(p, { recursive: true });
+
+const esc = s => String(s ?? "").replace(/[&<>"]/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[m]));
+
+function toSlug(title, slug){
+  if (slug) return slug;
+  return String(title||"untitled").trim().toLowerCase()
+    .replace(/[^\w\s-]/g,"").replace(/\s+/g,"-").replace(/-+/g,"-");
+}
+
+function buildHeadMeta(meta={}){
+  const arr = [];
+  const title = meta.title || "";
+  const desc  = meta.description || "";
+  if (title) arr.push(`<meta property="og:title" content="${esc(title)}">`);
+  if (desc)  arr.push(`<meta name="description" content="${esc(desc)}">`,
+                      `<meta property="og:description" content="${esc(desc)}">`);
+  if (meta.og?.image) arr.push(`<meta property="og:image" content="${esc(meta.og.image)}">`);
+  arr.push(`<meta property="og:type" content="${esc(meta.og?.type||"article")}">`);
+  if (meta.schema){
+    arr.push(`<script type="application/ld+json">${esc(JSON.stringify(meta.schema))}</script>`);
+  }
+  return arr.join("\n  ");
+}
+
+function buildTldr(aio){
+  const list = aio?.tldr;
+  if (!Array.isArray(list) || !list.length) return "";
+  return `<ul>${list.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`;
+}
+
+function buildSources(aio){
+  const src = aio?.sources;
+  if (!Array.isArray(src) || !src.length) return "";
+  return `<section><h2>Sources</h2><ul>${
+    src.map(s=>`<li><a href="${esc(s.url||"#")}">${esc(s.name||s.url||"source")}</a></li>`).join("")
+  }</ul></section>`;
+}
+
+async function main(){
+  const files = await fg([path.join(POSTS_DIR, "*.json").replace(/\\/g,"/")]);
+  if (!files.length){ console.log("No posts to render."); return; }
+
+  const tpl = await read(TPL_PATH);
+  await ensureDir(OUT_DIR);
+
+  let count=0;
+  for (const f of files){
+    const post = JSON.parse(await read(f));
+    const title = post.title || "Untitled";
+    const slug  = toSlug(title, post.slug);
+    const body  = post.body_html || post.content || "";
+    const headMeta   = buildHeadMeta(post.meta||{});
+    const tldrBlock  = buildTldr(post.meta?.aio);
+    const sourcesBlk = buildSources(post.meta?.aio);
+
+    const html = tpl
+      .replaceAll("{{title}}", esc(title))
+      .replace("{{headMeta}}", headMeta)
+      .replace("{{tldrBlock}}", tldrBlock)
+      .replace("{{body}}", body)
+      .replace("{{sourcesBlock}}", sourcesBlk);
+
+    const outPath = path.join(OUT_DIR, `${slug}.html`);
+    await write(outPath, html);
+    console.log(`✔ rendered: ${path.relative(ROOT, outPath)}`);
+    count++;
+  }
+  console.log(`✅ render complete (files=${count})`);
+}
+
+main().catch(e=>{ console.error(e); process.exit(1); });

@@ -1,0 +1,30 @@
+{
+  "label": "templates-checklists",
+  "trendLimit": 60,
+  "evergreenLimit": 60,
+  "trend": [
+    {
+      "id": "tpl-trend-001",
+      "title": "Preflight QA checklist for blog posts in 2025",
+      "angle": "Bundle meta, images, internal links, FAQ, and sources into one practical checklist.",
+      "audience": "Bloggers who want a consistent minimum quality bar for every article",
+      "intent": "template",
+      "priority": 1,
+      "createdAt": "2025-11-20T00:00:00+09:00",
+      "expiresAt": "2026-03-20T00:00:00+09:00",
+      "notes": "Versioned template (v1, v2…) that can be updated annually."
+    }
+  ],
+  "evergreen": [
+    {
+      "id": "tpl-ever-001",
+      "title": "Basic planning checklist before writing any new blog post",
+      "angle": "Clarify target reader, core message, search intent, and internal link candidates.",
+      "audience": "Writers who post often but without a structured planning habit",
+      "intent": "template",
+      "priority": 1,
+      "createdAt": "2025-11-20T00:00:00+09:00",
+      "notes": "Fits all six labels; can be reused as a generic ‘start here’ template."
+    }
+  ]
+}

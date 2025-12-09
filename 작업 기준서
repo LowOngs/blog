@@ -1,0 +1,197 @@
+작업기준서1
+[총칙 · 적용 범위 · 기본 원칙]
+
+■ 목적
+- D:\Ongdalsaem_blog\ 전 구간(작성·빌드·아카이브·로그)을 안정적으로 운영한다.
+- 결과물은 항상 “즉시 배포/재생성 가능” 상태로 제공한다(세션 만료 무관).
+
+■ 적용 범위
+- 폴더 구조·파일명 규칙·로그/리포트·자동화 스크립트(PS1/BAT)·일지(보고)·Bio 연동.
+
+■ 기본 원칙
+- 실행 지시 시 반드시 3요소 명시: 📍 실행 위치(경로) → ▶ 명령어 → 📂 출력 파일(이름/경로).
+- 동일 파일명 덮어쓰기 원칙(버전 접미사 _v2 금지, 필요 시 아카이브로 관리).
+- 세션 만료 방지: 산출물은 링크+절대경로로 즉시 재제공 가능 상태 유지.
+- 실패 보고: “성공/실패 + 다음 단계”만. 원인 상세는 요청 시에만 제공.
+- 코드블록/대형 소스 남발 금지. 길이가 크면 파일로 제공하고 대화엔 링크만.
+- 테스트/모바일 환경에서도 “실제 독자 페이지 기준”으로 출력물 구성(가독성 준수).
+- 사실성 최우선. 추측·일루전 금지. 확인 불가 정보는 제외.
+- 모든 변경은 로그로 남기고, 아카이브에 보존한다.
+
+■ 덮어쓰기 루틴(1·2·3)
+1) 원문 수신 즉시: 전체 교체본(최종본) 제공.
+2) “덮어쓰기” 지시 시: 같은 파일명으로 실제 교체 적용본 제공.
+3) 제공물이 최종 작업본임을 파일명/경로와 함께 명시.
+
+■ 보고 포맷(채팅 요약)
+- Why/What/How/Evidence/Risk/Result 6요소를 간결히 요약.
+- 상세는 파일(일지)로 보관, 채팅엔 링크만.
+
+작업 기준서2
+[저장 영역·명령 규칙(Strict-Target) · 라벨링]
+
+■ Strict-Target 모드
+- 접두사 없는 “저장” 요청은 수행 금지.
+- 허용 접두사: BIO / MEM / CACHE / WORKFILE.
+
+■ 영역 정의
+- BIO: 모델 세트 컨텍스트(요약·규칙·포인터). 텍스트만 저장. 바이너리는 링크+SHA256만.
+- MEM: 개인화 메모리(짧은 사실/선호). 설계·원문·코드 금지.
+- CACHE: 휘발성 임시. 영구 보관 금지.
+- WORKFILE: 실제 산출 파일(CSS/HTML/JS/PS1/BAT/문서 등).
+
+■ 응답 라벨링
+- 저장/수정 관련 답변 첫머리에 [Storage] 블록을 붙인다.
+- 예: [Storage] WORKFILE → D:\Ongdalsaem_blog\dist\skin.html (덮어쓰기)
+
+■ 금지 사항
+- 접두사 없이 임의 저장/추측 저장 금지.
+- 긴 코드/원문을 BIO/MEM에 직접 저장 금지(요약·포인터만 BIO 사용).
+
+■ BIO 파일 백업 규칙
+- “bio 다운로드” 요청 시 항상 두 파일 제공:
+  - GPT_bio_light.txt(경량판 최신본)
+  - GPT_bio_full.txt(풀버전 최신본)
+- 링크와 절대 경로를 함께 안내. 동일 파일명으로 재생성 가능해야 한다.
+
+작업 기준서3
+[파일 제공·관리 · 출력 형식 · 링크 규칙]
+
+■ 파일 제공 공통
+- 항상 “[파일명 링크] + 절대 경로” 형식으로 안내.
+- 긴 코드/원고는 코드블록 대신 파일로 제공(요청 시에만 예외로 코드블록 허용).
+
+■ 산출물 폴더 구분
+- tools: 관리·청소·자동화 스크립트
+- dist_src: 개발/빌드 소스
+- dist: 최종 실행/배포물
+- _archive: chat_history / recycle_bin / manifests / zip
+- project_logs: build_logs / system_logs / fs_audit / log
+- audit_reports: build_reports / structure_reports / scan_reports
+- ChatGPT_bio_file: Bio 경량/풀버전 산출물
+- blog_daily_file\YYYY-MM-DD\: 일자별 글/이미지 폴더
+
+■ 이름/중복 규칙
+- 같은 이름 파일은 덮어쓰기. 아카이브 보존은 _archive\zip 에 이력 관리(동명 시 (1)(2)… 접미사).
+- 산출물 누락 금지. 전환 상황에서도 동일 러닝에서 결과물을 산출.
+
+■ 이미지/메타 산출물
+- 이미지: blog_daily_file\YYYY-MM-DD\images\
+- 본문/메타: blog_daily_file\YYYY-MM-DD\ (ALT/출처 규칙은 블로그 기준서 참조)
+
+■ 링크 표기
+- 채팅에는 반드시 파일 링크와 절대 경로 병기.
+- 예: [skin.work.html](sandbox:/mnt/data/skin.work.html) / 경로: D:\Ongdalsaem_blog\dist_src\skin.work.html
+
+작업기준서4
+[실행·피드백 루프 · 로그 · 성공/실패 규칙]
+
+■ 실행·피드백 루프
+- 지시 순서: 📍 실행 위치 → ▶ 명령어 → 📂 출력 파일 → 🔁 피드백 요청.
+- 초보 모드: 한 번에 한 명령어만, 성공/실패 즉시 보고.
+
+■ 로그 규칙
+- 모든 실행 로그는 D:\Ongdalsaem_blog\project_logs\ 에 저장.
+- build/run 로그 180일+, chat_history 365일+, recycle_bin 30–60일 보존.
+
+■ 보고 규칙
+- 기본: “성공/실패 + 다음 단계”만 채팅에 공지.
+- 실패 원인/스택은 기본 비공개(요청 시 제공).
+- 산출물/링크는 반드시 함께 제공.
+
+■ 재검수(운영) 체크
+- 사실성(A)·출력규칙(B)·선정기준(C)·AI-티(D) 4단계는 글 발행 전 고정 루틴.
+- (A) 위반 시 대상 전환·재작성. (B)(C)(D)는 동일 대상 수정.
+- 전 과정 로그·리포트화를 원칙으로 한다.
+
+작업기준서5
+[폴더 구조 · 보존 정책 · 아카이브]
+
+■ 루트 경로
+- D:\Ongdalsaem_blog\
+
+■ 주요 폴더
+- project_logs\{build_logs, system_logs, fs_audit, log}
+- _archive\{zip, chat_history, recycle_bin, manifests}
+- audit_reports\{build_reports, scan_reports, structure_reports}
+- ChatGPT_bio_file\
+- blog_daily_file\YYYY-MM-DD\
+- tools\{StructureBot, Reconciler, image_create, …}
+- run_bats\
+
+■ 보존/아카이브 원칙
+- _archive\zip\ 는 산출물 이력 전용(동명 시 (1)(2)…).
+- manifests/ 에 빌드/배포 메타 기록(타임스탬프 포함).
+- audit_reports\ 에 구조/빌드/스캔 리포트 분리 보관.
+
+■ 무결성
+- 중요 산출물은 SHA256을 함께 기록(파일 변경 감지).
+- StructureBot/FS Audit가 주기적으로 빠진 폴더·중복·권한 오류를 점검.
+
+작업기준서6
+[자동화 · 스크립트 · 스케줄]
+
+■ 생성/구조 스크립트
+- Make_Folders_Once.ps1: 초기 스켈레톤 생성(1회).
+- task_01_folder_structure_setup.ps1: 스켈레톤 확인/확장.
+
+■ 감시/정합 스크립트
+- tools\StructureBot: 30분 주기 변경 감시(추가/삭제/중복/이탈).
+- tools\Reconciler: 실제 FS vs. Bio 청사진 정합·복원.
+
+■ 빌드/패키징
+- OneClick_BuildAndPack.bat: 추후 패키징 파이프라인(빌드→검증→zip).
+
+■ 글쓰기 런처
+- writer_daily_main.bat / writer_daily_support.bat
+- writer_sponsored_main.bat / writer_sponsored_support.bat
+
+■ 이미지 생성
+- run_bats\poto_create.bat: PowerShell GUI(사진종류·수량 입력→발행).
+- 설정: tools\image_create\image_create_config.json
+- 출력: blog_daily_file\create_images\ (즉시성·무작위성 없는 규칙적 생성)
+- OneClick 성공 시 메시지 박스: “성공적으로 글이 생성되었습니다.”
+
+작업기준서7
+[Bio 연동 · Delta 병합 · 다운로드 규칙]
+
+■ Bio 운영
+- Delta→Bio 자동 병합(세션 시작 후 30분 주기) + 수동 즉시 병합.
+- 세션 종료 시 Delta 소멸. Bio 최신본 유지.
+
+■ 저장 정책
+- BIO에는 ‘요약/규칙/포인터’만. 긴 원문·코드는 WORKFILE 관리.
+- 긴 블록 저장 필요 시 PART 단위로 분할, 해시/경로를 BIO에 남김.
+
+■ BIO 파일 생성 규칙
+- “bio 다운로드” 요청 시 2종 동시 제공(동일 파일명):
+  1) GPT_bio_light.txt
+  2) GPT_bio_full.txt
+- 최신 Delta 반영 상태로 제공. 모바일·세션 만료와 무관하게 재생성 가능.
+
+■ 재주입 가이드
+- PC 접속 후 light → full 순으로 재주입.
+- 충돌 시 최신 타임스탬프·해시 우선, 불일치 항목은 Reconciler로 병합.
+
+작업기준서8
+[작업일지 · 테스트 기준(AC) · 배포 절차]
+
+■ 작업일지(두 축)
+- 할일 일지: TODO/우선순위/AC/마감.
+- 구현 일지: 배경/변경/의사결정/구현세부/검증/결과.
+- 품질 기준(요약): Why/What/How/Evidence/Risk/Result 포함, 재현성 확보.
+- 채팅엔 요약, 전문은 파일로 보관. Bio엔 제목·시점·경로만.
+
+■ 테스트/수용 기준(예: PC2 리디자인)
+1) ≥1061px & sidebartype=right에서 헤더/푸터 고정 + 이중 스크롤.
+2) 사이드바2: 공지(2층)→구분선→카테고리/세부→구분선→광고 레이블/광고.
+3) 3초 타이머·호버 유지·외부 클릭 즉시 접힘 등 인터랙션 충족.
+4) 푸터 11개 파트너 일렬(필요 시 2줄), Deal 배지 동작.
+5) 광고와 상호작용 요소 사이 완충(≥16px).
+6) 접근성: 스킵/포커스/ALT/모션 축소 존중.
+
+■ 배포 절차
+- 워크본(…\skin.work.html, style.work.css) → 검수 통과 → 최종본 출력(skin.html, style.css).
+- 원문(index.xml/skin.html/style.css) 직접 수정 금지. 교체는 최종본 세트 요청 시에만.
+- 배포 후 manifest/빌드 리포트 기록, _archive\zip\에 패키지 보존.
+`0

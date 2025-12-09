@@ -1,0 +1,23 @@
+# google-blog/System_files/.github/workflows/deploy.yml
+name: deploy
+on:
+  push:
+    branches: [ main ]
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: google-blog/System_files
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm ci
+      - run: npm run build          # ai-json, schema, feed, validate
+      - run: npm run release        # ZIP + SHA-256 (롤백 포인트)
+      # 👉 실제 블로그 반영(배포)은 여기서 선택:
+      # - Blogger/Tistory 수동 업로드면 스킵
+      # - 정적 호스팅/서버라면 배포 커맨드 추가
+      - name: Post deploy tip
+        run: echo "Deploy step hook here (Blogger/Tistory API or static host)."

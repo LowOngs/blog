@@ -1,0 +1,19 @@
+{
+  "app-20251121-001": {
+    "snapshotDate": "2026-02-21",
+    "snapshotSource": "Google Play & App Store (combined)",
+    "apps": [
+      {
+        "name": "Todoist",
+        "rating": 4.6,
+        "votes": 252000,
+        "stars": { "5": 72, "4": 18, "3": 5, "2": 3, "1": 2 }
+      }
+     
+    ],
+    "insights": [
+      "Google Calendar still shows the highest overall satisfaction among daily-schedule users.",
+      "Todoist and Notion continue to attract power users who manage complex projects across devices."
+    ]
+  }
+}

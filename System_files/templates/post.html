@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <title>{{title}}</title>
+  <meta name="description" content="{{description}}" />
+
+  <!-- Canonical (렌더러가 채움) -->
+  <link rel="canonical" href="{{canonical}}">
+
+  <!-- Updated time (렌더러에서 ISO 주입) -->
+  <!-- Schema & 동적 메타(OG/Twitter/Preload/hreflang)는 렌더러가 주입 -->
+
+  <!--META-->
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --c-border:#e5e7eb;
+      --c-bg:#f8fafc;
+      --c-badge-bg:#eef6ff;
+      --c-badge-bd:#cfe2ff;
+      --c-badge-tx:#1e40af;
+      --radius:10px;
+    }
+    body{
+      font:16px/1.6 system-ui,Segoe UI,Apple SD Gothic Neo,Arial,sans-serif;
+      color:#111; margin:0; padding:24px;
+    }
+    main{margin-top:16px}
+
+    /* Updated 배지 */
+    .updated-badge{
+      display:inline-block; background:var(--c-badge-bg);
+      border:1px solid var(--c-badge-bd); color:var(--c-badge-tx);
+      border-radius:999px; padding:4px 10px; font-size:12px; margin:8px 0;
+    }
+
+    /* 히어로 이미지 */
+    .post-hero{
+      margin:16px 0;
+    }
+    .post-hero img{
+      display:block;
+      width:100%;
+      max-width:100%;
+      height:auto;
+      border-radius:var(--radius);
+    }
+
+    /* 요약/팩트 박스 */
+    .tldr,.keyfacts{
+      background:var(--c-bg); border:1px solid var(--c-border);
+      border-radius:var(--radius); padding:12px 14px; margin:12px 0;
+    }
+    .tldr ul,.keyfacts ul{margin:0; padding-left:18px}
+
+    /* FAQ/Sources */
+    .faq h3,.sources h3{margin:18px 0 8px; font-size:18px}
+    .sources{font-size:.95rem; opacity:.92}
+
+    /* 접힘 UI */
+    details.collapsible{
+      border:1px solid var(--c-border); border-radius:var(--radius);
+      background:#fff; margin:12px 0; overflow:hidden;
+    }
+    details.collapsible > summary{
+      list-style:none; cursor:pointer; padding:12px 14px; font-weight:600;
+    }
+    details.collapsible > summary::-webkit-details-marker{display:none}
+    details.collapsible[open] > summary{border-bottom:1px solid var(--c-border)}
+    details.collapsible .panel{padding:12px 14px; background:var(--c-bg)}
+
+    /* Review 전용 블록 */
+    .review-block{
+      border:1px solid var(--c-border);
+      border-radius:var(--radius);
+      padding:12px 14px;
+      margin:12px 0;
+      background:#fff;
+    }
+    .review-block__title{
+      font-weight:700;
+      font-size:15px;
+      margin:0 0 6px;
+    }
+    .review-block__meta{
+      font-size:12px;
+      opacity:.8;
+      margin-bottom:6px;
+    }
+    .review-rating-table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:14px;
+    }
+    .review-rating-table th,
+    .review-rating-table td{
+      padding:4px 6px;
+      border-top:1px solid var(--c-border);
+      text-align:left;
+    }
+    .review-rating-table th{
+      font-weight:600;
+    }
+    .review-insights-list{
+      margin:0;
+      padding-left:18px;
+      font-size:14px;
+    }
+    .review-insights-list li{
+      margin:2px 0;
+    }
+    /* Review 전용: 별점 히스토그램 */
+    .review-histogram{
+      margin-top:8px;
+    }
+    .review-histogram-row{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      margin:2px 0;
+      font-size:12px;
+    }
+    .review-histogram-label{
+      width:40px;
+      opacity:.8;
+    }
+    .review-histogram-bar-wrap{
+      flex:1;
+      height:6px;
+      border-radius:999px;
+      background:#f3f4f6;
+      overflow:hidden;
+    }
+    .review-histogram-bar{
+      height:100%;
+      border-radius:999px;
+      background:var(--c-badge-tx);
+    }
+    .review-histogram-value{
+      width:40px;
+      text-align:right;
+      opacity:.8;
+    }
+    
+  </style>
+</head>
+<body>
+  <!-- 페이지 배지 -->
+  <a class="page-badge" id="pageId" data-page-id="{{pageId}}" href="{{canonical}}" rel="nofollow">{{pageId}}</a>
+  <!--SLOT:PAGE_BADGE-->
+
+  <!-- 업데이트 배지 (렌더러에서 날짜 주입) -->
+  <div class="updated-badge" aria-label="Updated">Updated {{updated}}</div>
+
+  <!-- 히어로 이미지 (렌더러에서 주입) -->
+  <!--SLOT:HERO_IMAGE-->
+
+  <!-- TL;DR: 항상 보임 (상단 고정) -->
+  <section id="tldr">
+    <section class="tldr">
+      <ul>
+        {{tldr}}
+      </ul>
+      <!--SLOT:AFTER_TLDR-->
+    </section>
+  </section>
+
+  <!-- Key Facts: 모바일 접힘 / 데스크톱 자동 펼침은 JS에서 처리 -->
+  <details class="collapsible" id="keyfacts">
+    <summary>Key Facts</summary>
+    <div class="panel">
+      <section class="keyfacts">
+        <ul>
+          {{keyfacts}}
+        </ul>
+      </section>
+    </div>
+  </details>
+
+ <main>
+  <!-- 본문: 자동 렌더링 영역 -->
+  <section id="review-base-block">
+    {{body}}
+  </section>
+
+  <!-- 리뷰 전용: 현재 평점/분포 요약 블록 (본문 아래, 총평 앞) -->
+  <section id="review-rating-block" class="review-block">
+    <!--SLOT:REVIEW_RATING-->
+  </section>
+
+  <!-- 리뷰 전용: 최신 사용자 인사이트 스냅샷 블록 -->
+  <section id="review-insights-block" class="review-block">
+    <!--SLOT:REVIEW_INSIGHTS-->
+  </section>
+</main>
+
+  <!-- FAQ: 기본 접힘 -->
+  <details class="collapsible" id="faq">
+    <summary>FAQ</summary>
+    <div class="panel">
+      <section class="faq">
+        {{faq}}
+      </section>
+    </div>
+  </details>
+
+  <!-- Sources: 렌더러가 목록을 바로 삽입 -->
+  <section id="sources" class="sources">
+    <h3>Sources</h3>
+    <ul>
+      {{sources}}
+    </ul>
+  </section>
+
+  <!-- 데스크톱(≥769px)에서 Key Facts 자동 펼침 -->
+  <script>
+    (function(){
+      try{
+        var isDesktop = window.matchMedia('(min-width: 769px)').matches;
+        var kf = document.getElementById('keyfacts');
+        if(isDesktop && kf && !kf.hasAttribute('open')) kf.setAttribute('open','');
+      }catch(e){}
+    })();
+  </script>
+
+  <!-- AIO UI 스위치(선택적 제어) -->
+  <script>
+    window.__AIO_UI={"tldr":"show","keyfacts":"collapse-mobile","faq":"collapse","sources":"small"};
+    (function(){
+      try{
+        const ui = window.__AIO_UI || {};
+        function $(id){return document.getElementById(id)}
+        function rm(id){ var el=$(id); if(el && el.parentNode) el.parentNode.removeChild(el); }
+        function setOpen(id, isOpen){
+          var el=$(id); if(!el) return;
+          if(el.tagName.toLowerCase()!=='details') return;
+          if(isOpen){ el.setAttribute('open',''); } else { el.removeAttribute('open'); }
+        }
+        // TL;DR
+        if(ui.tldr==='hide'){ rm('tldr'); }
+        // Key Facts
+        if(ui.keyfacts==='hide'){ rm('keyfacts'); }
+        else if(ui.keyfacts==='show'){ setOpen('keyfacts', true); }
+        else if(ui.keyfacts==='collapse'){ setOpen('keyfacts', false); }
+        else if(ui.keyfacts==='collapse-mobile'){
+          var kf=$('keyfacts'); if(kf) kf.removeAttribute('open');
+          var isDesktop = window.matchMedia('(min-width: 769px)').matches;
+          if(isDesktop && kf) kf.setAttribute('open','');
+        }
+        // FAQ
+        if(ui.faq==='hide'){ rm('faq'); }
+        else if(ui.faq==='show'){ setOpen('faq', true); }
+        else if(ui.faq==='collapse'){ setOpen('faq', false); }
+        // Sources: 'small'은 기본 노출 유지
+      }catch(e){}
+    })();
+  </script>
+</body>
+</html>

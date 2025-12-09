@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>포스트 수정 요청 폼</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body{
+      font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
+      margin:0; padding:24px; background:#f9fafb; color:#111;
+    }
+    .wrap{max-width:800px; margin:0 auto;}
+    h1{font-size:20px; margin-bottom:8px;}
+    p.desc{font-size:14px; margin:0 0 16px; color:#4b5563;}
+    textarea{
+      width:100%; min-height:320px; padding:12px;
+      font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      border:1px solid #d1d5db; border-radius:8px; box-sizing:border-box;
+      resize:vertical; background:#fff;
+    }
+    .buttons{margin-top:12px; display:flex; gap:8px;}
+    button{
+      padding:8px 14px; border-radius:999px; border:1px solid transparent;
+      font-size:14px; cursor:pointer;
+    }
+    button.primary{
+      background:#111827; color:#fff;
+    }
+    button.secondary{
+      background:#e5e7eb; color:#111827;
+    }
+    small.hint{display:block; margin-top:8px; font-size:13px; color:#6b7280;}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>포스트 수정 요청 폼</h1>
+    <p class="desc">
+      아래 서식의 대괄호 안을 채운 뒤,<br>
+      <b>“GPT에게 요청(서식복사)”</b> 버튼을 눌러 클립보드에 복사하고 ChatGPT 대화창에 붙여넣어 주세요.
+    </p>
+
+    <textarea id="prText"></textarea>
+
+    <div class="buttons">
+      <button type="button" class="primary" id="copyBtn">GPT에게 요청(서식복사)</button>
+      <button type="button" class="secondary" id="resetBtn">내용 비우기</button>
+    </div>
+
+    <small class="hint">
+      • “내용 비우기”를 눌러도 <b>기본 서식 자체는 다시 채워집니다</b> (완전 빈칸 아님).<br>
+      • 이 페이지는 실제 GitHub PR을 만들지 않고, <b>GPT에게 보낼 요청서만 만드는 도구</b>입니다.
+    </small>
+  </div>
+
+  <script>
+    // ✅ 여기 안에 pull_request_template.md 원본 서식을 그대로 넣어 주세요.
+    const DEFAULT_TEMPLATE = `# Page URL
+[여기에 수정이 필요한 페이지 URL을 적어 주세요]
+
+# Page ID
+□ 수정 대상 글번호(ex. Page123) : 
+
+# Issue type
+□ 수정 의도(ex. 오타/의미 왜곡/정보 오류/표현 수정/기타):
+
+# Current text
+□ 수정 대상 글 / 문장(대상 원문) :
+
+
+# Suggested fix
+■ 수정 요청 내용(한글/영문) :
+
+
+# Extra notes
+□ 추가로 설명하고 싶은 내용을 적어 주세요. 없으면 "없음"`;
+
+    const textarea = document.getElementById('prText');
+    const copyBtn  = document.getElementById('copyBtn');
+    const resetBtn = document.getElementById('resetBtn');
+
+    function resetToTemplate() {
+      textarea.value = DEFAULT_TEMPLATE;
+      textarea.focus();
+      // 커서를 맨 아래로
+      textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+    }
+
+    resetToTemplate(); // 처음 로드 시 기본 서식 채우기
+
+    copyBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(textarea.value);
+        alert('수정요청 서식을 클립보드에 복사했습니다.\nChatGPT 창을 열고 붙여넣기(Ctrl+V / 길게 누른 뒤 붙여넣기)를 해 주세요.');
+      } catch (e) {
+        alert('클립보드 복사에 실패했습니다. 텍스트를 직접 드래그해서 복사해 주세요.');
+      }
+    });
+
+    resetBtn.addEventListener('click', () => {
+      if (confirm('입력한 내용을 지우고 기본 서식만 남길까요?')) {
+        resetToTemplate();
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+{
+  "label": "app-reviews",
+  "trendLimit": 200,
+  "evergreenLimit": 200,
+  "trend": [
+    {
+      "id": "app-trend-001",
+      "title": "5 must-have productivity apps in 2025",
+      "angle": "Compare a small set of cross-platform productivity apps for work, study, and side projects.",
+      "audience": "Users juggling work, study, and side projects",
+      "intent": "review",
+      "priority": 1,
+      "createdAt": "2025-11-20T00:00:00+09:00",
+      "expiresAt": "2026-03-20T00:00:00+09:00",
+      "notes": "Focus on features / pricing / platforms rather than deep feature-by-feature benchmarks."
+    }
+  ],
+  "evergreen": [
+    {
+      "id": "app-ever-001",
+      "title": "Essential apps to install on a brand-new smartphone",
+      "angle": "Guide to browser, notes, calendar, cloud storage and a few universal basics.",
+      "audience": "New smartphone users and people setting up phones for family or friends",
+      "intent": "review",
+      "priority": 1,
+      "createdAt": "2025-11-20T00:00:00+09:00",
+      "notes": "Explain by function type first, not by brand; keep it OS-agnostic where possible."
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "label": "device-reviews",
+  "trendLimit": 60,
+  "evergreenLimit": 60,
+  "trend": [
+    {
+      "id": "device-trend-001",
+      "title": "How to choose a budget laptop in 2025",
+      "angle": "Break down CPU, RAM, storage, and screen size into clear tiers and use cases.",
+      "audience": "Beginner developers, students, bloggers",
+      "intent": "review",
+      "priority": 1,
+      "createdAt": "2025-11-20T00:00:00+09:00",
+      "expiresAt": "2026-03-20T00:00:00+09:00",
+      "notes": "Use example specs instead of locking onto specific model names."
+    }
+  ],
+  "evergreen": [
+    {
+      "id": "device-ever-001",
+      "title": "7 things to check before buying any laptop",
+      "angle": "Keyboard, ports, weight, thermals, battery, screen, and upgradability as a checklist.",
+      "audience": "Anyone who reads laptop reviews before buying devices",
+      "intent": "review",
+      "priority": 1,
+      "createdAt": "2025-11-20T00:00:00+09:00",
+      "notes": "Good candidate to link from future device-specific reviews as a common reference."
+    }
+  ]
+}

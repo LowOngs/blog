@@ -1,0 +1,8 @@
+{
+  "app-reviews": "app_reviews_v1",
+  "device-reviews": "device_reviews_v1",
+  "subscription-services": "subscription_reviews_v1",
+  "how-to-playbooks": "howto_playbooks_v1",
+  "smart-savings": "smart_savings_v2",
+  "templates-checklists": "templates_checklists_v2"
+}
