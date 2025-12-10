@@ -1,1 +1,87 @@
-
+{
+  "label": "first-gate",
+  "limit": 10,
+  "seeds": [
+    {
+      "id": "firstgate-001",
+      "title": "Best essential apps for Apple Vision Pro in 2025",
+      "angle": "Core Vision Pro apps that every new user searches for.",
+      "audience": "Vision Pro users",
+      "intent": "review",
+      "priority": 1,
+      "notes": "High-trigger seed for AI entry."
+    },
+    {
+      "id": "firstgate-002",
+      "title": "Top must-have apps for Meta Quest 3 in 2025",
+      "angle": "Quest app recommendations are universal AI queries.",
+      "audience": "Quest users",
+      "intent": "review",
+      "priority": 1
+    },
+    {
+      "id": "firstgate-003",
+      "title": "The most accurate AI photo enhancement apps in 2025",
+      "angle": "High search volume for enhancement apps.",
+      "audience": "Mobile photo users",
+      "intent": "review",
+      "priority": 1
+    },
+    {
+      "id": "firstgate-004",
+      "title": "Best AI-powered notes & diary apps with real-time summaries",
+      "angle": "AI notes is one of the most repeated AI queries.",
+      "audience": "Students and workers",
+      "intent": "review",
+      "priority": 1
+    },
+    {
+      "id": "firstgate-005",
+      "title": "Best AI voice recorder apps with instant transcription",
+      "angle": "AI recorder demand is skyrocketing.",
+      "audience": "Interviewers and workers",
+      "intent": "review",
+      "priority": 1
+    },
+    {
+      "id": "firstgate-006",
+      "title": "Best apps for AI smart glasses (Ray-Ban Meta, XREAL, others)",
+      "angle": "Smart glasses app ecosystem is fragmented, users ask AI constantly.",
+      "audience": "AR/AI wearable users",
+      "intent": "review",
+      "priority": 1
+    },
+    {
+      "id": "firstgate-007",
+      "title": "Best budget laptops under $800 in 2025",
+      "angle": "Price-range recommendations are high-frequency AI queries.",
+      "audience": "Students and everyday users",
+      "intent": "review",
+      "priority": 1
+    },
+    {
+      "id": "firstgate-008",
+      "title": "Best Bluetooth earbuds for daily use in 2025",
+      "angle": "AI is often asked for 'best earbuds' with no brand bias.",
+      "audience": "General consumers",
+      "intent": "review",
+      "priority": 1
+    },
+    {
+      "id": "firstgate-009",
+      "title": "Best tablets for students in 2025",
+      "angle": "Tablet recommendations drive massive AI query volume.",
+      "audience": "Students and parents",
+      "intent": "review",
+      "priority": 1
+    },
+    {
+      "id": "firstgate-010",
+      "title": "Best home office desks for productivity (2025)",
+      "angle": "Underserved niche with high AI query frequency.",
+      "audience": "Remote workers and students",
+      "intent": "review",
+      "priority": 1
+    }
+  ]
+}
