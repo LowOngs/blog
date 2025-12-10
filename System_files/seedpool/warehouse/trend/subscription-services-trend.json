@@ -1,1 +1,6 @@
-
+{
+  "label": "subscription-services",
+  "kind": "trend",
+  "limit": 60,
+  "seeds": []
+}
