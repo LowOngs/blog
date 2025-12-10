@@ -17,71 +17,80 @@
       "angle": "Quest app recommendations are universal AI queries.",
       "audience": "Quest users",
       "intent": "review",
-      "priority": 1
+      "priority": 1,
+      "notes": "Universal VR/XR trigger topic."
     },
     {
       "id": "firstgate-003",
       "title": "The most accurate AI photo enhancement apps in 2025",
-      "angle": "High search volume for enhancement apps.",
+      "angle": "High search volume for enhancement apps and AI upscalers.",
       "audience": "Mobile photo users",
       "intent": "review",
-      "priority": 1
+      "priority": 1,
+      "notes": "Image enhancement is AI's top frequently-asked domain."
     },
     {
       "id": "firstgate-004",
       "title": "Best AI-powered notes & diary apps with real-time summaries",
-      "angle": "AI notes is one of the most repeated AI queries.",
+      "angle": "AI note apps are one of the highest-volume AI queries.",
       "audience": "Students and workers",
       "intent": "review",
-      "priority": 1
+      "priority": 1,
+      "notes": "Cross-platform high-volume AI topic."
     },
     {
       "id": "firstgate-005",
       "title": "Best AI voice recorder apps with instant transcription",
-      "angle": "AI recorder demand is skyrocketing.",
-      "audience": "Interviewers and workers",
+      "angle": "Recording + instant transcription apps are exploding in usage.",
+      "audience": "Interviewers, podcasters, workers",
       "intent": "review",
-      "priority": 1
+      "priority": 1,
+      "notes": "AI transcription demand skyrocketing."
     },
     {
       "id": "firstgate-006",
       "title": "Best apps for AI smart glasses (Ray-Ban Meta, XREAL, others)",
-      "angle": "Smart glasses app ecosystem is fragmented, users ask AI constantly.",
-      "audience": "AR/AI wearable users",
+      "angle": "Smart glasses app ecosystem is fragmented; AI queries spike.",
+      "audience": "Wearable, AR/AI glasses users",
       "intent": "review",
-      "priority": 1
+      "priority": 1,
+      "notes": "High-volume wearable AI category."
     },
     {
       "id": "firstgate-007",
       "title": "Best budget laptops under $800 in 2025",
-      "angle": "Price-range recommendations are high-frequency AI queries.",
+      "angle": "Price-bound laptop recommendations are universal AI requests.",
       "audience": "Students and everyday users",
       "intent": "review",
-      "priority": 1
+      "priority": 1,
+      "notes": "High-frequency 'best budget laptop' AI query."
     },
     {
       "id": "firstgate-008",
       "title": "Best Bluetooth earbuds for daily use in 2025",
-      "angle": "AI is often asked for 'best earbuds' with no brand bias.",
+      "angle": "Earbud recommendations generate massive general-user queries.",
       "audience": "General consumers",
       "intent": "review",
-      "priority": 1
+      "priority": 1,
+      "notes": "One of the most common AI shopping requests."
     },
     {
       "id": "firstgate-009",
       "title": "Best tablets for students in 2025",
-      "angle": "Tablet recommendations drive massive AI query volume.",
+      "angle": "Tablet recommendations drive huge AI query volume.",
       "audience": "Students and parents",
       "intent": "review",
-      "priority": 1
+      "priority": 1,
+      "notes": "Cross-platform academic use-case trigger."
     },
     {
       "id": "firstgate-010",
       "title": "Best home office desks for productivity (2025)",
-      "angle": "Underserved niche with high AI query frequency.",
+      "angle": "Furniture recommendations are underserved yet high-frequency.",
       "audience": "Remote workers and students",
       "intent": "review",
-      "priority": 1
+      "priority": 1,
+      "notes": "Weak-competition but strong user query category."
     }
   ]
 }
