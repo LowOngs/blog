@@ -1,1 +1,6 @@
-
+{
+  "label": "device-reviews",
+  "kind": "trend",
+  "limit": 60,
+  "seeds": []
+}
