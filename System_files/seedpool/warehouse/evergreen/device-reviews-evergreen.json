@@ -1,1 +1,6 @@
-
+{
+  "label": "device-reviews",
+  "kind": "evergreen",
+  "limit": 60,
+  "seeds": []
+}
