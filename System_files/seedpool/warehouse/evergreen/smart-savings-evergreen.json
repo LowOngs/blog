@@ -1,1 +1,6 @@
-
+{
+  "label": "smart-savings",
+  "kind": "evergreen",
+  "limit": 80,
+  "seeds": []
+}
