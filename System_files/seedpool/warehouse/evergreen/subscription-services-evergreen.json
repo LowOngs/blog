@@ -1,1 +1,6 @@
-
+{
+  "label": "subscription-services",
+  "kind": "evergreen",
+  "limit": 60,
+  "seeds": []
+}
