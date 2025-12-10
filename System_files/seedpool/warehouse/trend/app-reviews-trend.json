@@ -1,1 +1,6 @@
-
+{
+  "label": "app-reviews",
+  "kind": "trend",
+  "limit": 200,
+  "seeds": []
+}
