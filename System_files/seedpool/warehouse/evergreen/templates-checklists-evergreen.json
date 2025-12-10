@@ -1,1 +1,6 @@
-
+{
+  "label": "templates-checklists",
+  "kind": "evergreen",
+  "limit": 60,
+  "seeds": []
+}
