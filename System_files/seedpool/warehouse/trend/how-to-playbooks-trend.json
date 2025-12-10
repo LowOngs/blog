@@ -1,1 +1,6 @@
-
+{
+  "label": "how-to-playbooks",
+  "kind": "trend",
+  "limit": 200,
+  "seeds": []
+}
