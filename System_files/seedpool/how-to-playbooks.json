@@ -13,6 +13,105 @@
       "createdAt": "2025-11-20T00:00:00+09:00",
       "expiresAt": "2026-03-20T00:00:00+09:00",
       "notes": "Can reuse Ongs Blog’s real migration steps as a reference pattern."
+    },
+    {
+      "id": "howto-trend-002",
+      "title": "How to move your Blogger blog to a custom domain without losing SEO",
+      "angle": "Step-by-step flow from Blogspot URL to a custom domain with minimal ranking loss.",
+      "audience": "Blogger users switching to their own domain name",
+      "intent": "how-to",
+      "priority": 1,
+      "createdAt": "2025-12-10T00:00:00+09:00",
+      "expiresAt": "2026-04-10T00:00:00+09:00",
+      "notes": "Focus on DNS, redirects, canonical, and Search Console checks."
+    },
+    {
+      "id": "howto-trend-003",
+      "title": "Connecting Cloudflare to Blogger for free HTTPS and faster loading",
+      "angle": "Explain how to put Cloudflare in front of a Blogger site safely.",
+      "audience": "Blog owners wanting HTTPS and basic CDN without moving platforms",
+      "intent": "how-to",
+      "priority": 1,
+      "createdAt": "2025-12-10T00:00:00+09:00",
+      "expiresAt": "2026-04-10T00:00:00+09:00",
+      "notes": "Keep it beginner-friendly: step-by-step screenshots + common DNS mistakes."
+    },
+    {
+      "id": "howto-trend-004",
+      "title": "Setting up Cloudflare R2 as an image CDN for your blog",
+      "angle": "Create a bucket, upload images, and swap URLs in your posts.",
+      "audience": "Bloggers who want cheaper image hosting than traditional CDNs",
+      "intent": "how-to",
+      "priority": 2,
+      "createdAt": "2025-12-10T00:00:00+09:00",
+      "expiresAt": "2026-04-10T00:00:00+09:00",
+      "notes": "Assume zero S3 experience, but mention compatibility with S3 tools."
+    },
+    {
+      "id": "howto-trend-005",
+      "title": "How to schedule automatic blog publishing with GitHub Actions",
+      "angle": "Use a simple workflow file to render posts and publish on a schedule.",
+      "audience": "Solo bloggers who don’t want to click ‘publish’ manually",
+      "intent": "how-to",
+      "priority": 2,
+      "createdAt": "2025-12-10T00:00:00+09:00",
+      "expiresAt": "2026-04-10T00:00:00+09:00",
+      "notes": "Focus on the concept, not on advanced CI tricks."
+    },
+    {
+      "id": "howto-trend-006",
+      "title": "Migrating blog images from Google Photos or Drive to R2 the safe way",
+      "angle": "Export once, organize by year/month, and avoid broken embeds.",
+      "audience": "Users with years of blog images scattered across Google services",
+      "intent": "how-to",
+      "priority": 3,
+      "createdAt": "2025-12-10T00:00:00+09:00",
+      "expiresAt": "2026-04-10T00:00:00+09:00",
+      "notes": "Mention storage cost, backup habits, and directory naming patterns."
+    },
+    {
+      "id": "howto-trend-007",
+      "title": "Setting up basic uptime monitoring for your personal blog",
+      "angle": "Use simple tools to get alerts when your blog goes down.",
+      "audience": "Blog owners who don’t notice downtime until readers complain",
+      "intent": "how-to",
+      "priority": 3,
+      "createdAt": "2025-12-10T00:00:00+09:00",
+      "expiresAt": "2026-04-10T00:00:00+09:00",
+      "notes": "Use free-tier friendly examples; keep vendor-neutral."
+    },
+    {
+      "id": "howto-trend-008",
+      "title": "How to add a simple FAQ section to any Blogger post",
+      "angle": "Turn common reader questions into a structured FAQ block.",
+      "audience": "Blogger users who answer the same questions repeatedly in comments",
+      "intent": "how-to",
+      "priority": 2,
+      "createdAt": "2025-12-10T00:00:00+09:00",
+      "expiresAt": "2026-04-10T00:00:00+09:00",
+      "notes": "Connect naturally to schema.org FAQPage benefits."
+    },
+    {
+      "id": "howto-trend-009",
+      "title": "Using labels as a fake category system on Blogger",
+      "angle": "Design labels so readers feel like there are real categories.",
+      "audience": "Blogger owners who feel limited by the lack of categories",
+      "intent": "how-to",
+      "priority": 3,
+      "createdAt": "2025-12-10T00:00:00+09:00",
+      "expiresAt": "2026-04-10T00:00:00+09:00",
+      "notes": "Good place to mention Ongs Blog’s label strategy as an example."
+    },
+    {
+      "id": "howto-trend-010",
+      "title": "How to safely edit old posts without breaking your SEO",
+      "angle": "Show how to refresh and fix posts while keeping URLs stable.",
+      "audience": "Bloggers with years of old posts and outdated content",
+      "intent": "how-to",
+      "priority": 2,
+      "createdAt": "2025-12-10T00:00:00+09:00",
+      "expiresAt": "2026-04-10T00:00:00+09:00",
+      "notes": "Covers updating content, images, and meta without big SEO shocks."
     }
   ],
   "evergreen": [
@@ -25,6 +124,96 @@
       "priority": 1,
       "createdAt": "2025-11-20T00:00:00+09:00",
       "notes": "Foundation article referenced by many later setup and automation guides."
+    },
+    {
+      "id": "howto-ever-002",
+      "title": "Basic Git workflow for solo bloggers: commit, push, and revert",
+      "angle": "Explain just enough Git to keep blog content safe and versioned.",
+      "audience": "Solo bloggers using GitHub as a backup or deployment source",
+      "intent": "how-to",
+      "priority": 1,
+      "createdAt": "2025-12-10T00:00:00+09:00",
+      "notes": "Keep it simple: status, add, commit, push, and revert basics only."
+    },
+    {
+      "id": "howto-ever-003",
+      "title": "How to design a simple backup plan for your blog content",
+      "angle": "Mix local backups, cloud storage, and version control in a tiny plan.",
+      "audience": "Bloggers afraid of losing years of posts and images",
+      "intent": "how-to",
+      "priority": 1,
+      "createdAt": "2025-12-10T00:00:00+09:00",
+      "notes": "Avoid vendor lock-in; focus on principles that stay valid for years."
+    },
+    {
+      "id": "howto-ever-004",
+      "title": "Structuring blog posts so readers never get lost",
+      "angle": "Use headings, summaries, and signposts to guide the reader.",
+      "audience": "Writers who tend to ramble and lose readers halfway",
+      "intent": "how-to",
+      "priority": 2,
+      "createdAt": "2025-12-10T00:00:00+09:00",
+      "notes": "Tie in TL;DR, Key Facts, and FAQ as reusable pattern."
+    },
+    {
+      "id": "howto-ever-005",
+      "title": "How to choose the right label for every new post",
+      "angle": "A small decision tree so each post lands in the right bucket.",
+      "audience": "Bloggers with messy label lists and inconsistent tagging",
+      "intent": "how-to",
+      "priority": 2,
+      "createdAt": "2025-12-10T00:00:00+09:00",
+      "notes": "Explain ‘one main label’ rule and cross-link examples."
+    },
+    {
+      "id": "howto-ever-006",
+      "title": "Setting up a home for your long-term side projects",
+      "angle": "Use a blog plus basic pages as a stable base for your experiments.",
+      "audience": "People who start many side projects but forget to document them",
+      "intent": "how-to",
+      "priority": 3,
+      "createdAt": "2025-12-10T00:00:00+09:00",
+      "notes": "Encourage ‘project log’ posts instead of random notes."
+    },
+    {
+      "id": "howto-ever-007",
+      "title": "Using checklists to ship blog posts faster with fewer mistakes",
+      "angle": "Turn repeated steps into a reusable preflight checklist.",
+      "audience": "Bloggers who often forget images, links, or meta tags",
+      "intent": "how-to",
+      "priority": 2,
+      "createdAt": "2025-12-10T00:00:00+09:00",
+      "notes": "Connect naturally to templates-checklists label for deeper reading."
+    },
+    {
+      "id": "howto-ever-008",
+      "title": "A simple weekly routine to keep your blog healthy",
+      "angle": "One small session per week to fix links, update posts, and plan ahead.",
+      "audience": "Busy people who can only invest a little time each week",
+      "intent": "how-to",
+      "priority": 3,
+      "createdAt": "2025-12-10T00:00:00+09:00",
+      "notes": "Emphasize realistic routines that survive real life."
+    },
+    {
+      "id": "howto-ever-009",
+      "title": "How to write FAQs that actually reduce support questions",
+      "angle": "Turn repeated questions into clear, linkable answers.",
+      "audience": "Creators who get many repeat emails or comments",
+      "intent": "how-to",
+      "priority": 2,
+      "createdAt": "2025-12-10T00:00:00+09:00",
+      "notes": "Pairs well with on-page FAQ blocks and schema."
+    },
+    {
+      "id": "howto-ever-010",
+      "title": "A practical approach to mixing AI with your writing workflow",
+      "angle": "Use AI for drafts and structure while keeping final judgement human.",
+      "audience": "Writers experimenting with AI but afraid of losing their voice",
+      "intent": "how-to",
+      "priority": 3,
+      "createdAt": "2025-12-10T00:00:00+09:00",
+      "notes": "Good place to mention review, fact-check, and personal tone."
     }
   ]
 }
