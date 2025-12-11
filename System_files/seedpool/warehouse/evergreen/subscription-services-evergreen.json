@@ -1,25 +1,812 @@
-{
-  "label": "subscription-services",
-  "kind": "evergreen",
-  "limit": 60,
-  "seeds": [
-    {
-      "id": "sub-ev-001",
-      "title": "What to check before you cancel any subscription",
-      "angle": "Backup data, prorated refunds, account access, linked integrations, and renewal dates.",
-      "audience": "Users managing multiple subscriptions",
-      "intent": "review",
-      "priority": 1,
-      "notes": "옹스 블로그의 ‘표준 해체 체크리스트’. 모든 트렌드 글과 상호 연결 가능."
-    },
-    {
-      "id": "sub-ev-002",
-      "title": "How to track and manage your subscriptions efficiently",
-      "angle": "A simple system using reminders, receipts, category grouping, and yearly audits.",
-      "audience": "Anyone with more than 5 recurring payments",
-      "intent": "review",
-      "priority": 2,
-      "notes": "AI가 추천하기 좋은 기본 구조의 에버그린. 타 라벨과 시너지도 강함."
-    }
-  ]
-}
+[
+  {
+    "id": "ss-eg-001",
+    "title": "How to Evaluate the True Monthly Value of Any Subscription",
+    "angle": "Match between usage frequency and cost",
+    "audience": "General users",
+    "intent": "review/value",
+    "environment": "all subscription types",
+    "timing": "pre-purchase",
+    "goal": "avoid paying for underused services"
+  },
+  {
+    "id": "ss-eg-002",
+    "title": "Why Renewal Transparency Is the Most Important Feature",
+    "angle": "Auto-renewal clarity + cancellation ease",
+    "audience": "All users",
+    "intent": "review/contract",
+    "environment": "any subscription",
+    "timing": "onboarding",
+    "goal": "avoid hidden commitments"
+  },
+  {
+    "id": "ss-eg-003",
+    "title": "How to Check If a Cloud Storage Plan Is Actually Reliable",
+    "angle": "Server uptime + data retention clarity",
+    "audience": "Students/creators",
+    "intent": "review/reliability",
+    "environment": "cloud services",
+    "timing": "trial",
+    "goal": "pick stable servers with predictable behavior"
+  },
+  {
+    "id": "ss-eg-004",
+    "title": "Why Export Freedom Determines Long-Term Subscription Safety",
+    "angle": "Export formats + migration ease",
+    "audience": "Professionals",
+    "intent": "review/compatibility",
+    "environment": "AI tools/productivity",
+    "timing": "evaluation",
+    "goal": "avoid vendor lock-in"
+  },
+  {
+    "id": "ss-eg-005",
+    "title": "How to Evaluate Streaming Catalog Quality Efficiently",
+    "angle": "Genre coverage + region restrictions",
+    "audience": "Entertainment users",
+    "intent": "review/content",
+    "environment": "video/music streaming",
+    "timing": "content study",
+    "goal": "know if catalog fits personal taste"
+  },
+  {
+    "id": "ss-eg-006",
+    "title": "What Makes a Subscription's Free Tier Worth Using?",
+    "angle": "Rate limits + essential feature availability",
+    "audience": "General users",
+    "intent": "review/value",
+    "environment": "any subscription",
+    "timing": "comparative check",
+    "goal": "judge fair free-tier boundaries"
+  },
+  {
+    "id": "ss-eg-007",
+    "title": "How to Evaluate Trial Periods Without Wasting Time",
+    "angle": "Feature unlock pattern + time-to-value",
+    "audience": "Busy users",
+    "intent": "review/onboarding",
+    "environment": "any subscription",
+    "timing": "first day",
+    "goal": "measure trial efficiency"
+  },
+  {
+    "id": "ss-eg-008",
+    "title": "Why Family Plans Are Not Always the Best Deal",
+    "angle": "Slot utilization + shared permissions",
+    "audience": "Families",
+    "intent": "review/value",
+    "environment": "cloud/streaming/productivity",
+    "timing": "pre-purchase",
+    "goal": "avoid overpaying for unused seats"
+  },
+  {
+    "id": "ss-eg-009",
+    "title": "How to Check Data Privacy Guarantees in Subscriptions",
+    "angle": "Logging policy + audit history",
+    "audience": "Security-conscious users",
+    "intent": "review/security",
+    "environment": "vpn/cloud/AI tools",
+    "timing": "research",
+    "goal": "identify trustworthy providers"
+  },
+  {
+    "id": "ss-eg-010",
+    "title": "Why Update Cadence Reveals Subscription Quality",
+    "angle": "Feature shipping pace + bug fix frequency",
+    "audience": "General users",
+    "intent": "review/support",
+    "environment": "any subscription",
+    "timing": "long-term study",
+    "goal": "predict future value"
+  },
+
+  {
+    "id": "ss-eg-011",
+    "title": "How to Judge Real Productivity Benefits in SaaS Tools",
+    "angle": "Time saved vs overhead added",
+    "audience": "Remote workers",
+    "intent": "review/productivity",
+    "environment": "SaaS/productivity tools",
+    "timing": "workflow test",
+    "goal": "detect fake productivity claims"
+  },
+  {
+    "id": "ss-eg-012",
+    "title": "Why Pricing Stability Matters in Long-Term Subscriptions",
+    "angle": "Annual increase trend + hidden surcharges",
+    "audience": "General subscribers",
+    "intent": "review/value",
+    "environment": "any subscription",
+    "timing": "renewal",
+    "goal": "avoid unpredictable bills"
+  },
+  {
+    "id": "ss-eg-013",
+    "title": "How to Evaluate Subscription Cancellation Policies",
+    "angle": "Refund fairness + cancellation flow",
+    "audience": "General users",
+    "intent": "review/contract",
+    "environment": "any subscription",
+    "timing": "evaluation",
+    "goal": "avoid aggressive lock-in designs"
+  },
+  {
+    "id": "ss-eg-014",
+    "title": "Why Offline Mode Determines Real Subscription Behavior",
+    "angle": "Cache stability + sync reliability",
+    "audience": "Students/travelers",
+    "intent": "review/usability",
+    "environment": "cloud/storage/learning apps",
+    "timing": "usage",
+    "goal": "ensure usability without internet"
+  },
+  {
+    "id": "ss-eg-015",
+    "title": "How to Check Audio Quality Across Music Apps",
+    "angle": "Codec + bitrate consistency",
+    "audience": "Music listeners",
+    "intent": "review/quality",
+    "environment": "music streaming",
+    "timing": "listening test",
+    "goal": "judge real fidelity"
+  },
+  {
+    "id": "ss-eg-016",
+    "title": "Why Subscription Ecosystem Support Matters",
+    "angle": "Integrations + automation capability",
+    "audience": "Work/professional users",
+    "intent": "review/compatibility",
+    "environment": "productivity tools",
+    "timing": "evaluation",
+    "goal": "pick tools with strong interoperability"
+  },
+  {
+    "id": "ss-eg-017",
+    "title": "How to Evaluate the Real Quality of Customer Support",
+    "angle": "Resolution speed + channel availability",
+    "audience": "All users",
+    "intent": "review/support",
+    "environment": "any subscription",
+    "timing": "contact attempt",
+    "goal": "judge support readiness"
+  },
+  {
+    "id": "ss-eg-018",
+    "title": "Why Transparent Usage Meters Improve Subscription Value",
+    "angle": "Token/cap visibility + real consumption",
+    "audience": "AI tool users",
+    "intent": "review/value",
+    "environment": "AI/processing tools",
+    "timing": "usage",
+    "goal": "avoid surprise overage limits"
+  },
+  {
+    "id": "ss-eg-019",
+    "title": "How to Identify Effective Learning Subscriptions",
+    "angle": "Curriculum design + instructor quality",
+    "audience": "Learners",
+    "intent": "review/education",
+    "environment": "learning platforms",
+    "timing": "trial period",
+    "goal": "find actionable lessons"
+  },
+  {
+    "id": "ss-eg-020",
+    "title": "Why Device Support Coverage Determines Subscription Flexibility",
+    "angle": "Cross-platform stability",
+    "audience": "General users",
+    "intent": "review/compatibility",
+    "environment": "streaming/productivity/cloud",
+    "timing": "evaluation",
+    "goal": "ensure smooth experience on all devices"
+  }
+]
+[
+  {
+    "id": "ss-eg-021",
+    "title": "How to Compare Long-Term Value Between Annual and Monthly Plans",
+    "angle": "Effective monthly rate vs cancellation flexibility",
+    "audience": "General users",
+    "intent": "review/value",
+    "environment": "all subscription types",
+    "timing": "purchase decision",
+    "goal": "choose the right billing cycle"
+  },
+  {
+    "id": "ss-eg-022",
+    "title": "What Makes a Subscription Truly Beginner-Friendly?",
+    "angle": "Onboarding clarity + feature discoverability",
+    "audience": "New users",
+    "intent": "review/usability",
+    "environment": "any subscription",
+    "timing": "first 24 hours",
+    "goal": "evaluate ease of starting"
+  },
+  {
+    "id": "ss-eg-023",
+    "title": "Why Transparent Changelogs Increase Subscription Trust",
+    "angle": "Update notes, bug disclosures",
+    "audience": "General users",
+    "intent": "review/support",
+    "environment": "any subscription",
+    "timing": "update cycle",
+    "goal": "judge product evolution"
+  },
+  {
+    "id": "ss-eg-024",
+    "title": "How to Check Data Portability Before Subscribing",
+    "angle": "Export tools + backups",
+    "audience": "Professionals",
+    "intent": "review/migration",
+    "environment": "cloud/productivity",
+    "timing": "pre-purchase",
+    "goal": "ensure safe exit options"
+  },
+  {
+    "id": "ss-eg-025",
+    "title": "Why Real-World Speed Tests Matter for Cloud Subscriptions",
+    "angle": "Upload/download stability",
+    "audience": "Creators",
+    "intent": "review/performance",
+    "environment": "cloud storage",
+    "timing": "trial",
+    "goal": "identify stable plans"
+  },
+  {
+    "id": "ss-eg-026",
+    "title": "How to Evaluate the Long-Term Quality of Streaming Shows",
+    "angle": "Back-catalog strength",
+    "audience": "Entertainment users",
+    "intent": "review/content",
+    "environment": "video streaming",
+    "timing": "anytime",
+    "goal": "predict future interest"
+  },
+  {
+    "id": "ss-eg-027",
+    "title": "Why Security Audit History Matters in VPN Subscriptions",
+    "angle": "No-log tests + third-party verifications",
+    "audience": "Privacy-focused",
+    "intent": "review/security",
+    "environment": "vpn",
+    "timing": "evaluation",
+    "goal": "choose trustworthy providers"
+  },
+  {
+    "id": "ss-eg-028",
+    "title": "How to Evaluate Learning Platform Progress Systems",
+    "angle": "Assessment quality + spaced repetition",
+    "audience": "Learners",
+    "intent": "review/education",
+    "environment": "learning apps",
+    "timing": "trial",
+    "goal": "choose effective learning tools"
+  },
+  {
+    "id": "ss-eg-029",
+    "title": "Why Cross-Platform Sync Determines Subscription Reliability",
+    "angle": "Mobile ↔ desktop parity",
+    "audience": "Students/creators",
+    "intent": "review/usability",
+    "environment": "productivity/cloud",
+    "timing": "test period",
+    "goal": "ensure no data loss"
+  },
+  {
+    "id": "ss-eg-030",
+    "title": "How to Spot Hidden Limits in Free Trials",
+    "angle": "Feature gating + quota traps",
+    "audience": "General users",
+    "intent": "review/onboarding",
+    "environment": "any subscription",
+    "timing": "first day",
+    "goal": "avoid misleading trials"
+  },
+
+  {
+    "id": "ss-eg-031",
+    "title": "Why Support Response Time Matters More Than Rating",
+    "angle": "Actual resolution speed",
+    "audience": "All users",
+    "intent": "review/support",
+    "environment": "all services",
+    "timing": "contact test",
+    "goal": "filter poor support teams"
+  },
+  {
+    "id": "ss-eg-032",
+    "title": "How to Evaluate AI Tool Pricing Fairness",
+    "angle": "Token value per dollar",
+    "audience": "AI users",
+    "intent": "review/value",
+    "environment": "AI tools",
+    "timing": "pricing check",
+    "goal": "avoid overpriced plans"
+  },
+  {
+    "id": "ss-eg-033",
+    "title": "Why Device Limit Policies Matter for Larger Households",
+    "angle": "Concurrent streaming limits",
+    "audience": "Families",
+    "intent": "review/value",
+    "environment": "streaming",
+    "timing": "setup stage",
+    "goal": "avoid conflicts and interruptions"
+  },
+  {
+    "id": "ss-eg-034",
+    "title": "How to Judge the Real Accuracy of Weather Subscription Apps",
+    "angle": "Forecast consistency + alert timing",
+    "audience": "Travel/outdoor users",
+    "intent": "review/precision",
+    "environment": "weather apps",
+    "timing": "comparison",
+    "goal": "pick dependable forecasts"
+  },
+  {
+    "id": "ss-eg-035",
+    "title": "Why Long-Term AI Upgrades Matter in Productivity Suites",
+    "angle": "Automation depth",
+    "audience": "Remote workers",
+    "intent": "review/productivity",
+    "environment": "productivity tools",
+    "timing": "update review",
+    "goal": "predict long-term efficiency"
+  },
+  {
+    "id": "ss-eg-036",
+    "title": "How to Evaluate the Real Quality of Meditation Apps",
+    "angle": "Narrator tone + session structure",
+    "audience": "Wellness users",
+    "intent": "review/content",
+    "environment": "meditation apps",
+    "timing": "trial",
+    "goal": "choose calming, useful sessions"
+  },
+  {
+    "id": "ss-eg-037",
+    "title": "Why Storage Retention Policies Should Never Be Ignored",
+    "angle": "Data deletion rules",
+    "audience": "Professionals",
+    "intent": "review/reliability",
+    "environment": "cloud services",
+    "timing": "research",
+    "goal": "avoid risky retention models"
+  },
+  {
+    "id": "ss-eg-038",
+    "title": "How to Compare Gaming Subscription Libraries Effectively",
+    "angle": "Genre spread + rotation",
+    "audience": "Gamers",
+    "intent": "review/content",
+    "environment": "gaming subscriptions",
+    "timing": "anytime",
+    "goal": "find high-value rotations"
+  },
+  {
+    "id": "ss-eg-039",
+    "title": "Why Cross-Device Support Matters in Note-Taking Subscriptions",
+    "angle": "Input method consistency",
+    "audience": "Students/writers",
+    "intent": "review/usability",
+    "environment": "note-taking apps",
+    "timing": "evaluation",
+    "goal": "avoid sync friction"
+  },
+  {
+    "id": "ss-eg-040",
+    "title": "How to Evaluate the Real Cost of Premium Podcast Plans",
+    "angle": "Ad-free value vs exclusive content",
+    "audience": "Podcast listeners",
+    "intent": "review/value",
+    "environment": "podcast apps",
+    "timing": "sub renewal",
+    "goal": "judge long-term worth"
+  }
+]
+[
+  {
+    "id": "ss-eg-041",
+    "title": "How to Identify Sustainable Pricing Models in Subscriptions",
+    "angle": "Long-term stability + historical increases",
+    "audience": "General users",
+    "intent": "review/value",
+    "environment": "any subscription",
+    "timing": "pre-purchase",
+    "goal": "avoid volatile pricing"
+  },
+  {
+    "id": "ss-eg-042",
+    "title": "Why True Cross-Platform Parity Matters in Streaming Apps",
+    "angle": "Feature consistency across devices",
+    "audience": "Entertainment users",
+    "intent": "review/usability",
+    "environment": "video/music streaming",
+    "timing": "evaluation",
+    "goal": "ensure equal experience everywhere"
+  },
+  {
+    "id": "ss-eg-043",
+    "title": "How to Evaluate Long-Term AI Tool Reliability",
+    "angle": "Model stability + version continuity",
+    "audience": "Creators/students",
+    "intent": "review/reliability",
+    "environment": "AI tools",
+    "timing": "update cycle",
+    "goal": "predict future performance"
+  },
+  {
+    "id": "ss-eg-044",
+    "title": "Why Device Ecosystem Fit Affects Subscription Value",
+    "angle": "Integration with OS/app ecosystem",
+    "audience": "General users",
+    "intent": "review/compatibility",
+    "environment": "productivity/cloud",
+    "timing": "research",
+    "goal": "avoid incompatibility issues"
+  },
+  {
+    "id": "ss-eg-045",
+    "title": "How to Evaluate True Storage Speed in Cloud Plans",
+    "angle": "Real upload/download metrics",
+    "audience": "Creators",
+    "intent": "review/performance",
+    "environment": "cloud storage",
+    "timing": "trial",
+    "goal": "test real-world speeds"
+  },
+  {
+    "id": "ss-eg-046",
+    "title": "Why Subscription Transparency Builds Long-Term Trust",
+    "angle": "Clear terms + honest limitations",
+    "audience": "General users",
+    "intent": "review/contract",
+    "environment": "any subscription",
+    "timing": "evaluation",
+    "goal": "judge fairness"
+  },
+  {
+    "id": "ss-eg-047",
+    "title": "How to Analyze the Benefit of AI Features in Productivity Suites",
+    "angle": "Real time saved vs novelty",
+    "audience": "Workers",
+    "intent": "review/productivity",
+    "environment": "productivity tools",
+    "timing": "update cycle",
+    "goal": "spot meaningful features"
+  },
+  {
+    "id": "ss-eg-048",
+    "title": "Why Content Variety Determines Streaming Value",
+    "angle": "Genre distribution + rotation pattern",
+    "audience": "Entertainment users",
+    "intent": "review/content",
+    "environment": "video streaming",
+    "timing": "content audit",
+    "goal": "predict long-term satisfaction"
+  },
+  {
+    "id": "ss-eg-049",
+    "title": "How to Evaluate Backup Reliability in Cloud Subscriptions",
+    "angle": "Restore speed + version history",
+    "audience": "General users",
+    "intent": "review/reliability",
+    "environment": "cloud storage",
+    "timing": "trial",
+    "goal": "ensure safe recovery"
+  },
+  {
+    "id": "ss-eg-050",
+    "title": "Why Fair Usage Policies Matter More Than You Think",
+    "angle": "Throttle thresholds + overage rules",
+    "audience": "All users",
+    "intent": "review/fairness",
+    "environment": "any subscription",
+    "timing": "pre-purchase",
+    "goal": "avoid unexpected restrictions"
+  },
+
+  {
+    "id": "ss-eg-051",
+    "title": "How to Compare AI Text Tools Without Falling for Hype",
+    "angle": "Context depth + error rate",
+    "audience": "Students/writers",
+    "intent": "review/accuracy",
+    "environment": "AI writing tools",
+    "timing": "evaluation",
+    "goal": "detect inflated claims"
+  },
+  {
+    "id": "ss-eg-052",
+    "title": "Why Algorithm Transparency Matters in Recommendation Apps",
+    "angle": "Personalization accuracy",
+    "audience": "Entertainment users",
+    "intent": "review/recommendation",
+    "environment": "music/video apps",
+    "timing": "usage",
+    "goal": "judge reliability"
+  },
+  {
+    "id": "ss-eg-053",
+    "title": "How to Evaluate Subscription Bundles Properly",
+    "angle": "Included services vs real needs",
+    "audience": "General users",
+    "intent": "review/value",
+    "environment": "bundle subscriptions",
+    "timing": "purchase",
+    "goal": "avoid unnecessary bundles"
+  },
+  {
+    "id": "ss-eg-054",
+    "title": "Why Offline Capability Is Critical for Learning Platforms",
+    "angle": "Lesson caching + stable sync",
+    "audience": "Students",
+    "intent": "review/usability",
+    "environment": "learning apps",
+    "timing": "trial",
+    "goal": "support low-connectivity usage"
+  },
+  {
+    "id": "ss-eg-055",
+    "title": "How to Evaluate the True Value of Family Cloud Plans",
+    "angle": "Role permissions + active usage",
+    "audience": "Families",
+    "intent": "review/value",
+    "environment": "cloud",
+    "timing": "evaluation",
+    "goal": "maximize shared benefit"
+  },
+  {
+    "id": "ss-eg-056",
+    "title": "Why Churn Rate Matters When Evaluating Subscriptions",
+    "angle": "Customer confidence indicator",
+    "audience": "General users",
+    "intent": "review/reliability",
+    "environment": "any service",
+    "timing": "research",
+    "goal": "predict long-term stability"
+  },
+  {
+    "id": "ss-eg-057",
+    "title": "How to Evaluate Cloud Document Editors for Team Use",
+    "angle": "Collaboration speed + autosave logic",
+    "audience": "Teams/workers",
+    "intent": "review/collaboration",
+    "environment": "online office",
+    "timing": "trial",
+    "goal": "choose stable team editors"
+  },
+  {
+    "id": "ss-eg-058",
+    "title": "Why Trial-to-Subscription Conversion Flow Matters",
+    "angle": "Fair gating + honest upgrade path",
+    "audience": "General users",
+    "intent": "review/onboarding",
+    "environment": "any subscription",
+    "timing": "first week",
+    "goal": "avoid manipulative flows"
+  },
+  {
+    "id": "ss-eg-059",
+    "title": "How to Evaluate Subscription Learning Paths Effectively",
+    "angle": "Progress clarity + skill applicability",
+    "audience": "Learners",
+    "intent": "review/education",
+    "environment": "learning platforms",
+    "timing": "trial",
+    "goal": "measure actionable learning"
+  },
+  {
+    "id": "ss-eg-060",
+    "title": "Why Broad Device Support Determines Streaming Flexibility",
+    "angle": "Smart TV + console + mobile parity",
+    "audience": "Entertainment users",
+    "intent": "review/compatibility",
+    "environment": "video streaming",
+    "timing": "evaluation",
+    "goal": "ensure smooth usage anywhere"
+  }
+]
+[
+  {
+    "id": "ss-eg-061",
+    "title": "How to Evaluate Whether a Subscription's AI Features Are Practical",
+    "angle": "Real workflow benefit vs novelty demos",
+    "audience": "Workers/students",
+    "intent": "review/productivity",
+    "environment": "AI-enabled tools",
+    "timing": "evaluation",
+    "goal": "focus on features that reduce real workload"
+  },
+  {
+    "id": "ss-eg-062",
+    "title": "Why Backup Retention Policies Matter in Cloud Subscriptions",
+    "angle": "Version history depth + recovery accuracy",
+    "audience": "Professionals",
+    "intent": "review/reliability",
+    "environment": "cloud storage",
+    "timing": "research",
+    "goal": "avoid risky data loss scenarios"
+  },
+  {
+    "id": "ss-eg-063",
+    "title": "How to Judge Streaming Apps by Their Regional Catalog Quality",
+    "angle": "Content availability differences",
+    "audience": "International users",
+    "intent": "review/content",
+    "environment": "video streaming",
+    "timing": "catalog audit",
+    "goal": "ensure content availability in your region"
+  },
+  {
+    "id": "ss-eg-064",
+    "title": "Why AI Limit Transparency Is Essential for Subscription Fairness",
+    "angle": "Quota clarity + token pricing",
+    "audience": "AI users",
+    "intent": "review/fairness",
+    "environment": "AI tools",
+    "timing": "evaluation",
+    "goal": "avoid misleading usage limits"
+  },
+  {
+    "id": "ss-eg-065",
+    "title": "How to Evaluate Long-Term Learning Value in Subscriptions",
+    "angle": "Progress sustainability + curriculum depth",
+    "audience": "Learners",
+    "intent": "review/education",
+    "environment": "learning platforms",
+    "timing": "trial period",
+    "goal": "ensure the platform supports consistent progress"
+  },
+  {
+    "id": "ss-eg-066",
+    "title": "Why App Performance Consistency Matters More Than Peak Speed",
+    "angle": "Stable loading + latency behavior",
+    "audience": "General users",
+    "intent": "review/performance",
+    "environment": "productivity/cloud",
+    "timing": "real usage",
+    "goal": "avoid apps with unstable performance"
+  },
+  {
+    "id": "ss-eg-067",
+    "title": "How to Evaluate Customer Support Quality Without Waiting for Issues",
+    "angle": "Support channel availability tests",
+    "audience": "All users",
+    "intent": "review/support",
+    "environment": "any subscription",
+    "timing": "evaluation",
+    "goal": "predict future issue resolution quality"
+  },
+  {
+    "id": "ss-eg-068",
+    "title": "Why Trial Duration Doesn’t Always Equal Real Testing Opportunity",
+    "angle": "Feature gating + locked tools",
+    "audience": "Busy users",
+    "intent": "review/onboarding",
+    "environment": "any subscription",
+    "timing": "first 48 hours",
+    "goal": "spot trials designed to mislead"
+  },
+  {
+    "id": "ss-eg-069",
+    "title": "How to Evaluate Multi-Device Sync Reliability in Productivity Apps",
+    "angle": "Conflict resolution + offline handling",
+    "audience": "Workers/students",
+    "intent": "review/usability",
+    "environment": "productivity tools",
+    "timing": "test period",
+    "goal": "ensure frictionless multi-device workflows"
+  },
+  {
+    "id": "ss-eg-070",
+    "title": "Why Long-Term Content Rotation Trends Matter in Streaming Services",
+    "angle": "Yearly additions vs removals",
+    "audience": "Entertainment users",
+    "intent": "review/content",
+    "environment": "video/music streaming",
+    "timing": "annual review",
+    "goal": "predict future catalog health"
+  },
+
+  {
+    "id": "ss-eg-071",
+    "title": "How to Identify Reliable Cloud App Providers",
+    "angle": "Maintenance transparency + uptime guarantees",
+    "audience": "Students/professionals",
+    "intent": "review/reliability",
+    "environment": "cloud services",
+    "timing": "research phase",
+    "goal": "choose providers with stable infrastructure"
+  },
+  {
+    "id": "ss-eg-072",
+    "title": "Why Cross-App Integration Determines Subscription Longevity",
+    "angle": "Automation support + API quality",
+    "audience": "Teams/workers",
+    "intent": "review/compatibility",
+    "environment": "productivity/automation",
+    "timing": "evaluation",
+    "goal": "avoid isolated tools with weak integration"
+  },
+  {
+    "id": "ss-eg-073",
+    "title": "How to Evaluate Device-Based Restrictions Fairly",
+    "angle": "Concurrent usage policy clarity",
+    "audience": "Families",
+    "intent": "review/fairness",
+    "environment": "streaming/cloud",
+    "timing": "setup",
+    "goal": "avoid unexpected restrictions"
+  },
+  {
+    "id": "ss-eg-074",
+    "title": "Why Security Update Frequency Matters for Subscription Safety",
+    "angle": "Patch cadence + exploit transparency",
+    "audience": "All users",
+    "intent": "review/security",
+    "environment": "vpn/security suites",
+    "timing": "update cycle",
+    "goal": "ensure strong long-term protection"
+  },
+  {
+    "id": "ss-eg-075",
+    "title": "How to Judge Real Audio Quality in AI Voice Tools",
+    "angle": "Tone consistency + noise preservation",
+    "audience": "Creators/workers",
+    "intent": "review/quality",
+    "environment": "AI audio tools",
+    "timing": "evaluation",
+    "goal": "identify natural sound generation"
+  },
+  {
+    "id": "ss-eg-076",
+    "title": "Why Fair Pricing Models Matter for Streaming Bundles",
+    "angle": "Included channel value + rotation pattern",
+    "audience": "Entertainment users",
+    "intent": "review/value",
+    "environment": "streaming bundles",
+    "timing": "plan comparison",
+    "goal": "avoid weak bundles"
+  },
+  {
+    "id": "ss-eg-077",
+    "title": "How to Evaluate Long-Term Fitness App Effectiveness",
+    "angle": "Progress tracking + workout variety",
+    "audience": "Fitness users",
+    "intent": "review/consistency",
+    "environment": "fitness apps",
+    "timing": "multi-week evaluation",
+    "goal": "find sustainable fitness plans"
+  },
+  {
+    "id": "ss-eg-078",
+    "title": "Why Offline Caching Matters in Reading Subscriptions",
+    "angle": "Stable sync + file availability",
+    "audience": "Readers",
+    "intent": "review/usability",
+    "environment": "reading apps",
+    "timing": "anytime",
+    "goal": "ensure reliable access without internet"
+  },
+  {
+    "id": "ss-eg-079",
+    "title": "How to Evaluate Smart Home Subscription Reliability",
+    "angle": "Automation consistency + device support",
+    "audience": "Homeowners",
+    "intent": "review/reliability",
+    "environment": "smart home ecosystems",
+    "timing": "evaluation",
+    "goal": "ensure reliable automation routines"
+  },
+  {
+    "id": "ss-eg-080",
+    "title": "Why Version History Depth Matters in Document Subscriptions",
+    "angle": "Edit tracking + restore precision",
+    "audience": "Students/teams",
+    "intent": "review/reliability",
+    "environment": "cloud document tools",
+    "timing": "evaluation",
+    "goal": "avoid irreversible document loss"
+  }
+]
