@@ -1,25 +1,1015 @@
-{
-  "label": "device-reviews",
-  "kind": "evergreen",
-  "limit": 60,
-  "seeds": [
-    {
-      "id": "device-ev-001",
-      "title": "7 things to check before buying any laptop (keyboard, ports, battery and more)",
-      "angle": "A timeless checklist that applies to almost every laptop purchase.",
-      "audience": "Anyone considering a new laptop",
-      "intent": "review",
-      "priority": 1,
-      "notes": "향후 모든 노트북 리뷰글에서 내부 링크로 묶기 좋은 기준 글."
-    },
-    {
-      "id": "device-ev-002",
-      "title": "How to read laptop spec sheets without getting confused",
-      "angle": "Explain CPU names, RAM types, SSD sizes, and screen specs in human language.",
-      "audience": "Non-technical buyers who feel overwhelmed by specs",
-      "intent": "review",
-      "priority": 2,
-      "notes": "스펙 해석법은 세대가 바뀌어도 구조 자체는 유지되는 에버그린 테마."
-    }
-  ]
-}
+[
+  {
+    "id": "dr-eg-001",
+    "title": "How to Evaluate Long-Term Device Durability",
+    "angle": "Check hinge, frame rigidity, and stress points",
+    "audience": "General device buyers",
+    "intent": "review/durability",
+    "environment": "phones, laptops, tablets",
+    "timing": "initial inspection",
+    "goal": "spot weak physical designs early"
+  },
+  {
+    "id": "dr-eg-002",
+    "title": "Why Thermal Management Determines Real Performance",
+    "angle": "Track heating curve under load",
+    "audience": "Power users",
+    "intent": "review/performance",
+    "environment": "mobile/laptops",
+    "timing": "testing stage",
+    "goal": "judge sustainable performance"
+  },
+  {
+    "id": "dr-eg-003",
+    "title": "How to Check Display Uniformity on Any Screen",
+    "angle": "Evaluate brightness + color consistency",
+    "audience": "General users",
+    "intent": "review/display",
+    "environment": "monitors/phones",
+    "timing": "first setup",
+    "goal": "find displays with minimal panel variance"
+  },
+  {
+    "id": "dr-eg-004",
+    "title": "What Makes a Good Keyboard on Laptops?",
+    "angle": "Travel, feedback, comfort",
+    "audience": "Writers, students",
+    "intent": "review/ergonomics",
+    "environment": "laptops",
+    "timing": "initial evaluation",
+    "goal": "identify keyboards for long sessions"
+  },
+  {
+    "id": "dr-eg-005",
+    "title": "How to Assess Battery Health Before It Declines",
+    "angle": "Standby drain + peak capacity retention",
+    "audience": "Phone/laptop users",
+    "intent": "review/battery",
+    "environment": "mobile devices",
+    "timing": "first week",
+    "goal": "predict long-term endurance"
+  },
+  {
+    "id": "dr-eg-006",
+    "title": "How to Test Speaker Quality Without Equipment",
+    "angle": "Distortion, clarity, stereo separation",
+    "audience": "General users",
+    "intent": "review/audio",
+    "environment": "any device with speakers",
+    "timing": "initial try",
+    "goal": "identify strong speakers"
+  },
+  {
+    "id": "dr-eg-007",
+    "title": "Why Port Selection Reveals True Device Purpose",
+    "angle": "I/O versatility + charging placement",
+    "audience": "Productivity users",
+    "intent": "review/utility",
+    "environment": "laptops/tablets",
+    "timing": "evaluation",
+    "goal": "match device to workflow"
+  },
+  {
+    "id": "dr-eg-008",
+    "title": "How to Identify a High-Quality Phone Camera",
+    "angle": "Color accuracy + dynamic range",
+    "audience": "Photography users",
+    "intent": "review/camera",
+    "environment": "smartphones",
+    "timing": "photo tests",
+    "goal": "differentiate sensor quality"
+  },
+  {
+    "id": "dr-eg-009",
+    "title": "What Makes a Laptop Actually ‘Quiet’ Under Load?",
+    "angle": "Fan curve + cooling efficiency",
+    "audience": "Home/office users",
+    "intent": "review/noise",
+    "environment": "laptops",
+    "timing": "stress test",
+    "goal": "select quiet-performance balance"
+  },
+  {
+    "id": "dr-eg-010",
+    "title": "How to Judge Build Materials Beyond Marketing",
+    "angle": "Metal vs plastic vs composite behaviors",
+    "audience": "General device buyers",
+    "intent": "review/build-quality",
+    "environment": "phones/laptops",
+    "timing": "inspection",
+    "goal": "spot durable materials"
+  },
+
+  {
+    "id": "dr-eg-011",
+    "title": "Why Peak Brightness Isn’t Everything in Displays",
+    "angle": "Check sustained brightness + color accuracy",
+    "audience": "Consumers",
+    "intent": "review/display",
+    "environment": "any display device",
+    "timing": "review stage",
+    "goal": "find balanced display quality"
+  },
+  {
+    "id": "dr-eg-012",
+    "title": "How to Compare Device Noise Levels Honestly",
+    "angle": "Fan pitch + vibration",
+    "audience": "Sensitive users",
+    "intent": "review/noise",
+    "environment": "laptops/desktops",
+    "timing": "load test",
+    "goal": "avoid high-pitched fans"
+  },
+  {
+    "id": "dr-eg-013",
+    "title": "How to Check Multitasking Ability on Any Device",
+    "angle": "RAM pressure + background task stability",
+    "audience": "Multitaskers",
+    "intent": "review/performance",
+    "environment": "phones/tablets",
+    "timing": "test phase",
+    "goal": "gauge multitasking smoothness"
+  },
+  {
+    "id": "dr-eg-014",
+    "title": "Why Repairability Matters More Over Time",
+    "angle": "Battery replacement + SSD slots",
+    "audience": "Long-term device owners",
+    "intent": "review/repairability",
+    "environment": "laptops/phones",
+    "timing": "evaluation",
+    "goal": "choose devices that last"
+  },
+  {
+    "id": "dr-eg-015",
+    "title": "How to Test Touchscreen Responsiveness",
+    "angle": "Latency + edge detection",
+    "audience": "Phone/tablet users",
+    "intent": "review/touch",
+    "environment": "touch devices",
+    "timing": "first use",
+    "goal": "ensure smooth touch behaviors"
+  },
+  {
+    "id": "dr-eg-016",
+    "title": "Why Device Weight Distribution Affects Comfort",
+    "angle": "Grip balance + fatigue",
+    "audience": "Mobile users",
+    "intent": "review/ergonomics",
+    "environment": "phones/tablets",
+    "timing": "holding test",
+    "goal": "find balanced designs"
+  },
+  {
+    "id": "dr-eg-017",
+    "title": "How to Evaluate a Battery Saver Mode Honestly",
+    "angle": "CPU cap + brightness limit",
+    "audience": "General users",
+    "intent": "review/battery",
+    "environment": "phones/laptops",
+    "timing": "evaluation",
+    "goal": "judge effective vs cosmetic battery modes"
+  },
+  {
+    "id": "dr-eg-018",
+    "title": "Why Accessory Ecosystem Strength Matters",
+    "angle": "Covers, chargers, docks availability",
+    "audience": "General buyers",
+    "intent": "review/compatibility",
+    "environment": "phones/tablets",
+    "timing": "analysis stage",
+    "goal": "pick devices with strong ecosystem"
+  },
+  {
+    "id": "dr-eg-019",
+    "title": "How to Test Wireless Performance Properly",
+    "angle": "Wi-Fi + Bluetooth stability",
+    "audience": "Home/work users",
+    "intent": "review/connectivity",
+    "environment": "phones/laptops",
+    "timing": "testing phase",
+    "goal": "identify stable wireless designs"
+  },
+  {
+    "id": "dr-eg-020",
+    "title": "What Makes a Device Feel ‘Fast’ in Daily Use?",
+    "angle": "UI fluidity + animation frame pacing",
+    "audience": "General users",
+    "intent": "review/usability",
+    "environment": "any device",
+    "timing": "early impressions",
+    "goal": "measure perceived responsiveness"
+  }
+]
+[
+  {
+    "id": "dr-eg-021",
+    "title": "How to Evaluate Long-Term Software Support",
+    "angle": "Update frequency + security patch cadence",
+    "audience": "All device users",
+    "intent": "review/longevity",
+    "environment": "phones/tablets",
+    "timing": "research stage",
+    "goal": "predict usable lifespan"
+  },
+  {
+    "id": "dr-eg-022",
+    "title": "Why Thermal Throttling Tests Matter",
+    "angle": "Sustained vs peak performance",
+    "audience": "Power users/gamers",
+    "intent": "review/performance",
+    "environment": "laptops/phones",
+    "timing": "performance review",
+    "goal": "avoid devices that overheat quickly"
+  },
+  {
+    "id": "dr-eg-023",
+    "title": "How to Judge Microphone Quality on Any Device",
+    "angle": "Clarity + noise suppression",
+    "audience": "Remote workers/content creators",
+    "intent": "review/audio",
+    "environment": "phones/laptops",
+    "timing": "testing",
+    "goal": "identify clean voice capture"
+  },
+  {
+    "id": "dr-eg-024",
+    "title": "What Makes a Truly Good Trackpad?",
+    "angle": "Glide, accuracy, rejection behavior",
+    "audience": "Laptop users",
+    "intent": "review/input-device",
+    "environment": "laptops",
+    "timing": "evaluation",
+    "goal": "select laptops with reliable trackpads"
+  },
+  {
+    "id": "dr-eg-025",
+    "title": "How to Test Viewing Angles Properly",
+    "angle": "Color shift + brightness drop-off",
+    "audience": "Display-conscious buyers",
+    "intent": "review/display",
+    "environment": "monitors/phones",
+    "timing": "first inspection",
+    "goal": "find displays without severe shifts"
+  },
+  {
+    "id": "dr-eg-026",
+    "title": "Why Button Tactility Reveals Build Precision",
+    "angle": "Click feel + wobble test",
+    "audience": "All users",
+    "intent": "review/hardware-quality",
+    "environment": "any device",
+    "timing": "basic check",
+    "goal": "spot cheap build elements"
+  },
+  {
+    "id": "dr-eg-027",
+    "title": "How to Test Wireless Range Without Tools",
+    "angle": "Distance + wall-penetration behavior",
+    "audience": "Home users",
+    "intent": "review/wireless",
+    "environment": "phones/laptops",
+    "timing": "initial test",
+    "goal": "judge connectivity confidence"
+  },
+  {
+    "id": "dr-eg-028",
+    "title": "Why Good Haptics Improve Everyday Use",
+    "angle": "Haptic motor sharpness + tuning",
+    "audience": "Mobile users",
+    "intent": "review/usability",
+    "environment": "phones/controllers",
+    "timing": "evaluation",
+    "goal": "find devices with satisfying tactile feedback"
+  },
+  {
+    "id": "dr-eg-029",
+    "title": "How to Evaluate a Device’s Boot Reliability",
+    "angle": "Cold boot + resume consistency",
+    "audience": "Laptop/PC users",
+    "intent": "review/reliability",
+    "environment": "laptops/desktops",
+    "timing": "testing",
+    "goal": "determine if device resumes without issues"
+  },
+  {
+    "id": "dr-eg-030",
+    "title": "What Makes a Charger Truly ‘Safe’ to Use?",
+    "angle": "Overheat behavior + voltage stability",
+    "audience": "General users",
+    "intent": "review/safety",
+    "environment": "chargers",
+    "timing": "evaluation",
+    "goal": "avoid dangerous chargers"
+  },
+
+  {
+    "id": "dr-eg-031",
+    "title": "How to Judge Flashlight Quality on Phones",
+    "angle": "Beam uniformity + brightness",
+    "audience": "Outdoor users",
+    "intent": "review/utility",
+    "environment": "phones",
+    "timing": "night test",
+    "goal": "find phones with usable flashlight"
+  },
+  {
+    "id": "dr-eg-032",
+    "title": "Why Corner Drop Tests Matter More Than You Think",
+    "angle": "Frame stress response",
+    "audience": "Accident-prone users",
+    "intent": "review/durability",
+    "environment": "phones",
+    "timing": "durability test",
+    "goal": "predict survivability"
+  },
+  {
+    "id": "dr-eg-033",
+    "title": "How to Check If the Device Stutters Over Time",
+    "angle": "Memory leaks + background freeze",
+    "audience": "General users",
+    "intent": "review/stability",
+    "environment": "phones/tablets",
+    "timing": "days of testing",
+    "goal": "spot slowdowns early"
+  },
+  {
+    "id": "dr-eg-034",
+    "title": "What Makes a Phone ‘One-Hand Friendly’?",
+    "angle": "Reachability + UI scaling",
+    "audience": "Small-phone users",
+    "intent": "review/usability",
+    "environment": "phones",
+    "timing": "initial use",
+    "goal": "judge ergonomic friendliness"
+  },
+  {
+    "id": "dr-eg-035",
+    "title": "How to Evaluate the Real Quality of a Laptop Screen",
+    "angle": "Sharpness + uniformity + color accuracy",
+    "audience": "General laptop buyers",
+    "intent": "review/display",
+    "environment": "laptops",
+    "timing": "testing stage",
+    "goal": "ensure dependable screen quality"
+  },
+  {
+    "id": "dr-eg-036",
+    "title": "Why Device Weight Does Not Equal Comfort",
+    "angle": "Grip shape + weight distribution",
+    "audience": "General users",
+    "intent": "review/ergonomics",
+    "environment": "phones/tablets",
+    "timing": "comfort test",
+    "goal": "judge usability based on balance"
+  },
+  {
+    "id": "dr-eg-037",
+    "title": "How to Check for PWM Flicker on Displays",
+    "angle": "Low-brightness behavior",
+    "audience": "Sensitive users",
+    "intent": "review/display-health",
+    "environment": "phones/monitors",
+    "timing": "flicker test",
+    "goal": "avoid eye strain issues"
+  },
+  {
+    "id": "dr-eg-038",
+    "title": "How to Judge Camera Shutter Speed in Real Use",
+    "angle": "Shutter lag + capture consistency",
+    "audience": "Photography users",
+    "intent": "review/camera",
+    "environment": "phones",
+    "timing": "testing",
+    "goal": "avoid phones with slow captures"
+  },
+  {
+    "id": "dr-eg-039",
+    "title": "Why Trackpad Palm Rejection Greatly Affects Usability",
+    "angle": "Accidental touch handling",
+    "audience": "Laptop users",
+    "intent": "review/input-accuracy",
+    "environment": "laptops",
+    "timing": "usability check",
+    "goal": "ensure comfortable typing"
+  },
+  {
+    "id": "dr-eg-040",
+    "title": "How to Test Ambient Light Sensor Responsiveness",
+    "angle": "Auto-brightness speed + accuracy",
+    "audience": "General users",
+    "intent": "review/sensors",
+    "environment": "phones",
+    "timing": "sensor test",
+    "goal": "ensure smooth brightness transitions"
+  }
+]
+[
+  {
+    "id": "dr-eg-041",
+    "title": "How to Evaluate the Real Sharpness of Any Display",
+    "angle": "Subpixel structure + text rendering",
+    "audience": "General users",
+    "intent": "review/display",
+    "environment": "phones/monitors",
+    "timing": "setup stage",
+    "goal": "find crisp text rendering"
+  },
+  {
+    "id": "dr-eg-042",
+    "title": "Why a Good Fingerprint Scanner Is More Than Speed",
+    "angle": "Accuracy + reliability across conditions",
+    "audience": "Phone users",
+    "intent": "review/security",
+    "environment": "phones/tablets",
+    "timing": "daily use",
+    "goal": "choose reliable biometric systems"
+  },
+  {
+    "id": "dr-eg-043",
+    "title": "How to Check Charging Speed the Right Way",
+    "angle": "Peak vs sustained speed + heat",
+    "audience": "General users",
+    "intent": "review/charging",
+    "environment": "phones/tablets",
+    "timing": "evaluation",
+    "goal": "spot fake fast-charging claims"
+  },
+  {
+    "id": "dr-eg-044",
+    "title": "Why RAM Type and Speed Affect Real Multitasking",
+    "angle": "LPDDR vs DDR + bandwidth impact",
+    "audience": "Laptop/phone buyers",
+    "intent": "review/performance",
+    "environment": "phones/laptops",
+    "timing": "testing",
+    "goal": "judge true multitasking capability"
+  },
+  {
+    "id": "dr-eg-045",
+    "title": "How to Compare Device Vibration Strength Accurately",
+    "angle": "Motor type + tuning",
+    "audience": "Mobile users",
+    "intent": "review/haptics",
+    "environment": "phones/tablets",
+    "timing": "usability test",
+    "goal": "find satisfying and precise haptics"
+  },
+  {
+    "id": "dr-eg-046",
+    "title": "How to Evaluate Long-Term Comfort of Earbuds",
+    "angle": "Ear fatigue + seal consistency",
+    "audience": "General audio users",
+    "intent": "review/comfort",
+    "environment": "earbuds/headphones",
+    "timing": "multi-hour test",
+    "goal": "avoid discomfort"
+  },
+  {
+    "id": "dr-eg-047",
+    "title": "Why Standby Efficiency Matters More Than Screen-On Time",
+    "angle": "Background drain evaluation",
+    "audience": "Phone users",
+    "intent": "review/battery",
+    "environment": "phones",
+    "timing": "long-term",
+    "goal": "predict overnight battery behavior"
+  },
+  {
+    "id": "dr-eg-048",
+    "title": "How to Check Device Responsiveness Under Poor Signal",
+    "angle": "Modem stability + retry handling",
+    "audience": "Mobile users",
+    "intent": "review/connectivity",
+    "environment": "phones",
+    "timing": "testing stage",
+    "goal": "find stable modems"
+  },
+  {
+    "id": "dr-eg-049",
+    "title": "Why Speaker Vent Placement Changes Sound Quality",
+    "angle": "Direction + occlusion behavior",
+    "audience": "General consumers",
+    "intent": "review/audio",
+    "environment": "phones/laptops",
+    "timing": "initial checks",
+    "goal": "identify better speaker layouts"
+  },
+  {
+    "id": "dr-eg-050",
+    "title": "How to Test the Accuracy of Auto-Focus",
+    "angle": "Subject tracking + focus lock consistency",
+    "audience": "Camera users",
+    "intent": "review/camera",
+    "environment": "phones/cameras",
+    "timing": "camera test",
+    "goal": "avoid unreliable focus systems"
+  },
+
+  {
+    "id": "dr-eg-051",
+    "title": "How to Evaluate the Real Value of Device Storage Options",
+    "angle": "Read/write speed + sustained performance",
+    "audience": "General buyers",
+    "intent": "review/storage",
+    "environment": "phones/laptops",
+    "timing": "purchase planning",
+    "goal": "avoid slow storage variants"
+  },
+  {
+    "id": "dr-eg-052",
+    "title": "Why Heat Dissipation Design Affects Device Lifespan",
+    "angle": "Cooling materials + airflow",
+    "audience": "Laptop/PC users",
+    "intent": "review/thermal",
+    "environment": "laptops/desktops",
+    "timing": "evaluation",
+    "goal": "predict hardware longevity"
+  },
+  {
+    "id": "dr-eg-053",
+    "title": "How to Test Device Stability Over Several Days",
+    "angle": "Crash frequency + freeze analysis",
+    "audience": "General users",
+    "intent": "review/stability",
+    "environment": "phones/laptops",
+    "timing": "multiday test",
+    "goal": "spot unstable software"
+  },
+  {
+    "id": "dr-eg-054",
+    "title": "Why Build Symmetry Matters in Handheld Devices",
+    "angle": "Weight + grip alignment",
+    "audience": "Phone/tablet users",
+    "intent": "review/ergonomics",
+    "environment": "handheld devices",
+    "timing": "comfort test",
+    "goal": "avoid unbalanced designs"
+  },
+  {
+    "id": "dr-eg-055",
+    "title": "How to Check Brightness Consistency at Low Levels",
+    "angle": "Dimming curve accuracy",
+    "audience": "Night users",
+    "intent": "review/display",
+    "environment": "phones/monitors",
+    "timing": "display test",
+    "goal": "ensure comfortable low-light use"
+  },
+  {
+    "id": "dr-eg-056",
+    "title": "Why Button Placement Shapes Daily Usability",
+    "angle": "Accidental press behavior",
+    "audience": "General users",
+    "intent": "review/usability",
+    "environment": "all devices",
+    "timing": "initial use",
+    "goal": "find intuitive layouts"
+  },
+  {
+    "id": "dr-eg-057",
+    "title": "How to Evaluate GPS Accuracy on Any Device",
+    "angle": "Signal lock + drift behavior",
+    "audience": "Travelers/outdoor users",
+    "intent": "review/location",
+    "environment": "phones/wearables",
+    "timing": "field test",
+    "goal": "avoid inaccurate tracking"
+  },
+  {
+    "id": "dr-eg-058",
+    "title": "Why Multi-Microphone Phones Perform Better Outdoors",
+    "angle": "Wind noise + directional capture",
+    "audience": "General phone users",
+    "intent": "review/audio-recording",
+    "environment": "phones",
+    "timing": "outdoor test",
+    "goal": "find phones with cleaner audio capture"
+  },
+  {
+    "id": "dr-eg-059",
+    "title": "How to Check a Device’s Responsiveness at Low Battery",
+    "angle": "Performance management behavior",
+    "audience": "All mobile users",
+    "intent": "review/performance",
+    "environment": "phones/laptops",
+    "timing": "low battery test",
+    "goal": "spot poorly optimized battery modes"
+  },
+  {
+    "id": "dr-eg-060",
+    "title": "Why Charging Temperature Is More Important Than Speed",
+    "angle": "Battery health preservation",
+    "audience": "Mobile-heavy users",
+    "intent": "review/battery",
+    "environment": "phones/tablets",
+    "timing": "charging test",
+    "goal": "ensure cool, safe charging"
+  }
+]
+[
+  {
+    "id": "dr-eg-061",
+    "title": "How to Evaluate Device Responsiveness with Heavy Apps",
+    "angle": "RAM pressure + background task recovery",
+    "audience": "Power users",
+    "intent": "review/performance",
+    "environment": "phones/tablets/laptops",
+    "timing": "stress test",
+    "goal": "see how device behaves under real load"
+  },
+  {
+    "id": "dr-eg-062",
+    "title": "Why Good Thermal Design Matters Even in Idle Use",
+    "angle": "Base temperature + heat soak behavior",
+    "audience": "General users",
+    "intent": "review/thermal",
+    "environment": "all devices",
+    "timing": "observation stage",
+    "goal": "identify inefficient devices"
+  },
+  {
+    "id": "dr-eg-063",
+    "title": "How to Check Device Stability with Long Uptime",
+    "angle": "Memory leak tendency",
+    "audience": "All users",
+    "intent": "review/stability",
+    "environment": "phones/laptops",
+    "timing": "long-term test",
+    "goal": "spot devices that degrade over days"
+  },
+  {
+    "id": "dr-eg-064",
+    "title": "Why Sensor Accuracy Matters for Everyday Use",
+    "angle": "Proximity, gyro, accelerometer checks",
+    "audience": "Mobile users",
+    "intent": "review/sensors",
+    "environment": "phones/wearables",
+    "timing": "evaluation",
+    "goal": "ensure reliable sensor behavior"
+  },
+  {
+    "id": "dr-eg-065",
+    "title": "How to Test Device Responsiveness With Many Apps Installed",
+    "angle": "Launch consistency + cache behavior",
+    "audience": "General users",
+    "intent": "review/performance",
+    "environment": "phones/tablets",
+    "timing": "usage test",
+    "goal": "spot slow app launch patterns"
+  },
+  {
+    "id": "dr-eg-066",
+    "title": "Why Real-World Photo Quality Is More Important Than Specs",
+    "angle": "Color memory + metering consistency",
+    "audience": "Photography users",
+    "intent": "review/camera",
+    "environment": "phones",
+    "timing": "photo test",
+    "goal": "judge true camera output"
+  },
+  {
+    "id": "dr-eg-067",
+    "title": "How to Evaluate the Naturalness of Skin Tones",
+    "angle": "White balance + color shift",
+    "audience": "Photography users",
+    "intent": "review/camera",
+    "environment": "phones/cameras",
+    "timing": "testing",
+    "goal": "avoid devices with artificial tone rendering"
+  },
+  {
+    "id": "dr-eg-068",
+    "title": "Why Balanced Stereo Separation Improves Movie Watching",
+    "angle": "Speaker placement + channel clarity",
+    "audience": "Home users",
+    "intent": "review/audio",
+    "environment": "laptops/phones/tablets",
+    "timing": "first test",
+    "goal": "choose devices with immersive audio"
+  },
+  {
+    "id": "dr-eg-069",
+    "title": "How to Inspect Device Build for Micro-Creases and Gaps",
+    "angle": "Precision manufacturing check",
+    "audience": "General users",
+    "intent": "review/build-quality",
+    "environment": "phones/laptops",
+    "timing": "inspection",
+    "goal": "avoid poorly assembled hardware"
+  },
+  {
+    "id": "dr-eg-070",
+    "title": "Why Weight-to-Battery Ratio Predicts Portability Value",
+    "angle": "Battery life vs comfort balance",
+    "audience": "Travelers, commuters",
+    "intent": "review/ergonomics",
+    "environment": "phones/tablets/laptops",
+    "timing": "evaluation",
+    "goal": "select the optimal portability profile"
+  },
+
+  {
+    "id": "dr-eg-071",
+    "title": "How to Evaluate Noise Cancellation on Laptops",
+    "angle": "Mic processing consistency",
+    "audience": "Remote workers",
+    "intent": "review/audio-record",
+    "environment": "laptops",
+    "timing": "video-call test",
+    "goal": "choose laptops with clean call audio"
+  },
+  {
+    "id": "dr-eg-072",
+    "title": "Why Key Layout Affects Typing Accuracy",
+    "angle": "Spacing + stagger design",
+    "audience": "Writers/students",
+    "intent": "review/ergonomics",
+    "environment": "laptops/keyboards",
+    "timing": "typing test",
+    "goal": "predict accurate typing performance"
+  },
+  {
+    "id": "dr-eg-073",
+    "title": "How to Test Microphone Clarity in Noisy Environments",
+    "angle": "Wind + background noise handling",
+    "audience": "Outdoor callers",
+    "intent": "review/audio-record",
+    "environment": "phones/headsets",
+    "timing": "field test",
+    "goal": "identify noise-resistant mics"
+  },
+  {
+    "id": "dr-eg-074",
+    "title": "Why Build Stiffness Predicts Drop Resistance",
+    "angle": "Flex test + frame rigidity",
+    "audience": "General users",
+    "intent": "review/durability",
+    "environment": "phones/tablets",
+    "timing": "inspection",
+    "goal": "judge structural strength"
+  },
+  {
+    "id": "dr-eg-075",
+    "title": "How to Evaluate Device Accuracy in Color-Sensitive Work",
+    "angle": "Delta-E + gamma handling",
+    "audience": "Creators/editors",
+    "intent": "review/display",
+    "environment": "monitors/laptops/tablets",
+    "timing": "calibration test",
+    "goal": "ensure accurate color output"
+  },
+  {
+    "id": "dr-eg-076",
+    "title": "Why Smooth UI Animation Predicts System Health",
+    "angle": "Frame pacing consistency",
+    "audience": "All users",
+    "intent": "review/usability",
+    "environment": "phones/tablets/laptops",
+    "timing": "usage",
+    "goal": "spot hidden performance issues"
+  },
+  {
+    "id": "dr-eg-077",
+    "title": "How to Check the Usability of Device Stands and Hinges",
+    "angle": "Stiffness + multi-angle stability",
+    "audience": "Tablet/laptop owners",
+    "intent": "review/ergonomics",
+    "environment": "2-in-1s/tablets",
+    "timing": "setup test",
+    "goal": "avoid weak hinges"
+  },
+  {
+    "id": "dr-eg-078",
+    "title": "Why Device-Specific Software May Limit Longevity",
+    "angle": "Vendor lock-in + update support",
+    "audience": "General buyers",
+    "intent": "review/longevity",
+    "environment": "phones/tablets/laptops",
+    "timing": "research",
+    "goal": "avoid short-support ecosystems"
+  },
+  {
+    "id": "dr-eg-079",
+    "title": "How to Test a Device’s USB-C Reliability",
+    "angle": "Port wobble + cable compatibility",
+    "audience": "All users",
+    "intent": "review/build-quality",
+    "environment": "phones/tablets/laptops",
+    "timing": "stress test",
+    "goal": "ensure long-lasting ports"
+  },
+  {
+    "id": "dr-eg-080",
+    "title": "Why Idle Heat Levels Predict Battery Aging Speed",
+    "angle": "Thermal system efficiency",
+    "audience": "Mobile-heavy users",
+    "intent": "review/battery",
+    "environment": "phones/tablets",
+    "timing": "observation",
+    "goal": "protect long-term battery health"
+  }
+]
+[
+  {
+    "id": "dr-eg-081",
+    "title": "How to Evaluate Real-World Charging Efficiency",
+    "angle": "Energy loss + temperature rise",
+    "audience": "General device users",
+    "intent": "review/charging",
+    "environment": "phones/tablets",
+    "timing": "charging test",
+    "goal": "choose efficient chargers and devices"
+  },
+  {
+    "id": "dr-eg-082",
+    "title": "Why Display Reflectivity Matters Outdoors",
+    "angle": "Glare handling + surface coating",
+    "audience": "Outdoor users",
+    "intent": "review/display",
+    "environment": "phones/tablets",
+    "timing": "sunlight test",
+    "goal": "identify readable outdoor screens"
+  },
+  {
+    "id": "dr-eg-083",
+    "title": "How to Test Device Speed After Prolonged Use",
+    "angle": "Cache integrity + throttling",
+    "audience": "General users",
+    "intent": "review/performance",
+    "environment": "phones/laptops",
+    "timing": "multi-week test",
+    "goal": "spot performance degradation"
+  },
+  {
+    "id": "dr-eg-084",
+    "title": "Why Color Temperature Consistency Matters",
+    "angle": "Delta shift across brightness levels",
+    "audience": "Color-sensitive users",
+    "intent": "review/display",
+    "environment": "phones/monitors",
+    "timing": "display test",
+    "goal": "ensure stable color experience"
+  },
+  {
+    "id": "dr-eg-085",
+    "title": "How to Check Fan Bearing Quality in Laptops",
+    "angle": "Noise pattern + vibration signatures",
+    "audience": "Laptop users",
+    "intent": "review/hardware",
+    "environment": "laptops",
+    "timing": "stress test",
+    "goal": "avoid early fan failure"
+  },
+  {
+    "id": "dr-eg-086",
+    "title": "Why Touch Accuracy Matters for Stylus Work",
+    "angle": "Edge drift + latency",
+    "audience": "Creators/students",
+    "intent": "review/stylus",
+    "environment": "tablets/2-in-1s",
+    "timing": "pen test",
+    "goal": "ensure accurate stylus performance"
+  },
+  {
+    "id": "dr-eg-087",
+    "title": "How to Evaluate Webcam Performance in Mixed Lighting",
+    "angle": "Exposure balance + noise",
+    "audience": "Remote workers",
+    "intent": "review/camera",
+    "environment": "laptops/webcams",
+    "timing": "video-call simulation",
+    "goal": "spot unreliable webcams"
+  },
+  {
+    "id": "dr-eg-088",
+    "title": "Why Good Vibration Isolation Improves Device Longevity",
+    "angle": "Internal mounting stability",
+    "audience": "All device buyers",
+    "intent": "review/durability",
+    "environment": "phones/tablets",
+    "timing": "inspection",
+    "goal": "avoid fragile internal designs"
+  },
+  {
+    "id": "dr-eg-089",
+    "title": "How to Test Bluetooth Stability Over Time",
+    "angle": "Drop frequency + reconnection speed",
+    "audience": "All users",
+    "intent": "review/wireless",
+    "environment": "phones/laptops",
+    "timing": "multi-day test",
+    "goal": "identify stable wireless stacks"
+  },
+  {
+    "id": "dr-eg-090",
+    "title": "Why Sharpness in Ultra-Wide Cameras Matters",
+    "angle": "Edge clarity + distortion handling",
+    "audience": "Photography users",
+    "intent": "review/camera",
+    "environment": "phones",
+    "timing": "camera comparison",
+    "goal": "judge wide-angle lens quality"
+  },
+
+  {
+    "id": "dr-eg-091",
+    "title": "How to Evaluate Speaker Loudness Without Distortion",
+    "angle": "Peak clarity + bass integrity",
+    "audience": "General users",
+    "intent": "review/audio",
+    "environment": "phones/laptops/tablets",
+    "timing": "sound test",
+    "goal": "identify clean loud output"
+  },
+  {
+    "id": "dr-eg-092",
+    "title": "Why App Launch Consistency Reveals System Health",
+    "angle": "Cache behavior + cold vs warm start",
+    "audience": "All users",
+    "intent": "review/usability",
+    "environment": "phones/tablets",
+    "timing": "usage test",
+    "goal": "spot hidden slowdowns"
+  },
+  {
+    "id": "dr-eg-093",
+    "title": "How to Check Battery Calibration Accuracy",
+    "angle": "Drain pattern + percentage stability",
+    "audience": "General users",
+    "intent": "review/battery",
+    "environment": "phones/laptops",
+    "timing": "observation",
+    "goal": "avoid faulty battery indicators"
+  },
+  {
+    "id": "dr-eg-094",
+    "title": "Why Realistic Skin Tone Reproduction Matters in Cameras",
+    "angle": "Color trajectory + tone mapping",
+    "audience": "Content creators",
+    "intent": "review/camera",
+    "environment": "phones/cameras",
+    "timing": "camera test",
+    "goal": "ensure natural-looking photos"
+  },
+  {
+    "id": "dr-eg-095",
+    "title": "How to Evaluate Device Stability Under Temperature Changes",
+    "angle": "Thermal shocks + performance consistency",
+    "audience": "Outdoor users",
+    "intent": "review/thermal-stability",
+    "environment": "phones/cameras",
+    "timing": "environmental test",
+    "goal": "avoid thermally vulnerable devices"
+  },
+  {
+    "id": "dr-eg-096",
+    "title": "Why Keyboard Flex Is a Serious Red Flag",
+    "angle": "Chassis stiffness test",
+    "audience": "Laptop users",
+    "intent": "review/build-quality",
+    "environment": "laptops",
+    "timing": "inspection",
+    "goal": "predict long-term structural integrity"
+  },
+  {
+    "id": "dr-eg-097",
+    "title": "How to Test Biometric Stability Across Conditions",
+    "angle": "Dry/wet fingers + low light",
+    "audience": "Phone users",
+    "intent": "review/security",
+    "environment": "phones",
+    "timing": "multi-scenario test",
+    "goal": "ensure consistent biometric unlocking"
+  },
+  {
+    "id": "dr-eg-098",
+    "title": "Why USB-C PD Compatibility Determines Charging Flexibility",
+    "angle": "Power profile support",
+    "audience": "All device users",
+    "intent": "review/compatibility",
+    "environment": "phones/tablets/laptops",
+    "timing": "charger test",
+    "goal": "maximize charging options"
+  },
+  {
+    "id": "dr-eg-099",
+    "title": "How to Evaluate Lens Flare Control in Cameras",
+    "angle": "Strong light performance",
+    "audience": "Photography users",
+    "intent": "review/camera",
+    "environment": "phones/cameras",
+    "timing": "flare test",
+    "goal": "avoid cameras with poor flare control"
+  },
+  {
+    "id": "dr-eg-100",
+    "title": "What Makes a Device Age Gracefully Over the Years?",
+    "angle": "Software support + battery health + chassis durability",
+    "audience": "General buyers",
+    "intent": "review/longevity",
+    "environment": "phones/laptops/tablets",
+    "timing": "long-term evaluation",
+    "goal": "identify devices that stay reliable"
+  }
+]
