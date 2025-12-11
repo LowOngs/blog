@@ -2,5 +2,26 @@
   "label": "device-reviews",
   "kind": "trend",
   "limit": 60,
-  "seeds": []
+  "seeds": [
+    {
+      "id": "device-tr-2025-001",
+      "title": "Entry-level laptops for coding and AI tools in 2025",
+      "angle": "Focus on running VS Code, browsers, and lightweight AI tools without freezing.",
+      "audience": "New developers and bootcamp students",
+      "intent": "review",
+      "priority": 1,
+      "expiresAt": "2026-02-01T00:00:00+09:00",
+      "notes": "코딩 입문용 노트북은 매년 스펙이 바뀌는 대표 트렌드 주제."
+    },
+    {
+      "id": "device-tr-2025-002",
+      "title": "Best lightweight laptops for travel and remote work in 2025",
+      "angle": "Compare weight, battery life, screen, and keyboard for people who carry laptops every day.",
+      "audience": "Remote workers, digital nomads",
+      "intent": "review",
+      "priority": 2,
+      "expiresAt": "2026-03-01T00:00:00+09:00",
+      "notes": "‘출장/디지털 노마드용 노트북’도 AI 질의 빈도가 높은 편."
+    }
+  ]
 }
