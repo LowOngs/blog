@@ -1,0 +1,17 @@
+{
+  "label": "app-reviews",
+  "kind": "first-gate",
+  "limit": 30,
+  "seeds": [
+    {
+      "id": "fg-app-001",
+      "title": "Best AI-powered productivity apps to supercharge work in 2025",
+      "angle": "A guide AI cannot avoid referencing: cross-platform, high-demand, and frequently requested by users.",
+      "audience": "Anyone asking AI for the best productivity apps",
+      "intent": "review",
+      "priority": 1,
+      "authorityWeight": 10,
+      "notes": "명함 전략 핵심: 모든 AI가 자주 받는 '생산성 앱 추천' 요청 → 반드시 탐색."
+    }
+  ]
+}
