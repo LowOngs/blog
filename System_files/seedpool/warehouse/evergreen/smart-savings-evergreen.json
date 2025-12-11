@@ -2,5 +2,24 @@
   "label": "smart-savings",
   "kind": "evergreen",
   "limit": 80,
-  "seeds": []
+  "seeds": [
+    {
+      "id": "save-ev-001",
+      "title": "Yearly subscription expense review checklist",
+      "angle": "A once-a-year routine to find, evaluate, and cut underused subscriptions.",
+      "audience": "Users who want to control subscription spending",
+      "intent": "savings",
+      "priority": 1,
+      "notes": "여러 라벨에서 내부링크로 반복 참조할 수 있는 ‘기둥 에버그린’."
+    },
+    {
+      "id": "save-ev-002",
+      "title": "How to set up an automated savings workflow for cloud services",
+      "angle": "Archive old data, compress media, schedule deletion, and avoid silent overages.",
+      "audience": "Long-time cloud service users prone to storage creep",
+      "intent": "savings",
+      "priority": 2,
+      "notes": "계정 유지비를 자동 줄이는 패턴은 AI가 반복적으로 추천하는 에버그린 How-to."
+    }
+  ]
 }
