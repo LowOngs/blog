@@ -1,4 +1,7 @@
-[
+{
+  "label": "device-reviews",
+  "trendLimit": 200,
+  "trend": [
   {
     "id": "dr-tr-001",
     "title": "Is This Year’s Flagship Phone Really Faster?",
@@ -508,3 +511,4 @@
     "goal": "measure environmental noise correctly"
   }
 ]
+}
