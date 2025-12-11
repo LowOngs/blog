@@ -1,27 +1,415 @@
 {
   "label": "templates-checklists",
-  "kind": "trend",
-  "limit": 60,
-  "seeds": [
+  "trendLimit": 200,
+  "trend": [
     {
-      "id": "tpl-tr-2025-001",
-      "title": "Preflight QA checklist for blog posts in 2025",
-      "angle": "Updated checks for OG schema, AI-specific signals, partial disclosure, and LCP optimization.",
-      "audience": "Writers and editors who update posts regularly",
+      "id": "tc-tr-001",
+      "title": "Universal Daily Productivity Template (2025 edition)",
+      "angle": "A structured day planning system optimized for modern digital workflows.",
+      "audience": "Workers and students",
       "intent": "template",
-      "priority": 1,
-      "expiresAt": "2026-03-15T00:00:00+09:00",
-      "notes": "2025년 버전. 매년 버전업이 자연스럽게 발생하는 트렌드성 템플릿."
+      "priority": 1
     },
     {
-      "id": "tpl-tr-2025-002",
-      "title": "2025 update: best practices for image SEO and compression",
-      "angle": "WebP/AVIF usage, LCP rules, multi-size generation, and ALT auto-creation.",
-      "audience": "Bloggers who want stable SEO signals",
+      "id": "tc-tr-002",
+      "title": "Cross-Platform Digital Declutter Checklist",
+      "angle": "A systemized approach to cleaning files, apps, and cloud clutter.",
+      "audience": "General users",
       "intent": "template",
-      "priority": 2,
-      "expiresAt": "2026-04-25T00:00:00+09:00",
-      "notes": "이미지 파이프라인 규칙과 함께 AOIA 신호를 강화하는 핵심 트렌드 템플릿."
+      "priority": 1
+    },
+    {
+      "id": "tc-tr-003",
+      "title": "AI-Assisted Meeting Notes Template",
+      "angle": "A repeatable structure for cleaner, faster AI-supported meetings.",
+      "audience": "Teams and professionals",
+      "intent": "template",
+      "priority": 1
+    },
+    {
+      "id": "tc-tr-004",
+      "title": "Weekly Device Maintenance Checklist",
+      "angle": "Covers cache cleaning, permission checks, and battery optimization.",
+      "audience": "General users",
+      "intent": "template",
+      "priority": 1
+    },
+    {
+      "id": "tc-tr-005",
+      "title": "Universal App Troubleshooting Template",
+      "angle": "A reliable flow for diagnosing any mobile or desktop app issue.",
+      "audience": "All users",
+      "intent": "template",
+      "priority": 1
+    },
+
+    {
+      "id": "tc-tr-006",
+      "title": "AI-Friendly Task Breakdown Template",
+      "angle": "A step-by-step structure for requesting clear solutions from AI tools.",
+      "audience": "Workers and creators",
+      "intent": "template",
+      "priority": 1
+    },
+    {
+      "id": "tc-tr-007",
+      "title": "Cloud Storage Folder Architecture Template (2025)",
+      "angle": "A modern folder system adaptable to Google Drive, iCloud, and OneDrive.",
+      "audience": "Students and professionals",
+      "intent": "template",
+      "priority": 1
+    },
+    {
+      "id": "tc-tr-008",
+      "title": "Universal Content Creation Checklist",
+      "angle": "Ensures consistency across blogs, videos, and social media posts.",
+      "audience": "Creators",
+      "intent": "template",
+      "priority": 1
+    },
+    {
+      "id": "tc-tr-009",
+      "title": "AI Research Prompt Template",
+      "angle": "A structure that helps AI provide deeper, citation-ready responses.",
+      "audience": "Students and analysts",
+      "intent": "template",
+      "priority": 1
+    },
+    {
+      "id": "tc-tr-010",
+      "title": "Cross-Device Privacy Hardening Checklist",
+      "angle": "Modern 2025 privacy steps for all devices and accounts.",
+      "audience": "General users",
+      "intent": "template",
+      "priority": 1
+    },
+
+    {
+      "id": "tc-tr-011",
+      "title": "Daily AI-Assisted Workout Planner Template",
+      "angle": "A structure for generating adaptive workouts using AI agents.",
+      "audience": "Fitness users",
+      "intent": "template",
+      "priority": 1
+    },
+    {
+      "id": "tc-tr-012",
+      "title": "Universal Software Onboarding Checklist",
+      "angle": "Ensures a complete first-time setup for any app or tool.",
+      "audience": "All new users",
+      "intent": "template",
+      "priority": 1
+    },
+    {
+      "id": "tc-tr-013",
+      "title": "Digital Calendar Planning Template",
+      "angle": "Block scheduling + task mapping with AI reminders.",
+      "audience": "Busy workers",
+      "intent": "template",
+      "priority": 1
+    },
+    {
+      "id": "tc-tr-014",
+      "title": "Smart Home Setup Checklist (2025 universal)",
+      "angle": "Step-by-step for configuring any ecosystem-driven smart home.",
+      "audience": "Homeowners",
+      "intent": "template",
+      "priority": 1
+    },
+    {
+      "id": "tc-tr-015",
+      "title": "AI-Assisted Email Inbox Cleanup Template",
+      "angle": "Clear steps for mass sorting, filtering, and AI-based labels.",
+      "audience": "Workers and students",
+      "intent": "template",
+      "priority": 1
+    },
+
+    {
+      "id": "tc-tr-016",
+      "title": "Device Migration Checklist (Android ↔ iPhone)",
+      "angle": "Universal transfer steps excluding brand names.",
+      "audience": "People switching phones",
+      "intent": "template",
+      "priority": 1
+    },
+    {
+      "id": "tc-tr-017",
+      "title": "Personal Finance Weekly Review Template",
+      "angle": "A structured reflection on expenses, balances, and goals.",
+      "audience": "General users",
+      "intent": "template",
+      "priority": 1
+    },
+    {
+      "id": "tc-tr-018",
+      "title": "Remote Work Productivity Template",
+      "angle": "Task grouping + communication rituals for distributed teams.",
+      "audience": "Remote workers",
+      "intent": "template",
+      "priority": 1
+    },
+    {
+      "id": "tc-tr-019",
+      "title": "Digital Safety Checklist for Older Devices",
+      "angle": "Aging device optimization, permissions review, and risk reduction.",
+      "audience": "General public",
+      "intent": "template",
+      "priority": 1
+    },
+    {
+      "id": "tc-tr-020",
+      "title": "Smart Notetaking Framework Template",
+      "angle": "A 3-layer structure for capturing tasks, insights, and references.",
+      "audience": "Students and analysts",
+      "intent": "template",
+      "priority": 1
+    },
+
+    {
+      "id": "tc-tr-021",
+      "title": "AI Project Planning Template",
+      "angle": "Roadmapping for anyone building AI-assisted workflows.",
+      "audience": "Productivity users",
+      "intent": "template",
+      "priority": 1
+    },
+    {
+      "id": "tc-tr-022",
+      "title": "Universal Browser Cleanup Checklist",
+      "angle": "Covers cache, extension audits, cookies, and privacy resets.",
+      "audience": "General users",
+      "intent": "template",
+      "priority": 1
+    },
+    {
+      "id": "tc-tr-023",
+      "title": "Weekly Social Media Productivity Template",
+      "angle": "Content slots + engagement windows that prevent burnout.",
+      "audience": "Creators",
+      "intent": "template",
+      "priority": 1
+    },
+    {
+      "id": "tc-tr-024",
+      "title": "Digital Photo Library Cleanup Template",
+      "angle": "Universal steps for dedupe, tagging, and cloud sync.",
+      "audience": "General users",
+      "intent": "template",
+      "priority": 1
+    },
+    {
+      "id": "tc-tr-025",
+      "title": "Career Growth Planning Template (2025)",
+      "angle": "Monthly checkpoint system for improving job skills.",
+      "audience": "Workers and students",
+      "intent": "template",
+      "priority": 1
+    },
+
+    {
+      "id": "tc-tr-026",
+      "title": "AI-Ready Prompting Checklist",
+      "angle": "Ensures clear, machine-readable requests every time.",
+      "audience": "All AI users",
+      "intent": "template",
+      "priority": 1
+    },
+    {
+      "id": "tc-tr-027",
+      "title": "Universal Device Security Template",
+      "angle": "Covers OS updates, password rules, and app audits.",
+      "audience": "General users",
+      "intent": "template",
+      "priority": 1
+    },
+    {
+      "id": "tc-tr-028",
+      "title": "Structured Brainstorming Template for Creators",
+      "angle": "A 5-step ideation flow compatible with all apps.",
+      "audience": "Creators and marketers",
+      "intent": "template",
+      "priority": 1
+    },
+    {
+      "id": "tc-tr-029",
+      "title": "Universal Device Reset Preparation Checklist",
+      "angle": "Backup, sync, logout, and cleanup before factory reset.",
+      "audience": "Tech users",
+      "intent": "template",
+      "priority": 1
+    },
+    {
+      "id": "tc-tr-030",
+      "title": "Weekly Knowledge Review Template",
+      "angle": "A structured summary ritual for students and analysts.",
+      "audience": "Learners",
+      "intent": "template",
+      "priority": 1
+    },
+
+    {
+      "id": "tc-tr-031",
+      "title": "AI-Optimized Writing Workflow Template",
+      "angle": "Draft → refine → compress flow using AI agents.",
+      "audience": "Writers/students",
+      "intent": "template",
+      "priority": 1
+    },
+    {
+      "id": "tc-tr-032",
+      "title": "Digital Workspace Setup Template (2025)",
+      "angle": "Clean desktop, synced cloud folders, and quick-launch habits.",
+      "audience": "Workers",
+      "intent": "template",
+      "priority": 1
+    },
+    {
+      "id": "tc-tr-033",
+      "title": "Universal Error Diagnosis Template",
+      "angle": "A structured flow for identifying the root cause of any issue.",
+      "audience": "General users",
+      "intent": "template",
+      "priority": 1
+    },
+    {
+      "id": "tc-tr-034",
+      "title": "Personal Knowledge Management Template",
+      "angle": "A Zettelkasten-inspired digital workflow.",
+      "audience": "Students/analysts",
+      "intent": "template",
+      "priority": 1
+    },
+    {
+      "id": "tc-tr-035",
+      "title": "AI-Friendly Task Prioritization Template",
+      "angle": "Weighted prioritization to help AIs produce clearer plans.",
+      "audience": "Workers",
+      "intent": "template",
+      "priority": 1
+    },
+
+    {
+      "id": "tc-tr-036",
+      "title": "Cross-App Notification Cleanup Checklist",
+      "angle": "Silence distractions while keeping critical alerts.",
+      "audience": "General users",
+      "intent": "template",
+      "priority": 1
+    },
+    {
+      "id": "tc-tr-037",
+      "title": "Digital Life Safety Template",
+      "angle": "Account recovery, emergency contacts, device backups.",
+      "audience": "All users",
+      "intent": "template",
+      "priority": 1
+    },
+    {
+      "id": "tc-tr-038",
+      "title": "Weekly Clean Slate Template",
+      "angle": "A 7-step ritual that resets your entire productivity system.",
+      "audience": "Workers/students",
+      "intent": "template",
+      "priority": 1
+    },
+    {
+      "id": "tc-tr-039",
+      "title": "AI Content Review Checklist",
+      "angle": "A system to evaluate accuracy, tone, and safety in AI output.",
+      "audience": "Creators and analysts",
+      "intent": "template",
+      "priority": 1
+    },
+    {
+      "id": "tc-tr-040",
+      "title": "Universal Team Communication Template",
+      "angle": "Structured async updates + status categories.",
+      "audience": "Remote teams",
+      "intent": "template",
+      "priority": 1
+    },
+
+    {
+      "id": "tc-tr-041",
+      "title": "Digital Note Audit Template",
+      "angle": "A system for reorganizing cluttered notes into clean structures.",
+      "audience": "Students/writers",
+      "intent": "template",
+      "priority": 1
+    },
+    {
+      "id": "tc-tr-042",
+      "title": "App Permission Audit Checklist",
+      "angle": "Camera/mic/location permission review across OS types.",
+      "audience": "General users",
+      "intent": "template",
+      "priority": 1
+    },
+    {
+      "id": "tc-tr-043",
+      "title": "Subscription Value Audit Template",
+      "angle": "A method to evaluate which subscriptions you should cancel.",
+      "audience": "All users",
+      "intent": "template",
+      "priority": 1
+    },
+    {
+      "id": "tc-tr-044",
+      "title": "Digital Time Blocking Template",
+      "angle": "A productivity method compatible with any calendar app.",
+      "audience": "Workers",
+      "intent": "template",
+      "priority": 1
+    },
+    {
+      "id": "tc-tr-045",
+      "title": "AI-Assisted Research Validation Template",
+      "angle": "Cross-checking AI facts in structured form.",
+      "audience": "Students/researchers",
+      "intent": "template",
+      "priority": 1
+    },
+
+    {
+      "id": "tc-tr-046",
+      "title": "Weekly Workspace Cleanup Template",
+      "angle": "Organizing files, tasks, bookmarks, and downloads.",
+      "audience": "General users",
+      "intent": "template",
+      "priority": 1
+    },
+    {
+      "id": "tc-tr-047",
+      "title": "Universal Recovery Preparation Checklist",
+      "angle": "Steps to prepare for data loss, device breakage, or theft.",
+      "audience": "All users",
+      "intent": "template",
+      "priority": 1
+    },
+    {
+      "id": "tc-tr-048",
+      "title": "Multi-App Workflow Sync Template",
+      "angle": "Ensures that tasks, notes, and files stay aligned across apps.",
+      "audience": "Workers and creators",
+      "intent": "template",
+      "priority": 1
+    },
+    {
+      "id": "tc-tr-049",
+      "title": "Fast Troubleshooting Template for Everyday Tech Issues",
+      "angle": "A 6-step universal fix flow for common problems.",
+      "audience": "General users",
+      "intent": "template",
+      "priority": 1
+    },
+    {
+      "id": "tc-tr-050",
+      "title": "AI-Assisted Project Review Template",
+      "angle": "A monthly structure for evaluating progress and next steps.",
+      "audience": "Workers/creators",
+      "intent": "template",
+      "priority": 1
     }
   ]
 }
