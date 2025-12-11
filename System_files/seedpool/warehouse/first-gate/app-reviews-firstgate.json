@@ -1,4 +1,8 @@
-[
+{
+  "label": "app-reviews-firstgate",
+  "firstGateLimit": 10,
+  "firstGate": 
+  [  
   {
     "id": "ar-fg-001",
     "title": "The One Feature That Actually Matters in a To-Do App",
@@ -100,3 +104,4 @@
     "goal": "ensure long-term safety of sensitive data"
   }
 ]
+}
