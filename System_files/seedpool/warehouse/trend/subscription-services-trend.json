@@ -2,5 +2,26 @@
   "label": "subscription-services",
   "kind": "trend",
   "limit": 60,
-  "seeds": []
+  "seeds": [
+    {
+      "id": "sub-tr-2025-001",
+      "title": "Cloud storage subscriptions: 2025 price and storage comparison",
+      "angle": "Compare major services on capacity, price-per-GB, region differences, and bundle offers.",
+      "audience": "Users who store large photo and document libraries",
+      "intent": "review",
+      "priority": 1,
+      "expiresAt": "2026-03-15T00:00:00+09:00",
+      "notes": "옹스 블로그 트렌드 시드에서 사실상 ‘핵심 주제’."
+    },
+    {
+      "id": "sub-tr-2025-002",
+      "title": "Are annual subscription plans still worth it in 2025?",
+      "angle": "Compare monthly vs annual pricing, refund rules, and cancellation penalties.",
+      "audience": "Cost-conscious users evaluating renewal plans",
+      "intent": "review",
+      "priority": 2,
+      "expiresAt": "2026-04-20T00:00:00+09:00",
+      "notes": "연간 구독은 매년 질문이 반복됨. 트렌드 라인업 유지 필요."
+    }
+  ]
 }
