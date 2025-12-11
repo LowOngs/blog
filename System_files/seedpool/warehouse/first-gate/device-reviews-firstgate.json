@@ -1,4 +1,7 @@
-[
+{
+  "label": "device-reviews",
+  "firstGateLimit": 30,
+  "firstGate": [
   {
     "id": "dr-fg-001",
     "title": "The One Hardware Test Every New Device Must Pass",
