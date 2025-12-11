@@ -1,12 +1,12 @@
 // System_files/scripts/build/seed-scheduler.cjs
 // 시드풀 → 오늘 발행할 큐(dist/queue/today.json) 생성 + fallback 라벨 지원
+// SCHEDULE_MODE(test/live) 는 "지금 상태가 테스트인지, 실운영인지"를 알려주는 플래그로만 사용.
+// (test라도 today.json은 정상 생성되지만, 로그에 [TEST] 표시만 붙음)
 
 const fs = require('fs');
 const path = require('path');
 
-// ────────────────────────────────────
-// 스케줄 모드 로딩 (test / live)
-// ────────────────────────────────────
+// 모드 스위치 유틸
 const { getScheduleMode } = require('./lib/mode.cjs');
 const SCHEDULE_MODE = getScheduleMode(); // 'test' 또는 'live'
 
@@ -41,7 +41,6 @@ function getTodayInfo() {
 
 // ────────────────────────────────────
 // 오늘 요일에 따른 기본 발행 라벨/모드 계획
-//   ※ 이미 옹스님이 잡아둔 패턴에 맞춤
 //   - 월(1): how-to + app
 //   - 화(2): how-to
 //   - 수(3): how-to + app + templates
@@ -56,40 +55,40 @@ function planForWeekday(weekday) {
     case 1: // Mon
       return [
         { label: 'how-to-playbooks', mode: 'trend' },
-        { label: 'app-reviews',      mode: 'trend' }
+        { label: 'app-reviews',      mode: 'trend' },
       ];
     case 2: // Tue
       return [
-        { label: 'how-to-playbooks', mode: 'trend' }
+        { label: 'how-to-playbooks', mode: 'trend' },
       ];
     case 3: // Wed
       return [
         { label: 'how-to-playbooks',     mode: 'trend' },
         { label: 'app-reviews',          mode: 'trend' },
-        { label: 'templates-checklists', mode: 'trend' }
+        { label: 'templates-checklists', mode: 'trend' },
       ];
     case 4: // Thu
       return [
-        { label: 'how-to-playbooks', mode: 'trend' }
+        { label: 'how-to-playbooks', mode: 'trend' },
       ];
     case 5: // Fri
       return [
         { label: 'how-to-playbooks', mode: 'trend' },
-        { label: 'app-reviews',      mode: 'trend' }
+        { label: 'app-reviews',      mode: 'trend' },
       ];
     case 6: // Sat
       return [
-        { label: 'smart-savings', mode: 'trend' }
+        { label: 'smart-savings', mode: 'trend' },
       ];
     case 7: // Sun
       return [
-        { label: 'smart-savings', mode: 'trend' }
+        { label: 'smart-savings', mode: 'trend' },
       ];
     default:
       // 이론상 올 일은 없지만, 방어용
       return [
         { label: 'how-to-playbooks', mode: 'trend' },
-        { label: 'app-reviews',      mode: 'trend' }
+        { label: 'app-reviews',      mode: 'trend' },
       ];
   }
 }
@@ -102,7 +101,7 @@ function planForWeekday(weekday) {
  */
 const FALLBACK_LABELS = [
   'how-to-playbooks',
-  'app-reviews'
+  'app-reviews',
 ];
 // ────────────────────────────────────
 
@@ -121,7 +120,7 @@ function loadSeedConfig(label) {
       trendLimit: 0,
       evergreenLimit: 0,
       trend: [],
-      evergreen: []
+      evergreen: [],
     };
     SEED_CACHE.set(label, empty);
     return empty;
@@ -141,7 +140,7 @@ function loadSeedConfig(label) {
     trendLimit:      json.trendLimit ?? 0,
     evergreenLimit:  json.evergreenLimit ?? 0,
     trend:           Array.isArray(json.trend) ? json.trend : [],
-    evergreen:       Array.isArray(json.evergreen) ? json.evergreen : []
+    evergreen:       Array.isArray(json.evergreen) ? json.evergreen : [],
   };
 
   SEED_CACHE.set(label, cfg);
@@ -162,16 +161,16 @@ function getCandidates(cfg, mode, usedIds, todayStr) {
     return true;
   };
 
-  let trend = cfg.trend.filter(filterBase);
-  let evergreen = cfg.evergreen.filter(filterBase);
+  const trend     = cfg.trend.filter(filterBase);
+  const evergreen = cfg.evergreen.filter(filterBase);
 
   if (mode === 'trend') {
-    if (trend.length) return { list: trend, effectiveMode: 'trend' };
+    if (trend.length)     return { list: trend,     effectiveMode: 'trend' };
     if (evergreen.length) return { list: evergreen, effectiveMode: 'evergreen' };
     return { list: [], effectiveMode: 'trend' };
   } else {
     if (evergreen.length) return { list: evergreen, effectiveMode: 'evergreen' };
-    if (trend.length) return { list: trend, effectiveMode: 'trend' };
+    if (trend.length)     return { list: trend,     effectiveMode: 'trend' };
     return { list: [], effectiveMode: 'evergreen' };
   }
 }
@@ -216,7 +215,7 @@ function pickSeedForLabel(label, preferredMode, usedIds, todayStr) {
   console.log('[seed-scheduler] ROOT   =', ROOT);
   console.log('[seed-scheduler] SEED   =', SEEDDIR);
   console.log('[seed-scheduler] OUTDIR =', OUTDIR);
-  console.log('[seed-scheduler] SCHEDULE_MODE =', SCHEDULE_MODE);
+  console.log('[seed-scheduler] MODE   =', SCHEDULE_MODE);
   console.log(
     '[seed-scheduler] DATE   =',
     dateStr,
@@ -234,12 +233,12 @@ function pickSeedForLabel(label, preferredMode, usedIds, todayStr) {
   const items = [];
 
   for (const slot of plan) {
-    const primaryLabel = slot.label;
+    const primaryLabel  = slot.label;
     const preferredMode = slot.mode || 'trend';
 
     // 1) 기본 라벨에서 시드 선택 시도
     let picked = pickSeedForLabel(primaryLabel, preferredMode, usedIds, dateStr);
-    let finalLabel = primaryLabel;
+    let finalLabel   = primaryLabel;
     let fallbackFrom = null;
 
     // 2) 실패하면 fallback 라벨 순서대로 대체 시도
@@ -248,8 +247,8 @@ function pickSeedForLabel(label, preferredMode, usedIds, todayStr) {
         if (fb === primaryLabel) continue;
         const alt = pickSeedForLabel(fb, preferredMode, usedIds, dateStr);
         if (alt) {
-          picked = alt;
-          finalLabel = fb;
+          picked       = alt;
+          finalLabel   = fb;
           fallbackFrom = primaryLabel;
           break;
         }
@@ -285,7 +284,7 @@ function pickSeedForLabel(label, preferredMode, usedIds, todayStr) {
       audience: seed.audience || '',
       intent: seed.intent || '',
       priority: typeof seed.priority === 'number' ? seed.priority : 0,
-      notes: seed.notes || ''
+      notes: seed.notes || '',
     };
 
     if (fallbackFrom) {
@@ -298,8 +297,8 @@ function pickSeedForLabel(label, preferredMode, usedIds, todayStr) {
   const outFile = path.join(OUTDIR, 'today.json');
   const outJson = {
     date: dateStr,
-    mode: SCHEDULE_MODE,   // ← 여기 추가: test / live 구분용
-    items
+    mode: SCHEDULE_MODE, // 참고용으로 기록
+    items,
   };
 
   fs.writeFileSync(outFile, JSON.stringify(outJson, null, 2), 'utf8');
