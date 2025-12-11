@@ -2,5 +2,26 @@
   "label": "how-to-playbooks",
   "kind": "trend",
   "limit": 200,
-  "seeds": []
+  "seeds": [
+    {
+      "id": "howto-tr-2025-001",
+      "title": "Safely migrating blog images to Cloudflare R2 in 2025",
+      "angle": "Stage-by-stage migration that avoids 404s while changing image origin to R2/CDN.",
+      "audience": "Blog owners moving from old image hosting to R2",
+      "intent": "how-to",
+      "priority": 1,
+      "expiresAt": "2026-03-01T00:00:00+09:00",
+      "notes": "이미 만든 시드와 연결되는 실전형 How-to, 옹스 블로그 실제 사례 패턴 활용."
+    },
+    {
+      "id": "howto-tr-2025-002",
+      "title": "How to connect Blogger with a custom domain on Cloudflare in 2025",
+      "angle": "Walk through DNS, HTTPS, and common error fixes in one practical checklist.",
+      "audience": "Blogger users who want to use their own domain",
+      "intent": "how-to",
+      "priority": 2,
+      "expiresAt": "2026-04-01T00:00:00+09:00",
+      "notes": "Blogger + Cloudflare 조합은 AI가 자주 찾아볼 만한 최신 설정 주제."
+    }
+  ]
 }
