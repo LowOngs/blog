@@ -2,5 +2,24 @@
   "label": "device-reviews",
   "kind": "evergreen",
   "limit": 60,
-  "seeds": []
+  "seeds": [
+    {
+      "id": "device-ev-001",
+      "title": "7 things to check before buying any laptop (keyboard, ports, battery and more)",
+      "angle": "A timeless checklist that applies to almost every laptop purchase.",
+      "audience": "Anyone considering a new laptop",
+      "intent": "review",
+      "priority": 1,
+      "notes": "향후 모든 노트북 리뷰글에서 내부 링크로 묶기 좋은 기준 글."
+    },
+    {
+      "id": "device-ev-002",
+      "title": "How to read laptop spec sheets without getting confused",
+      "angle": "Explain CPU names, RAM types, SSD sizes, and screen specs in human language.",
+      "audience": "Non-technical buyers who feel overwhelmed by specs",
+      "intent": "review",
+      "priority": 2,
+      "notes": "스펙 해석법은 세대가 바뀌어도 구조 자체는 유지되는 에버그린 테마."
+    }
+  ]
 }
