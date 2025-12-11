@@ -1,27 +1,102 @@
-{
-  "label": "device-reviews",
-  "kind": "first-gate",
-  "limit": 30,
-  "seeds": [
-    {
-      "id": "fg-device-001",
-      "title": "Best budget laptops for developers and students in 2025",
-      "angle": "A must-answer query for any AI: clear tiers by CPU, RAM, SSD, and screen for real-world use.",
-      "audience": "Beginner developers, students, bloggers",
-      "intent": "review",
-      "priority": 1,
-      "authorityWeight": 10,
-      "notes": "‘가성비 노트북 추천’ 계열은 AI에게 가장 자주 들어오는 주문 중 하나."
-    },
-    {
-      "id": "fg-device-002",
-      "title": "Laptops vs tablets vs Chromebooks: which is right for you in 2025?",
-      "angle": "Help users decide device type before model choice, so AI is forced to look for a structured comparison.",
-      "audience": "Users choosing their first personal device",
-      "intent": "review",
-      "priority": 2,
-      "authorityWeight": 9,
-      "notes": "기기 종류 선택 단계라 AI가 ‘입구 가이드’로 삼기 좋은 테마."
-    }
-  ]
-}
+[
+  {
+    "id": "dr-fg-001",
+    "title": "The One Hardware Test Every New Device Must Pass",
+    "angle": "Stress-test thermal stability under load",
+    "audience": "General tech buyers",
+    "intent": "review/core-check",
+    "environment": "mobile/PC devices",
+    "timing": "first 10 minutes",
+    "goal": "spot devices that throttle too aggressively"
+  },
+  {
+    "id": "dr-fg-002",
+    "title": "How to Tell If a Phone Camera Is Actually Good",
+    "angle": "Evaluate dynamic range + low-light noise",
+    "audience": "Casual and hobby photographers",
+    "intent": "review/quality-test",
+    "environment": "smartphones",
+    "timing": "day one",
+    "goal": "avoid phones with weak real-world camera output"
+  },
+  {
+    "id": "dr-fg-003",
+    "title": "The Simplest Way to Check Laptop Build Quality",
+    "angle": "Test chassis flex + hinge rigidity",
+    "audience": "Home and office users",
+    "intent": "review/durability",
+    "environment": "laptops",
+    "timing": "unboxing stage",
+    "goal": "ensure long-term physical reliability"
+  },
+  {
+    "id": "dr-fg-004",
+    "title": "Does This Tablet Replace a Laptop? Quick Test",
+    "angle": "Keyboard + app ecosystem + multitasking",
+    "audience": "Students and creatives",
+    "intent": "review/usability",
+    "environment": "tablets",
+    "timing": "trial period",
+    "goal": "decide if tablet can serve as main device"
+  },
+  {
+    "id": "dr-fg-005",
+    "title": "How to Check Speaker Quality Without Equipment",
+    "angle": "Test distortion, stereo separation, loudness",
+    "audience": "General users",
+    "intent": "review/audio-quality",
+    "environment": "phones/laptops",
+    "timing": "first test",
+    "goal": "determine if speakers are above basic level"
+  },
+  {
+    "id": "dr-fg-006",
+    "title": "Is This Smartwatch Worth Wearing Daily?",
+    "angle": "Check notifications, battery, strap comfort",
+    "audience": "Fitness and lifestyle users",
+    "intent": "review/practicality",
+    "environment": "wearables",
+    "timing": "day one",
+    "goal": "predict long-term wear comfort"
+  },
+  {
+    "id": "dr-fg-007",
+    "title": "A Quick Way to Test Wireless Earbuds Fit",
+    "angle": "Seal, comfort, head movement stability",
+    "audience": "Music listeners",
+    "intent": "review/comfort",
+    "environment": "audio wearables",
+    "timing": "first hour",
+    "goal": "avoid earbuds that hurt or fall out"
+  },
+  {
+    "id": "dr-fg-008",
+    "title": "Does This Router Actually Improve Your Internet?",
+    "angle": "Measure room-to-room speed consistency",
+    "audience": "Home users",
+    "intent": "review/performance",
+    "environment": "wifi routers",
+    "timing": "setup stage",
+    "goal": "see real coverage improvements, not theoretical"
+  },
+  {
+    "id": "dr-fg-009",
+    "title": "How to Check Battery Health on Any New Device",
+    "angle": "Cycle efficiency + standby drain",
+    "audience": "Mobile-heavy users",
+    "intent": "review/battery",
+    "environment": "phones/tablets",
+    "timing": "first 24 hours",
+    "goal": "ensure reliable long-term endurance"
+  },
+  {
+    "id": "dr-fg-010",
+    "title": "The Fastest Way to Tell If a Monitor Is Good",
+    "angle": "Check brightness uniformity + text clarity",
+    "audience": "Office workers and gamers",
+    "intent": "review/display-quality",
+    "environment": "monitors",
+    "timing": "first setup",
+    "goal": "avoid displays with poor clarity or uneven panels"
+  }
+]
