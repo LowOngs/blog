@@ -12,6 +12,7 @@
  * 사용 전 준비:
  * - 환경변수 OPENAI_API_KEY 필수
  * - (선택) OPENAI_MODEL: 기본값 'gpt-4.1-mini'
+ * - (선택) SCHEDULE_MODE: 'live' 일 때만 실제 생성·저장, 그 외는 DRY-RUN
  */
 
 const fs = require('fs');
@@ -27,6 +28,10 @@ const POSTS_DIR = path.join(ROOT, 'content', 'posts');
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-4.1-mini';
+
+// 스케줄 모드: live 일 때만 실제 본문 생성
+const SCHEDULE_MODE = process.env.SCHEDULE_MODE || 'test';
+const IS_LIVE = SCHEDULE_MODE === 'live';
 
 // 기본 시스템 프롬프트
 const BASE_SYSTEM_PROMPT = [
@@ -147,8 +152,9 @@ async function generateBodyFromPrompt({ slug, label, bodyPrompt }) {
 async function main() {
   console.log('────────────────────────────────────────────');
   console.log('[generate-body] 시작');
-  console.log(`[generate-body] ROOT      = ${ROOT}`);
-  console.log(`[generate-body] POSTS_DIR = ${POSTS_DIR}`);
+  console.log(`[generate-body] ROOT        = ${ROOT}`);
+  console.log(`[generate-body] POSTS_DIR   = ${POSTS_DIR}`);
+  console.log(`[generate-body] SCHEDULE_MODE = ${SCHEDULE_MODE} (${IS_LIVE ? 'LIVE' : 'DRY-RUN'})`);
 
   if (!OPENAI_API_KEY) {
     console.error(
@@ -168,6 +174,7 @@ async function main() {
   let skippedHasBody = 0;
   let skippedNoPrompt = 0;
   let failed = 0;
+  let dryRunTargets = 0;
 
   for (const filePath of files) {
     total += 1;
@@ -185,7 +192,15 @@ async function main() {
     }
 
     const slug = data.slug || path.basename(name, '.json');
-    const label = data.label || 'unknown';
+
+    // 라벨: labels[0] 우선, 없으면 label, 없으면 unknown
+    let label = 'unknown';
+    if (Array.isArray(data.labels) && data.labels.length > 0) {
+      label = String(data.labels[0]);
+    } else if (data.label) {
+      label = String(data.label);
+    }
+
     const hasExistingBody = hasBody(data);
     const bodyPrompt = data.bodyPrompt;
 
@@ -205,9 +220,16 @@ async function main() {
       continue;
     }
 
-    console.log(
-      '────────────────────────────────────────────'
-    );
+    // DRY-RUN 모드: 대상만 표시하고 실제 생성은 하지 않음
+    if (!IS_LIVE) {
+      dryRunTargets += 1;
+      console.log(
+        `[generate-body] [DRY-RUN] slug=${slug}, label=${label} — 본문 생성 대상이지만 SCHEDULE_MODE != "live" 이므로 생성하지 않습니다.`
+      );
+      continue;
+    }
+
+    console.log('────────────────────────────────────────────');
     console.log(
       `[generate-body] [TARGET] slug=${slug}, label=${label} — 본문 생성 시작`
     );
@@ -236,11 +258,12 @@ async function main() {
 
   console.log('────────────────────────────────────────────');
   console.log(`[generate-body] 처리 요약:`);
-  console.log(`  총 파일 수     = ${total}`);
-  console.log(`  생성 완료      = ${generated}`);
-  console.log(`  SKIP(기존 body)= ${skippedHasBody}`);
-  console.log(`  SKIP(bodyPrompt 없음) = ${skippedNoPrompt}`);
-  console.log(`  실패           = ${failed}`);
+  console.log(`  총 파일 수                 = ${total}`);
+  console.log(`  생성 완료(LIVE)           = ${generated}`);
+  console.log(`  DRY-RUN 대상 수(TEST 모드) = ${dryRunTargets}`);
+  console.log(`  SKIP(기존 body)           = ${skippedHasBody}`);
+  console.log(`  SKIP(bodyPrompt 없음)     = ${skippedNoPrompt}`);
+  console.log(`  실패                      = ${failed}`);
   console.log('────────────────────────────────────────────');
   console.log('[generate-body] 완료');
 }
