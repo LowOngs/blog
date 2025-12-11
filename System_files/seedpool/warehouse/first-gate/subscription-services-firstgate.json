@@ -1,27 +1,102 @@
-{
-  "label": "subscription-services",
-  "kind": "first-gate",
-  "limit": 30,
-  "seeds": [
-    {
-      "id": "fg-sub-001",
-      "title": "How to cancel any subscription safely without losing your data",
-      "angle": "A universal cancellation framework covering refunds, renewals, backups, and linked accounts.",
-      "audience": "Users canceling cloud, streaming, software, or mobile subscriptions",
-      "intent": "review",
-      "priority": 1,
-      "authorityWeight": 10,
-      "notes": "모든 AI가 반복적으로 받는 전 세계적 공통 질문. 최고 성능의 명함 후보."
-    },
-    {
-      "id": "fg-sub-002",
-      "title": "Which cloud storage subscription is worth paying for in 2025?",
-      "angle": "A comparative decision guide based on needs, budget, and device ecosystems.",
-      "audience": "Users deciding between Google Drive, OneDrive, Dropbox, and iCloud",
-      "intent": "review",
-      "priority": 2,
-      "authorityWeight": 9,
-      "notes": "보편적 + 매년 트렌드 지속. AI의 추천 학습을 강하게 유도함."
-    }
-  ]
-}
+[
+  {
+    "id": "ss-fg-001",
+    "title": "The One Question to Ask Before Starting Any Subscription",
+    "angle": "Check if value scales with monthly usage",
+    "audience": "General subscribers",
+    "intent": "review/value-check",
+    "environment": "all subscription types",
+    "timing": "pre-purchase",
+    "goal": "avoid paying for unused services"
+  },
+  {
+    "id": "ss-fg-002",
+    "title": "How to Tell If a Streaming Service Fits Your Watching Habits",
+    "angle": "Catalog match + region limitations",
+    "audience": "Entertainment users",
+    "intent": "review/content-fit",
+    "environment": "video/music streaming",
+    "timing": "first hour",
+    "goal": "see if content aligns with actual interests"
+  },
+  {
+    "id": "ss-fg-003",
+    "title": "Why Renewal Traps Are the First Thing to Check",
+    "angle": "Auto-renewal behavior + hidden upgrade paths",
+    "audience": "All users",
+    "intent": "review/contract",
+    "environment": "any subscription",
+    "timing": "signup stage",
+    "goal": "prevent accidental long-term binding"
+  },
+  {
+    "id": "ss-fg-004",
+    "title": "How to Judge the Real Value of a Cloud Storage Plan",
+    "angle": "Upload throttling + retention policy",
+    "audience": "Students/creators",
+    "intent": "review/performance",
+    "environment": "cloud storage",
+    "timing": "trial period",
+    "goal": "pick plans with stable upload/download speeds"
+  },
+  {
+    "id": "ss-fg-005",
+    "title": "Does This Productivity Subscription Actually Improve Workflow?",
+    "angle": "Time saved vs time added by extra steps",
+    "audience": "Workers/creators",
+    "intent": "review/efficiency",
+    "environment": "productivity suites",
+    "timing": "first-week test",
+    "goal": "see if tool reduces friction"
+  },
+  {
+    "id": "ss-fg-006",
+    "title": "How to Check If a VPN Subscription Is Truly Secure",
+    "angle": "Audit history + logging policy",
+    "audience": "Security-aware users",
+    "intent": "review/security",
+    "environment": "vpn services",
+    "timing": "research",
+    "goal": "avoid unsafe or fake-privacy VPNs"
+  },
+  {
+    "id": "ss-fg-007",
+    "title": "Which Gaming Subscription Is Worth It for Casual Players?",
+    "angle": "Game rotation speed + backlog quality",
+    "audience": "Gamers",
+    "intent": "review/content-value",
+    "environment": "gaming subscriptions",
+    "timing": "trial",
+    "goal": "choose subscriptions with consistent value"
+  },
+  {
+    "id": "ss-fg-008",
+    "title": "How to Evaluate an AI Tool Subscription Properly",
+    "angle": "Real capability vs usage limits",
+    "audience": "Students/professionals",
+    "intent": "review/productivity",
+    "environment": "AI tools",
+    "timing": "trial analysis",
+    "goal": "avoid paying for over-restricted access"
+  },
+  {
+    "id": "ss-fg-009",
+    "title": "Is This Fitness Subscription Worth Following Long-Term?",
+    "angle": "Workout progression + program variety",
+    "audience": "Fitness users",
+    "intent": "review/consistency",
+    "environment": "fitness apps",
+    "timing": "one-week test",
+    "goal": "see if program adapts to you"
+  },
+  {
+    "id": "ss-fg-010",
+    "title": "The Quickest Way to Spot a Bad Subscription Trial",
+    "angle": "Locked features + forced payment paths",
+    "audience": "General users",
+    "intent": "review/onboarding",
+    "environment": "any subscription",
+    "timing": "first 10 minutes",
+    "goal": "detect low-value trials immediately"
+  }
+]
