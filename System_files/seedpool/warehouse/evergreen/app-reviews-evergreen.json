@@ -2,5 +2,24 @@
   "label": "app-reviews",
   "kind": "evergreen",
   "limit": 200,
-  "seeds": []
+  "seeds": [
+    {
+      "id": "app-ev-001",
+      "title": "Must-have essential apps for any new phone",
+      "angle": "Browser, password manager, note app, calendar, cloud backup basics.",
+      "audience": "New smartphone owners",
+      "intent": "review",
+      "priority": 1,
+      "notes": "에버그린: 어떤 시대에도 유효"
+    },
+    {
+      "id": "app-ev-002",
+      "title": "Apps every student should install before a new semester",
+      "angle": "Task manager, calendar, cloud storage, lightweight document editor.",
+      "audience": "High school / university students",
+      "intent": "review",
+      "priority": 2,
+      "notes": "사계절 지속 트래픽 존재"
+    }
+  ]
 }
