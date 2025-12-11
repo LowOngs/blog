@@ -1,25 +1,609 @@
-{
-  "label": "templates-checklists",
-  "kind": "evergreen",
-  "limit": 60,
-  "seeds": [
-    {
-      "id": "tpl-ev-001",
-      "title": "Basic planning checklist before writing any blog post",
-      "angle": "Clarify search intent, target reader, core message, and internal link anchors.",
-      "audience": "Writers who need a predictable process",
-      "intent": "template",
-      "priority": 1,
-      "notes": "모든 라벨에 공통 활용 가능. 전체 SEO·AIO 구조의 뼈대."
-    },
-    {
-      "id": "tpl-ev-002",
-      "title": "How to structure a clean, readable article (2–5 sentence rule)",
-      "angle": "A simple method for readability: chunking, paragraph length, anchors, and transitions.",
-      "audience": "Writers who struggle with clarity",
-      "intent": "template",
-      "priority": 2,
-      "notes": "옹스 블로그 기준서의 핵심 원칙과 일치. AI가 인용하기 가장 안전한 글 구조."
-    }
-  ]
-}
+[
+  {
+    "id": "tc-ever-001",
+    "title": "Daily Planning Checklist for High-Productivity Workflows",
+    "angle": "A reusable daily planning framework that balances focus work and admin tasks.",
+    "audience": "Knowledge workers and creators",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Classic evergreen; works with any calendar or todo app."
+  },
+  {
+    "id": "tc-ever-002",
+    "title": "Weekly Review Template for Personal and Work Projects",
+    "angle": "A structured weekly ritual that reduces stress and prevents task overflow.",
+    "audience": "People juggling multiple projects",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "GTD-inspired; designed to be tool-agnostic."
+  },
+  {
+    "id": "tc-ever-003",
+    "title": "Monthly Goal-Setting Checklist for Focused Progress",
+    "angle": "A simple process to translate vague wishes into trackable monthly targets.",
+    "audience": "Workers and students",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Separates outcome goals from daily input habits."
+  },
+  {
+    "id": "tc-ever-004",
+    "title": "Annual Life Review Template for Big-Picture Planning",
+    "angle": "A once-a-year reflection that turns scattered memories into decisions.",
+    "audience": "Anyone planning the next year with intention",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Covers work, health, money, relationships, and learning."
+  },
+  {
+    "id": "tc-ever-005",
+    "title": "Morning Routine Checklist for a Calm Start",
+    "angle": "A short, realistic set of actions that stabilizes the first hour of the day.",
+    "audience": "People who feel rushed every morning",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Minimalist version; can be extended for power users."
+  },
+  {
+    "id": "tc-ever-006",
+    "title": "Evening Shutdown Checklist for Better Sleep and Focus",
+    "angle": "A repeatable process to clear the brain and park unfinished tasks safely.",
+    "audience": "Knowledge workers, students, remote staff",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Pairs well with daily planning; reduces mental looping at night."
+  },
+  {
+    "id": "tc-ever-007",
+    "title": "Universal Project Kickoff Template",
+    "angle": "A simple set of questions to define scope, risks, and first steps.",
+    "audience": "Anyone starting a new project",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Designed to work for solo and team projects."
+  },
+  {
+    "id": "tc-ever-008",
+    "title": "Task Breakdown Template for Overwhelming Goals",
+    "angle": "A step-by-step process to turn a vague big task into small clear actions.",
+    "audience": "People stuck on big, fuzzy tasks",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Optimized for AI-assisted decomposition as well."
+  },
+  {
+    "id": "tc-ever-009",
+    "title": "Context-Based To-Do List Template",
+    "angle": "Groups tasks by location, energy, and tools instead of by project only.",
+    "audience": "Busy people with fragmented days",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Evergreen GTD-style context sorting."
+  },
+  {
+    "id": "tc-ever-010",
+    "title": "Single-Page Weekly Planner Template",
+    "angle": "A compact layout that fits priorities, schedule blocks, and notes on one page.",
+    "audience": "People who dislike complex planners",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Printable or digital; intentionally low-friction."
+  },
+
+  {
+    "id": "tc-ever-011",
+    "title": "Deep Work Session Checklist",
+    "angle": "Pre- and post-session steps to protect long stretches of focus.",
+    "audience": "Writers, developers, analysts",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Includes environment, notifications, and recovery blocks."
+  },
+  {
+    "id": "tc-ever-012",
+    "title": "Universal Meeting Preparation Template",
+    "angle": "A short checklist to ensure every meeting has a purpose and desired outcome.",
+    "audience": "Remote workers and managers",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Works for 1:1s, team syncs, and external calls."
+  },
+  {
+    "id": "tc-ever-013",
+    "title": "Post-Meeting Action Review Template",
+    "angle": "A quick format for confirming decisions, owners, and deadlines.",
+    "audience": "Teams and project owners",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Designed to be used with or without AI summarization."
+  },
+  {
+    "id": "tc-ever-014",
+    "title": "Personal Knowledge Vault Structure Template",
+    "angle": "A simple layout for notes, ideas, and references that can grow for years.",
+    "audience": "Students, researchers, creators",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Evergreen; independent of any specific note app."
+  },
+  {
+    "id": "tc-ever-015",
+    "title": "Idea Capture and Sorting Checklist",
+    "angle": "A system for catching ideas quickly and processing them later without loss.",
+    "audience": "Creatives and builders",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Pairs well with inbox-style note systems."
+  },
+  {
+    "id": "tc-ever-016",
+    "title": "Universal Digital File Naming Rules Template",
+    "angle": "A tiny standard that makes old files searchable years later.",
+    "audience": "Anyone with messy folders",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Date, project, and type-based convention; evergreen."
+  },
+  {
+    "id": "tc-ever-017",
+    "title": "Monthly Device Maintenance Checklist",
+    "angle": "A recurring routine to keep phones and laptops healthy and responsive.",
+    "audience": "General users",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Covers storage, updates, backups, and security basics."
+  },
+  {
+    "id": "tc-ever-018",
+    "title": "Digital Declutter Weekend Template",
+    "angle": "A one-weekend plan to reset files, apps, and notifications.",
+    "audience": "Overloaded knowledge workers",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Can be repeated once or twice a year."
+  },
+  {
+    "id": "tc-ever-019",
+    "title": "Simple Habit Tracking Template for Busy People",
+    "angle": "A low-friction way to track 3–5 habits without burnout.",
+    "audience": "Anyone building new habits",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Evergreen; works on paper, sheets, or apps."
+  },
+  {
+    "id": "tc-ever-020",
+    "title": "Personal Reset Checklist for Overwhelmed Days",
+    "angle": "A short sequence to regain control when everything feels behind.",
+    "audience": "Stressed workers and students",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Focuses on triage, boundaries, and one small win."
+  }
+]
+[
+  {
+    "id": "tc-ever-021",
+    "title": "Universal App Onboarding Checklist",
+    "angle": "A structured first-use routine that prevents misconfigurations from day one.",
+    "audience": "New app users",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Helps users stabilize their app environment early."
+  },
+  {
+    "id": "tc-ever-022",
+    "title": "Personal Budget Setup Template",
+    "angle": "A simple structure for newbies to establish stable monthly money flow.",
+    "audience": "Young adults and new workers",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Device/platform-agnostic; can be used with any finance app."
+  },
+  {
+    "id": "tc-ever-023",
+    "title": "Goal Breakdown Template for Long-Term Projects",
+    "angle": "A multi-level decomposition framework from yearly to weekly targets.",
+    "audience": "Creators, students, founders",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Evergreen; works for study, fitness, financial, or career goals."
+  },
+  {
+    "id": "tc-ever-024",
+    "title": "Emergency Digital Backup Checklist",
+    "angle": "A simple, repeatable system for protecting critical data before problems hit.",
+    "audience": "Everyone with laptops or phones",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Includes cloud+local redundancy and password strategies."
+  },
+  {
+    "id": "tc-ever-025",
+    "title": "Universal Packing Checklist for Any Trip",
+    "angle": "A stable list structure adaptable to trips, seasons, or travel length.",
+    "audience": "Travelers",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Designed for reusability; evergreen travel guide."
+  },
+  {
+    "id": "tc-ever-026",
+    "title": "Home Cleaning Workflow Template",
+    "angle": "A zone-based system that minimizes decision fatigue and speeds maintenance.",
+    "audience": "People managing their homes",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Repeatable weekly or monthly; works for any home size."
+  },
+  {
+    "id": "tc-ever-027",
+    "title": "Simple Meal Planning Template for Busy Weeks",
+    "angle": "A practical meal mapping method that reduces last-minute stress.",
+    "audience": "Workers, students, families",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Cross-cultural; not tied to specific cuisines."
+  },
+  {
+    "id": "tc-ever-028",
+    "title": "Content Creation Checklist for Videos, Blogs, or Social Posts",
+    "angle": "A stable structure covering ideation to publishing.",
+    "audience": "Creators and marketers",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Ensures quality and reduces repeated mistakes."
+  },
+  {
+    "id": "tc-ever-029",
+    "title": "Research Workflow Template for Students",
+    "angle": "Guides students from topic selection to final paper submission.",
+    "audience": "High school and college students",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Evergreen academic structure."
+  },
+  {
+    "id": "tc-ever-030",
+    "title": "Universal Meeting Agenda Template",
+    "angle": "Prevents unproductive meetings and reduces wasted time.",
+    "audience": "Business teams and remote workers",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Applies to any industry."
+  },
+
+  {
+    "id": "tc-ever-031",
+    "title": "Simple Home Inventory Checklist",
+    "angle": "A minimal but powerful method to track important household items.",
+    "audience": "Families and renters",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Useful for insurance, moving, or decluttering."
+  },
+  {
+    "id": "tc-ever-032",
+    "title": "Morning Productivity Starter Template",
+    "angle": "A structured kick-off routine for a focused workday.",
+    "audience": "Workers and creators",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Designed for repeat use in any environment."
+  },
+  {
+    "id": "tc-ever-033",
+    "title": "Digital Minimalism Checklist",
+    "angle": "A stable framework for removing digital noise and regaining attention.",
+    "audience": "People feeling overwhelmed online",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Evergreen system; not app-specific."
+  },
+  {
+    "id": "tc-ever-034",
+    "title": "Universal Backup Routine for Small Businesses",
+    "angle": "A repeatable, low-cost system that protects critical business data.",
+    "audience": "Solo entrepreneurs and small teams",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Platform-independent; evergreen requirement."
+  },
+  {
+    "id": "tc-ever-035",
+    "title": "Google Sheets Budgeting Template",
+    "angle": "A flexible spreadsheet-based template for beginners.",
+    "audience": "People who want simple money tracking",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Works offline or online."
+  },
+  {
+    "id": "tc-ever-036",
+    "title": "Universal Feedback Collection Template",
+    "angle": "A minimal system for gathering and organizing feedback from any source.",
+    "audience": "Creators, teachers, managers",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Adaptable to email, forms, or AI summaries."
+  },
+  {
+    "id": "tc-ever-037",
+    "title": "Low-Effort Weekly Meal Prep Template",
+    "angle": "A structure for predictable nutrition without decision fatigue.",
+    "audience": "Busy workers and students",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Evergreen; strategy works year-round."
+  },
+  {
+    "id": "tc-ever-038",
+    "title": "Universal To-Do System for Forgetful People",
+    "angle": "A checklist that safeguards tasks with backups and triggers.",
+    "audience": "Neurodivergent and busy users",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Reduces missed tasks via redundancy."
+  },
+  {
+    "id": "tc-ever-039",
+    "title": "One-Page Productivity Dashboard Template",
+    "angle": "A minimalist hub for goals, tasks, and metrics.",
+    "audience": "Workers, students, founders",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Designed to fit within a single screen."
+  },
+  {
+    "id": "tc-ever-040",
+    "title": "Universal Troubleshooting Checklist for Home Wi-Fi",
+    "angle": "A stable routine to fix the most common network problems.",
+    "audience": "General users",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Works for any router or ISP."
+  }
+]
+[
+  {
+    "id": "tc-ever-041",
+    "title": "Simple Home Maintenance Seasonal Checklist",
+    "angle": "A stable quarterly routine that keeps any home safe and efficient.",
+    "audience": "Homeowners and renters",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Covers HVAC, filters, deep clean zones, and safety checks."
+  },
+  {
+    "id": "tc-ever-042",
+    "title": "Annual Subscription Review Template",
+    "angle": "A one-page method to reduce wasted recurring expenses.",
+    "audience": "All digital consumers",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Evergreen; works with any subscription or billing cycle."
+  },
+  {
+    "id": "tc-ever-043",
+    "title": "Universal Health Check Tracking Template",
+    "angle": "A simple framework for recording vitals and doctor visits over time.",
+    "audience": "Families, adults managing health info",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Can be stored in cloud docs or printed."
+  },
+  {
+    "id": "tc-ever-044",
+    "title": "Car Maintenance Checklist for Busy Drivers",
+    "angle": "A repeatable process that prevents costly long-term repairs.",
+    "audience": "Car owners",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Covers fluids, tires, inspections, and seasonal prep."
+  },
+  {
+    "id": "tc-ever-045",
+    "title": "Home Move-Out Checklist",
+    "angle": "A structured template ensuring nothing is forgotten before moving.",
+    "audience": "People switching homes",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Universal; works for apartment or house moves."
+  },
+  {
+    "id": "tc-ever-046",
+    "title": "Home Move-In Setup Checklist",
+    "angle": "A first-week structure to stabilize a new home environment.",
+    "audience": "New tenants and homeowners",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Includes safety, utilities, and organization basics."
+  },
+  {
+    "id": "tc-ever-047",
+    "title": "Simple Project Closure Template",
+    "angle": "A system to wrap up any project with clarity and archived notes.",
+    "audience": "Teams, freelancers, creators",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Ensures learnings and assets are preserved."
+  },
+  {
+    "id": "tc-ever-048",
+    "title": "Universal Reading Log Template",
+    "angle": "A lightweight structure for tracking insights from books and papers.",
+    "audience": "Readers and students",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Keeps reading organized across years."
+  },
+  {
+    "id": "tc-ever-049",
+    "title": "Annual Skill Growth Plan Template",
+    "angle": "A reusable structure for building one major skill per year.",
+    "audience": "Workers and students",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Works for language, coding, creative, or business skills."
+  },
+  {
+    "id": "tc-ever-050",
+    "title": "Personal Crisis Management Checklist",
+    "angle": "A stabilizing structure for handling stressful emergencies.",
+    "audience": "Anyone facing unexpected challenges",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Evergreen; focuses on clarity and immediate steps."
+  },
+
+  {
+    "id": "tc-ever-051",
+    "title": "Universal Tech Support Checklist for Family Members",
+    "angle": "A standard routine to solve 80% of common tech issues.",
+    "audience": "People helping parents or kids with devices",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Simple enough for beginners."
+  },
+  {
+    "id": "tc-ever-052",
+    "title": "Home Document Organization Template",
+    "angle": "A stable folder structure for storing essential documents.",
+    "audience": "Everyone managing paperwork",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Evergreen need for most households."
+  },
+  {
+    "id": "tc-ever-053",
+    "title": "Smartphone Clean-Up & Optimization Checklist",
+    "angle": "A monthly routine that improves speed and storage.",
+    "audience": "All mobile users",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "App-agnostic; works for iOS and Android."
+  },
+  {
+    "id": "tc-ever-054",
+    "title": "Universal Productivity Reset Template",
+    "angle": "A system to reboot routines after burnout or long breaks.",
+    "audience": "Workers, students, creators",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Helps regain momentum quickly."
+  },
+  {
+    "id": "tc-ever-055",
+    "title": "Personal Archive Checklist for Digital Life",
+    "angle": "A stable structure to preserve memories and key records yearly.",
+    "audience": "Everyone with digital data",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Covers photos, files, email, and cloud accounts."
+  },
+  {
+    "id": "tc-ever-056",
+    "title": "Family Emergency Contact Sheet Template",
+    "angle": "A simple printable and digital form for emergencies.",
+    "audience": "Families and caregivers",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Evergreen; essential for preparedness."
+  },
+  {
+    "id": "tc-ever-057",
+    "title": "Simple Gift Planning Template",
+    "angle": "A reusable structure that keeps birthdays and holidays organized.",
+    "audience": "Families and friends",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Prevents last-minute stress."
+  },
+  {
+    "id": "tc-ever-058",
+    "title": "Universal Habit Creation Template",
+    "angle": "A system to define motivations, triggers, and tracking.",
+    "audience": "Anyone building habits",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Timeless habit-building structure."
+  },
+  {
+    "id": "tc-ever-059",
+    "title": "Simple Career Reflection Template",
+    "angle": "A yearly process to evaluate skills, satisfaction, and direction.",
+    "audience": "Workers, job seekers, students",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Evergreen; supports long-term planning."
+  },
+  {
+    "id": "tc-ever-060",
+    "title": "Universal Cleaning Checklist for Digital Workstations",
+    "angle": "A stable routine for decluttering desktops, cables, and devices.",
+    "audience": "Remote workers, gamers, office staff",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Applies to any desk setup."
+  }
+]
