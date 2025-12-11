@@ -1,4 +1,7 @@
-[
+{
+  "label": "app-reviews",
+  "trendLimit": 200,
+  "trend": [
   {
     "id": "ar-tr-001",
     "title": "Is the New AI Writing App Worth Switching To?",
