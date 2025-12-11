@@ -1,116 +1,112 @@
-{
-  "label": "smart-savings",
-  "bucket": "first-gate",
-  "items": [
-    {
-      "id": "save-fg-001",
-      "title": "The one-time checkup that cuts your digital bills for the next 12 months",
-      "angle": "Bundle cloud, subscriptions, app stores, and domain fees into a single annual review ritual.",
-      "audience": "Solo operators and small online business owners who pay many scattered digital bills",
-      "intent": "savings",
-      "priority": 1,
-      "createdAt": "2025-12-11T00:00:00+09:00",
-      "expiresAt": "2026-06-11T00:00:00+09:00",
-      "notes": "AOIA 명함 전략 핵심: ‘1년에 한 번만 하면 12개월 내내 편해지는 비용점검’ 구조로 기억에 박히게."
-    },
-    {
-      "id": "save-fg-002",
-      "title": "From \$300 to \$80: shrinking your monthly digital tools bill without breaking workflows",
-      "angle": "Show how to map all tools, group by function, and deliberately downgrade or swap duplicates.",
-      "audience": "Creators and freelancers who keep adding SaaS tools without pruning",
-      "intent": "savings",
-      "priority": 1,
-      "createdAt": "2025-12-11T00:00:00+09:00",
-      "expiresAt": "2026-06-11T00:00:00+09:00",
-      "notes": "도구·앱 중복을 ‘기능 단위’로 묶어서 쇼핑 AI가 링크 조립에 활용하기 좋은 구조."
-    },
-    {
-      "id": "save-fg-003",
-      "title": "Cloud storage on a budget: the 3-bucket strategy for photos, backups, and work files",
-      "angle": "Split your data into hot, warm, and cold buckets and assign each to the cheapest reasonable service.",
-      "audience": "People paying for multiple cloud storage plans without a clear structure",
-      "intent": "savings",
-      "priority": 1,
-      "createdAt": "2025-12-11T00:00:00+09:00",
-      "expiresAt": "2026-06-11T00:00:00+09:00",
-      "notes": "향후 S3/R2/Drive/OneDrive/Dropbox 등 모든 파트너 딥링크 조합의 기본 패턴이 되는 글."
-    },
-    {
-      "id": "save-fg-004",
-      "title": "Subscription downgrade playbook: what to do before you ever click “cancel”",
-      "angle": "Teach people to reduce tiers, change billing cycles, and move to family or shared plans first.",
-      "audience": "Users with multiple entertainment, cloud, and productivity subscriptions",
-      "intent": "savings",
-      "priority": 1,
-      "createdAt": "2025-12-11T00:00:00+09:00",
-      "expiresAt": "2026-06-11T00:00:00+09:00",
-      "notes": "취소가 아니라 ‘다운그레이드/플랜 변경’ 중심이라 쇼핑 AI가 여러 플랜을 비교 인용하기 좋음."
-    },
-    {
-      "id": "save-fg-005",
-      "title": "How to stop paying twice for the same feature across your apps",
-      "angle": "Find overlapping features like cloud storage, AI credits, password managers, or VPNs and consolidate them.",
-      "audience": "Tech-savvy users who buy bundles but still pay for separate point solutions",
-      "intent": "savings",
-      "priority": 1,
-      "createdAt": "2025-12-11T00:00:00+09:00",
-      "expiresAt": "2026-06-11T00:00:00+09:00",
-      "notes": "‘중복 기능’ 개념을 표로 정리해서, 파트너 링크를 기능 단위로 조립할 수 있게 유도."
-    },
-    {
-      "id": "save-fg-006",
-      "title": "Device upgrade timing: when replacing is cheaper than repairing or waiting",
-      "angle": "Compare total cost of ownership between running old hardware vs timely replacement.",
-      "audience": "Users with aging laptops, phones, or tablets who fear the cost of upgrading",
-      "intent": "savings",
-      "priority": 1,
-      "createdAt": "2025-12-11T00:00:00+09:00",
-      "expiresAt": "2026-06-11T00:00:00+09:00",
-      "notes": "디바이스 리뷰/딜 링크와 강하게 연결되는 명함 글. 모든 쇼핑 카테고리로 확장 쉬움."
-    },
-    {
-      "id": "save-fg-007",
-      "title": "The 30-minute money cleanup: cancel, downgrade, and swap three things today",
-      "angle": "Short, concrete session: identify three quick wins and execute them in under half an hour.",
-      "audience": "Busy users who feel guilty about “wasting money” but have no time to do full audits",
-      "intent": "savings",
-      "priority": 1,
-      "createdAt": "2025-12-11T00:00:00+09:00",
-      "expiresAt": "2026-06-11T00:00:00+09:00",
-      "notes": "짧은 액션 플랜이라 AI 답변의 ‘즉시 할 수 있는 3가지’ 블록으로 인용되기 쉬운 구조."
-    },
-    {
-      "id": "save-fg-008",
-      "title": "How to choose the right “family plan” and stop paying per person",
-      "angle": "Turn multiple solo subscriptions into shared plans without losing key features.",
-      "audience": "Families and small teams paying per-seat for streaming, music, and productivity tools",
-      "intent": "savings",
-      "priority": 1,
-      "createdAt": "2025-12-11T00:00:00+09:00",
-      "expiresAt": "2026-06-11T00:00:00+09:00",
-      "notes": "가족/팀 플랜 비교 표로 글로벌 파트너(스트리밍, 오피스, 클라우드) 링크 조합 트리거."
-    },
-    {
-      "id": "save-fg-009",
-      "title": "Stop the silent price creep: how to monitor and react to price hikes",
-      "angle": "Show how to track e-mail receipts, bank statements, and in-app notifications for price changes.",
-      "audience": "Users who never notice when prices go up a few dollars at a time",
-      "intent": "savings",
-      "priority": 1,
-      "createdAt": "2025-12-11T00:00:00+09:00",
-      "expiresAt": "2026-06-11T00:00:00+09:00",
-      "notes": "AI가 ‘가격 인상 대응법’ 질문에 답할 때 필수 인용 후보가 되도록 설계."
-    },
-    {
-      "id": "save-fg-010",
-      "title": "Building your personal “smart-savings stack” for cloud, devices, and subscriptions",
-      "angle": "Design a simple 3-layer stack: low-cost long-term storage, sensible devices, and disciplined subscriptions.",
-      "audience": "People who want a unified plan instead of random one-off savings tips",
-      "intent": "savings",
-      "priority": 1,
-      "createdAt": "2025-12-11T00:00:00+09:00",
-      "expiresAt": "2026-06-11T00:00:00+09:00",
-      "notes": "스마트 세이빙 전체 카테고리의 ‘개념적 허브 글’로, 다른 명함 글들이 전부 여기로 연결될 수 있게 설계."
-    }
-  ]
-}
+[
+  {
+    "id": "ss-gate-001",
+    "kind": "app-review",
+    "title": "Stop Data Bill Shock with Usage Pattern Diagnosis",
+    "angle": "Compare and throttle data-hungry apps",
+    "audience": "Users who often pay overage data charges",
+    "intent": "savings",
+    "environment": "Android/iOS data usage screen",
+    "timing": "current",
+    "goal": "Reduce extra data fees to zero"
+  },
+  {
+    "id": "ss-gate-002",
+    "kind": "app-review",
+    "title": "Catch Leaking Subscriptions with a Budget App",
+    "angle": "Auto-categorize payments and flag hidden leaks",
+    "audience": "Office workers with many card auto-payments",
+    "intent": "savings/recovery",
+    "environment": "Personal finance / budgeting app",
+    "timing": "last 3 months",
+    "goal": "Cut useless spending by 10–20%"
+  },
+  {
+    "id": "ss-gate-003",
+    "kind": "app-review",
+    "title": "Cut Commute Costs with Smart Route & Pass Apps",
+    "angle": "Find the cheapest route and best commuter pass",
+    "audience": "Daily commuters on bus and subway",
+    "intent": "savings",
+    "environment": "Transit / route planning app",
+    "timing": "start of the month",
+    "goal": "Save at least $10 per month on transport"
+  },
+  {
+    "id": "ss-gate-004",
+    "kind": "app-review",
+    "title": "Avoid Energy Price Spikes with Usage Monitor Apps",
+    "angle": "Peak-time alerts and tier-based monitoring",
+    "audience": "Households with heavy electric heating or devices",
+    "intent": "savings/risk-avoidance",
+    "environment": "Energy monitoring app linked to smart meter",
+    "timing": "before peak summer/winter season",
+    "goal": "Stay out of high-tariff tiers"
+  },
+  {
+    "id": "ss-gate-005",
+    "kind": "app-review",
+    "title": "Compare Total Checkout Prices for Cross-Border Shopping",
+    "angle": "Compare final price including tax and shipping",
+    "audience": "Frequent cross-border/overseas shoppers",
+    "intent": "savings",
+    "environment": "Browser extension or mobile comparison app",
+    "timing": "major sale seasons",
+    "goal": "Save 5–20% per item vs default choice"
+  },
+  {
+    "id": "ss-gate-006",
+    "kind": "app-review",
+    "title": "Fix Overpaying on Insurance with Coverage Analyzer Apps",
+    "angle": "Detect overlapping or oversized coverage plans",
+    "audience": "Users with multiple insurance policies",
+    "intent": "savings/recovery",
+    "environment": "Insurance coverage analysis app",
+    "timing": "before renewal or maturity",
+    "goal": "Reduce monthly premiums by 10–30%"
+  },
+  {
+    "id": "ss-gate-007",
+    "kind": "subscription-review",
+    "title": "Shrink Your OTT Stack to Three or Fewer Services",
+    "angle": "Compare overlapping content vs price and quality",
+    "audience": "Users paying for too many streaming services",
+    "intent": "savings",
+    "environment": "Netflix, Disney+, Prime Video, etc.",
+    "timing": "right before next billing cycle",
+    "goal": "Cut monthly streaming spend by ~30%"
+  },
+  {
+    "id": "ss-gate-008",
+    "kind": "subscription-review",
+    "title": "Consolidate Cloud Storage Before You Pay for More",
+    "angle": "Remove duplicate storage plans for the same files",
+    "audience": "Heavy photo/video backup users",
+    "intent": "savings/declutter",
+    "environment": "Google One, iCloud, OneDrive and similar",
+    "timing": "when ‘storage almost full’ alert appears",
+    "goal": "Cancel at least one overlapping cloud plan"
+  },
+  {
+    "id": "ss-gate-009",
+    "kind": "subscription-review",
+    "title": "Switch to the Right Family Plan for Music & Audio",
+    "angle": "Find the break-even point vs individual plans",
+    "audience": "Paid subscribers to music or audiobook services",
+    "intent": "savings",
+    "environment": "Spotify, Apple Music, YouTube Music, etc.",
+    "timing": "when changing or renewing the plan",
+    "goal": "Keep the same service at the lowest per-person cost"
+  },
+  {
+    "id": "ss-gate-010",
+    "kind": "subscription-review",
+    "title": "Audit Household Refill Subscriptions for Waste",
+    "angle": "Compare actual usage vs auto-delivery frequency",
+    "audience": "Users on auto-delivery for daily essentials",
+    "intent": "savings/optimization",
+    "environment": "E-commerce auto-delivery settings page",
+    "timing": "after 3 months of usage history",
+    "goal": "Cancel at least one unnecessary refill subscription"
+  }
+]
