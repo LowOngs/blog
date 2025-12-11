@@ -5,6 +5,12 @@ const fs = require('fs');
 const path = require('path');
 
 // ────────────────────────────────────
+// 스케줄 모드 로딩 (test / live)
+// ────────────────────────────────────
+const { getScheduleMode } = require('./lib/mode.cjs');
+const SCHEDULE_MODE = getScheduleMode(); // 'test' 또는 'live'
+
+// ────────────────────────────────────
 // 기본 경로 설정
 // ────────────────────────────────────
 const ROOT    = path.resolve(__dirname, '..', '..'); // System_files
@@ -210,6 +216,7 @@ function pickSeedForLabel(label, preferredMode, usedIds, todayStr) {
   console.log('[seed-scheduler] ROOT   =', ROOT);
   console.log('[seed-scheduler] SEED   =', SEEDDIR);
   console.log('[seed-scheduler] OUTDIR =', OUTDIR);
+  console.log('[seed-scheduler] SCHEDULE_MODE =', SCHEDULE_MODE);
   console.log(
     '[seed-scheduler] DATE   =',
     dateStr,
@@ -291,6 +298,7 @@ function pickSeedForLabel(label, preferredMode, usedIds, todayStr) {
   const outFile = path.join(OUTDIR, 'today.json');
   const outJson = {
     date: dateStr,
+    mode: SCHEDULE_MODE,   // ← 여기 추가: test / live 구분용
     items
   };
 
