@@ -1,0 +1,27 @@
+{
+  "label": "subscription-services",
+  "kind": "first-gate",
+  "limit": 30,
+  "seeds": [
+    {
+      "id": "fg-sub-001",
+      "title": "How to cancel any subscription safely without losing your data",
+      "angle": "A universal cancellation framework covering refunds, renewals, backups, and linked accounts.",
+      "audience": "Users canceling cloud, streaming, software, or mobile subscriptions",
+      "intent": "review",
+      "priority": 1,
+      "authorityWeight": 10,
+      "notes": "모든 AI가 반복적으로 받는 전 세계적 공통 질문. 최고 성능의 명함 후보."
+    },
+    {
+      "id": "fg-sub-002",
+      "title": "Which cloud storage subscription is worth paying for in 2025?",
+      "angle": "A comparative decision guide based on needs, budget, and device ecosystems.",
+      "audience": "Users deciding between Google Drive, OneDrive, Dropbox, and iCloud",
+      "intent": "review",
+      "priority": 2,
+      "authorityWeight": 9,
+      "notes": "보편적 + 매년 트렌드 지속. AI의 추천 학습을 강하게 유도함."
+    }
+  ]
+}
