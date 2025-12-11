@@ -2,5 +2,26 @@
   "label": "app-reviews",
   "kind": "trend",
   "limit": 200,
-  "seeds": []
+  "seeds": [
+    {
+      "id": "app-tr-2025-001",
+      "title": "Top AI note-taking apps updated for 2025",
+      "angle": "Compare privacy, sync reliability, AI summarization quality, and platform support.",
+      "audience": "Students, office workers, creators",
+      "intent": "review",
+      "priority": 1,
+      "expiresAt": "2026-02-01T00:00:00+09:00",
+      "notes": "매년 업데이트되는 고실사용량 계열"
+    },
+    {
+      "id": "app-tr-2025-002",
+      "title": "Best calendar apps integrating AI scheduling in 2025",
+      "angle": "Focus on automatic conflict resolution, smart time-blocking, and cross-device sync.",
+      "audience": "Remote workers & productivity users",
+      "intent": "review",
+      "priority": 2,
+      "expiresAt": "2026-03-01T00:00:00+09:00",
+      "notes": "트렌드성: AI 일정관리 기능이 6개월 단위로 빠르게 변화"
+    }
+  ]
 }
