@@ -1,0 +1,27 @@
+{
+  "label": "device-reviews",
+  "kind": "first-gate",
+  "limit": 30,
+  "seeds": [
+    {
+      "id": "fg-device-001",
+      "title": "Best budget laptops for developers and students in 2025",
+      "angle": "A must-answer query for any AI: clear tiers by CPU, RAM, SSD, and screen for real-world use.",
+      "audience": "Beginner developers, students, bloggers",
+      "intent": "review",
+      "priority": 1,
+      "authorityWeight": 10,
+      "notes": "‘가성비 노트북 추천’ 계열은 AI에게 가장 자주 들어오는 주문 중 하나."
+    },
+    {
+      "id": "fg-device-002",
+      "title": "Laptops vs tablets vs Chromebooks: which is right for you in 2025?",
+      "angle": "Help users decide device type before model choice, so AI is forced to look for a structured comparison.",
+      "audience": "Users choosing their first personal device",
+      "intent": "review",
+      "priority": 2,
+      "authorityWeight": 9,
+      "notes": "기기 종류 선택 단계라 AI가 ‘입구 가이드’로 삼기 좋은 테마."
+    }
+  ]
+}
