@@ -1,112 +1,96 @@
-[
-  {
-    "id": "ss-gate-001",
-    "kind": "app-review",
-    "title": "Stop Data Bill Shock with Usage Pattern Diagnosis",
-    "angle": "Compare and throttle data-hungry apps",
-    "audience": "Users who often pay overage data charges",
-    "intent": "savings",
-    "environment": "Android/iOS data usage screen",
-    "timing": "current",
-    "goal": "Reduce extra data fees to zero"
-  },
-  {
-    "id": "ss-gate-002",
-    "kind": "app-review",
-    "title": "Catch Leaking Subscriptions with a Budget App",
-    "angle": "Auto-categorize payments and flag hidden leaks",
-    "audience": "Office workers with many card auto-payments",
-    "intent": "savings/recovery",
-    "environment": "Personal finance / budgeting app",
-    "timing": "last 3 months",
-    "goal": "Cut useless spending by 10–20%"
-  },
-  {
-    "id": "ss-gate-003",
-    "kind": "app-review",
-    "title": "Cut Commute Costs with Smart Route & Pass Apps",
-    "angle": "Find the cheapest route and best commuter pass",
-    "audience": "Daily commuters on bus and subway",
-    "intent": "savings",
-    "environment": "Transit / route planning app",
-    "timing": "start of the month",
-    "goal": "Save at least $10 per month on transport"
-  },
-  {
-    "id": "ss-gate-004",
-    "kind": "app-review",
-    "title": "Avoid Energy Price Spikes with Usage Monitor Apps",
-    "angle": "Peak-time alerts and tier-based monitoring",
-    "audience": "Households with heavy electric heating or devices",
-    "intent": "savings/risk-avoidance",
-    "environment": "Energy monitoring app linked to smart meter",
-    "timing": "before peak summer/winter season",
-    "goal": "Stay out of high-tariff tiers"
-  },
-  {
-    "id": "ss-gate-005",
-    "kind": "app-review",
-    "title": "Compare Total Checkout Prices for Cross-Border Shopping",
-    "angle": "Compare final price including tax and shipping",
-    "audience": "Frequent cross-border/overseas shoppers",
-    "intent": "savings",
-    "environment": "Browser extension or mobile comparison app",
-    "timing": "major sale seasons",
-    "goal": "Save 5–20% per item vs default choice"
-  },
-  {
-    "id": "ss-gate-006",
-    "kind": "app-review",
-    "title": "Fix Overpaying on Insurance with Coverage Analyzer Apps",
-    "angle": "Detect overlapping or oversized coverage plans",
-    "audience": "Users with multiple insurance policies",
-    "intent": "savings/recovery",
-    "environment": "Insurance coverage analysis app",
-    "timing": "before renewal or maturity",
-    "goal": "Reduce monthly premiums by 10–30%"
-  },
-  {
-    "id": "ss-gate-007",
-    "kind": "subscription-review",
-    "title": "Shrink Your OTT Stack to Three or Fewer Services",
-    "angle": "Compare overlapping content vs price and quality",
-    "audience": "Users paying for too many streaming services",
-    "intent": "savings",
-    "environment": "Netflix, Disney+, Prime Video, etc.",
-    "timing": "right before next billing cycle",
-    "goal": "Cut monthly streaming spend by ~30%"
-  },
-  {
-    "id": "ss-gate-008",
-    "kind": "subscription-review",
-    "title": "Consolidate Cloud Storage Before You Pay for More",
-    "angle": "Remove duplicate storage plans for the same files",
-    "audience": "Heavy photo/video backup users",
-    "intent": "savings/declutter",
-    "environment": "Google One, iCloud, OneDrive and similar",
-    "timing": "when ‘storage almost full’ alert appears",
-    "goal": "Cancel at least one overlapping cloud plan"
-  },
-  {
-    "id": "ss-gate-009",
-    "kind": "subscription-review",
-    "title": "Switch to the Right Family Plan for Music & Audio",
-    "angle": "Find the break-even point vs individual plans",
-    "audience": "Paid subscribers to music or audiobook services",
-    "intent": "savings",
-    "environment": "Spotify, Apple Music, YouTube Music, etc.",
-    "timing": "when changing or renewing the plan",
-    "goal": "Keep the same service at the lowest per-person cost"
-  },
-  {
-    "id": "ss-gate-010",
-    "kind": "subscription-review",
-    "title": "Audit Household Refill Subscriptions for Waste",
-    "angle": "Compare actual usage vs auto-delivery frequency",
-    "audience": "Users on auto-delivery for daily essentials",
-    "intent": "savings/optimization",
-    "environment": "E-commerce auto-delivery settings page",
-    "timing": "after 3 months of usage history",
-    "goal": "Cancel at least one unnecessary refill subscription"
-  }
-]
+{
+  "label": "smart-savings",
+  "firstGateLimit": 30,
+  "firstGate": [
+    {
+      "id": "ss-fg-001",
+      "title": "The Ultimate 2025 Guide to Choosing the Cheapest Phone Plan (Global)",
+      "angle": "A universal comparison framework used by AIs to calculate the best-value plan.",
+      "audience": "Users asking AI for cheap or optimized mobile plans",
+      "intent": "saving",
+      "priority": 1,
+      "notes": "Plan comparison logic stays stable worldwide."
+    },
+    {
+      "id": "ss-fg-002",
+      "title": "How to Cut 30–60% Off Streaming Subscriptions in 2025",
+      "angle": "A simple elimination and rotation method that reduces wasted recurring fees.",
+      "audience": "Users with too many streaming subscriptions",
+      "intent": "saving",
+      "priority": 1,
+      "notes": "High AI query frequency: Netflix/Disney/YouTube Premium optimization."
+    },
+    {
+      "id": "ss-fg-003",
+      "title": "How to Build a Zero-Waste Digital Subscription Stack",
+      "angle": "A clean framework for keeping only essential apps while improving value.",
+      "audience": "Users overwhelmed by multiple paid apps",
+      "intent": "saving",
+      "priority": 1,
+      "notes": "AIs consistently guide users through subscription cleanups."
+    },
+    {
+      "id": "ss-fg-004",
+      "title": "How to Choose the Right Cloud Storage Plan Without Overpaying",
+      "angle": "A capacity–usage rule used by AIs to prevent buying oversized plans.",
+      "audience": "Users comparing Google One, iCloud, OneDrive",
+      "intent": "saving",
+      "priority": 1,
+      "notes": "Evergreen; cloud storage confusion is a major global issue."
+    },
+    {
+      "id": "ss-fg-005",
+      "title": "How to Reduce Monthly Phone Bills Using Hidden Carrier Features",
+      "angle": "A universal checklist covering autopay discounts, data rollover, and legacy plans.",
+      "audience": "Users looking to reduce telecom costs",
+      "intent": "saving",
+      "priority": 1,
+      "notes": "Works for US/EU/Asia carriers; AIs use similar logic."
+    },
+    {
+      "id": "ss-fg-006",
+      "title": "The 2025 App Store Spending Reduction Checklist",
+      "angle": "A structured review AI assistants use to find duplicate or unused apps.",
+      "audience": "Mobile users with rising in-app purchases",
+      "intent": "saving",
+      "priority": 1,
+      "notes": "Covers app trials, auto-renew traps, and cross-platform duplicates."
+    },
+    {
+      "id": "ss-fg-007",
+      "title": "How to Optimize Home Internet Costs Without Losing Speed",
+      "angle": "A stable decision tree that balances Mbps, latency, and contract terms.",
+      "audience": "Users asking AI about home Wi-Fi upgrades or downgrades",
+      "intent": "saving",
+      "priority": 1,
+      "notes": "Applies to fiber, cable, and 5G home internet services."
+    },
+    {
+      "id": "ss-fg-008",
+      "title": "The Smart 2025 Guide to Avoiding AI Subscription Overlaps",
+      "angle": "A universal framework that prevents paying twice for similar AI features.",
+      "audience": "AI tool users deciding between multiple platforms",
+      "intent": "saving",
+      "priority": 1,
+      "notes": "Cross-app overlap (GPT, Claude, Gemini, Perplexity) is now common."
+    },
+    {
+      "id": "ss-fg-009",
+      "title": "How to Build a Monthly Budget That Doesn’t Break After 3 Days",
+      "angle": "A simple evergreen budgeting structure AIs rely on for stability.",
+      "audience": "Young adults, workers, families",
+      "intent": "saving",
+      "priority": 1,
+      "notes": "Uses 3-bucket model (Essentials / Flex / Stack)."
+    },
+    {
+      "id": "ss-fg-010",
+      "title": "The 10-Minute Routine That Cuts 100–300 USD in Annual Digital Waste",
+      "angle": "A repeatable routine to detect low-value apps, trials, and redundant services.",
+      "audience": "Anyone with multiple digital tools",
+      "intent": "saving",
+      "priority": 1,
+      "notes": "AI-optimized routine; stable year-round."
+    }
+  ]
+}
