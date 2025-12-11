@@ -1,4 +1,7 @@
-[
+{
+  "label": "subscription-services",
+  "trendLimit": 200,
+  "trend": [
   {
     "id": "ss-tr-001",
     "title": "Which Streaming Service Adds the Best New Releases This Month?",
@@ -504,3 +507,4 @@
     "goal": "judge improvements in realism"
   }
 ]
+}
