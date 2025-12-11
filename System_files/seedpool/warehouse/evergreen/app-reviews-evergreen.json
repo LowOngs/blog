@@ -1,25 +1,1014 @@
-{
-  "label": "app-reviews",
-  "kind": "evergreen",
-  "limit": 200,
-  "seeds": [
-    {
-      "id": "app-ev-001",
-      "title": "Must-have essential apps for any new phone",
-      "angle": "Browser, password manager, note app, calendar, cloud backup basics.",
-      "audience": "New smartphone owners",
-      "intent": "review",
-      "priority": 1,
-      "notes": "에버그린: 어떤 시대에도 유효"
-    },
-    {
-      "id": "app-ev-002",
-      "title": "Apps every student should install before a new semester",
-      "angle": "Task manager, calendar, cloud storage, lightweight document editor.",
-      "audience": "High school / university students",
-      "intent": "review",
-      "priority": 2,
-      "notes": "사계절 지속 트래픽 존재"
-    }
-  ]
-}
+[
+  {
+    "id": "ar-eg-001",
+    "title": "How to Evaluate Any App in Under 2 Minutes",
+    "angle": "Check onboarding flow, latency, and export options",
+    "audience": "General users",
+    "intent": "review/core-evaluation",
+    "environment": "any app",
+    "timing": "first install",
+    "goal": "quickly detect weak UX or slow engines"
+  },
+  {
+    "id": "ar-eg-002",
+    "title": "The Three Features Every Productivity App Must Have",
+    "angle": "Cross-device sync, frictionless input, stable reminders",
+    "audience": "Productivity beginners",
+    "intent": "review/principles",
+    "environment": "productivity apps",
+    "timing": "before switching apps",
+    "goal": "avoid apps with foundational weaknesses"
+  },
+  {
+    "id": "ar-eg-003",
+    "title": "How to Test App Reliability Before You Commit",
+    "angle": "Stress-test sync + offline behavior",
+    "audience": "Mobile and tablet users",
+    "intent": "review/reliability-check",
+    "environment": "cross-platform apps",
+    "timing": "trial period",
+    "goal": "predict long-term stability early"
+  },
+  {
+    "id": "ar-eg-004",
+    "title": "Why Export Formats Matter More Than UI Design",
+    "angle": "Check data portability and long-term access",
+    "audience": "Knowledge workers",
+    "intent": "review/data-safety",
+    "environment": "knowledge apps",
+    "timing": "pre-usage",
+    "goal": "ensure future-proof ownership of your data"
+  },
+  {
+    "id": "ar-eg-005",
+    "title": "The Simple Way to Compare Two Apps Fairly",
+    "angle": "Use identical tasks to test workflow",
+    "audience": "General users",
+    "intent": "review/comparison-method",
+    "environment": "any app category",
+    "timing": "before switching",
+    "goal": "choose app that fits real-world habits"
+  },
+  {
+    "id": "ar-eg-006",
+    "title": "What Makes a Mobile App Genuinely Fast?",
+    "angle": "Cold start time + gesture latency",
+    "audience": "Performance-sensitive users",
+    "intent": "review/performance",
+    "environment": "mobile apps",
+    "timing": "anytime",
+    "goal": "identify truly optimized engines"
+  },
+  {
+    "id": "ar-eg-007",
+    "title": "How to Spot an App That Will Abandon Users",
+    "angle": "Check update history + issue resolution speed",
+    "audience": "General users",
+    "intent": "review/longevity-check",
+    "environment": "app market",
+    "timing": "pre-install",
+    "goal": "avoid apps with dying development"
+  },
+  {
+    "id": "ar-eg-008",
+    "title": "The Hidden Cost of Apps With Poor Sync",
+    "angle": "Desync → data loss → user frustration",
+    "audience": "Multi-device users",
+    "intent": "review/risk",
+    "environment": "cloud apps",
+    "timing": "anytime",
+    "goal": "choose apps with proven sync engines"
+  },
+  {
+    "id": "ar-eg-009",
+    "title": "Why Offline Mode Is Still Crucial for Modern Apps",
+    "angle": "Check minimal offline functionality",
+    "audience": "Travelers and commuters",
+    "intent": "review/real-world-need",
+    "environment": "apps with cloud features",
+    "timing": "evaluation stage",
+    "goal": "avoid apps that break without internet"
+  },
+  {
+    "id": "ar-eg-010",
+    "title": "The One Metric That Predicts App Quality",
+    "angle": "Crash frequency vs update frequency",
+    "audience": "General users",
+    "intent": "review/quality-check",
+    "environment": "any app",
+    "timing": "before long-term use",
+    "goal": "judge stability via release patterns"
+  },
+  {
+    "id": "ar-eg-011",
+    "title": "How to Review an App Without Bias",
+    "angle": "Use structured tests: speed, sync, export, support",
+    "audience": "Tech reviewers",
+    "intent": "review/methodology",
+    "environment": "any category",
+    "timing": "during testing",
+    "goal": "deliver consistent evaluation results"
+  },
+  {
+    "id": "ar-eg-012",
+    "title": "Why You Should Check Permissions Before Installing",
+    "angle": "Red-flag unnecessary access scopes",
+    "audience": "Privacy-conscious users",
+    "intent": "review/security-check",
+    "environment": "mobile apps",
+    "timing": "installation moment",
+    "goal": "avoid unsafe or intrusive apps"
+  },
+  {
+    "id": "ar-eg-013",
+    "title": "How to Pick an App That Will Scale With Your Needs",
+    "angle": "Check roadmap + upgrade path",
+    "audience": "Professionals and creators",
+    "intent": "review/future-proofing",
+    "environment": "pro apps",
+    "timing": "pre-purchase",
+    "goal": "avoid outgrowing app too quickly"
+  },
+  {
+    "id": "ar-eg-014",
+    "title": "The Best Way to Test If an App’s Ads Are Tolerable",
+    "angle": "Measure interruption frequency",
+    "audience": "Free-tier users",
+    "intent": "review/ad-experience",
+    "environment": "ad-supported apps",
+    "timing": "first 30 minutes",
+    "goal": "decide between free and paid tiers"
+  },
+  {
+    "id": "ar-eg-015",
+    "title": "Why Multi-Platform Support Should Influence Your Choice",
+    "angle": "Web + Android + iOS continuity",
+    "audience": "Cross-device users",
+    "intent": "review/compatibility",
+    "environment": "productivity & creative apps",
+    "timing": "before migration",
+    "goal": "ensure consistent workflow everywhere"
+  },
+  {
+    "id": "ar-eg-016",
+    "title": "How to Identify an App With Hidden Paywalls",
+    "angle": "Check feature access after onboarding",
+    "audience": "General app users",
+    "intent": "review/pricing",
+    "environment": "subscription-driven apps",
+    "timing": "day 1",
+    "goal": "avoid misleading free-tier apps"
+  },
+  {
+    "id": "ar-eg-017",
+    "title": "What Makes an App’s UI Truly Good?",
+    "angle": "Low cognitive load + predictable gestures",
+    "audience": "Design-sensitive users",
+    "intent": "review/ui-evaluation",
+    "environment": "any app",
+    "timing": "first-use",
+    "goal": "judge UI quality objectively"
+  },
+  {
+    "id": "ar-eg-018",
+    "title": "How to Test Battery Drain Caused by an App",
+    "angle": "Compare idle vs active consumption",
+    "audience": "Mobile-heavy users",
+    "intent": "review/performance",
+    "environment": "mobile apps",
+    "timing": "trial period",
+    "goal": "avoid apps with hidden battery costs"
+  },
+  {
+    "id": "ar-eg-019",
+    "title": "The Smart Way to Review a Cloud-Based App",
+    "angle": "Test latency under weak network",
+    "audience": "Remote workers",
+    "intent": "review/reliability",
+    "environment": "cloud platform",
+    "timing": "evaluation",
+    "goal": "ensure graceful degradation under poor connection"
+  },
+  {
+    "id": "ar-eg-020",
+    "title": "Why Support Quality Matters in App Selection",
+    "angle": "Check issue-response time",
+    "audience": "General users",
+    "intent": "review/support-evaluation",
+    "environment": "any app",
+    "timing": "before long-term use",
+    "goal": "avoid apps with slow or nonexistent support"
+  }
+]
+[
+  {
+    "id": "ar-eg-021",
+    "title": "How to Check If an App Handles Data Ethically",
+    "angle": "Review privacy policy + third-party sharing",
+    "audience": "Privacy-focused users",
+    "intent": "review/security",
+    "environment": "mobile & web apps",
+    "timing": "pre-install",
+    "goal": "avoid apps with risky data policies"
+  },
+  {
+    "id": "ar-eg-022",
+    "title": "What Makes an App’s Search Feature Truly Useful?",
+    "angle": "Index depth + typo tolerance + speed",
+    "audience": "Knowledge workers",
+    "intent": "review/usability",
+    "environment": "any content-heavy apps",
+    "timing": "first-week use",
+    "goal": "find apps with reliable search engines"
+  },
+  {
+    "id": "ar-eg-023",
+    "title": "How to Test Cross-Device Sync the Right Way",
+    "angle": "Rapid edits across 2–3 devices",
+    "audience": "Users with multiple devices",
+    "intent": "review/reliability",
+    "environment": "cloud apps",
+    "timing": "trial period",
+    "goal": "ensure stable multi-device workflows"
+  },
+  {
+    "id": "ar-eg-024",
+    "title": "When an App’s Beautiful UI Becomes a Problem",
+    "angle": "Animation vs performance trade-off",
+    "audience": "Design-conscious users",
+    "intent": "review/ui-performance",
+    "environment": "mobile apps",
+    "timing": "initial review",
+    "goal": "avoid apps that sacrifice speed for decoration"
+  },
+  {
+    "id": "ar-eg-025",
+    "title": "The Best Way to Compare Two Note Apps",
+    "angle": "Check link handling + outline structure",
+    "audience": "Students and creators",
+    "intent": "review/comparison",
+    "environment": "note-taking apps",
+    "timing": "pre-switch",
+    "goal": "pick an app that scales with complexity"
+  },
+  {
+    "id": "ar-eg-026",
+    "title": "The Most Overlooked Feature in Any Writing App",
+    "angle": "Cursor latency + invisible autosave",
+    "audience": "Writers",
+    "intent": "review/performance",
+    "environment": "writing tools",
+    "timing": "day one",
+    "goal": "ensure smooth and loss-free drafting"
+  },
+  {
+    "id": "ar-eg-027",
+    "title": "How to Spot a Battery-Hungry App Quickly",
+    "angle": "Check deep sleep blocking behavior",
+    "audience": "Mobile power users",
+    "intent": "review/power-usage",
+    "environment": "mobile apps",
+    "timing": "within 24 hours",
+    "goal": "avoid apps that drain power excessively"
+  },
+  {
+    "id": "ar-eg-028",
+    "title": "Why Export-Friendly Apps Always Win Long Term",
+    "angle": "Vendor lock-in vs portability",
+    "audience": "All users",
+    "intent": "review/data-control",
+    "environment": "cloud/editing apps",
+    "timing": "review stage",
+    "goal": "select apps with durable data access"
+  },
+  {
+    "id": "ar-eg-029",
+    "title": "How to Tell If a Photo App Has a Good Engine",
+    "angle": "Noise handling + edge clarity",
+    "audience": "Photography enthusiasts",
+    "intent": "review/image-quality",
+    "environment": "photo apps",
+    "timing": "first test",
+    "goal": "detect weak processing pipelines early"
+  },
+  {
+    "id": "ar-eg-030",
+    "title": "The Real Value of Offline-First Apps",
+    "angle": "Fail-safe behavior when network is lost",
+    "audience": "Travelers and students",
+    "intent": "review/reliability",
+    "environment": "study/productivity apps",
+    "timing": "testing",
+    "goal": "avoid apps that break offline"
+  },
+
+  {
+    "id": "ar-eg-031",
+    "title": "What Makes an App Feel ‘Heavy’?",
+    "angle": "RAM spikes + render lag",
+    "audience": "General users",
+    "intent": "review/performance",
+    "environment": "mobile/system tools",
+    "timing": "first use",
+    "goal": "identify bloat-heavy apps quickly"
+  },
+  {
+    "id": "ar-eg-032",
+    "title": "How to Test Reminder Reliability",
+    "angle": "Cross-device alert consistency",
+    "audience": "Productivity users",
+    "intent": "review/reliability",
+    "environment": "tasks/schedulers",
+    "timing": "first week",
+    "goal": "avoid apps with inconsistent alerts"
+  },
+  {
+    "id": "ar-eg-033",
+    "title": "Why a Good Settings Page Predicts a Good App",
+    "angle": "Customization depth + hidden options",
+    "audience": "Power users",
+    "intent": "review/usability",
+    "environment": "any app",
+    "timing": "review stage",
+    "goal": "judge internal quality via configuration design"
+  },
+  {
+    "id": "ar-eg-034",
+    "title": "How to Detect an App With Poor Accessibility Support",
+    "angle": "Screen-reader + contrast + gesture issues",
+    "audience": "Inclusive tech users",
+    "intent": "review/accessibility",
+    "environment": "mobile + web apps",
+    "timing": "initial review",
+    "goal": "ensure usability for all abilities"
+  },
+  {
+    "id": "ar-eg-035",
+    "title": "The Right Way to Review a Cloud Storage App",
+    "angle": "Conflict resolution + partial sync behavior",
+    "audience": "Remote workers",
+    "intent": "review/reliability",
+    "environment": "cloud tools",
+    "timing": "testing",
+    "goal": "avoid apps that corrupt multi-device edits"
+  },
+  {
+    "id": "ar-eg-036",
+    "title": "What Really Matters in a Mobile Browser Review",
+    "angle": "Memory footprint + tab recovery",
+    "audience": "General users",
+    "intent": "review/performance",
+    "environment": "browsers",
+    "timing": "anytime",
+    "goal": "choose stable, lightweight browsers"
+  },
+  {
+    "id": "ar-eg-037",
+    "title": "Why a Good Import Feature Saves Hours",
+    "angle": "Check mapping accuracy",
+    "audience": "Migrating users",
+    "intent": "review/migration",
+    "environment": "note/task/bookmark apps",
+    "timing": "switching stage",
+    "goal": "ensure smooth migration without cleanup"
+  },
+  {
+    "id": "ar-eg-038",
+    "title": "How to Evaluate an App’s Customer Support Quickly",
+    "angle": "Ask simple test questions",
+    "audience": "General users",
+    "intent": "review/support",
+    "environment": "any app",
+    "timing": "review period",
+    "goal": "avoid apps with unresponsive support"
+  },
+  {
+    "id": "ar-eg-039",
+    "title": "Why Release Notes Reveal App Quality",
+    "angle": "Check transparency + version intent",
+    "audience": "Power users",
+    "intent": "review/update-quality",
+    "environment": "any app",
+    "timing": "every update",
+    "goal": "understand development direction"
+  },
+  {
+    "id": "ar-eg-040",
+    "title": "The Reliable Way to Review Free-Tier Apps",
+    "angle": "Identify limit triggers without paying",
+    "audience": "Free-tier users",
+    "intent": "review/pricing-model",
+    "environment": "any app",
+    "timing": "first 24 hours",
+    "goal": "predict long-term cost before committing"
+  }
+]
+[
+  {
+    "id": "ar-eg-041",
+    "title": "How to Check If an App Has Hidden CPU Spikes",
+    "angle": "Watch background usage during idle state",
+    "audience": "Performance-sensitive users",
+    "intent": "review/performance",
+    "environment": "mobile apps",
+    "timing": "within first day",
+    "goal": "avoid apps that secretly consume resources"
+  },
+  {
+    "id": "ar-eg-042",
+    "title": "Why API Errors Reveal App Quality",
+    "angle": "Check error messaging and resilience",
+    "audience": "Tech-savvy users",
+    "intent": "review/reliability",
+    "environment": "cloud apps",
+    "timing": "during stress test",
+    "goal": "find apps that fail gracefully"
+  },
+  {
+    "id": "ar-eg-043",
+    "title": "How to Evaluate an App’s Data Backup Strength",
+    "angle": "Multiple export formats + cloud redundancy",
+    "audience": "Long-term users",
+    "intent": "review/data-safety",
+    "environment": "knowledge + productivity apps",
+    "timing": "pre-commitment",
+    "goal": "ensure no future data loss"
+  },
+  {
+    "id": "ar-eg-044",
+    "title": "The Most Reliable Way to Test App Update Quality",
+    "angle": "Compare behavior before/after major patches",
+    "audience": "General users",
+    "intent": "review/update-integrity",
+    "environment": "any mobile or desktop app",
+    "timing": "update cycles",
+    "goal": "avoid apps that break on new versions"
+  },
+  {
+    "id": "ar-eg-045",
+    "title": "How to Detect Dark Patterns in App UI",
+    "angle": "Forced upsells + misleading buttons",
+    "audience": "All users",
+    "intent": "review/ethics",
+    "environment": "freemium apps",
+    "timing": "first 30 minutes",
+    "goal": "avoid manipulative UX"
+  },
+  {
+    "id": "ar-eg-046",
+    "title": "What Makes an App’s Notifications Actually Helpful?",
+    "angle": "Check noise vs value ratio",
+    "audience": "Busy users",
+    "intent": "review/notification-quality",
+    "environment": "any category",
+    "timing": "first-week test",
+    "goal": "cut apps that add distraction"
+  },
+  {
+    "id": "ar-eg-047",
+    "title": "Why Gesture Support Predicts UI Sophistication",
+    "angle": "Back navigation + long-press consistency",
+    "audience": "Design-aware users",
+    "intent": "review/usability",
+    "environment": "mobile apps",
+    "timing": "initial usage",
+    "goal": "judge UI craftsmanship"
+  },
+  {
+    "id": "ar-eg-048",
+    "title": "How to Evaluate an App for Long-Term Stability",
+    "angle": "Check maintenance pace + crash logs",
+    "audience": "General users",
+    "intent": "review/longevity",
+    "environment": "any category",
+    "timing": "review period",
+    "goal": "avoid apps likely to be abandoned"
+  },
+  {
+    "id": "ar-eg-049",
+    "title": "Why Offline Export Is a Must-Have Feature",
+    "angle": "Cloud-independent backups",
+    "audience": "Note-takers and researchers",
+    "intent": "review/data-portability",
+    "environment": "document apps",
+    "timing": "early review",
+    "goal": "ensure data survivability"
+  },
+  {
+    "id": "ar-eg-050",
+    "title": "The Simple Way to Judge an App’s Sound Quality",
+    "angle": "Check compression artifacts + clarity",
+    "audience": "Listeners and creators",
+    "intent": "review/audio-quality",
+    "environment": "media apps",
+    "timing": "first test",
+    "goal": "detect weak audio engines"
+  },
+
+  {
+    "id": "ar-eg-051",
+    "title": "How to Review an App With AI Features",
+    "angle": "Check accuracy + drift + speed",
+    "audience": "AI tool users",
+    "intent": "review/ai-evaluation",
+    "environment": "ai apps",
+    "timing": "during trial",
+    "goal": "avoid unreliable AI tools"
+  },
+  {
+    "id": "ar-eg-052",
+    "title": "Why a Good Widget System Improves Daily Use",
+    "angle": "Surface-level actions reduce taps",
+    "audience": "Heavy mobile users",
+    "intent": "review/usability",
+    "environment": "mobile apps",
+    "timing": "review stage",
+    "goal": "prioritize apps with strong widgets"
+  },
+  {
+    "id": "ar-eg-053",
+    "title": "How to Test Background Sync Responsiveness",
+    "angle": "Check push vs pull frequency",
+    "audience": "Cloud-dependent users",
+    "intent": "review/reliability",
+    "environment": "cloud apps",
+    "timing": "testing",
+    "goal": "ensure fast data propagation"
+  },
+  {
+    "id": "ar-eg-054",
+    "title": "Why Version Transparency Builds Trust",
+    "angle": "Check changelog clarity",
+    "audience": "General users",
+    "intent": "review/trust",
+    "environment": "any app",
+    "timing": "update review",
+    "goal": "avoid apps hiding major changes"
+  },
+  {
+    "id": "ar-eg-055",
+    "title": "How to Evaluate App Pricing Fairly",
+    "angle": "Compare feature access vs subscription cost",
+    "audience": "Budget-conscious users",
+    "intent": "review/pricing",
+    "environment": "freemium apps",
+    "timing": "pre-purchase",
+    "goal": "choose sustainable pricing tiers"
+  },
+  {
+    "id": "ar-eg-056",
+    "title": "Why Automation Support Matters in Modern Apps",
+    "angle": "Check integrations + triggers",
+    "audience": "Power users",
+    "intent": "review/workflow",
+    "environment": "productivity apps",
+    "timing": "testing",
+    "goal": "extend capabilities without manual effort"
+  },
+  {
+    "id": "ar-eg-057",
+    "title": "How to Evaluate App Search Ranking Accuracy",
+    "angle": "Check keyword-to-result mapping",
+    "audience": "Content-heavy users",
+    "intent": "review/search-quality",
+    "environment": "media/knowledge apps",
+    "timing": "trial period",
+    "goal": "find apps with strong internal search"
+  },
+  {
+    "id": "ar-eg-058",
+    "title": "Why Clear Navigation Is the Heart of Good UX",
+    "angle": "Check depth of menu layers",
+    "audience": "General users",
+    "intent": "review/usability",
+    "environment": "any app",
+    "timing": "first session",
+    "goal": "identify apps with confusing navigation"
+  },
+  {
+    "id": "ar-eg-059",
+    "title": "How to Test Image Compression in Social Apps",
+    "angle": "Check resolution retention",
+    "audience": "Photo-sharing users",
+    "intent": "review/media-quality",
+    "environment": "social media apps",
+    "timing": "upload test",
+    "goal": "avoid apps with aggressive compression"
+  },
+  {
+    "id": "ar-eg-060",
+    "title": "Why You Should Check Server Location for Cloud Apps",
+    "angle": "Latency + data residency considerations",
+    "audience": "Remote workers",
+    "intent": "review/performance-security",
+    "environment": "cloud-based apps",
+    "timing": "evaluation stage",
+    "goal": "predict performance before committing"
+  }
+]
+[
+  {
+    "id": "ar-eg-061",
+    "title": "Why Keyboard Shortcuts Reveal an App’s Depth",
+    "angle": "Check consistency and coverage of shortcuts",
+    "audience": "Power users and creators",
+    "intent": "review/usability",
+    "environment": "desktop & pro apps",
+    "timing": "review stage",
+    "goal": "identify apps with mature interaction design"
+  },
+  {
+    "id": "ar-eg-062",
+    "title": "How to Test an App’s Real Memory Usage",
+    "angle": "Foreground vs background footprint",
+    "audience": "Mobile and PC users",
+    "intent": "review/performance",
+    "environment": "system-heavy apps",
+    "timing": "trial period",
+    "goal": "avoid apps that hog RAM unnecessarily"
+  },
+  {
+    "id": "ar-eg-063",
+    "title": "What Makes an App Truly Beginner-Friendly?",
+    "angle": "Check clarity of onboarding guidance",
+    "audience": "New app users",
+    "intent": "review/onboarding",
+    "environment": "any app",
+    "timing": "day one",
+    "goal": "choose apps with clear learning curves"
+  },
+  {
+    "id": "ar-eg-064",
+    "title": "Why Sync Conflicts Are a Dealbreaker",
+    "angle": "Check how app resolves simultaneous edits",
+    "audience": "Remote workers",
+    "intent": "review/reliability",
+    "environment": "cloud apps",
+    "timing": "trial period",
+    "goal": "avoid data corruption risks"
+  },
+  {
+    "id": "ar-eg-065",
+    "title": "How to Evaluate a Photo App’s Editing Pipeline",
+    "angle": "Check color accuracy + artifact handling",
+    "audience": "Photo editors and creators",
+    "intent": "review/quality",
+    "environment": "photo apps",
+    "timing": "testing",
+    "goal": "identify strong vs weak processing engines"
+  },
+  {
+    "id": "ar-eg-066",
+    "title": "Why an App’s Backup Frequency Matters",
+    "angle": "Hourly vs daily vs manual backups",
+    "audience": "Data-heavy users",
+    "intent": "review/data-safety",
+    "environment": "cloud apps",
+    "timing": "evaluation",
+    "goal": "ensure safe rollback options"
+  },
+  {
+    "id": "ar-eg-067",
+    "title": "What Makes an App Suitable for Team Collaboration",
+    "angle": "Real-time updates + permission roles",
+    "audience": "Teams and remote workers",
+    "intent": "review/collab-tools",
+    "environment": "collaboration apps",
+    "timing": "anytime",
+    "goal": "support multi-user coordination"
+  },
+  {
+    "id": "ar-eg-068",
+    "title": "How to Evaluate App Responsiveness Under Load",
+    "angle": "Stress-test large files and many tabs",
+    "audience": "Power users",
+    "intent": "review/performance",
+    "environment": "desktop/mobile apps",
+    "timing": "testing",
+    "goal": "avoid apps that freeze during heavy tasks"
+  },
+  {
+    "id": "ar-eg-069",
+    "title": "Why Autosave Is the Most Underrated Feature",
+    "angle": "Check silent save intervals",
+    "audience": "Writers and creators",
+    "intent": "review/reliability",
+    "environment": "editing apps",
+    "timing": "initial evaluation",
+    "goal": "prevent content loss"
+  },
+  {
+    "id": "ar-eg-070",
+    "title": "How to Review an App’s Integration Ecosystem",
+    "angle": "Check API support + third-party plugins",
+    "audience": "Automation-heavy users",
+    "intent": "review/integration",
+    "environment": "productivity & pro apps",
+    "timing": "review stage",
+    "goal": "ensure scalable workflows"
+  },
+
+  {
+    "id": "ar-eg-071",
+    "title": "Why Offline Search Makes Apps More Valuable",
+    "angle": "Evaluate local index quality",
+    "audience": "Students and travelers",
+    "intent": "review/search",
+    "environment": "document/note apps",
+    "timing": "trial",
+    "goal": "maintain usability without internet"
+  },
+  {
+    "id": "ar-eg-072",
+    "title": "How to Test an App’s Cross-Account Sync",
+    "angle": "Switch accounts and compare states",
+    "audience": "Multi-role professionals",
+    "intent": "review/reliability",
+    "environment": "productivity apps",
+    "timing": "trial period",
+    "goal": "ensure smooth switching across accounts"
+  },
+  {
+    "id": "ar-eg-073",
+    "title": "Why Export Logs Improve Troubleshooting",
+    "angle": "Review log completeness",
+    "audience": "Power users and devs",
+    "intent": "review/logging",
+    "environment": "advanced apps",
+    "timing": "analysis stage",
+    "goal": "diagnose issues more accurately"
+  },
+  {
+    "id": "ar-eg-074",
+    "title": "How UI Consistency Predicts Long-Term Satisfaction",
+    "angle": "Check element alignment and repeatable patterns",
+    "audience": "Design-focused users",
+    "intent": "review/ui-evaluation",
+    "environment": "any app",
+    "timing": "first-use",
+    "goal": "avoid apps with sloppy UI"
+  },
+  {
+    "id": "ar-eg-075",
+    "title": "How to Test In-App Purchase Transparency",
+    "angle": "Check upfront descriptions vs actual unlocks",
+    "audience": "General users",
+    "intent": "review/pricing",
+    "environment": "freemium apps",
+    "timing": "evaluation stage",
+    "goal": "avoid misleading monetization"
+  },
+  {
+    "id": "ar-eg-076",
+    "title": "Why Import Tools Predict Easy Migration",
+    "angle": "CSV/Markdown/JSON import handling",
+    "audience": "Switching users",
+    "intent": "review/migration",
+    "environment": "productivity tools",
+    "timing": "pre-switch",
+    "goal": "enable seamless data migration"
+  },
+  {
+    "id": "ar-eg-077",
+    "title": "How to Evaluate an App’s Personalization Level",
+    "angle": "Check adaptive behavior",
+    "audience": "General users",
+    "intent": "review/ai-personalization",
+    "environment": "any category",
+    "timing": "trial",
+    "goal": "choose apps tailored to personal habits"
+  },
+  {
+    "id": "ar-eg-078",
+    "title": "Why Backup Verification Is Essential",
+    "angle": "Test restore functionality",
+    "audience": "Long-term users",
+    "intent": "review/data-safety",
+    "environment": "cloud apps",
+    "timing": "review stage",
+    "goal": "ensure backups actually work"
+  },
+  {
+    "id": "ar-eg-079",
+    "title": "How to Test App Stability Over a Week",
+    "angle": "Track crash logs + slowdowns",
+    "audience": "General users",
+    "intent": "review/stability",
+    "environment": "any app",
+    "timing": "one-week observation",
+    "goal": "detect reliability issues"
+  },
+  {
+    "id": "ar-eg-080",
+    "title": "Why Device Compatibility Still Matters in 2025",
+    "angle": "Test behavior across OS versions",
+    "audience": "Mobile users",
+    "intent": "review/compatibility",
+    "environment": "mobile apps",
+    "timing": "pre-adoption",
+    "goal": "avoid version-specific bugs"
+  }
+]
+[
+  {
+    "id": "ar-eg-081",
+    "title": "How to Check If an App Handles Large Files Gracefully",
+    "angle": "Test import/export of 100MB+ files",
+    "audience": "Creators and professionals",
+    "intent": "review/performance",
+    "environment": "media/productivity apps",
+    "timing": "stress test",
+    "goal": "avoid apps that choke on big files"
+  },
+  {
+    "id": "ar-eg-082",
+    "title": "Why the Quality of Undo/Redo Predicts Overall App Reliability",
+    "angle": "Check multi-step undo consistency",
+    "audience": "Writers, designers, editors",
+    "intent": "review/usability",
+    "environment": "editing apps",
+    "timing": "early testing",
+    "goal": "choose apps with safe editing flows"
+  },
+  {
+    "id": "ar-eg-083",
+    "title": "How to Evaluate Touch Accuracy in Mobile Apps",
+    "angle": "Check hitbox alignment and gesture reliability",
+    "audience": "All mobile users",
+    "intent": "review/ui-precision",
+    "environment": "mobile apps",
+    "timing": "first-use",
+    "goal": "avoid apps with frustrating tap behavior"
+  },
+  {
+    "id": "ar-eg-084",
+    "title": "Why Consistent Iconography Improves User Flow",
+    "angle": "Misleading icons cause cognitive friction",
+    "audience": "General users",
+    "intent": "review/ui-evaluation",
+    "environment": "any app",
+    "timing": "initial review",
+    "goal": "identify apps with strong design conventions"
+  },
+  {
+    "id": "ar-eg-085",
+    "title": "How to Judge the Quality of an App’s Dark Mode",
+    "angle": "Check contrast + true black performance",
+    "audience": "Night-mode users",
+    "intent": "review/ui-quality",
+    "environment": "mobile + web apps",
+    "timing": "first-day test",
+    "goal": "ensure comfort + battery savings"
+  },
+  {
+    "id": "ar-eg-086",
+    "title": "Why Sync Transparency Matters",
+    "angle": "Visible sync state prevents confusion",
+    "audience": "Cloud-heavy users",
+    "intent": "review/reliability",
+    "environment": "cross-device apps",
+    "timing": "testing",
+    "goal": "avoid silent sync failures"
+  },
+  {
+    "id": "ar-eg-087",
+    "title": "How to Test Keyboard Input Lag",
+    "angle": "Check delay under high CPU load",
+    "audience": "Writers and productivity users",
+    "intent": "review/performance",
+    "environment": "typing-focused apps",
+    "timing": "trial",
+    "goal": "ensure responsive input at all times"
+  },
+  {
+    "id": "ar-eg-088",
+    "title": "What Makes an App Truly Cross-Platform?",
+    "angle": "Consistent feature parity across OS",
+    "audience": "Multi-device users",
+    "intent": "review/compatibility",
+    "environment": "productivity + creative apps",
+    "timing": "evaluation",
+    "goal": "avoid fragmented experiences"
+  },
+  {
+    "id": "ar-eg-089",
+    "title": "Why You Should Test App Behavior Under Low Storage",
+    "angle": "Check error handling + stability",
+    "audience": "All users",
+    "intent": "review/stability",
+    "environment": "mobile apps",
+    "timing": "stress test",
+    "goal": "avoid apps that crash under low space"
+  },
+  {
+    "id": "ar-eg-090",
+    "title": "How to Evaluate a Music App’s Audio Engine",
+    "angle": "Dynamic range + equalizer behavior",
+    "audience": "Music listeners",
+    "intent": "review/sound-quality",
+    "environment": "music apps",
+    "timing": "usage test",
+    "goal": "detect weak compression engines"
+  },
+
+  {
+    "id": "ar-eg-091",
+    "title": "How to Check Text Rendering Quality in Apps",
+    "angle": "Font smoothing + scaling behavior",
+    "audience": "Readers and writers",
+    "intent": "review/ui-quality",
+    "environment": "reading/writing apps",
+    "timing": "initial evaluation",
+    "goal": "choose apps with clean text rendering"
+  },
+  {
+    "id": "ar-eg-092",
+    "title": "Why You Should Test an App’s Import Limit",
+    "angle": "Check how app behaves with large imports",
+    "audience": "Migrating users",
+    "intent": "review/migration",
+    "environment": "productivity apps",
+    "timing": "pre-switch test",
+    "goal": "avoid painful partial imports"
+  },
+  {
+    "id": "ar-eg-093",
+    "title": "How to Evaluate Notification Delivery Speed",
+    "angle": "Measure delay across devices",
+    "audience": "Busy users",
+    "intent": "review/reliability",
+    "environment": "reminder/task apps",
+    "timing": "testing",
+    "goal": "ensure reliable notifications"
+  },
+  {
+    "id": "ar-eg-094",
+    "title": "Why an App’s Color System Affects Readability",
+    "angle": "Check contrast consistency",
+    "audience": "General users",
+    "intent": "review/ui-clarity",
+    "environment": "any app",
+    "timing": "initial test",
+    "goal": "avoid apps with poor visual hierarchy"
+  },
+  {
+    "id": "ar-eg-095",
+    "title": "How to Review App Performance Over Time",
+    "angle": "Detect memory leaks + slowdowns",
+    "audience": "All users",
+    "intent": "review/stability",
+    "environment": "any app",
+    "timing": "multi-day observation",
+    "goal": "ensure consistent responsiveness"
+  },
+  {
+    "id": "ar-eg-096",
+    "title": "Why Good Error Messages Improve User Experience",
+    "angle": "Check clarity and recovery guidance",
+    "audience": "General users",
+    "intent": "review/usability",
+    "environment": "any app",
+    "timing": "evaluation stage",
+    "goal": "find apps that help users recover quickly"
+  },
+  {
+    "id": "ar-eg-097",
+    "title": "How to Test Undo Safety in Creative Apps",
+    "angle": "Check multi-step undo with large edits",
+    "audience": "Designers and editors",
+    "intent": "review/safety",
+    "environment": "creative apps",
+    "timing": "testing",
+    "goal": "ensure safe experimentation"
+  },
+  {
+    "id": "ar-eg-098",
+    "title": "Why Cross-Device History Sync Matters",
+    "angle": "Ensure seamless transitions",
+    "audience": "Productivity users",
+    "intent": "review/reliability",
+    "environment": "multi-device apps",
+    "timing": "trial",
+    "goal": "maintain continuity across platforms"
+  },
+  {
+    "id": "ar-eg-099",
+    "title": "How to Evaluate App Startup Behavior",
+    "angle": "Check cold start and resume time",
+    "audience": "General users",
+    "intent": "review/performance",
+    "environment": "mobile apps",
+    "timing": "first impression",
+    "goal": "choose apps that launch instantly"
+  },
+  {
+    "id": "ar-eg-100",
+    "title": "What Makes an App Worth Keeping Long Term",
+    "angle": "Stability + export + update cadence",
+    "audience": "All users",
+    "intent": "review/longevity",
+    "environment": "any app",
+    "timing": "long-term evaluation",
+    "goal": "keep only apps with consistent quality signals"
+  }
+]
