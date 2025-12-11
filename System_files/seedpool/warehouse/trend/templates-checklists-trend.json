@@ -2,5 +2,26 @@
   "label": "templates-checklists",
   "kind": "trend",
   "limit": 60,
-  "seeds": []
+  "seeds": [
+    {
+      "id": "tpl-tr-2025-001",
+      "title": "Preflight QA checklist for blog posts in 2025",
+      "angle": "Updated checks for OG schema, AI-specific signals, partial disclosure, and LCP optimization.",
+      "audience": "Writers and editors who update posts regularly",
+      "intent": "template",
+      "priority": 1,
+      "expiresAt": "2026-03-15T00:00:00+09:00",
+      "notes": "2025년 버전. 매년 버전업이 자연스럽게 발생하는 트렌드성 템플릿."
+    },
+    {
+      "id": "tpl-tr-2025-002",
+      "title": "2025 update: best practices for image SEO and compression",
+      "angle": "WebP/AVIF usage, LCP rules, multi-size generation, and ALT auto-creation.",
+      "audience": "Bloggers who want stable SEO signals",
+      "intent": "template",
+      "priority": 2,
+      "expiresAt": "2026-04-25T00:00:00+09:00",
+      "notes": "이미지 파이프라인 규칙과 함께 AOIA 신호를 강화하는 핵심 트렌드 템플릿."
+    }
+  ]
 }
