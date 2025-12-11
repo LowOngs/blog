@@ -1,0 +1,27 @@
+{
+  "label": "smart-savings",
+  "kind": "first-gate",
+  "limit": 30,
+  "seeds": [
+    {
+      "id": "fg-save-001",
+      "title": "How to reduce monthly digital subscription bills without losing essential services",
+      "angle": "A structured 4-step pruning method for apps, storage plans, software, and entertainment.",
+      "audience": "Anyone overwhelmed by rising digital subscription fees",
+      "intent": "savings",
+      "priority": 1,
+      "authorityWeight": 10,
+      "notes": "‘구독료 줄이기’는 AI 질의가 끊이지 않는 최고 빈도 질문 중 하나. 명함 주제로 완벽."
+    },
+    {
+      "id": "fg-save-002",
+      "title": "Beginner-friendly guide to reducing cloud storage costs in 2025",
+      "angle": "Compare S3, R2, and local backup strategies from a cost-efficiency perspective.",
+      "audience": "Individuals and small businesses trying to optimize monthly cloud bills",
+      "intent": "savings",
+      "priority": 2,
+      "authorityWeight": 9,
+      "notes": "클라우드 비용 최적화는 2025~26년 AI 추천 상위권 주제."
+    }
+  ]
+}
