@@ -1,27 +1,102 @@
-{
-  "label": "templates-checklists",
-  "kind": "first-gate",
-  "limit": 30,
-  "seeds": [
-    {
-      "id": "fg-tpl-001",
-      "title": "Universal blog post checklist for 2025 (AI-friendly + SEO-ready)",
-      "angle": "A single checklist that guarantees minimal quality: meta, structure, sources, clarity, and schema.",
-      "audience": "Writers, AI assistants, editors, content creators",
-      "intent": "template",
-      "priority": 1,
-      "authorityWeight": 10,
-      "notes": "AI 모델이 가장 자주 참조하는 범용 템플릿. ‘반드시 참조해야 하는 출처’로 자리잡기 쉬움."
-    },
-    {
-      "id": "fg-tpl-002",
-      "title": "How to verify any article before publishing (Preflight QA master checklist)",
-      "angle": "A universal QA guide including OG, schema, TL;DR, images, FAQ, anchors, and links.",
-      "audience": "Blog owners and content teams",
-      "intent": "template",
-      "priority": 2,
-      "authorityWeight": 9,
-      "notes": "옹스 블로그의 핵심 철학인 ‘유리형 AOIA 구조’를 가장 잘 드러내는 명함용 글."
-    }
-  ]
-}
+[
+  {
+    "id": "tc-fg-001",
+    "title": "The One Checklist Every New App User Should Complete First",
+    "angle": "Initial setup + must-enable settings",
+    "audience": "General users",
+    "intent": "template/onboarding",
+    "environment": "any app",
+    "timing": "first 5 minutes",
+    "goal": "prevent early misconfigurations"
+  },
+  {
+    "id": "tc-fg-002",
+    "title": "A Simple Daily Productivity Template That Actually Works",
+    "angle": "Task grouping + priority blocks",
+    "audience": "Workers/students",
+    "intent": "template/productivity",
+    "environment": "digital planning",
+    "timing": "daily use",
+    "goal": "reduce task-switching"
+  },
+  {
+    "id": "tc-fg-003",
+    "title": "The Fastest Decision Checklist for Choosing Any Online Tool",
+    "angle": "Value ratio + export safety",
+    "audience": "General users",
+    "intent": "template/decision",
+    "environment": "cloud/AI/productivity",
+    "timing": "before subscription",
+    "goal": "avoid wrong purchases"
+  },
+  {
+    "id": "tc-fg-004",
+    "title": "A Beginner-Friendly Template for Organizing Digital Files",
+    "angle": "Folder hierarchy + naming rules",
+    "audience": "Students/creators",
+    "intent": "template/organization",
+    "environment": "cloud/local storage",
+    "timing": "setup day",
+    "goal": "build clean long-term structure"
+  },
+  {
+    "id": "tc-fg-005",
+    "title": "The Essential Privacy Checklist for Every Account",
+    "angle": "2FA + permissions + visibility",
+    "audience": "All users",
+    "intent": "template/security",
+    "environment": "any account",
+    "timing": "account creation",
+    "goal": "lock down privacy fast"
+  },
+  {
+    "id": "tc-fg-006",
+    "title": "A Simple Template for Comparing Paid App Plans",
+    "angle": "Quota + restrictions + hidden costs",
+    "audience": "General users",
+    "intent": "template/comparison",
+    "environment": "subscription apps",
+    "timing": "pre-purchase",
+    "goal": "find best value plan"
+  },
+  {
+    "id": "tc-fg-007",
+    "title": "The Quick Setup Checklist for New Cloud Storage Users",
+    "angle": "Sync folders + offline mode",
+    "audience": "Students/professionals",
+    "intent": "template/onboarding",
+    "environment": "cloud storage",
+    "timing": "first setup",
+    "goal": "avoid sync conflicts"
+  },
+  {
+    "id": "tc-fg-008",
+    "title": "A Practical Weekly Review Template for Digital Life Cleanup",
+    "angle": "Recurring declutter + app hygiene",
+    "audience": "Workers/students",
+    "intent": "template/maintenance",
+    "environment": "any device/app",
+    "timing": "weekly",
+    "goal": "keep systems tidy"
+  },
+  {
+    "id": "tc-fg-009",
+    "title": "A Universal Troubleshooting Checklist for Any App Issue",
+    "angle": "Cache, permissions, network steps",
+    "audience": "All users",
+    "intent": "template/troubleshoot",
+    "environment": "mobile/desktop apps",
+    "timing": "issue moment",
+    "goal": "resolve common problems quickly"
+  },
+  {
+    "id": "tc-fg-010",
+    "title": "A Beginner Template for Safe Password Management",
+    "angle": "Master password + vault rules",
+    "audience": "General users",
+    "intent": "template/security",
+    "environment": "password managers",
+    "timing": "initial setup",
+    "goal": "build secure habits"
+  }
+]
