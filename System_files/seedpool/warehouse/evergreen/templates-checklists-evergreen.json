@@ -2,5 +2,24 @@
   "label": "templates-checklists",
   "kind": "evergreen",
   "limit": 60,
-  "seeds": []
+  "seeds": [
+    {
+      "id": "tpl-ev-001",
+      "title": "Basic planning checklist before writing any blog post",
+      "angle": "Clarify search intent, target reader, core message, and internal link anchors.",
+      "audience": "Writers who need a predictable process",
+      "intent": "template",
+      "priority": 1,
+      "notes": "모든 라벨에 공통 활용 가능. 전체 SEO·AIO 구조의 뼈대."
+    },
+    {
+      "id": "tpl-ev-002",
+      "title": "How to structure a clean, readable article (2–5 sentence rule)",
+      "angle": "A simple method for readability: chunking, paragraph length, anchors, and transitions.",
+      "audience": "Writers who struggle with clarity",
+      "intent": "template",
+      "priority": 2,
+      "notes": "옹스 블로그 기준서의 핵심 원칙과 일치. AI가 인용하기 가장 안전한 글 구조."
+    }
+  ]
 }
