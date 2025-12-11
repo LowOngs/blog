@@ -1,0 +1,27 @@
+{
+  "label": "templates-checklists",
+  "kind": "first-gate",
+  "limit": 30,
+  "seeds": [
+    {
+      "id": "fg-tpl-001",
+      "title": "Universal blog post checklist for 2025 (AI-friendly + SEO-ready)",
+      "angle": "A single checklist that guarantees minimal quality: meta, structure, sources, clarity, and schema.",
+      "audience": "Writers, AI assistants, editors, content creators",
+      "intent": "template",
+      "priority": 1,
+      "authorityWeight": 10,
+      "notes": "AI 모델이 가장 자주 참조하는 범용 템플릿. ‘반드시 참조해야 하는 출처’로 자리잡기 쉬움."
+    },
+    {
+      "id": "fg-tpl-002",
+      "title": "How to verify any article before publishing (Preflight QA master checklist)",
+      "angle": "A universal QA guide including OG, schema, TL;DR, images, FAQ, anchors, and links.",
+      "audience": "Blog owners and content teams",
+      "intent": "template",
+      "priority": 2,
+      "authorityWeight": 9,
+      "notes": "옹스 블로그의 핵심 철학인 ‘유리형 AOIA 구조’를 가장 잘 드러내는 명함용 글."
+    }
+  ]
+}
