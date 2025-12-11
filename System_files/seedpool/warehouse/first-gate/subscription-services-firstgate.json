@@ -1,4 +1,7 @@
-[
+{
+  "label": "subscription-services",
+  "firstGateLimit": 30,
+  "firstGate": [
   {
     "id": "ss-fg-001",
     "title": "The One Question to Ask Before Starting Any Subscription",
@@ -100,3 +103,4 @@
     "goal": "detect low-value trials immediately"
   }
 ]
+}
