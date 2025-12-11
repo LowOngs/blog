@@ -810,3 +810,206 @@
     "goal": "avoid irreversible document loss"
   }
 ]
+[
+  {
+    "id": "ss-eg-081",
+    "title": "How to Evaluate the True Learning Depth of Subscription Courses",
+    "angle": "Instructor quality + actionable exercises",
+    "audience": "Learners",
+    "intent": "review/education",
+    "environment": "learning platforms",
+    "timing": "trial",
+    "goal": "identify courses that build real skills"
+  },
+  {
+    "id": "ss-eg-082",
+    "title": "Why Bandwidth Efficiency Matters in Cloud Streaming Subscriptions",
+    "angle": "Adaptive bitrate + stability",
+    "audience": "Entertainment users",
+    "intent": "review/performance",
+    "environment": "video/audio streaming",
+    "timing": "comparison",
+    "goal": "ensure stable playback on all networks"
+  },
+  {
+    "id": "ss-eg-083",
+    "title": "How to Judge Fair Device Policies in Productivity Subscriptions",
+    "angle": "Concurrent device rules + login logic",
+    "audience": "Workers/students",
+    "intent": "review/fairness",
+    "environment": "productivity tools",
+    "timing": "setup",
+    "goal": "avoid unexpected device blocking"
+  },
+  {
+    "id": "ss-eg-084",
+    "title": "Why Transparency in Logging Policies Is Crucial for VPN Subscriptions",
+    "angle": "Real no-log proof + external audits",
+    "audience": "Privacy users",
+    "intent": "review/security",
+    "environment": "vpn services",
+    "timing": "evaluation",
+    "goal": "ensure data trustworthiness"
+  },
+  {
+    "id": "ss-eg-085",
+    "title": "How to Evaluate Long-Term ROI for AI Productivity Subscriptions",
+    "angle": "Work hours saved per month",
+    "audience": "Professionals",
+    "intent": "review/value",
+    "environment": "AI tools",
+    "timing": "usage",
+    "goal": "calculate real workflow gains"
+  },
+  {
+    "id": "ss-eg-086",
+    "title": "Why Device Compatibility Defines Streaming Flexibility",
+    "angle": "Smart TV + mobile parity",
+    "audience": "Entertainment users",
+    "intent": "review/compatibility",
+    "environment": "video streaming",
+    "timing": "evaluation",
+    "goal": "avoid restricted hardware scenarios"
+  },
+  {
+    "id": "ss-eg-087",
+    "title": "How to Evaluate the Reliability of Online Backup Tools",
+    "angle": "Restore test + data integrity check",
+    "audience": "General users",
+    "intent": "review/reliability",
+    "environment": "cloud backup apps",
+    "timing": "trial",
+    "goal": "ensure safe retrieval of files"
+  },
+  {
+    "id": "ss-eg-088",
+    "title": "Why Consistent Update Frequency Predicts Subscription Longevity",
+    "angle": "Release pacing",
+    "audience": "General users",
+    "intent": "review/support",
+    "environment": "any subscription",
+    "timing": "long-term observation",
+    "goal": "predict future product investment"
+  },
+  {
+    "id": "ss-eg-089",
+    "title": "How to Evaluate App Learning Curve in Subscription Tools",
+    "angle": "Feature discoverability + UI clarity",
+    "audience": "New users",
+    "intent": "review/usability",
+    "environment": "any app subscription",
+    "timing": "first week",
+    "goal": "ensure fast onboarding"
+  },
+  {
+    "id": "ss-eg-090",
+    "title": "Why Accurate Forecast Alerts Matter in Weather Subscriptions",
+    "angle": "Storm alert timing + precision",
+    "audience": "Travel/outdoor users",
+    "intent": "review/precision",
+    "environment": "weather apps",
+    "timing": "seasonal",
+    "goal": "ensure reliable alert delivery"
+  },
+
+  {
+    "id": "ss-eg-091",
+    "title": "How to Evaluate Collaboration Quality in Cloud Tools",
+    "angle": "Latency + multi-user sync",
+    "audience": "Teams",
+    "intent": "review/collaboration",
+    "environment": "cloud office/document tools",
+    "timing": "test period",
+    "goal": "ensure smooth team workflows"
+  },
+  {
+    "id": "ss-eg-092",
+    "title": "Why AI Translation Plans Need Real Context Awareness Tests",
+    "angle": "Semantic accuracy + latency",
+    "audience": "Travelers/students",
+    "intent": "review/accuracy",
+    "environment": "translation apps",
+    "timing": "evaluation",
+    "goal": "avoid mistranslation risks"
+  },
+  {
+    "id": "ss-eg-093",
+    "title": "How to Evaluate Subscription Scalability for Growing Teams",
+    "angle": "Seat management + admin control",
+    "audience": "Businesses",
+    "intent": "review/administration",
+    "environment": "team SaaS",
+    "timing": "team expansion",
+    "goal": "ensure smooth scaling"
+  },
+  {
+    "id": "ss-eg-094",
+    "title": "Why Clear Plan Differentiation Matters in Learning Platforms",
+    "angle": "Feature tiers + curriculum depth",
+    "audience": "Learners",
+    "intent": "review/value",
+    "environment": "learning subscriptions",
+    "timing": "planning",
+    "goal": "avoid paying for minimal differences"
+  },
+  {
+    "id": "ss-eg-095",
+    "title": "How to Evaluate the Longevity of Device Subscription Plans",
+    "angle": "Hardware support timeline",
+    "audience": "Tech users",
+    "intent": "review/compatibility",
+    "environment": "device/cloud ecosystems",
+    "timing": "research",
+    "goal": "avoid short-lifespan subscriptions"
+  },
+  {
+    "id": "ss-eg-096",
+    "title": "Why Sync Recovery Accuracy Matters in Cloud Document Plans",
+    "angle": "Conflict resolution reliability",
+    "audience": "Workers/students",
+    "intent": "review/reliability",
+    "environment": "document tools",
+    "timing": "stress test",
+    "goal": "ensure no file corruption"
+  },
+  {
+    "id": "ss-eg-097",
+    "title": "How to Evaluate Noise Handling in AI Audio Subscriptions",
+    "angle": "Background suppression + clarity",
+    "audience": "Remote workers/creators",
+    "intent": "review/quality",
+    "environment": "AI audio tools",
+    "timing": "evaluation",
+    "goal": "identify reliable real-time audio tools"
+  },
+  {
+    "id": "ss-eg-098",
+    "title": "Why Team Permission Structure Matters in Cloud Platforms",
+    "angle": "Granular roles + audit logs",
+    "audience": "Businesses",
+    "intent": "review/security",
+    "environment": "team SaaS/cloud",
+    "timing": "setup",
+    "goal": "ensure safe multi-user operations"
+  },
+  {
+    "id": "ss-eg-099",
+    "title": "How to Evaluate Price-to-Feature Ratio in Subscription Bundles",
+    "angle": "Comparison of included services",
+    "audience": "General users",
+    "intent": "review/value",
+    "environment": "bundle subscriptions",
+    "timing": "evaluation",
+    "goal": "avoid overpriced bundles"
+  },
+  {
+    "id": "ss-eg-100",
+    "title": "Why Long-Term Reliability Matters More Than Flashy Features",
+    "angle": "Stability over novelty",
+    "audience": "All users",
+    "intent": "review/reliability",
+    "environment": "any subscription",
+    "timing": "long-term",
+    "goal": "focus on sustainable value"
+  }
+]
