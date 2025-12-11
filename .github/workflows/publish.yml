@@ -1,7 +1,6 @@
 name: Publish Blog (Blogger)
 
 on:
-  # 수동 실행 + 입력값 (GitHub Actions UI)
   workflow_dispatch:
     inputs:
       category:
@@ -18,11 +17,10 @@ on:
           - "5: Smart Savings (smart-savings)"
           - "6: Templates & Checklists (templates-checklists)"
       dry_run:
-        description: "true = 발행 시도만 로그, 실제 Blogger 게시 없음 / false = 실제 발행"
+        description: "true = 발행 시도만 로그 / false = 실제 Blogger 게시"
         required: true
         default: "true"
 
-  # 자동 실행(스케줄) — UTC 기준! (예: 매일 00:30 UTC = KST 오전 9:30)
   schedule:
     - cron: "30 0 * * *"
 
@@ -32,7 +30,6 @@ jobs:
     timeout-minutes: 20
 
     env:
-      # ===== Site/CDN/AIO =====
       SITE_NAME:       "Ongs Blog"
       SITE_BASE:       https://ongsblog.com
       CANONICAL_BASE:  ${{ secrets.CANONICAL_BASE }}
@@ -40,34 +37,34 @@ jobs:
       TIME_ZONE:       America/Los_Angeles
       AOIA_ENABLE:     "false"
 
-      # 스케줄 기본 발행 파라미터
+      # === 스케줄 모드 / 페이지ID 모드 ===
+      SCHEDULE_MODE:   ${{ secrets.SCHEDULE_MODE }}
+      PAGE_ID_MODE:    ${{ secrets.PAGE_ID_MODE }}
+
+      # === OpenAI (본문 생성기) ===
+      OPENAI_API_KEY:  ${{ secrets.OPENAI_API_KEY }}
+      OPENAI_MODEL:    "gpt-4.1-mini"
+
+      # === 스케줄 기본 파라미터 ===
       SCHEDULE_LABEL:         ""
       SCHEDULE_MAX_POSTS:     "3"
       SCHEDULE_DRY_RUN:       "false"
 
-      # 스케줄/페이지ID 모드 스위치 (기본: test)
-      # - SCHEDULE_MODE = 'live' 일 때만 본문 자동 생성/실제 발급
-      # - PAGE_ID_MODE  = 'live' 일 때만 pageId 시퀀스 증가
-      SCHEDULE_MODE:          "test"
-      PAGE_ID_MODE:           "test"
-
-      # 로컬 이미지 소스폴더
+      # === 이미지 처리(R2) ===
       IMAGES_DIR:      System_files/assets/images
-
-      # ===== R2 / CDN =====
       R2_ACCOUNT_ID:         ${{ secrets.R2_ACCOUNT_ID }}
       R2_ACCESS_KEY_ID:      ${{ secrets.R2_ACCESS_KEY_ID }}
       R2_SECRET_ACCESS_KEY:  ${{ secrets.R2_SECRET_ACCESS_KEY }}
       R2_BUCKET:             ${{ secrets.R2_BUCKET }}
       R2_ENDPOINT:           ${{ secrets.R2_ENDPOINT }}
 
-      # ===== Blogger / Google =====
+      # === Blogger API ===
       BLOGGER_BLOG_ID:       ${{ secrets.BLOGGER_BLOG_ID }}
       GOOGLE_CLIENT_ID:      ${{ secrets.GOOGLE_CLIENT_ID }}
       GOOGLE_CLIENT_SECRET:  ${{ secrets.GOOGLE_CLIENT_SECRET }}
       GOOGLE_REFRESH_TOKEN:  ${{ secrets.GOOGLE_REFRESH_TOKEN }}
 
-      # ===== Page ID 시퀀스 =====
+      # === Page ID 시퀀스 ===
       PAGEID_SECRET:         ${{ secrets.PAGEID_SECRET }}
 
     steps:
@@ -82,7 +79,6 @@ jobs:
             npm install
           fi
 
-      # 수동 실행 inputs 처리
       - name: Resolve inputs (dispatch vs schedule)
         run: |
           echo "event_name=${{ github.event_name }}"
@@ -126,8 +122,6 @@ jobs:
           echo "  CATEGORY_RAW=$CATEGORY_RAW"
           echo "  MAX_POSTS=$MAX_POSTS"
           echo "  DRY_RUN=$DRY_RUN"
-          echo "  SCHEDULE_MODE=${{ env.SCHEDULE_MODE }}"
-          echo "  PAGE_ID_MODE=${{ env.PAGE_ID_MODE }}"
 
       - name: Verify required files exist
         run: |
@@ -141,26 +135,23 @@ jobs:
           test -f System_files/scripts/build/images-renew.cjs
           test -f System_files/scripts/build/images-build-og.cjs
           test -f System_files/scripts/build/lib/page-ids.cjs
-          test -f System_files/scripts/build/generate-body.cjs
-          ls -la System_files/content/posts || true
-          echo "✅ required files OK"
 
-      # === 오늘 발행할 시드 선정 ===
+          echo "OK: required files present"
+
+      # === 오늘 발행 시드 선택 → 큐 생성 ===
       - name: Plan today posts from seedpool
-        run: |
-          echo "SCHEDULE_MODE=$SCHEDULE_MODE"
-          node System_files/scripts/build/seed-scheduler.cjs
+        run: node System_files/scripts/build/seed-scheduler.cjs
 
       - name: Generate posts from today queue
         run: node System_files/scripts/build/queue-to-posts.cjs
 
-      # === bodyPrompt 기반 본문 생성 (스위치 존중) ===
-      - name: Generate article bodies from prompts (SCHEDULE_MODE-aware)
+      # === 본문 자동생성 ===
+      - name: Generate article bodies (if body empty)
         run: |
           echo "Running generate-body.cjs with SCHEDULE_MODE=$SCHEDULE_MODE"
           node System_files/scripts/build/generate-body.cjs
 
-      # === 렌더 → 본문 문단 정규화 → 툴 복사 ===
+      # === JSON → HTML 렌더 ===
       - name: Render posts (JSON → HTML)
         run: npm run posts:render
 
@@ -170,11 +161,11 @@ jobs:
       - name: Copy tools (edit-request UI)
         run: node System_files/scripts/build/copy-tools.cjs
 
-      # === OG 이미지 / 이미지 파이프라인 (로컬 루프와 동기화) ===
-      - name: Renew OG manifest from rendered posts
+      # === OG 이미지 / 이미지 업로드 ===
+      - name: Renew OG manifest
         run: npm run images:renew
 
-      - name: Build OG images (with pageId sequence)
+      - name: Build OG images
         run: npm run images:build:og
 
       - name: Upload images to R2
@@ -185,7 +176,7 @@ jobs:
             node System_files/scripts/build/r2-upload.js
           fi
 
-      - name: Rewrite image URLs in posts (body images → CDN)
+      - name: Rewrite image URLs
         run: |
           if npm run | grep -q "images:rewrite"; then
             npm run images:rewrite
@@ -193,14 +184,11 @@ jobs:
             node System_files/scripts/build/rewrite-images.js
           fi
 
-      # === AIO/SEO 밸리데이트 & 자동 교정 ===
-      - name: Validate & auto-repair (AIO/SEO)
+      # === AIO/SEO 교정 ===
+      - name: Validate & auto-repair
         run: npm run posts:validate
 
-      - name: List rendered outputs
-        run: ls -la System_files/dist/posts || true
-
-      # === Blogger 발행 전 토큰 체크 ===
+      # === Token Refresh ===
       - name: Token refresh check
         env:
           C_ID:     ${{ secrets.GOOGLE_CLIENT_ID }}
@@ -213,16 +201,10 @@ jobs:
             -d client_secret="$C_SECRET" \
             -d refresh_token="$R_TOKEN" \
             -d grant_type=refresh_token)
-          echo "$RESP" | grep -q access_token && echo "✅ access_token issued" || (echo "❌ token refresh failed"; echo "$RESP"; exit 1)
+          echo "$RESP" | grep -q access_token && echo "OK" || (echo "token refresh failed"; exit 1)
 
-      - name: Check BLOGGER_BLOG_ID
-        env:
-          BLOG_ID: ${{ secrets.BLOGGER_BLOG_ID }}
-        run: |
-          test -n "$BLOG_ID" || (echo "❌ BLOGGER_BLOG_ID is empty"; exit 1)
-          echo "✅ BLOGGER_BLOG_ID set (masked)."
-
-      - name: Publish to Blogger (respecting LABEL/MAX_POSTS/DRY_RUN)
+      # === 발행 ===
+      - name: Publish to Blogger
         env:
           LABEL:      ${{ env.LABEL }}
           MAX_POSTS:  ${{ env.MAX_POSTS }}
@@ -231,6 +213,7 @@ jobs:
           echo "LABEL=$LABEL MAX_POSTS=$MAX_POSTS DRY_RUN=$DRY_RUN"
           npm run publish:blogger
 
+      # === 아티팩트 보관 ===
       - name: Upload artifacts
         if: always()
         uses: actions/upload-artifact@v4
