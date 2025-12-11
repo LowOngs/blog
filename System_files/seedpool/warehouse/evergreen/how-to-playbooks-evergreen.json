@@ -1,25 +1,921 @@
-{
-  "label": "how-to-playbooks",
-  "kind": "evergreen",
-  "limit": 200,
-  "seeds": [
-    {
-      "id": "howto-ev-001",
-      "title": "Setting up Node.js and Git on Windows and cloning your first repo",
-      "angle": "Beginner-friendly path from nothing installed to having a working local project.",
-      "audience": "People creating their first development environment",
-      "intent": "how-to",
-      "priority": 1,
-      "notes": "이미 기본 시드풀에 있던 핵심 에버그린 How-to, 여러 글에서 반복 링크 가능."
-    },
-    {
-      "id": "howto-ev-002",
-      "title": "How to back up your blog content before any major change",
-      "angle": "Simple habits to export posts, images, and settings so you can always roll back.",
-      "audience": "Blog owners planning migrations, redesigns, or platform changes",
-      "intent": "how-to",
-      "priority": 2,
-      "notes": "백업 습관은 시대가 바뀌어도 유효한 에버그린 How-to."
-    }
-  ]
-}
+[
+  {
+    "id": "ever-001",
+    "title": "Daily Planning Checklist for High-Productivity Workflows",
+    "angle": "A reusable daily planning framework used across productivity teams.",
+    "audience": "Knowledge workers and creators",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Classic evergreen; applicable all year"
+  },
+  {
+    "id": "ever-002",
+    "title": "Weekly Review Template for Personal and Work Projects",
+    "angle": "A structured review ritual that reduces stress and increases clarity.",
+    "audience": "People balancing multiple projects",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Evergreen GTD-inspired checklist"
+  },
+  {
+    "id": "ever-003",
+    "title": "Simple 5-Step Method to Prioritize Competing Tasks",
+    "angle": "A universal prioritization model that works for any category.",
+    "audience": "Anyone dealing with task overload",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": ""
+  },
+  {
+    "id": "ever-004",
+    "title": "Beginner-Friendly Framework for Comparing Similar Apps",
+    "angle": "A neutral, reusable rubric that works for reviews, how-to, and templates.",
+    "audience": "Review writers and tech users",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-005",
+    "title": "Essential Pre-Publish Checklist for Any Blog Article",
+    "angle": "Universal QA steps: clarity, links, structure, AIO readiness.",
+    "audience": "Bloggers and editors",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-006",
+    "title": "5-Bullet Template for Explaining Any Complex Topic",
+    "angle": "A minimal template that removes jargon and focuses on reader clarity.",
+    "audience": "Writers and educators",
+    "intent": "template",
+    "priority": 2,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-007",
+    "title": "Universal Onboarding Checklist for Any New App",
+    "angle": "Reusable steps for understanding features, settings, and workflows.",
+    "audience": "App users and team trainers",
+    "intent": "template",
+    "priority": 2,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-008",
+    "title": "Simple Template for Writing Clear How-To Guides",
+    "angle": "A short blueprint for structured tutorials.",
+    "audience": "Beginners writing their first tutorial",
+    "intent": "template",
+    "priority": 2,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-009",
+    "title": "Easy Comparison Template for Evaluating Product Value",
+    "angle": "Suitable for apps, devices, or subscription services.",
+    "audience": "Shoppers and reviewers",
+    "intent": "template",
+    "priority": 2,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-010",
+    "title": "Checklist for Diagnosing Any Tech Problem Quickly",
+    "angle": "Universal debugging sequence applicable to most devices and apps.",
+    "audience": "General tech users",
+    "intent": "template",
+    "priority": 2,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-011",
+    "title": "Beginner Framework for Choosing the Right App",
+    "angle": "A criteria-based approach covering cost, features, privacy, and workflow.",
+    "audience": "App shoppers",
+    "intent": "template",
+    "priority": 3,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-012",
+    "title": "Reusable Template for Quick Pros & Cons Lists",
+    "angle": "Useful for reviews, savings guides, and comparison posts.",
+    "audience": "Bloggers and product researchers",
+    "intent": "template",
+    "priority": 3,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-013",
+    "title": "Starter Template for First-Time Budget Planners",
+    "angle": "Simple monthly layout with categories people actually use.",
+    "audience": "Beginners managing money",
+    "intent": "template",
+    "priority": 3,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-014",
+    "title": "Universal Troubleshooting Guide for Subscription Service Issues",
+    "angle": "General diagnostic path for login, billing, and access problems.",
+    "audience": "Subscription users",
+    "intent": "template",
+    "priority": 3,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-015",
+    "title": "Checklist: What to Verify Before Buying Any Device",
+    "angle": "Simple inspection routine covering build quality, battery, and display.",
+    "audience": "Device shoppers",
+    "intent": "template",
+    "priority": 3,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-016",
+    "title": "Template for Writing Clear Step-by-Step Tutorials",
+    "angle": "A general blueprint to reduce confusion and increase readability.",
+    "audience": "Writers creating guides",
+    "intent": "template",
+    "priority": 4,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-017",
+    "title": "Universal Savings Strategy Checklist",
+    "angle": "Simple habits and changes that help long-term cost reduction.",
+    "audience": "General readers aiming to save money",
+    "intent": "template",
+    "priority": 4,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-018",
+    "title": "Reusable Template for Quick Feature Overviews",
+    "angle": "Helps readers grasp what an app or device actually does, fast.",
+    "audience": "Review readers and shoppers",
+    "intent": "template",
+    "priority": 4,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-019",
+    "title": "Checklist for Identifying Hidden Costs in Any Subscription",
+    "angle": "Teaches users what to look for in terms of renewal, fees, and tiers.",
+    "audience": "Subscription shoppers",
+    "intent": "template",
+    "priority": 4,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-020",
+    "title": "Template for Micro-Reviews (Quick 1-Minute Read)",
+    "angle": "Ultra-short reviews for apps, devices, or services.",
+    "audience": "Readers who want bite-sized analysis",
+    "intent": "template",
+    "priority": 4,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-021",
+    "title": "Checklist for Evaluating Any App’s Privacy Settings",
+    "angle": "A universal privacy review list covering permissions, data sharing, and security options.",
+    "audience": "App users concerned about privacy",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Usable across all app categories"
+  },
+  {
+    "id": "ever-022",
+    "title": "Universal ‘Before You Install’ App Inspection Guide",
+    "angle": "A pre-installation workflow to avoid unwanted costs and wrong app choices.",
+    "audience": "General users installing new software",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-023",
+    "title": "Simple Template for Writing Feature Comparison Tables",
+    "angle": "Provides a neutral structure for comparing similar tools or devices.",
+    "audience": "Review writers and comparison shoppers",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-024",
+    "title": "Basic Guide: How to Read Pricing Pages More Accurately",
+    "angle": "A template to detect hidden tiers, upsells, and trial traps.",
+    "audience": "Subscription shoppers",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-025",
+    "title": "Checklist for Safe Account Migration Between Services",
+    "angle": "A general list for moving data—app, device, or subscription—without loss.",
+    "audience": "Users switching apps or devices",
+    "intent": "template",
+    "priority": 2,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-026",
+    "title": "Universal Template for Quick Start Guides",
+    "angle": "Reusable layout for onboarding new users to any tool.",
+    "audience": "Writers creating onboarding documents",
+    "intent": "template",
+    "priority": 2,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-027",
+    "title": "Minimalist Guide to Decluttering Your Digital Workspace",
+    "angle": "Simple habits to reduce app overload and improve mental focus.",
+    "audience": "Productivity-focused users",
+    "intent": "template",
+    "priority": 2,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-028",
+    "title": "Checklist: How to Evaluate AI Tools Without Hype",
+    "angle": "A clear method to judge AI features, pricing, and limitations.",
+    "audience": "General users trying modern AI apps",
+    "intent": "template",
+    "priority": 2,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Evergreen for AI category, no trend dependency"
+  },
+  {
+    "id": "ever-029",
+    "title": "Reusable Template for Balanced App Reviews",
+    "angle": "A neutral review format covering features, usability, pricing, and alternatives.",
+    "audience": "App reviewers",
+    "intent": "template",
+    "priority": 2,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Foundation template for any review label"
+  },
+  {
+    "id": "ever-030",
+    "title": "Pre-Upgrade Checklist for Any Device",
+    "angle": "Steps to confirm whether an upgrade is actually needed.",
+    "audience": "Device owners considering an upgrade",
+    "intent": "template",
+    "priority": 2,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-031",
+    "title": "How to Compare Specifications Without Getting Confused",
+    "angle": "A universal spec-reading guide that works for phones, tablets, laptops.",
+    "audience": "Device shoppers",
+    "intent": "template",
+    "priority": 3,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Timeless content"
+  },
+  {
+    "id": "ever-032",
+    "title": "Checklist: Avoiding Unnecessary Monthly Subscriptions",
+    "angle": "A universal method to filter essential vs non-essential services.",
+    "audience": "Budget-conscious users",
+    "intent": "template",
+    "priority": 3,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-033",
+    "title": "Basic Template for Step-by-Step Troubleshooting Guides",
+    "angle": "Works for apps, devices, or login/account issues.",
+    "audience": "General users",
+    "intent": "template",
+    "priority": 3,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-034",
+    "title": "Universal Template for Feature Highlight Articles",
+    "angle": "A structure to quickly introduce what’s useful, unique, or time-saving.",
+    "audience": "Blog writers and tool reviewers",
+    "intent": "template",
+    "priority": 3,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-035",
+    "title": "Checklist: Preparing a Device Before Resale or Transfer",
+    "angle": "Universal wipe/reset/backup flow for any device.",
+    "audience": "Sellers and recyclers",
+    "intent": "template",
+    "priority": 3,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-036",
+    "title": "How to Distinguish Real vs Marketing Features",
+    "angle": "A reusable thinking framework for analyzing feature claims.",
+    "audience": "Tech shoppers and reviewers",
+    "intent": "template",
+    "priority": 4,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Evergreen concept"
+  },
+  {
+    "id": "ever-037",
+    "title": "Checklist for Evaluating Ease-of-Use in Any Product",
+    "angle": "A universal usability scoring method that works across categories.",
+    "audience": "Reviewers and shoppers",
+    "intent": "template",
+    "priority": 4,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-038",
+    "title": "Creating Reusable Naming Conventions for Files and Projects",
+    "angle": "Evergreen organizational best practices.",
+    "audience": "General users and teams",
+    "intent": "template",
+    "priority": 4,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-039",
+    "title": "Checklist: Questions to Ask Before Trying a New AI Tool",
+    "angle": "Clarifies expectations, cost, data handling, and alternatives.",
+    "audience": "Casual AI tool users",
+    "intent": "template",
+    "priority": 4,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Timeless AI-safety evergreen"
+  },
+  {
+    "id": "ever-040",
+    "title": "5-Part Template for Beginner-Friendly Explainers",
+    "angle": "A structure that turns complex ideas into simple guidance.",
+    "audience": "Writers targeting general audiences",
+    "intent": "template",
+    "priority": 4,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-041",
+    "title": "Universal Template for Beginner Product Guides",
+    "angle": "A placeholder-friendly structure that works for any new tool review.",
+    "audience": "New users exploring unfamiliar apps or devices",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-042",
+    "title": "Checklist: How to Verify Product Credibility Online",
+    "angle": "Safely evaluating websites, ratings, and documentation before buying.",
+    "audience": "Online shoppers",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-043",
+    "title": "Template for Writing Mini How-To Guides",
+    "angle": "A universal short-format guide layout for quick fixes.",
+    "audience": "General users troubleshooting issues",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-044",
+    "title": "Basic Security Checklist for Any Digital Account",
+    "angle": "Universal protections: passwords, MFA, backup codes, devices.",
+    "audience": "Any user with online accounts",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-045",
+    "title": "Simple Template for ‘Pros and Cons’ Product Summaries",
+    "angle": "A reusable comparison element suitable for any category.",
+    "audience": "Review writers",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-046",
+    "title": "Checklist: Pre-Purchase Questions for Any Device",
+    "angle": "Universal buying questions that help avoid regret.",
+    "audience": "Device shoppers",
+    "intent": "template",
+    "priority": 2,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-047",
+    "title": "Template for Documenting Feature Updates Clearly",
+    "angle": "Helps writers publish concise update summaries.",
+    "audience": "Tech bloggers and reviewers",
+    "intent": "template",
+    "priority": 2,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-048",
+    "title": "Universal Troubleshooting Template for App Issues",
+    "angle": "A structured approach narrowing down app malfunction causes.",
+    "audience": "General app users",
+    "intent": "template",
+    "priority": 2,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-049",
+    "title": "Basic Template for Writing 'Why It Matters' Sections",
+    "angle": "A reusable framework for explaining value or significance.",
+    "audience": "Writers and reviewers",
+    "intent": "template",
+    "priority": 2,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-050",
+    "title": "Checklist: How to Prepare Data Before Switching Apps",
+    "angle": "Universal backup/export routine before leaving a service.",
+    "audience": "Users switching apps or subscriptions",
+    "intent": "template",
+    "priority": 2,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-051",
+    "title": "Template for Neutral Feature Reviews",
+    "angle": "A layout that emphasizes clarity, not hype.",
+    "audience": "Tech reviewers",
+    "intent": "template",
+    "priority": 3,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "General-purpose neutral review template"
+  },
+  {
+    "id": "ever-052",
+    "title": "Checklist for Cleaner App Interfaces",
+    "angle": "Guidelines to evaluate UI clutter, spacing, and usability.",
+    "audience": "UI-conscious users",
+    "intent": "template",
+    "priority": 3,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-053",
+    "title": "Universal Template for Long-Form Guides",
+    "angle": "A reusable structure when writing a full-length in-depth guide.",
+    "audience": "Writers producing detailed tutorials",
+    "intent": "template",
+    "priority": 3,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-054",
+    "title": "Checklist: Evaluating Accessibility in any Tool",
+    "angle": "Universal accessibility considerations for software or hardware.",
+    "audience": "Users prioritizing accessibility",
+    "intent": "template",
+    "priority": 3,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Good for device/app categories"
+  },
+  {
+    "id": "ever-055",
+    "title": "Template for Budget-Friendly Buyer’s Guides",
+    "angle": "Reusable price-conscious framework for any category.",
+    "audience": "Shoppers on a budget",
+    "intent": "template",
+    "priority": 3,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-056",
+    "title": "How to Read User Reviews More Critically",
+    "angle": "Identifying patterns, bias, and noise across review platforms.",
+    "audience": "Shoppers researching products",
+    "intent": "template",
+    "priority": 4,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-057",
+    "title": "Basic Template for Writing App Setup Guides",
+    "angle": "Universal steps covering install → configure → verify.",
+    "audience": "New users installing apps",
+    "intent": "template",
+    "priority": 4,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-058",
+    "title": "Checklist for Evaluating Mobile App Performance",
+    "angle": "General guidelines for speed, stability, data use, and battery.",
+    "audience": "Mobile users",
+    "intent": "template",
+    "priority": 4,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Modern evergreen"
+  },
+  {
+    "id": "ever-059",
+    "title": "Template: How to Build an Alternatives List",
+    "angle": "A general structure for suggesting competing tools.",
+    "audience": "Review writers",
+    "intent": "template",
+    "priority": 4,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-060",
+    "title": "Checklist for Testing Cross-Device Compatibility",
+    "angle": "Universal tests for syncing, file formats, and sign-in flow.",
+    "audience": "Multi-device users",
+    "intent": "template",
+    "priority": 4,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-061",
+    "title": "Template for Feature Comparison Tables",
+    "angle": "A reusable grid for comparing any set of tools, devices, or services.",
+    "audience": "Writers creating side-by-side comparisons",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Core review infrastructure"
+  },
+  {
+    "id": "ever-062",
+    "title": "Checklist: What to Back Up Before Resetting Any Device",
+    "angle": "Universal backup items that apply to phones, laptops, and tablets.",
+    "audience": "Everyday device users",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-063",
+    "title": "Template for Writing 'Getting Started' Sections",
+    "angle": "Reusable onboarding structure across any product or service.",
+    "audience": "Users beginning new services/apps",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-064",
+    "title": "Checklist: Evaluating Long-Term App Reliability",
+    "angle": "How to judge stability, policy changes, and vendor reputation.",
+    "audience": "App-heavy users",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-065",
+    "title": "Template for Fair Pricing Analysis",
+    "angle": "Reusable framework for subscription or product value evaluation.",
+    "audience": "Price-sensitive shoppers",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-066",
+    "title": "Checklist: What to Check in Privacy Policies",
+    "angle": "Universal items to confirm before using any new service.",
+    "audience": "Users signing up for digital tools",
+    "intent": "template",
+    "priority": 2,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Useful for subscription and app categories"
+  },
+  {
+    "id": "ever-067",
+    "title": "Template for Linkable Mini-Guides",
+    "angle": "Reusable micro-guide structure for referencing across posts.",
+    "audience": "How-to content creators",
+    "intent": "template",
+    "priority": 2,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-068",
+    "title": "Checklist: Best Practices for Multi-Device Sync",
+    "angle": "General syncing principles that span all ecosystems.",
+    "audience": "Users juggling laptop/phone/tablet",
+    "intent": "template",
+    "priority": 2,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-069",
+    "title": "Template for Quick-Start Buyer Guides",
+    "angle": "A short, high-impact layout for fast purchase decisions.",
+    "audience": "Shoppers needing simple criteria",
+    "intent": "template",
+    "priority": 2,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-070",
+    "title": "Checklist: How to Compare Cloud Storage Plans",
+    "angle": "Generic metrics: storage tiers, speed, retention, recovery, limits.",
+    "audience": "Cloud storage shoppers",
+    "intent": "template",
+    "priority": 2,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "No vendor-specific claims included"
+  },
+  {
+    "id": "ever-071",
+    "title": "Template: How to Structure a Troubleshooting Section",
+    "angle": "Reusable triage flow for any technical issue.",
+    "audience": "General users and writers of guides",
+    "intent": "template",
+    "priority": 3,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Useful for how-to and app categories"
+  },
+  {
+    "id": "ever-072",
+    "title": "Checklist: What to Audit in Annual Tech Decluttering",
+    "angle": "Devices, files, data, accounts, subscriptions, passwords.",
+    "audience": "Users performing annual digital cleanup",
+    "intent": "template",
+    "priority": 3,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-073",
+    "title": "Template for Explaining Trade-Offs Clearly",
+    "angle": "A universal reasoning framework for pros vs compromises.",
+    "audience": "Writers, reviewers, decision makers",
+    "intent": "template",
+    "priority": 3,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-074",
+    "title": "Checklist: Cross-Platform Compatibility Factors",
+    "angle": "A reusable evaluation list across any ecosystem.",
+    "audience": "Multi-device users",
+    "intent": "template",
+    "priority": 3,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-075",
+    "title": "Template for Writing Clear Step-By-Step Guides",
+    "angle": "Cleaner structure for long procedures and technical workflows.",
+    "audience": "How-to readers and guide creators",
+    "intent": "template",
+    "priority": 3,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-076",
+    "title": "Checklist: What Makes a Good App Review Objective",
+    "angle": "Objective framing, usage cases, fairness, and test boundaries.",
+    "audience": "App reviewers",
+    "intent": "template",
+    "priority": 4,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-077",
+    "title": "Template for Listing Limitations Transparently",
+    "angle": "Encourages honest disclosure of weaknesses without negativity.",
+    "audience": "Review and how-to writers",
+    "intent": "template",
+    "priority": 4,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-078",
+    "title": "Checklist: Pre-Review Setup for Any App or Device",
+    "angle": "Universal preparation steps before testing something.",
+    "audience": "Reviewers allocating time to evaluate products",
+    "intent": "template",
+    "priority": 4,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Supports consistent review flow"
+  },
+  {
+    "id": "ever-079",
+    "title": "Template: Simple Multi-Section Summary Layout",
+    "angle": "Reusable compact summary format for any type of article.",
+    "audience": "General content writers",
+    "intent": "template",
+    "priority": 4,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-080",
+    "title": "Checklist: What to Look For in Long-Term Subscriptions",
+    "angle": "Durability, stability, portability, and exit flexibility.",
+    "audience": "Subscription service users",
+    "intent": "template",
+    "priority": 4,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-081",
+    "title": "Template: Balanced Pros & Cons Section",
+    "angle": "Reusable structure for fair, neutral comparison.",
+    "audience": "Review and analysis writers",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-082",
+    "title": "Checklist: Universal App Setup Steps",
+    "angle": "Initial settings, permissions, and basic checks for any app.",
+    "audience": "Mobile and desktop users",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-083",
+    "title": "Template for Explaining Update History",
+    "angle": "Reusable block for summarizing version changes and long-term reliability.",
+    "audience": "Readers evaluating app/device maturity",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-084",
+    "title": "Checklist: Pre-Purchase Verification Items",
+    "angle": "Cross-category purchase validation for apps, devices, or services.",
+    "audience": "Shoppers wanting to avoid mistakes",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-085",
+    "title": "Template: Clean Feature Breakdown Structure",
+    "angle": "Reusable layout for breaking complex products into digestible parts.",
+    "audience": "Product reviewers and guide creators",
+    "intent": "template",
+    "priority": 1,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-086",
+    "title": "Checklist: Digital Minimalism Starter",
+    "angle": "A universal list to reduce digital noise and app overload.",
+    "audience": "General users seeking simplification",
+    "intent": "template",
+    "priority": 2,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-087",
+    "title": "Template for Summarizing Complex Settings",
+    "angle": "Reusable guide to explain advanced settings in simple terms.",
+    "audience": "Users configuring multifaceted apps/devices",
+    "intent": "template",
+    "priority": 2,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-088",
+    "title": "Checklist: What to Review Monthly for Digital Hygiene",
+    "angle": "Subscriptions, storage, security, usage data.",
+    "audience": "Users maintaining personal digital systems",
+    "intent": "template",
+    "priority": 2,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-089",
+    "title": "Template: Unified Specification Layout",
+    "angle": "A consistent spec table format for any device category.",
+    "audience": "Device reviewers",
+    "intent": "template",
+    "priority": 2,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-090",
+    "title": "Checklist: What Makes a Subscription Worth Keeping",
+    "angle": "Retention value factors: updates, stability, support, portability.",
+    "audience": "Subscription shoppers",
+    "intent": "template",
+    "priority": 2,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-091",
+    "title": "Template for Explaining Technical Jargon Clearly",
+    "angle": "Reusable glossary-style section for any topic.",
+    "audience": "General readers wanting clarity",
+    "intent": "template",
+    "priority": 3,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-092",
+    "title": "Checklist: Evaluating Long-Term Vendor Support",
+    "angle": "Criteria to judge commitment beyond initial launch.",
+    "audience": "Buyers avoiding abandoned products",
+    "intent": "template",
+    "priority": 3,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-093",
+    "title": "Template: Multi-Layer Summary for Long Posts",
+    "angle": "Reusable top/mid/bottom summary design.",
+    "audience": "Readers scanning large articles",
+    "intent": "template",
+    "priority": 3,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-094",
+    "title": "Checklist: Preparing Device Before Selling or Donating",
+    "angle": "Reset, wipe, backup, deregister, clean.",
+    "audience": "Users recycling devices",
+    "intent": "template",
+    "priority": 3,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-095",
+    "title": "Template: What to Include in a Mini Comparison Box",
+    "angle": "Reusable micro-comparison design for in-article boxes.",
+    "audience": "Reviewers needing compact comparisons",
+    "intent": "template",
+    "priority": 3,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-096",
+    "title": "Checklist: Cross-Review Consistency Rules",
+    "angle": "Rules for labeling, sections, tone, and fairness.",
+    "audience": "Writers producing series of reviews",
+    "intent": "template",
+    "priority": 4,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Supports long-term consistency"
+  },
+  {
+    "id": "ever-097",
+    "title": "Template: Breaking Down Multi-Step Processes",
+    "angle": "Reusable pattern for complex workflows.",
+    "audience": "How-to and technical writers",
+    "intent": "template",
+    "priority": 4,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-098",
+    "title": "Checklist: What to Review Before Publishing Any Article",
+    "angle": "Structure, clarity, formatting, disclaimers (no brand claims).",
+    "audience": "All article creators",
+    "intent": "template",
+    "priority": 4,
+    "createdAt": "2025-12-10T00:00:00+09:00",
+    "notes": "Internal quality gate"
+  },
+  {
+    "id": "ever-099",
+    "title": "Template for Neutral Tone Alerts",
+    "angle": "Reusable note that clarifies limitations or edge cases.",
+    "audience": "General readers",
+    "intent": "template",
+    "priority": 4,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  },
+  {
+    "id": "ever-100",
+    "title": "Checklist: Long-Term Data Portability Factors",
+    "angle": "Vendor lock-in, export formats, migration difficulty.",
+    "audience": "Users wanting multi-year stability",
+    "intent": "template",
+    "priority": 4,
+    "createdAt": "2025-12-10T00:00:00+09:00"
+  }
+]
