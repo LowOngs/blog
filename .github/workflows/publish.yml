@@ -45,6 +45,12 @@ jobs:
       SCHEDULE_MAX_POSTS:     "3"
       SCHEDULE_DRY_RUN:       "false"
 
+      # 스케줄/페이지ID 모드 스위치 (기본: test)
+      # - SCHEDULE_MODE = 'live' 일 때만 본문 자동 생성/실제 발급
+      # - PAGE_ID_MODE  = 'live' 일 때만 pageId 시퀀스 증가
+      SCHEDULE_MODE:          "test"
+      PAGE_ID_MODE:           "test"
+
       # 로컬 이미지 소스폴더
       IMAGES_DIR:      System_files/assets/images
 
@@ -120,6 +126,8 @@ jobs:
           echo "  CATEGORY_RAW=$CATEGORY_RAW"
           echo "  MAX_POSTS=$MAX_POSTS"
           echo "  DRY_RUN=$DRY_RUN"
+          echo "  SCHEDULE_MODE=${{ env.SCHEDULE_MODE }}"
+          echo "  PAGE_ID_MODE=${{ env.PAGE_ID_MODE }}"
 
       - name: Verify required files exist
         run: |
@@ -133,15 +141,24 @@ jobs:
           test -f System_files/scripts/build/images-renew.cjs
           test -f System_files/scripts/build/images-build-og.cjs
           test -f System_files/scripts/build/lib/page-ids.cjs
+          test -f System_files/scripts/build/generate-body.cjs
           ls -la System_files/content/posts || true
           echo "✅ required files OK"
 
       # === 오늘 발행할 시드 선정 ===
       - name: Plan today posts from seedpool
-        run: node System_files/scripts/build/seed-scheduler.cjs
+        run: |
+          echo "SCHEDULE_MODE=$SCHEDULE_MODE"
+          node System_files/scripts/build/seed-scheduler.cjs
 
       - name: Generate posts from today queue
         run: node System_files/scripts/build/queue-to-posts.cjs
+
+      # === bodyPrompt 기반 본문 생성 (스위치 존중) ===
+      - name: Generate article bodies from prompts (SCHEDULE_MODE-aware)
+        run: |
+          echo "Running generate-body.cjs with SCHEDULE_MODE=$SCHEDULE_MODE"
+          node System_files/scripts/build/generate-body.cjs
 
       # === 렌더 → 본문 문단 정규화 → 툴 복사 ===
       - name: Render posts (JSON → HTML)
