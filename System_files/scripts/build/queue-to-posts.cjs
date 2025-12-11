@@ -73,6 +73,10 @@ try {
   process.exit(1);
 }
 
+// 스케줄 모드(test/live 등) 추출
+const scheduleMode = queue.mode || process.env.SCHEDULE_MODE || 'test';
+log(`today.json 로드 완료 → date=${queue.date || 'N/A'}, mode=${scheduleMode}`);
+
 const items = Array.isArray(queue.items) ? queue.items : [];
 if (!items.length) {
   log('today.json 안에 items가 비어 있음. 건너뜀.');
@@ -141,6 +145,8 @@ for (const item of items) {
     labels: [label],
     intent: item.intent || 'review',
     updated: updatedISO,
+    // 모드 정보(테스트/라이브)도 상단에 한 번 박아둠
+    scheduleMode,
     aio: {
       tldr: [
         `This article is based on today's planned topic: "${item.title}".`,
@@ -167,7 +173,9 @@ for (const item of items) {
       audience: item.audience,
       intent: item.intent,
       priority: item.priority,
-      notes: item.notes
+      notes: item.notes,
+      // 여기에도 mode 함께 기록(나중에 분석/검증용)
+      scheduleMode
     }
   };
 
