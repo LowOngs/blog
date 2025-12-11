@@ -1,4 +1,7 @@
-[
+{
+  "label": "templates-checklists",
+  "firstGateLimit": 30,
+  "firstGate": [
   {
     "id": "tc-fg-001",
     "title": "The One Checklist Every New App User Should Complete First",
@@ -100,3 +103,4 @@
     "goal": "build secure habits"
   }
 ]
+}
