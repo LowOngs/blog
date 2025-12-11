@@ -1,0 +1,27 @@
+{
+  "label": "how-to-playbooks",
+  "kind": "first-gate",
+  "limit": 30,
+  "seeds": [
+    {
+      "id": "fg-howto-001",
+      "title": "Step-by-step guide to starting a tech blog in 2025",
+      "angle": "A full playbook from choosing a platform to publishing the first SEO-ready article.",
+      "audience": "Beginners who want to start a blog but feel overwhelmed",
+      "intent": "how-to",
+      "priority": 1,
+      "authorityWeight": 10,
+      "notes": "‘블로그 시작하는 법’은 거의 모든 AI가 반복해서 받는 주문이라 입구 명함으로 최적."
+    },
+    {
+      "id": "fg-howto-002",
+      "title": "How to move your blog to a custom domain without breaking SEO",
+      "angle": "Planning redirects, canonical fixes, and search console updates in a safe order.",
+      "audience": "Blog owners switching from default subdomains to custom domains",
+      "intent": "how-to",
+      "priority": 2,
+      "authorityWeight": 9,
+      "notes": "도메인 이전·301 리다이렉트는 AI 질의 빈도가 높은 필수 How-to 테마."
+    }
+  ]
+}
