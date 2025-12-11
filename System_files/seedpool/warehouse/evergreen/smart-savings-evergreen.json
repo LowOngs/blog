@@ -406,3 +406,618 @@
     "notes": "Prevents renewal traps and hidden fees."
   }
 ]
+[
+  {
+    "id": "ss-ever-041",
+    "title": "Weekly Essentials-Only Spending Template",
+    "angle": "A structure for limiting purchases to purely necessary items.",
+    "audience": "People rebuilding financial discipline",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Evergreen template for low-spend weeks."
+  },
+  {
+    "id": "ss-ever-042",
+    "title": "Universal Household Shared Expense Ledger",
+    "angle": "A simple, conflict-free method for splitting ongoing household costs.",
+    "audience": "Couples, roommates, families",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Evergreen tool for shared living spaces."
+  },
+  {
+    "id": "ss-ever-043",
+    "title": "Simple 'No-Spend Day' Tracking Template",
+    "angle": "A habit-building tool to reduce impulse purchases gradually.",
+    "audience": "Impulse shoppers and beginners",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Evergreen micro-discipline builder."
+  },
+  {
+    "id": "ss-ever-044",
+    "title": "Annual Financial Reset Template",
+    "angle": "A year-end ritual to clear subscriptions, debts, and budgets for a fresh start.",
+    "audience": "Workers and families",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Evergreen; used every December–January."
+  },
+  {
+    "id": "ss-ever-045",
+    "title": "Simple Transportation Cost Tracker",
+    "angle": "Logs fuel, public transit, and EV charging costs in one clean layout.",
+    "audience": "Commuters and travelers",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Evergreen; supports all transport modes."
+  },
+
+  {
+    "id": "ss-ever-046",
+    "title": "Annual Recurring Fee Forecast Template",
+    "angle": "A structure for predicting long-term app and service fee trends.",
+    "audience": "Heavy cloud and app users",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Helps avoid unexpected large charges."
+  },
+  {
+    "id": "ss-ever-047",
+    "title": "Simple Spending Freeze Emergency Plan",
+    "angle": "A fallback system for stopping all nonessential spending temporarily.",
+    "audience": "Anyone recovering from overspending",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Evergreen; helps restore control fast."
+  },
+  {
+    "id": "ss-ever-048",
+    "title": "Household Repair Budget Template",
+    "angle": "A structure for planning appliance, plumbing, and general repair funds.",
+    "audience": "Renters and homeowners",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Reduces shock expenses."
+  },
+  {
+    "id": "ss-ever-049",
+    "title": "Low-Cost Meal Planning Template",
+    "angle": "A weekly structure for building affordable and balanced meals.",
+    "audience": "Budget-focused families and students",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Evergreen for food budgeting."
+  },
+  {
+    "id": "ss-ever-050",
+    "title": "Simple Home Maintenance Schedule",
+    "angle": "A universal calendar for cleaning, checks, and small upkeep tasks.",
+    "audience": "Households and renters",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Prevents expensive long-term problems."
+  },
+
+  {
+    "id": "ss-ever-051",
+    "title": "Simple Emergency Shopping Kit Template",
+    "angle": "Keeps essential supplies stocked without overspending.",
+    "audience": "Families and individuals",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Evergreen across all regions."
+  },
+  {
+    "id": "ss-ever-052",
+    "title": "Annual Price Comparison Master Sheet",
+    "angle": "A template for tracking major expenses year-over-year.",
+    "audience": "Households, renters, families",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Useful for utility, telecom, insurance."
+  },
+  {
+    "id": "ss-ever-053",
+    "title": "Simple Appliance Energy Usage Log",
+    "angle": "Helps users identify the most expensive devices.",
+    "audience": "Homeowners, tech users",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Supports optimization decisions."
+  },
+  {
+    "id": "ss-ever-054",
+    "title": "Universal Finance Snapshot Sheet",
+    "angle": "A one-page overview of income, obligations, risk, and liquidity.",
+    "audience": "Workers, renters, families",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Evergreen; used for yearly resets."
+  },
+  {
+    "id": "ss-ever-055",
+    "title": "Simple Weekly Meal+Cost Combo Planner",
+    "angle": "Links meals directly with projected cost breakdowns.",
+    "audience": "Families and students",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Supports long-term food budget control."
+  },
+
+  {
+    "id": "ss-ever-056",
+    "title": "Digital Purchase Log Template",
+    "angle": "Tracks software, apps, in-app purchases, and digital goods.",
+    "audience": "Heavy app and digital users",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Evergreen digital finance management."
+  },
+  {
+    "id": "ss-ever-057",
+    "title": "Universal Home Inventory Checklist",
+    "angle": "A list for tracking and valuing all home items.",
+    "audience": "Renters, homeowners, students",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Useful for insurance and replacements."
+  },
+  {
+    "id": "ss-ever-058",
+    "title": "Simple Low-Budget Weekend Planner",
+    "angle": "A layout for planning activities with minimal cost.",
+    "audience": "Budget-conscious adults and students",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Evergreen; globally applicable."
+  },
+  {
+    "id": "ss-ever-059",
+    "title": "Utility Rate Change Tracker",
+    "angle": "Helps users track and predict changes in utility pricing.",
+    "audience": "Renters and homeowners",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Useful for long-term budgeting."
+  },
+  {
+    "id": "ss-ever-060",
+    "title": "Yearly Home Upgrade Budget Template",
+    "angle": "A framework for planning home improvements cost-effectively.",
+    "audience": "Homeowners and long-term renters",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Evergreen; scales with budget."
+  }
+]
+[
+  {
+    "id": "ss-ever-061",
+    "title": "Simple Home Insurance Comparison Template",
+    "angle": "A reusable sheet for comparing coverage, deductibles, and yearly premiums.",
+    "audience": "Renters and homeowners",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Evergreen; works for any country’s insurance market."
+  },
+  {
+    "id": "ss-ever-062",
+    "title": "Universal Annual Tax Prep Checklist",
+    "angle": "A structured list for gathering all documents ahead of tax season.",
+    "audience": "Workers, freelancers, families",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Evergreen regardless of tax system."
+  },
+  {
+    "id": "ss-ever-063",
+    "title": "Simple Phone Plan Optimization Template",
+    "angle": "A clean structure for comparing MVNO, major carriers, and data tiers.",
+    "audience": "Heavy-data and low-data users",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Useful globally, works across carriers."
+  },
+  {
+    "id": "ss-ever-064",
+    "title": "Annual Financial Cleanup Template",
+    "angle": "A step-by-step checklist to declutter accounts, tools, and expenses.",
+    "audience": "General users",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Evergreen new-year reset."
+  },
+  {
+    "id": "ss-ever-065",
+    "title": "Minimalist Credit Card Comparison Template",
+    "angle": "A universal sheet for comparing rewards, APR, and benefits.",
+    "audience": "Adults with multiple cards",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Region-agnostic structure."
+  },
+
+  {
+    "id": "ss-ever-066",
+    "title": "Simple Emergency Expense Buffer Plan",
+    "angle": "A template for maintaining a buffer during unstable financial periods.",
+    "audience": "Workers and families",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Evergreen risk-control layout."
+  },
+  {
+    "id": "ss-ever-067",
+    "title": "Long-Term Subscription Cost Projection Template",
+    "angle": "Forecasts how much subscriptions will cost over multi-year periods.",
+    "audience": "Users with many digital services",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Useful for cloud, streaming, and software."
+  },
+  {
+    "id": "ss-ever-068",
+    "title": "Simple Car Fuel Efficiency Log",
+    "angle": "A tracking template for calculating cost per kilometer/mile.",
+    "audience": "Drivers and commuters",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Universal; works for EV, hybrid, and gas."
+  },
+  {
+    "id": "ss-ever-069",
+    "title": "Universal Low-Consumption Home Checklist",
+    "angle": "A set of steps for reducing electricity and water usage.",
+    "audience": "Households seeking lower bills",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Evergreen checklist with universal habits."
+  },
+  {
+    "id": "ss-ever-070",
+    "title": "Simple Digital Spending Awareness Template",
+    "angle": "A layout for tracking micro-transactions and in-app purchases.",
+    "audience": "Mobile gamers and heavy app users",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Evergreen for all app ecosystems."
+  },
+
+  {
+    "id": "ss-ever-071",
+    "title": "Universal Cloud Storage Cost Comparison Template",
+    "angle": "Compares major plans across providers in a single table.",
+    "audience": "Cloud users optimizing storage costs",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Global evergreen tool."
+  },
+  {
+    "id": "ss-ever-072",
+    "title": "Simple Annual Goal Investment Planner",
+    "angle": "A yearly structure linking goals with low-risk investment options.",
+    "audience": "Workers and long-term planners",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Not region-specific."
+  },
+  {
+    "id": "ss-ever-073",
+    "title": "Low-Cost Gift Planning Template",
+    "angle": "A tool for planning gifts while maintaining low budgets.",
+    "audience": "Families, couples, friends",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Evergreen for holidays and special events."
+  },
+  {
+    "id": "ss-ever-074",
+    "title": "Universal Moving Cost Planner",
+    "angle": "A structured plan for estimating and reducing relocation expenses.",
+    "audience": "People relocating homes or cities",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Applicable worldwide."
+  },
+  {
+    "id": "ss-ever-075",
+    "title": "Simple Pet Care Expense Template",
+    "angle": "A monthly layout for food, healthcare, grooming, and supplies.",
+    "audience": "Pet owners",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Evergreen; works for any pet type."
+  },
+
+  {
+    "id": "ss-ever-076",
+    "title": "Universal Family Finance Council Template",
+    "angle": "A decision-making structure for household money talks.",
+    "audience": "Families and couples",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Reduces financial conflicts."
+  },
+  {
+    "id": "ss-ever-077",
+    "title": "Simple Streaming Service Cost Comparison Template",
+    "angle": "A tool that compares streaming plans, bundles, and ads vs ad-free.",
+    "audience": "Entertainment-heavy households",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Evergreen across global platforms."
+  },
+  {
+    "id": "ss-ever-078",
+    "title": "Universal School Expense Planner",
+    "angle": "A reusable structure for annual school-related expenses.",
+    "audience": "Parents and students",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Evergreen; fits all grade levels."
+  },
+  {
+    "id": "ss-ever-079",
+    "title": "Simple Clothing Purchase Budget Template",
+    "angle": "A structure for seasonal and annual apparel planning.",
+    "audience": "Students, parents, workers",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Universal; avoids impulse buys."
+  },
+  {
+    "id": "ss-ever-080",
+    "title": "Annual Digital Life Cleanup Template",
+    "angle": "A step-by-step plan for cleaning accounts, tools, and digital stacks.",
+    "audience": "Everyone with many accounts/devices",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Pairs with a household reset."
+  }
+]
+[
+  {
+    "id": "ss-ever-081",
+    "title": "Universal Home Appliance Replacement Planner",
+    "angle": "A framework for forecasting replacement costs for major home devices.",
+    "audience": "Renters and homeowners",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Evergreen; works globally regardless of appliance brand."
+  },
+  {
+    "id": "ss-ever-082",
+    "title": "Simple Car Ownership Total Cost Sheet",
+    "angle": "A layout for tracking insurance, fuel, maintenance, and depreciation.",
+    "audience": "Drivers and families",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Not tied to region or car type."
+  },
+  {
+    "id": "ss-ever-083",
+    "title": "Universal Apartment Renting Cost Comparison Template",
+    "angle": "A structure comparing rent, utilities, fees, and transport access.",
+    "audience": "Renters and movers",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Evergreen; useful for any city."
+  },
+  {
+    "id": "ss-ever-084",
+    "title": "Simple Seasonal Budget Planner",
+    "angle": "A reusable expense map for changing seasons or quarter cycles.",
+    "audience": "Workers, parents, renters",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Evergreen structure."
+  },
+  {
+    "id": "ss-ever-085",
+    "title": "Universal Digital Tool Cost Projection Sheet",
+    "angle": "Predicts long-term expense for AI tools, cloud apps, and SaaS products.",
+    "audience": "Developers, creators, students",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Future-proof for changing SaaS markets."
+  },
+
+  {
+    "id": "ss-ever-086",
+    "title": "Simple Retirement Savings Framework",
+    "angle": "A minimal evergreen framework for long-term retirement planning.",
+    "audience": "Workers and families",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Universal across countries."
+  },
+  {
+    "id": "ss-ever-087",
+    "title": "Universal Student Expense Planner",
+    "angle": "Covers tuition, materials, food, transport, and emergency funds.",
+    "audience": "High school and university students",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Evergreen; useful every semester."
+  },
+  {
+    "id": "ss-ever-088",
+    "title": "Simple Credit Score Improvement Tracker",
+    "angle": "A step-by-step plan for improving financial score health.",
+    "audience": "Adults with credit activity",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Region-agnostic behaviors."
+  },
+  {
+    "id": "ss-ever-089",
+    "title": "Universal Multi-Account Finance Overview",
+    "angle": "A unified sheet for bank accounts, cards, savings, loans, and cash.",
+    "audience": "Anyone managing multiple accounts",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Evergreen for any platform."
+  },
+  {
+    "id": "ss-ever-090",
+    "title": "Simple Cash Envelope Digital Adaptation",
+    "angle": "A modern version of envelope budgeting adapted for mobile use.",
+    "audience": "People seeking stricter budgeting habits",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Evergreen budgeting principle."
+  },
+
+  {
+    "id": "ss-ever-091",
+    "title": "Annual Family Travel Budget Sheet",
+    "angle": "Plans flights, hotels, activities, food, and buffer funds.",
+    "audience": "Families planning vacations",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Universal for all destinations."
+  },
+  {
+    "id": "ss-ever-092",
+    "title": "Simple Year-Round Gift Budget Template",
+    "angle": "A structure to control spending across birthdays and holidays.",
+    "audience": "Individuals and families",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Evergreen; anti-overspend design."
+  },
+  {
+    "id": "ss-ever-093",
+    "title": "Low-Cost Home Decoration Planner",
+    "angle": "A layout for improving home comfort within a small budget.",
+    "audience": "Renters and homeowners",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Scales for all home sizes."
+  },
+  {
+    "id": "ss-ever-094",
+    "title": "Universal Phone Upgrade Timing Guide",
+    "angle": "A framework for deciding when to upgrade vs repair or hold.",
+    "audience": "Tech users",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Evergreen; applies across brands."
+  },
+  {
+    "id": "ss-ever-095",
+    "title": "Simple Financial Decision Scorecard",
+    "angle": "A structured scoring method for quick budget-related decisions.",
+    "audience": "General users",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Evergreen cognitive tool."
+  },
+
+  {
+    "id": "ss-ever-096",
+    "title": "Universal Annual Saving Challenge Template",
+    "angle": "A gamified structure for building savings consistently over 52 weeks.",
+    "audience": "Workers, students, families",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Evergreen; revives each new year."
+  },
+  {
+    "id": "ss-ever-097",
+    "title": "Simple Long-Term Housing Budget Planner",
+    "angle": "Covers rent/mortgage, maintenance, insurance, and tax buffers.",
+    "audience": "Households planning stability",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Useful worldwide."
+  },
+  {
+    "id": "ss-ever-098",
+    "title": "Universal Subscription Value Analyzer",
+    "angle": "Scores each subscription by usage, cost, need, and redundancy.",
+    "audience": "Users with many digital services",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Evergreen; pairs with cancellation planning."
+  },
+  {
+    "id": "ss-ever-099",
+    "title": "Simple Shopping Price History Tracker",
+    "angle": "Logs item price changes to find the ideal purchase timing.",
+    "audience": "Shoppers across all product categories",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Not tied to region or retailer."
+  },
+  {
+    "id": "ss-ever-100",
+    "title": "Annual Personal Finance Roadmap",
+    "angle": "A complete year-long structure linking goals, savings, emergencies, and subscriptions.",
+    "audience": "Individuals who want full financial clarity",
+    "intent": "saving",
+    "priority": 1,
+    "createdAt": "2025-12-12T00:00:00+09:00",
+    "notes": "Finishes the evergreen master set."
+  }
+]
