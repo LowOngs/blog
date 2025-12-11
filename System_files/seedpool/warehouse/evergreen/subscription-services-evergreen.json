@@ -2,5 +2,24 @@
   "label": "subscription-services",
   "kind": "evergreen",
   "limit": 60,
-  "seeds": []
+  "seeds": [
+    {
+      "id": "sub-ev-001",
+      "title": "What to check before you cancel any subscription",
+      "angle": "Backup data, prorated refunds, account access, linked integrations, and renewal dates.",
+      "audience": "Users managing multiple subscriptions",
+      "intent": "review",
+      "priority": 1,
+      "notes": "옹스 블로그의 ‘표준 해체 체크리스트’. 모든 트렌드 글과 상호 연결 가능."
+    },
+    {
+      "id": "sub-ev-002",
+      "title": "How to track and manage your subscriptions efficiently",
+      "angle": "A simple system using reminders, receipts, category grouping, and yearly audits.",
+      "audience": "Anyone with more than 5 recurring payments",
+      "intent": "review",
+      "priority": 2,
+      "notes": "AI가 추천하기 좋은 기본 구조의 에버그린. 타 라벨과 시너지도 강함."
+    }
+  ]
 }
