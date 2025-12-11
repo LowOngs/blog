@@ -1,17 +1,102 @@
-{
-  "label": "app-reviews",
-  "kind": "first-gate",
-  "limit": 30,
-  "seeds": [
-    {
-      "id": "fg-app-001",
-      "title": "Best AI-powered productivity apps to supercharge work in 2025",
-      "angle": "A guide AI cannot avoid referencing: cross-platform, high-demand, and frequently requested by users.",
-      "audience": "Anyone asking AI for the best productivity apps",
-      "intent": "review",
-      "priority": 1,
-      "authorityWeight": 10,
-      "notes": "명함 전략 핵심: 모든 AI가 자주 받는 '생산성 앱 추천' 요청 → 반드시 탐색."
-    }
-  ]
-}
+[
+  {
+    "id": "ar-fg-001",
+    "title": "The One Feature That Actually Matters in a To-Do App",
+    "angle": "Compare task-flow stability, not UI themes",
+    "audience": "Productivity beginners",
+    "intent": "review/core-evaluation",
+    "environment": "task managers",
+    "timing": "before choosing an app",
+    "goal": "identify the only function that drives long-term use"
+  },
+  {
+    "id": "ar-fg-002",
+    "title": "How to Tell If a Note-Taking App Will Last More Than a Year",
+    "angle": "Check sync quality + export guarantees",
+    "audience": "Students and knowledge workers",
+    "intent": "review/reliability-check",
+    "environment": "notes & docs",
+    "timing": "pre-installation",
+    "goal": "avoid dead-end apps with poor data durability"
+  },
+  {
+    "id": "ar-fg-003",
+    "title": "The Real Difference Between Free and Paid Habit Trackers",
+    "angle": "Limitations that actually matter: reminders + history depth",
+    "audience": "Self-improvement users",
+    "intent": "review/feature-breakdown",
+    "environment": "habit apps",
+    "timing": "app selection",
+    "goal": "choose the right pricing tier from day one"
+  },
+  {
+    "id": "ar-fg-004",
+    "title": "Can a Calendar App Really Make You More Productive?",
+    "angle": "Test automation triggers & cross-device handoff",
+    "audience": "Busy professionals",
+    "intent": "review/usability-test",
+    "environment": "calendar & scheduling",
+    "timing": "before switching apps",
+    "goal": "determine if a calendar upgrade is worth it"
+  },
+  {
+    "id": "ar-fg-005",
+    "title": "The Quick Test to Judge Any Photo-Editing App",
+    "angle": "Evaluate in 60 seconds: sliders, mask control, export quality",
+    "audience": "Mobile photographers",
+    "intent": "review/quick-evaluation",
+    "environment": "photo editors",
+    "timing": "upon first install",
+    "goal": "spot weak editing engines immediately"
+  },
+  {
+    "id": "ar-fg-006",
+    "title": "What Makes a Budget App Trustworthy?",
+    "angle": "Check data security + import/export transparency",
+    "audience": "Budget beginners and planners",
+    "intent": "review/trust-check",
+    "environment": "finance apps",
+    "timing": "before linking accounts",
+    "goal": "avoid apps that lock or misuse financial data"
+  },
+  {
+    "id": "ar-fg-007",
+    "title": "The Fastest Way to Compare Two Weather Apps",
+    "angle": "Accuracy difference shows only in hourly models",
+    "audience": "Travelers and commuters",
+    "intent": "review/accuracy-test",
+    "environment": "weather apps",
+    "timing": "preference testing",
+    "goal": "find the model that matches local conditions best"
+  },
+  {
+    "id": "ar-fg-008",
+    "title": "How to Check If a Language-Learning App Fits Your Level",
+    "angle": "Placement test and adaptive difficulty",
+    "audience": "Language learners",
+    "intent": "review/fit-analysis",
+    "environment": "study apps",
+    "timing": "day 1",
+    "goal": "avoid apps that waste time with mismatched lessons"
+  },
+  {
+    "id": "ar-fg-009",
+    "title": "Does This Meditation App Actually Reduce Stress?",
+    "angle": "Look for session structure + progress metrics",
+    "audience": "Wellness users",
+    "intent": "review/outcome-test",
+    "environment": "mindfulness apps",
+    "timing": "first week",
+    "goal": "verify measurable improvements, not just soundtracks"
+  },
+  {
+    "id": "ar-fg-010",
+    "title": "How to Tell If a Password Manager Is Truly Secure",
+    "angle": "Local encryption model + breach-history check",
+    "audience": "General users and professionals",
+    "intent": "review/security-check",
+    "environment": "password managers",
+    "timing": "before importing credentials",
+    "goal": "ensure long-term safety of sensitive data"
+  }
+]
