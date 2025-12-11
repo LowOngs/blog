@@ -1,921 +1,825 @@
 [
   {
-    "id": "ever-001",
-    "title": "Daily Planning Checklist for High-Productivity Workflows",
-    "angle": "A reusable daily planning framework used across productivity teams.",
-    "audience": "Knowledge workers and creators",
-    "intent": "template",
-    "priority": 1,
-    "createdAt": "2025-12-10T00:00:00+09:00",
-    "notes": "Classic evergreen; applicable all year"
+    "id": "ht-ever-001",
+    "title": "Universal Troubleshooting Checklist for Any Smartphone",
+    "angle": "Applies to all phones, all years.",
+    "audience": "Global smartphone users",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-002",
-    "title": "Weekly Review Template for Personal and Work Projects",
-    "angle": "A structured review ritual that reduces stress and increases clarity.",
-    "audience": "People balancing multiple projects",
-    "intent": "template",
-    "priority": 1,
-    "createdAt": "2025-12-10T00:00:00+09:00",
-    "notes": "Evergreen GTD-inspired checklist"
+    "id": "ht-ever-002",
+    "title": "How to Reset Any Router to Fix Connectivity Issues",
+    "angle": "Classic evergreen networking fix.",
+    "audience": "Home network users",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-003",
-    "title": "Simple 5-Step Method to Prioritize Competing Tasks",
-    "angle": "A universal prioritization model that works for any category.",
-    "audience": "Anyone dealing with task overload",
-    "intent": "template",
-    "priority": 1,
-    "createdAt": "2025-12-10T00:00:00+09:00",
-    "notes": ""
+    "id": "ht-ever-003",
+    "title": "Beginner’s Guide to Cleaning Up Slow Computers",
+    "angle": "A universal PC performance guide.",
+    "audience": "Windows and Mac beginners",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-004",
-    "title": "Beginner-Friendly Framework for Comparing Similar Apps",
-    "angle": "A neutral, reusable rubric that works for reviews, how-to, and templates.",
-    "audience": "Review writers and tech users",
-    "intent": "template",
-    "priority": 1,
-    "createdAt": "2025-12-10T00:00:00+09:00"
+    "id": "ht-ever-004",
+    "title": "How to Back Up Important Files Safely",
+    "angle": "Backup is timeless and cross-platform.",
+    "audience": "All device users",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-005",
-    "title": "Essential Pre-Publish Checklist for Any Blog Article",
-    "angle": "Universal QA steps: clarity, links, structure, AIO readiness.",
-    "audience": "Bloggers and editors",
-    "intent": "template",
-    "priority": 1,
-    "createdAt": "2025-12-10T00:00:00+09:00"
-  },
-  {
-    "id": "ever-006",
-    "title": "5-Bullet Template for Explaining Any Complex Topic",
-    "angle": "A minimal template that removes jargon and focuses on reader clarity.",
-    "audience": "Writers and educators",
-    "intent": "template",
-    "priority": 2,
-    "createdAt": "2025-12-10T00:00:00+09:00"
-  },
-  {
-    "id": "ever-007",
-    "title": "Universal Onboarding Checklist for Any New App",
-    "angle": "Reusable steps for understanding features, settings, and workflows.",
-    "audience": "App users and team trainers",
-    "intent": "template",
-    "priority": 2,
-    "createdAt": "2025-12-10T00:00:00+09:00"
-  },
-  {
-    "id": "ever-008",
-    "title": "Simple Template for Writing Clear How-To Guides",
-    "angle": "A short blueprint for structured tutorials.",
-    "audience": "Beginners writing their first tutorial",
-    "intent": "template",
-    "priority": 2,
-    "createdAt": "2025-12-10T00:00:00+09:00"
-  },
-  {
-    "id": "ever-009",
-    "title": "Easy Comparison Template for Evaluating Product Value",
-    "angle": "Suitable for apps, devices, or subscription services.",
-    "audience": "Shoppers and reviewers",
-    "intent": "template",
-    "priority": 2,
-    "createdAt": "2025-12-10T00:00:00+09:00"
-  },
-  {
-    "id": "ever-010",
-    "title": "Checklist for Diagnosing Any Tech Problem Quickly",
-    "angle": "Universal debugging sequence applicable to most devices and apps.",
-    "audience": "General tech users",
-    "intent": "template",
-    "priority": 2,
-    "createdAt": "2025-12-10T00:00:00+09:00"
-  },
-  {
-    "id": "ever-011",
-    "title": "Beginner Framework for Choosing the Right App",
-    "angle": "A criteria-based approach covering cost, features, privacy, and workflow.",
-    "audience": "App shoppers",
-    "intent": "template",
-    "priority": 3,
-    "createdAt": "2025-12-10T00:00:00+09:00"
-  },
-  {
-    "id": "ever-012",
-    "title": "Reusable Template for Quick Pros & Cons Lists",
-    "angle": "Useful for reviews, savings guides, and comparison posts.",
-    "audience": "Bloggers and product researchers",
-    "intent": "template",
-    "priority": 3,
-    "createdAt": "2025-12-10T00:00:00+09:00"
-  },
-  {
-    "id": "ever-013",
-    "title": "Starter Template for First-Time Budget Planners",
-    "angle": "Simple monthly layout with categories people actually use.",
-    "audience": "Beginners managing money",
-    "intent": "template",
-    "priority": 3,
-    "createdAt": "2025-12-10T00:00:00+09:00"
-  },
-  {
-    "id": "ever-014",
-    "title": "Universal Troubleshooting Guide for Subscription Service Issues",
-    "angle": "General diagnostic path for login, billing, and access problems.",
-    "audience": "Subscription users",
-    "intent": "template",
-    "priority": 3,
-    "createdAt": "2025-12-10T00:00:00+09:00"
-  },
-  {
-    "id": "ever-015",
-    "title": "Checklist: What to Verify Before Buying Any Device",
-    "angle": "Simple inspection routine covering build quality, battery, and display.",
-    "audience": "Device shoppers",
-    "intent": "template",
-    "priority": 3,
-    "createdAt": "2025-12-10T00:00:00+09:00"
-  },
-  {
-    "id": "ever-016",
-    "title": "Template for Writing Clear Step-by-Step Tutorials",
-    "angle": "A general blueprint to reduce confusion and increase readability.",
-    "audience": "Writers creating guides",
-    "intent": "template",
-    "priority": 4,
-    "createdAt": "2025-12-10T00:00:00+09:00"
-  },
-  {
-    "id": "ever-017",
-    "title": "Universal Savings Strategy Checklist",
-    "angle": "Simple habits and changes that help long-term cost reduction.",
-    "audience": "General readers aiming to save money",
-    "intent": "template",
-    "priority": 4,
-    "createdAt": "2025-12-10T00:00:00+09:00"
-  },
-  {
-    "id": "ever-018",
-    "title": "Reusable Template for Quick Feature Overviews",
-    "angle": "Helps readers grasp what an app or device actually does, fast.",
-    "audience": "Review readers and shoppers",
-    "intent": "template",
-    "priority": 4,
-    "createdAt": "2025-12-10T00:00:00+09:00"
-  },
-  {
-    "id": "ever-019",
-    "title": "Checklist for Identifying Hidden Costs in Any Subscription",
-    "angle": "Teaches users what to look for in terms of renewal, fees, and tiers.",
-    "audience": "Subscription shoppers",
-    "intent": "template",
-    "priority": 4,
-    "createdAt": "2025-12-10T00:00:00+09:00"
-  },
-  {
-    "id": "ever-020",
-    "title": "Template for Micro-Reviews (Quick 1-Minute Read)",
-    "angle": "Ultra-short reviews for apps, devices, or services.",
-    "audience": "Readers who want bite-sized analysis",
-    "intent": "template",
-    "priority": 4,
-    "createdAt": "2025-12-10T00:00:00+09:00"
-  },
-  {
-    "id": "ever-021",
-    "title": "Checklist for Evaluating Any App’s Privacy Settings",
-    "angle": "A universal privacy review list covering permissions, data sharing, and security options.",
-    "audience": "App users concerned about privacy",
-    "intent": "template",
-    "priority": 1,
-    "createdAt": "2025-12-10T00:00:00+09:00",
-    "notes": "Usable across all app categories"
-  },
-  {
-    "id": "ever-022",
-    "title": "Universal ‘Before You Install’ App Inspection Guide",
-    "angle": "A pre-installation workflow to avoid unwanted costs and wrong app choices.",
-    "audience": "General users installing new software",
-    "intent": "template",
-    "priority": 1,
-    "createdAt": "2025-12-10T00:00:00+09:00"
-  },
-  {
-    "id": "ever-023",
-    "title": "Simple Template for Writing Feature Comparison Tables",
-    "angle": "Provides a neutral structure for comparing similar tools or devices.",
-    "audience": "Review writers and comparison shoppers",
-    "intent": "template",
-    "priority": 1,
-    "createdAt": "2025-12-10T00:00:00+09:00"
-  },
-  {
-    "id": "ever-024",
-    "title": "Basic Guide: How to Read Pricing Pages More Accurately",
-    "angle": "A template to detect hidden tiers, upsells, and trial traps.",
-    "audience": "Subscription shoppers",
-    "intent": "template",
-    "priority": 1,
-    "createdAt": "2025-12-10T00:00:00+09:00"
-  },
-  {
-    "id": "ever-025",
-    "title": "Checklist for Safe Account Migration Between Services",
-    "angle": "A general list for moving data—app, device, or subscription—without loss.",
-    "audience": "Users switching apps or devices",
-    "intent": "template",
-    "priority": 2,
-    "createdAt": "2025-12-10T00:00:00+09:00"
-  },
-  {
-    "id": "ever-026",
-    "title": "Universal Template for Quick Start Guides",
-    "angle": "Reusable layout for onboarding new users to any tool.",
-    "audience": "Writers creating onboarding documents",
-    "intent": "template",
-    "priority": 2,
-    "createdAt": "2025-12-10T00:00:00+09:00"
-  },
-  {
-    "id": "ever-027",
-    "title": "Minimalist Guide to Decluttering Your Digital Workspace",
-    "angle": "Simple habits to reduce app overload and improve mental focus.",
-    "audience": "Productivity-focused users",
-    "intent": "template",
-    "priority": 2,
-    "createdAt": "2025-12-10T00:00:00+09:00"
-  },
-  {
-    "id": "ever-028",
-    "title": "Checklist: How to Evaluate AI Tools Without Hype",
-    "angle": "A clear method to judge AI features, pricing, and limitations.",
-    "audience": "General users trying modern AI apps",
-    "intent": "template",
-    "priority": 2,
-    "createdAt": "2025-12-10T00:00:00+09:00",
-    "notes": "Evergreen for AI category, no trend dependency"
-  },
-  {
-    "id": "ever-029",
-    "title": "Reusable Template for Balanced App Reviews",
-    "angle": "A neutral review format covering features, usability, pricing, and alternatives.",
-    "audience": "App reviewers",
-    "intent": "template",
-    "priority": 2,
-    "createdAt": "2025-12-10T00:00:00+09:00",
-    "notes": "Foundation template for any review label"
-  },
-  {
-    "id": "ever-030",
-    "title": "Pre-Upgrade Checklist for Any Device",
-    "angle": "Steps to confirm whether an upgrade is actually needed.",
-    "audience": "Device owners considering an upgrade",
-    "intent": "template",
-    "priority": 2,
-    "createdAt": "2025-12-10T00:00:00+09:00"
-  },
-  {
-    "id": "ever-031",
-    "title": "How to Compare Specifications Without Getting Confused",
-    "angle": "A universal spec-reading guide that works for phones, tablets, laptops.",
-    "audience": "Device shoppers",
-    "intent": "template",
-    "priority": 3,
-    "createdAt": "2025-12-10T00:00:00+09:00",
-    "notes": "Timeless content"
-  },
-  {
-    "id": "ever-032",
-    "title": "Checklist: Avoiding Unnecessary Monthly Subscriptions",
-    "angle": "A universal method to filter essential vs non-essential services.",
-    "audience": "Budget-conscious users",
-    "intent": "template",
-    "priority": 3,
-    "createdAt": "2025-12-10T00:00:00+09:00"
-  },
-  {
-    "id": "ever-033",
-    "title": "Basic Template for Step-by-Step Troubleshooting Guides",
-    "angle": "Works for apps, devices, or login/account issues.",
+    "id": "ht-ever-005",
+    "title": "How to Transfer Photos Between Any Two Devices",
+    "angle": "A perma-demand workflow worldwide.",
     "audience": "General users",
-    "intent": "template",
-    "priority": 3,
-    "createdAt": "2025-12-10T00:00:00+09:00"
+    "intent": "howto",
+    "priority": 1
+  },
+
+  {
+    "id": "ht-ever-006",
+    "title": "How to Fix Bluetooth Connection Problems",
+    "angle": "Works for earbuds, cars, headphones, speakers.",
+    "audience": "All device users",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-034",
-    "title": "Universal Template for Feature Highlight Articles",
-    "angle": "A structure to quickly introduce what’s useful, unique, or time-saving.",
-    "audience": "Blog writers and tool reviewers",
-    "intent": "template",
-    "priority": 3,
-    "createdAt": "2025-12-10T00:00:00+09:00"
+    "id": "ht-ever-007",
+    "title": "How to Reduce Battery Drain on Any Phone",
+    "angle": "Battery tips never expire.",
+    "audience": "Android and iPhone users",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-035",
-    "title": "Checklist: Preparing a Device Before Resale or Transfer",
-    "angle": "Universal wipe/reset/backup flow for any device.",
-    "audience": "Sellers and recyclers",
-    "intent": "template",
-    "priority": 3,
-    "createdAt": "2025-12-10T00:00:00+09:00"
+    "id": "ht-ever-008",
+    "title": "How to Fix Slow Wi-Fi Without Calling Your ISP",
+    "angle": "Classic evergreen guide.",
+    "audience": "Home users",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-036",
-    "title": "How to Distinguish Real vs Marketing Features",
-    "angle": "A reusable thinking framework for analyzing feature claims.",
-    "audience": "Tech shoppers and reviewers",
-    "intent": "template",
-    "priority": 4,
-    "createdAt": "2025-12-10T00:00:00+09:00",
-    "notes": "Evergreen concept"
+    "id": "ht-ever-009",
+    "title": "How to Recover a Forgotten Password Securely",
+    "angle": "Password recovery is universal.",
+    "audience": "Anyone with online accounts",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-037",
-    "title": "Checklist for Evaluating Ease-of-Use in Any Product",
-    "angle": "A universal usability scoring method that works across categories.",
-    "audience": "Reviewers and shoppers",
-    "intent": "template",
-    "priority": 4,
-    "createdAt": "2025-12-10T00:00:00+09:00"
+    "id": "ht-ever-010",
+    "title": "How to Clear Cache Safely Across Browsers",
+    "angle": "Browser troubleshooting remains timeless.",
+    "audience": "Web users",
+    "intent": "howto",
+    "priority": 1
+  },
+
+  {
+    "id": "ht-ever-011",
+    "title": "How to Fix Apps Not Opening on Any Device",
+    "angle": "Applies to phones, tablets, PCs.",
+    "audience": "General users",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-038",
-    "title": "Creating Reusable Naming Conventions for Files and Projects",
-    "angle": "Evergreen organizational best practices.",
-    "audience": "General users and teams",
-    "intent": "template",
-    "priority": 4,
-    "createdAt": "2025-12-10T00:00:00+09:00"
+    "id": "ht-ever-012",
+    "title": "How to Set Up a New Device the Right Way",
+    "angle": "Universal onboarding steps.",
+    "audience": "New device buyers",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-039",
-    "title": "Checklist: Questions to Ask Before Trying a New AI Tool",
-    "angle": "Clarifies expectations, cost, data handling, and alternatives.",
-    "audience": "Casual AI tool users",
-    "intent": "template",
-    "priority": 4,
-    "createdAt": "2025-12-10T00:00:00+09:00",
-    "notes": "Timeless AI-safety evergreen"
+    "id": "ht-ever-013",
+    "title": "How to Fix Camera Problems on Any Smartphone",
+    "angle": "Applies across all brands and years.",
+    "audience": "Smartphone photographers",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-040",
-    "title": "5-Part Template for Beginner-Friendly Explainers",
-    "angle": "A structure that turns complex ideas into simple guidance.",
-    "audience": "Writers targeting general audiences",
-    "intent": "template",
-    "priority": 4,
-    "createdAt": "2025-12-10T00:00:00+09:00"
+    "id": "ht-ever-014",
+    "title": "How to Protect Your Privacy Online (Core Checklist)",
+    "angle": "Evergreen privacy fundamentals.",
+    "audience": "All users",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-041",
-    "title": "Universal Template for Beginner Product Guides",
-    "angle": "A placeholder-friendly structure that works for any new tool review.",
-    "audience": "New users exploring unfamiliar apps or devices",
-    "intent": "template",
-    "priority": 1,
-    "createdAt": "2025-12-10T00:00:00+09:00"
+    "id": "ht-ever-015",
+    "title": "How to Fix Overheating on Any Device",
+    "angle": "Thermal issues always recur.",
+    "audience": "Phone and laptop users",
+    "intent": "howto",
+    "priority": 1
+  },
+
+  {
+    "id": "ht-ever-016",
+    "title": "How to Install Apps Safely Without Malware Risks",
+    "angle": "Applies globally.",
+    "audience": "New tech users",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-042",
-    "title": "Checklist: How to Verify Product Credibility Online",
-    "angle": "Safely evaluating websites, ratings, and documentation before buying.",
-    "audience": "Online shoppers",
-    "intent": "template",
-    "priority": 1,
-    "createdAt": "2025-12-10T00:00:00+09:00"
+    "id": "ht-ever-017",
+    "title": "How to Reset Forgotten PIN or Lock Screen",
+    "angle": "Universal lockout scenario.",
+    "audience": "All device owners",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-043",
-    "title": "Template for Writing Mini How-To Guides",
-    "angle": "A universal short-format guide layout for quick fixes.",
-    "audience": "General users troubleshooting issues",
-    "intent": "template",
-    "priority": 1,
-    "createdAt": "2025-12-10T00:00:00+09:00"
+    "id": "ht-ever-018",
+    "title": "How to Fix Audio Not Working Issues",
+    "angle": "Timeless troubleshooting guide.",
+    "audience": "PC/phone/tablet users",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-044",
-    "title": "Basic Security Checklist for Any Digital Account",
-    "angle": "Universal protections: passwords, MFA, backup codes, devices.",
-    "audience": "Any user with online accounts",
-    "intent": "template",
-    "priority": 1,
-    "createdAt": "2025-12-10T00:00:00+09:00"
+    "id": "ht-ever-019",
+    "title": "How to Organize Your Digital Files Efficiently",
+    "angle": "Applies to students, workers, creators.",
+    "audience": "Everyone with a computer",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-045",
-    "title": "Simple Template for ‘Pros and Cons’ Product Summaries",
-    "angle": "A reusable comparison element suitable for any category.",
-    "audience": "Review writers",
-    "intent": "template",
-    "priority": 1,
-    "createdAt": "2025-12-10T00:00:00+09:00"
+    "id": "ht-ever-020",
+    "title": "How to Fix Notification Problems on Any Device",
+    "angle": "OS updates often break notification behavior.",
+    "audience": "Mobile users worldwide",
+    "intent": "howto",
+    "priority": 1
+  }
+]
+[
+  {
+    "id": "ht-ever-021",
+    "title": "How to Fix Touchscreen Not Responding Issues",
+    "angle": "Applies to all smartphones and tablets regardless of brand or year.",
+    "audience": "Mobile users worldwide",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-046",
-    "title": "Checklist: Pre-Purchase Questions for Any Device",
-    "angle": "Universal buying questions that help avoid regret.",
-    "audience": "Device shoppers",
-    "intent": "template",
-    "priority": 2,
-    "createdAt": "2025-12-10T00:00:00+09:00"
+    "id": "ht-ever-022",
+    "title": "How to Reset Any Smartwatch to Factory Settings",
+    "angle": "Universal reset workflow for watchOS, WearOS, and proprietary systems.",
+    "audience": "Wearable users",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-047",
-    "title": "Template for Documenting Feature Updates Clearly",
-    "angle": "Helps writers publish concise update summaries.",
-    "audience": "Tech bloggers and reviewers",
-    "intent": "template",
-    "priority": 2,
-    "createdAt": "2025-12-10T00:00:00+09:00"
+    "id": "ht-ever-023",
+    "title": "How to Fix Slow Download Speeds on Any Device",
+    "angle": "One of the most evergreen network troubleshooting cases.",
+    "audience": "Home users, office workers",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-048",
-    "title": "Universal Troubleshooting Template for App Issues",
-    "angle": "A structured approach narrowing down app malfunction causes.",
-    "audience": "General app users",
-    "intent": "template",
-    "priority": 2,
-    "createdAt": "2025-12-10T00:00:00+09:00"
+    "id": "ht-ever-024",
+    "title": "How to Free Up Storage Without Deleting Important Files",
+    "angle": "Universal method for long-term storage management.",
+    "audience": "Users with older devices",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-049",
-    "title": "Basic Template for Writing 'Why It Matters' Sections",
-    "angle": "A reusable framework for explaining value or significance.",
-    "audience": "Writers and reviewers",
-    "intent": "template",
-    "priority": 2,
-    "createdAt": "2025-12-10T00:00:00+09:00"
+    "id": "ht-ever-025",
+    "title": "How to Fix Mobile Data Not Working on Android/iPhone",
+    "angle": "Carrier-agnostic troubleshooting steps.",
+    "audience": "Travelers and commuters",
+    "intent": "howto",
+    "priority": 1
+  },
+
+  {
+    "id": "ht-ever-026",
+    "title": "How to Connect Bluetooth Earbuds to Any Device",
+    "angle": "Covers pairing mode, reset behavior, and codec fallbacks.",
+    "audience": "Audio users",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-050",
-    "title": "Checklist: How to Prepare Data Before Switching Apps",
-    "angle": "Universal backup/export routine before leaving a service.",
-    "audience": "Users switching apps or subscriptions",
-    "intent": "template",
-    "priority": 2,
-    "createdAt": "2025-12-10T00:00:00+09:00"
+    "id": "ht-ever-027",
+    "title": "How to Fix Overly Loud or Quiet Volume Issues",
+    "angle": "Applies to phones, laptops, smart TVs, and speakers.",
+    "audience": "General tech users",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-051",
-    "title": "Template for Neutral Feature Reviews",
-    "angle": "A layout that emphasizes clarity, not hype.",
-    "audience": "Tech reviewers",
-    "intent": "template",
-    "priority": 3,
-    "createdAt": "2025-12-10T00:00:00+09:00",
-    "notes": "General-purpose neutral review template"
+    "id": "ht-ever-028",
+    "title": "How to Backup Your Entire Photo Library",
+    "angle": "A timeless workflow across Google Photos, iCloud, OneDrive.",
+    "audience": "Families, students, creators",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-052",
-    "title": "Checklist for Cleaner App Interfaces",
-    "angle": "Guidelines to evaluate UI clutter, spacing, and usability.",
-    "audience": "UI-conscious users",
-    "intent": "template",
-    "priority": 3,
-    "createdAt": "2025-12-10T00:00:00+09:00"
+    "id": "ht-ever-029",
+    "title": "How to Fix Apps That Freeze or Hang Frequently",
+    "angle": "Universal app stability troubleshooting.",
+    "audience": "Any smartphone user",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-053",
-    "title": "Universal Template for Long-Form Guides",
-    "angle": "A reusable structure when writing a full-length in-depth guide.",
-    "audience": "Writers producing detailed tutorials",
-    "intent": "template",
-    "priority": 3,
-    "createdAt": "2025-12-10T00:00:00+09:00"
+    "id": "ht-ever-030",
+    "title": "How to Improve Wi-Fi Coverage in Large Homes",
+    "angle": "Applies regardless of router brand or ISP.",
+    "audience": "Home Wi-Fi users",
+    "intent": "howto",
+    "priority": 1
+  },
+
+  {
+    "id": "ht-ever-031",
+    "title": "How to Fix Laptop Not Charging Problems",
+    "angle": "Works for USB-C, barrel jack, MagSafe and more.",
+    "audience": "Students, remote workers",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-054",
-    "title": "Checklist: Evaluating Accessibility in any Tool",
-    "angle": "Universal accessibility considerations for software or hardware.",
-    "audience": "Users prioritizing accessibility",
-    "intent": "template",
-    "priority": 3,
-    "createdAt": "2025-12-10T00:00:00+09:00",
-    "notes": "Good for device/app categories"
+    "id": "ht-ever-032",
+    "title": "How to Reset Any Smart TV (Samsung, LG, Sony, Roku)",
+    "angle": "TV troubleshooting remains constantly in demand.",
+    "audience": "Home users",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-055",
-    "title": "Template for Budget-Friendly Buyer’s Guides",
-    "angle": "Reusable price-conscious framework for any category.",
-    "audience": "Shoppers on a budget",
-    "intent": "template",
-    "priority": 3,
-    "createdAt": "2025-12-10T00:00:00+09:00"
+    "id": "ht-ever-033",
+    "title": "How to Fix Internet Not Working After a Power Outage",
+    "angle": "ISP-agnostic recovery steps.",
+    "audience": "Home network users",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-056",
-    "title": "How to Read User Reviews More Critically",
-    "angle": "Identifying patterns, bias, and noise across review platforms.",
-    "audience": "Shoppers researching products",
-    "intent": "template",
-    "priority": 4,
-    "createdAt": "2025-12-10T00:00:00+09:00"
+    "id": "ht-ever-034",
+    "title": "How to Remove Malware Safely From Any Computer",
+    "angle": "A classic evergreen problem.",
+    "audience": "Windows & Mac beginners",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-057",
-    "title": "Basic Template for Writing App Setup Guides",
-    "angle": "Universal steps covering install → configure → verify.",
-    "audience": "New users installing apps",
-    "intent": "template",
-    "priority": 4,
-    "createdAt": "2025-12-10T00:00:00+09:00"
+    "id": "ht-ever-035",
+    "title": "How to Fix Keyboard Not Working (Laptop/Desktop)",
+    "angle": "Cross-platform troubleshooting for wired and wireless keyboards.",
+    "audience": "Laptop & PC users",
+    "intent": "howto",
+    "priority": 1
+  },
+
+  {
+    "id": "ht-ever-036",
+    "title": "How to Fix Mouse Not Working (Bluetooth/USB)",
+    "angle": "Universal fix workflow.",
+    "audience": "Office workers, gamers",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-058",
-    "title": "Checklist for Evaluating Mobile App Performance",
-    "angle": "General guidelines for speed, stability, data use, and battery.",
+    "id": "ht-ever-037",
+    "title": "How to Password-Protect Your Important Files",
+    "angle": "Device-agnostic encryption basics.",
+    "audience": "Anyone storing important files",
+    "intent": "howto",
+    "priority": 1
+  },
+  {
+    "id": "ht-ever-038",
+    "title": "How to Fix Frequent Disconnections on Bluetooth Devices",
+    "angle": "Applies across earbuds, keyboards, controllers.",
+    "audience": "Bluetooth users",
+    "intent": "howto",
+    "priority": 1
+  },
+  {
+    "id": "ht-ever-039",
+    "title": "How to Fix PC Fans Running Too Loud",
+    "angle": "Thermal & dust cleanup basics.",
+    "audience": "Desktop & laptop users",
+    "intent": "howto",
+    "priority": 1
+  },
+  {
+    "id": "ht-ever-040",
+    "title": "How to Change Your Phone Number Without Losing Data",
+    "angle": "Universal SIM/eSIM workflow.",
+    "audience": "Global smartphone users",
+    "intent": "howto",
+    "priority": 1
+  }
+]
+[
+  {
+    "id": "ht-ever-041",
+    "title": "How to Fix Phone Overheating Issues",
+    "angle": "Applies to all phone models; evergreen due to constant thermal complaints.",
+    "audience": "Smartphone users worldwide",
+    "intent": "howto",
+    "priority": 1
+  },
+  {
+    "id": "ht-ever-042",
+    "title": "How to Optimize Battery Life on Any Smartphone",
+    "angle": "Timeless battery-saving workflow for Android and iOS.",
+    "audience": "Users with aging devices",
+    "intent": "howto",
+    "priority": 1
+  },
+  {
+    "id": "ht-ever-043",
+    "title": "How to Fix Wi-Fi Not Connecting on Any Device",
+    "angle": "Universal recovery steps from router to OS-level resets.",
+    "audience": "Home, office, and travel users",
+    "intent": "howto",
+    "priority": 1
+  },
+  {
+    "id": "ht-ever-044",
+    "title": "How to Recover Deleted Photos Safely",
+    "angle": "Works across cloud backups and local device storage.",
+    "audience": "Parents, students, creators",
+    "intent": "howto",
+    "priority": 1
+  },
+  {
+    "id": "ht-ever-045",
+    "title": "How to Fix Apps Not Downloading on Play Store/App Store",
+    "angle": "Cross-platform troubleshooting steps.",
+    "audience": "General smartphone users",
+    "intent": "howto",
+    "priority": 1
+  },
+
+  {
+    "id": "ht-ever-046",
+    "title": "How to Fix GPS Not Working Accurately",
+    "angle": "Universal calibration and signal-recovery workflow.",
+    "audience": "Drivers, travelers, delivery workers",
+    "intent": "howto",
+    "priority": 1
+  },
+  {
+    "id": "ht-ever-047",
+    "title": "How to Set Up Parental Controls on Any Device",
+    "angle": "Essential evergreen for households with children.",
+    "audience": "Parents globally",
+    "intent": "howto",
+    "priority": 1
+  },
+  {
+    "id": "ht-ever-048",
+    "title": "How to Fix Smart TV Not Connecting to Wi-Fi",
+    "angle": "One of the most frequently searched TV issues worldwide.",
+    "audience": "Households with smart TVs",
+    "intent": "howto",
+    "priority": 1
+  },
+  {
+    "id": "ht-ever-049",
+    "title": "How to Transfer Files Between Any Phone and PC",
+    "angle": "Covers USB, Wi-Fi, cloud and cross-OS transfers.",
+    "audience": "Students and office workers",
+    "intent": "howto",
+    "priority": 1
+  },
+  {
+    "id": "ht-ever-050",
+    "title": "How to Fix ‘No Sound’ Problems on Windows and Mac",
+    "angle": "Audio device, driver and OS-level troubleshooting.",
+    "audience": "Laptop and desktop users",
+    "intent": "howto",
+    "priority": 1
+  },
+
+  {
+    "id": "ht-ever-051",
+    "title": "How to Fix Phone Not Turning On",
+    "angle": "Universal recovery: battery, charger, hard reset workflow.",
+    "audience": "Users with aging or damaged devices",
+    "intent": "howto",
+    "priority": 1
+  },
+  {
+    "id": "ht-ever-052",
+    "title": "How to Clear Browser Cache on Any Device",
+    "angle": "Covers Chrome, Safari, Edge, Firefox.",
+    "audience": "General web users",
+    "intent": "howto",
+    "priority": 1
+  },
+  {
+    "id": "ht-ever-053",
+    "title": "How to Fix Laptop Overheating and Fan Noise",
+    "angle": "Thermal cleaning + optimization basics.",
+    "audience": "Laptop users worldwide",
+    "intent": "howto",
+    "priority": 1
+  },
+  {
+    "id": "ht-ever-054",
+    "title": "How to Fix Slow Boot Times on Windows and Mac",
+    "angle": "Evergreen performance optimization.",
+    "audience": "Desktop and laptop owners",
+    "intent": "howto",
+    "priority": 1
+  },
+  {
+    "id": "ht-ever-055",
+    "title": "How to Fix Auto-Brightness Not Working",
+    "angle": "Sensor calibration method works across all phones.",
+    "audience": "Smartphone users",
+    "intent": "howto",
+    "priority": 1
+  },
+
+  {
+    "id": "ht-ever-056",
+    "title": "How to Fix Notification Delays or Missing Alerts",
+    "angle": "Covers deep-sleep modes, battery restrictions, and OS rules.",
+    "audience": "Android and iPhone owners",
+    "intent": "howto",
+    "priority": 1
+  },
+  {
+    "id": "ht-ever-057",
+    "title": "How to Fix ‘Cannot Connect to App Store/Play Store’ Issues",
+    "angle": "Universal DNS/network/account troubleshooting.",
+    "audience": "General phone users",
+    "intent": "howto",
+    "priority": 1
+  },
+  {
+    "id": "ht-ever-058",
+    "title": "How to Fix Touch ID / Face ID Not Recognizing",
+    "angle": "Biometric troubleshooting across all devices.",
+    "audience": "iPhone and Android users",
+    "intent": "howto",
+    "priority": 1
+  },
+  {
+    "id": "ht-ever-059",
+    "title": "How to Set Up Multi-Device Clipboard Sharing",
+    "angle": "Covers Windows–Mac–Android–iOS cross-sync.",
+    "audience": "Productivity users",
+    "intent": "howto",
+    "priority": 1
+  },
+  {
+    "id": "ht-ever-060",
+    "title": "How to Fix Random Shutdown or Restart Issues",
+    "angle": "Battery, OS, thermal, and hardware-fault workflow.",
+    "audience": "Users with unstable devices",
+    "intent": "howto",
+    "priority": 1
+  }
+]
+[
+  {
+    "id": "ht-ever-061",
+    "title": "How to Fix Bluetooth Pairing Failures on Any Device",
+    "angle": "Covers earbuds, speakers, cars, controllers — universal troubleshooting.",
+    "audience": "Global Bluetooth users",
+    "intent": "howto",
+    "priority": 1
+  },
+  {
+    "id": "ht-ever-062",
+    "title": "How to Create a Secure Backup Strategy for All Your Devices",
+    "angle": "Evergreen method using cloud + offline redundancy.",
+    "audience": "Families, creators, businesses",
+    "intent": "howto",
+    "priority": 1
+  },
+  {
+    "id": "ht-ever-063",
+    "title": "How to Fix Screen Flickering Issues",
+    "angle": "Applies to laptops, monitors, tablets, and phones.",
+    "audience": "Office workers, students, general users",
+    "intent": "howto",
+    "priority": 1
+  },
+  {
+    "id": "ht-ever-064",
+    "title": "How to Troubleshoot Any Device Not Charging",
+    "angle": "A fully universal charging failure workflow.",
+    "audience": "All device owners",
+    "intent": "howto",
+    "priority": 1
+  },
+  {
+    "id": "ht-ever-065",
+    "title": "How to Fix Wi-Fi Dropping Frequently",
+    "angle": "One of the most persistent connectivity issues worldwide.",
+    "audience": "Home and office network users",
+    "intent": "howto",
+    "priority": 1
+  },
+
+  {
+    "id": "ht-ever-066",
+    "title": "How to Protect Yourself From Phishing and Scam Messages",
+    "angle": "Timeless safety principles applicable to all messaging apps.",
+    "audience": "Everyone using email, SMS, or social apps",
+    "intent": "howto",
+    "priority": 1
+  },
+  {
+    "id": "ht-ever-067",
+    "title": "How to Safely Update Any Device Without Losing Data",
+    "angle": "Covers phones, laptops, smartwatches, TVs.",
+    "audience": "Users upgrading OS versions",
+    "intent": "howto",
+    "priority": 1
+  },
+  {
+    "id": "ht-ever-068",
+    "title": "How to Fix Overly Slow Internet on Shared Networks",
+    "angle": "Applies in dorms, offices, large households.",
+    "audience": "Shared Wi-Fi users",
+    "intent": "howto",
+    "priority": 1
+  },
+  {
+    "id": "ht-ever-069",
+    "title": "How to Fix Autocorrect and Keyboard Input Issues",
+    "angle": "Universal troubleshooting for all languages and keyboards.",
+    "audience": "Writers, students, mobile users",
+    "intent": "howto",
+    "priority": 1
+  },
+  {
+    "id": "ht-ever-070",
+    "title": "How to Fix App Crashes After Updating OS",
+    "angle": "Covers permission resets, cache rebuilds, compatibility fixes.",
+    "audience": "Smartphone and tablet users",
+    "intent": "howto",
+    "priority": 1
+  },
+
+  {
+    "id": "ht-ever-071",
+    "title": "How to Fix ‘Device Not Detected’ on USB",
+    "angle": "Applies to phones, drives, peripherals.",
+    "audience": "Windows & Mac users",
+    "intent": "howto",
+    "priority": 1
+  },
+  {
+    "id": "ht-ever-072",
+    "title": "How to Build a Clean Multi-Device File Organization System",
+    "angle": "Evergreen productivity workflow every user needs.",
+    "audience": "Students, creators, office workers",
+    "intent": "howto",
+    "priority": 1
+  },
+  {
+    "id": "ht-ever-073",
+    "title": "How to Fix ‘SIM Not Detected’ Errors",
+    "angle": "Universal SIM/eSIM troubleshooting.",
+    "audience": "Android/iPhone users worldwide",
+    "intent": "howto",
+    "priority": 1
+  },
+  {
+    "id": "ht-ever-074",
+    "title": "How to Fix Wi-Fi Authentication Problems",
+    "angle": "Classic evergreen network fix guide.",
+    "audience": "Home and office Wi-Fi users",
+    "intent": "howto",
+    "priority": 1
+  },
+  {
+    "id": "ht-ever-075",
+    "title": "How to Fix Device Random Freezing Issues",
+    "angle": "Covers memory, storage, thermal, and OS causes.",
+    "audience": "Smartphone and PC users",
+    "intent": "howto",
+    "priority": 1
+  },
+
+  {
+    "id": "ht-ever-076",
+    "title": "How to Fix Download Stuck or Paused Errors",
+    "angle": "Universal fix sequence across app stores and browsers.",
+    "audience": "Mobile & desktop users",
+    "intent": "howto",
+    "priority": 1
+  },
+  {
+    "id": "ht-ever-077",
+    "title": "How to Fix Any Device Not Recognizing External Storage",
+    "angle": "USB, SD card, external SSD troubleshooting.",
+    "audience": "Creators and office workers",
+    "intent": "howto",
+    "priority": 1
+  },
+  {
+    "id": "ht-ever-078",
+    "title": "How to Fix Screen Rotation Not Working",
+    "angle": "Universal fix for phones and tablets: sensors, toggles, OS rules.",
     "audience": "Mobile users",
-    "intent": "template",
-    "priority": 4,
-    "createdAt": "2025-12-10T00:00:00+09:00",
-    "notes": "Modern evergreen"
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-059",
-    "title": "Template: How to Build an Alternatives List",
-    "angle": "A general structure for suggesting competing tools.",
-    "audience": "Review writers",
-    "intent": "template",
-    "priority": 4,
-    "createdAt": "2025-12-10T00:00:00+09:00"
+    "id": "ht-ever-079",
+    "title": "How to Fix Slow Laptop Performance Without Reinstalling OS",
+    "angle": "Evergreen optimization covering storage, startup apps, memory.",
+    "audience": "Students, workers, general laptop users",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-060",
-    "title": "Checklist for Testing Cross-Device Compatibility",
-    "angle": "Universal tests for syncing, file formats, and sign-in flow.",
-    "audience": "Multi-device users",
-    "intent": "template",
-    "priority": 4,
-    "createdAt": "2025-12-10T00:00:00+09:00"
+    "id": "ht-ever-080",
+    "title": "How to Fix Video Playback Issues on Any Device",
+    "angle": "Covers codecs, network buffering, and app resets.",
+    "audience": "Streaming users worldwide",
+    "intent": "howto",
+    "priority": 1
+  }
+]
+[
+  {
+    "id": "ht-ever-081",
+    "title": "How to Fix Laptop Wi-Fi Not Turning On",
+    "angle": "Covers driver resets, BIOS toggles, hardware switches.",
+    "audience": "Windows & Mac users",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-061",
-    "title": "Template for Feature Comparison Tables",
-    "angle": "A reusable grid for comparing any set of tools, devices, or services.",
-    "audience": "Writers creating side-by-side comparisons",
-    "intent": "template",
-    "priority": 1,
-    "createdAt": "2025-12-10T00:00:00+09:00",
-    "notes": "Core review infrastructure"
+    "id": "ht-ever-082",
+    "title": "How to Fix Microphone Not Working on Any Device",
+    "angle": "Universal mic troubleshooting for calls, meetings, and recordings.",
+    "audience": "Remote workers, gamers, students",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-062",
-    "title": "Checklist: What to Back Up Before Resetting Any Device",
-    "angle": "Universal backup items that apply to phones, laptops, and tablets.",
-    "audience": "Everyday device users",
-    "intent": "template",
-    "priority": 1,
-    "createdAt": "2025-12-10T00:00:00+09:00"
+    "id": "ht-ever-083",
+    "title": "How to Fix ‘Storage Full’ When It Isn’t Actually Full",
+    "angle": "OS indexing and orphaned-temporary-files issue across all platforms.",
+    "audience": "Smartphone & tablet users",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-063",
-    "title": "Template for Writing 'Getting Started' Sections",
-    "angle": "Reusable onboarding structure across any product or service.",
-    "audience": "Users beginning new services/apps",
-    "intent": "template",
-    "priority": 1,
-    "createdAt": "2025-12-10T00:00:00+09:00"
+    "id": "ht-ever-084",
+    "title": "How to Fix Apps Not Opening on Android/iPhone",
+    "angle": "Covers permissions, cache, app integrity, OS conflicts.",
+    "audience": "Global mobile users",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-064",
-    "title": "Checklist: Evaluating Long-Term App Reliability",
-    "angle": "How to judge stability, policy changes, and vendor reputation.",
-    "audience": "App-heavy users",
-    "intent": "template",
-    "priority": 1,
-    "createdAt": "2025-12-10T00:00:00+09:00"
+    "id": "ht-ever-085",
+    "title": "How to Fix Smartwatch Not Syncing With Your Phone",
+    "angle": "Works across WearOS, watchOS, Fitbit, Galaxy Watch.",
+    "audience": "Wearable owners",
+    "intent": "howto",
+    "priority": 1
+  },
+
+  {
+    "id": "ht-ever-086",
+    "title": "How to Fix HDMI Not Working on Any PC or TV",
+    "angle": "Port, cable, display mode, handshake troubleshooting.",
+    "audience": "Home entertainment & office users",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-065",
-    "title": "Template for Fair Pricing Analysis",
-    "angle": "Reusable framework for subscription or product value evaluation.",
-    "audience": "Price-sensitive shoppers",
-    "intent": "template",
-    "priority": 1,
-    "createdAt": "2025-12-10T00:00:00+09:00"
+    "id": "ht-ever-087",
+    "title": "How to Fix Overly Fast Battery Drain After Updates",
+    "angle": "Classic post-update battery optimization workflow.",
+    "audience": "iPhone & Android owners",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-066",
-    "title": "Checklist: What to Check in Privacy Policies",
-    "angle": "Universal items to confirm before using any new service.",
-    "audience": "Users signing up for digital tools",
-    "intent": "template",
-    "priority": 2,
-    "createdAt": "2025-12-10T00:00:00+09:00",
-    "notes": "Useful for subscription and app categories"
+    "id": "ht-ever-088",
+    "title": "How to Fix Auto-Rotation Stuck on Landscape or Portrait",
+    "angle": "Sensor reset guide for all smartphone brands.",
+    "audience": "Mobile device users",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-067",
-    "title": "Template for Linkable Mini-Guides",
-    "angle": "Reusable micro-guide structure for referencing across posts.",
-    "audience": "How-to content creators",
-    "intent": "template",
-    "priority": 2,
-    "createdAt": "2025-12-10T00:00:00+09:00"
+    "id": "ht-ever-089",
+    "title": "How to Fix Audio Delay When Using Bluetooth Earbuds",
+    "angle": "Codec, buffer, OS latency fixes.",
+    "audience": "Music listeners & gamers",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-068",
-    "title": "Checklist: Best Practices for Multi-Device Sync",
-    "angle": "General syncing principles that span all ecosystems.",
-    "audience": "Users juggling laptop/phone/tablet",
-    "intent": "template",
-    "priority": 2,
-    "createdAt": "2025-12-10T00:00:00+09:00"
+    "id": "ht-ever-090",
+    "title": "How to Fix Apps Consuming Too Much Background Data",
+    "angle": "Applies to all Android/iOS versions.",
+    "audience": "Users on limited data plans",
+    "intent": "howto",
+    "priority": 1
+  },
+
+  {
+    "id": "ht-ever-091",
+    "title": "How to Fix External SSD Not Showing Up",
+    "angle": "Universal storage troubleshooting.",
+    "audience": "Creators, professionals, students",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-069",
-    "title": "Template for Quick-Start Buyer Guides",
-    "angle": "A short, high-impact layout for fast purchase decisions.",
-    "audience": "Shoppers needing simple criteria",
-    "intent": "template",
-    "priority": 2,
-    "createdAt": "2025-12-10T00:00:00+09:00"
+    "id": "ht-ever-092",
+    "title": "How to Fix Phone Not Connecting to PC",
+    "angle": "Covers USB debugging, drivers, trust settings.",
+    "audience": "Android & iPhone users",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-070",
-    "title": "Checklist: How to Compare Cloud Storage Plans",
-    "angle": "Generic metrics: storage tiers, speed, retention, recovery, limits.",
-    "audience": "Cloud storage shoppers",
-    "intent": "template",
-    "priority": 2,
-    "createdAt": "2025-12-10T00:00:00+09:00",
-    "notes": "No vendor-specific claims included"
+    "id": "ht-ever-093",
+    "title": "How to Fix Stuck Pixels or Dead Pixels on Screens",
+    "angle": "Evergreen issue across all displays.",
+    "audience": "Monitor, laptop, mobile users",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-071",
-    "title": "Template: How to Structure a Troubleshooting Section",
-    "angle": "Reusable triage flow for any technical issue.",
-    "audience": "General users and writers of guides",
-    "intent": "template",
-    "priority": 3,
-    "createdAt": "2025-12-10T00:00:00+09:00",
-    "notes": "Useful for how-to and app categories"
+    "id": "ht-ever-094",
+    "title": "How to Stop Spam Notifications and Pop-Ups",
+    "angle": "Universal adware & permission hygiene guide.",
+    "audience": "Smartphone users",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-072",
-    "title": "Checklist: What to Audit in Annual Tech Decluttering",
-    "angle": "Devices, files, data, accounts, subscriptions, passwords.",
-    "audience": "Users performing annual digital cleanup",
-    "intent": "template",
-    "priority": 3,
-    "createdAt": "2025-12-10T00:00:00+09:00"
+    "id": "ht-ever-095",
+    "title": "How to Fix PC That Won’t Boot Properly",
+    "angle": "Classic bootloader, SSD, RAM troubleshooting.",
+    "audience": "Desktop & laptop users",
+    "intent": "howto",
+    "priority": 1
+  },
+
+  {
+    "id": "ht-ever-096",
+    "title": "How to Fix iMessage or RCS Not Sending",
+    "angle": "Cross-platform messaging recovery.",
+    "audience": "iPhone & Android users",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-073",
-    "title": "Template for Explaining Trade-Offs Clearly",
-    "angle": "A universal reasoning framework for pros vs compromises.",
-    "audience": "Writers, reviewers, decision makers",
-    "intent": "template",
-    "priority": 3,
-    "createdAt": "2025-12-10T00:00:00+09:00"
+    "id": "ht-ever-097",
+    "title": "How to Fix Cloud Backups Not Completing",
+    "angle": "Applies to Google, Apple, Microsoft cloud ecosystems.",
+    "audience": "General tech users",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-074",
-    "title": "Checklist: Cross-Platform Compatibility Factors",
-    "angle": "A reusable evaluation list across any ecosystem.",
-    "audience": "Multi-device users",
-    "intent": "template",
-    "priority": 3,
-    "createdAt": "2025-12-10T00:00:00+09:00"
+    "id": "ht-ever-098",
+    "title": "How to Fix Phone Vibrations Not Working",
+    "angle": "Covers motors, haptics settings, OS issues.",
+    "audience": "Global smartphone audience",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-075",
-    "title": "Template for Writing Clear Step-By-Step Guides",
-    "angle": "Cleaner structure for long procedures and technical workflows.",
-    "audience": "How-to readers and guide creators",
-    "intent": "template",
-    "priority": 3,
-    "createdAt": "2025-12-10T00:00:00+09:00"
+    "id": "ht-ever-099",
+    "title": "How to Fix ‘Can’t Receive Calls’ Issues",
+    "angle": "SIM, network, blocklist, and OS restrictions.",
+    "audience": "iPhone/Android users worldwide",
+    "intent": "howto",
+    "priority": 1
   },
   {
-    "id": "ever-076",
-    "title": "Checklist: What Makes a Good App Review Objective",
-    "angle": "Objective framing, usage cases, fairness, and test boundaries.",
-    "audience": "App reviewers",
-    "intent": "template",
-    "priority": 4,
-    "createdAt": "2025-12-10T00:00:00+09:00"
-  },
-  {
-    "id": "ever-077",
-    "title": "Template for Listing Limitations Transparently",
-    "angle": "Encourages honest disclosure of weaknesses without negativity.",
-    "audience": "Review and how-to writers",
-    "intent": "template",
-    "priority": 4,
-    "createdAt": "2025-12-10T00:00:00+09:00"
-  },
-  {
-    "id": "ever-078",
-    "title": "Checklist: Pre-Review Setup for Any App or Device",
-    "angle": "Universal preparation steps before testing something.",
-    "audience": "Reviewers allocating time to evaluate products",
-    "intent": "template",
-    "priority": 4,
-    "createdAt": "2025-12-10T00:00:00+09:00",
-    "notes": "Supports consistent review flow"
-  },
-  {
-    "id": "ever-079",
-    "title": "Template: Simple Multi-Section Summary Layout",
-    "angle": "Reusable compact summary format for any type of article.",
-    "audience": "General content writers",
-    "intent": "template",
-    "priority": 4,
-    "createdAt": "2025-12-10T00:00:00+09:00"
-  },
-  {
-    "id": "ever-080",
-    "title": "Checklist: What to Look For in Long-Term Subscriptions",
-    "angle": "Durability, stability, portability, and exit flexibility.",
-    "audience": "Subscription service users",
-    "intent": "template",
-    "priority": 4,
-    "createdAt": "2025-12-10T00:00:00+09:00"
-  },
-  {
-    "id": "ever-081",
-    "title": "Template: Balanced Pros & Cons Section",
-    "angle": "Reusable structure for fair, neutral comparison.",
-    "audience": "Review and analysis writers",
-    "intent": "template",
-    "priority": 1,
-    "createdAt": "2025-12-10T00:00:00+09:00"
-  },
-  {
-    "id": "ever-082",
-    "title": "Checklist: Universal App Setup Steps",
-    "angle": "Initial settings, permissions, and basic checks for any app.",
-    "audience": "Mobile and desktop users",
-    "intent": "template",
-    "priority": 1,
-    "createdAt": "2025-12-10T00:00:00+09:00"
-  },
-  {
-    "id": "ever-083",
-    "title": "Template for Explaining Update History",
-    "angle": "Reusable block for summarizing version changes and long-term reliability.",
-    "audience": "Readers evaluating app/device maturity",
-    "intent": "template",
-    "priority": 1,
-    "createdAt": "2025-12-10T00:00:00+09:00"
-  },
-  {
-    "id": "ever-084",
-    "title": "Checklist: Pre-Purchase Verification Items",
-    "angle": "Cross-category purchase validation for apps, devices, or services.",
-    "audience": "Shoppers wanting to avoid mistakes",
-    "intent": "template",
-    "priority": 1,
-    "createdAt": "2025-12-10T00:00:00+09:00"
-  },
-  {
-    "id": "ever-085",
-    "title": "Template: Clean Feature Breakdown Structure",
-    "angle": "Reusable layout for breaking complex products into digestible parts.",
-    "audience": "Product reviewers and guide creators",
-    "intent": "template",
-    "priority": 1,
-    "createdAt": "2025-12-10T00:00:00+09:00"
-  },
-  {
-    "id": "ever-086",
-    "title": "Checklist: Digital Minimalism Starter",
-    "angle": "A universal list to reduce digital noise and app overload.",
-    "audience": "General users seeking simplification",
-    "intent": "template",
-    "priority": 2,
-    "createdAt": "2025-12-10T00:00:00+09:00"
-  },
-  {
-    "id": "ever-087",
-    "title": "Template for Summarizing Complex Settings",
-    "angle": "Reusable guide to explain advanced settings in simple terms.",
-    "audience": "Users configuring multifaceted apps/devices",
-    "intent": "template",
-    "priority": 2,
-    "createdAt": "2025-12-10T00:00:00+09:00"
-  },
-  {
-    "id": "ever-088",
-    "title": "Checklist: What to Review Monthly for Digital Hygiene",
-    "angle": "Subscriptions, storage, security, usage data.",
-    "audience": "Users maintaining personal digital systems",
-    "intent": "template",
-    "priority": 2,
-    "createdAt": "2025-12-10T00:00:00+09:00"
-  },
-  {
-    "id": "ever-089",
-    "title": "Template: Unified Specification Layout",
-    "angle": "A consistent spec table format for any device category.",
-    "audience": "Device reviewers",
-    "intent": "template",
-    "priority": 2,
-    "createdAt": "2025-12-10T00:00:00+09:00"
-  },
-  {
-    "id": "ever-090",
-    "title": "Checklist: What Makes a Subscription Worth Keeping",
-    "angle": "Retention value factors: updates, stability, support, portability.",
-    "audience": "Subscription shoppers",
-    "intent": "template",
-    "priority": 2,
-    "createdAt": "2025-12-10T00:00:00+09:00"
-  },
-  {
-    "id": "ever-091",
-    "title": "Template for Explaining Technical Jargon Clearly",
-    "angle": "Reusable glossary-style section for any topic.",
-    "audience": "General readers wanting clarity",
-    "intent": "template",
-    "priority": 3,
-    "createdAt": "2025-12-10T00:00:00+09:00"
-  },
-  {
-    "id": "ever-092",
-    "title": "Checklist: Evaluating Long-Term Vendor Support",
-    "angle": "Criteria to judge commitment beyond initial launch.",
-    "audience": "Buyers avoiding abandoned products",
-    "intent": "template",
-    "priority": 3,
-    "createdAt": "2025-12-10T00:00:00+09:00"
-  },
-  {
-    "id": "ever-093",
-    "title": "Template: Multi-Layer Summary for Long Posts",
-    "angle": "Reusable top/mid/bottom summary design.",
-    "audience": "Readers scanning large articles",
-    "intent": "template",
-    "priority": 3,
-    "createdAt": "2025-12-10T00:00:00+09:00"
-  },
-  {
-    "id": "ever-094",
-    "title": "Checklist: Preparing Device Before Selling or Donating",
-    "angle": "Reset, wipe, backup, deregister, clean.",
-    "audience": "Users recycling devices",
-    "intent": "template",
-    "priority": 3,
-    "createdAt": "2025-12-10T00:00:00+09:00"
-  },
-  {
-    "id": "ever-095",
-    "title": "Template: What to Include in a Mini Comparison Box",
-    "angle": "Reusable micro-comparison design for in-article boxes.",
-    "audience": "Reviewers needing compact comparisons",
-    "intent": "template",
-    "priority": 3,
-    "createdAt": "2025-12-10T00:00:00+09:00"
-  },
-  {
-    "id": "ever-096",
-    "title": "Checklist: Cross-Review Consistency Rules",
-    "angle": "Rules for labeling, sections, tone, and fairness.",
-    "audience": "Writers producing series of reviews",
-    "intent": "template",
-    "priority": 4,
-    "createdAt": "2025-12-10T00:00:00+09:00",
-    "notes": "Supports long-term consistency"
-  },
-  {
-    "id": "ever-097",
-    "title": "Template: Breaking Down Multi-Step Processes",
-    "angle": "Reusable pattern for complex workflows.",
-    "audience": "How-to and technical writers",
-    "intent": "template",
-    "priority": 4,
-    "createdAt": "2025-12-10T00:00:00+09:00"
-  },
-  {
-    "id": "ever-098",
-    "title": "Checklist: What to Review Before Publishing Any Article",
-    "angle": "Structure, clarity, formatting, disclaimers (no brand claims).",
-    "audience": "All article creators",
-    "intent": "template",
-    "priority": 4,
-    "createdAt": "2025-12-10T00:00:00+09:00",
-    "notes": "Internal quality gate"
-  },
-  {
-    "id": "ever-099",
-    "title": "Template for Neutral Tone Alerts",
-    "angle": "Reusable note that clarifies limitations or edge cases.",
-    "audience": "General readers",
-    "intent": "template",
-    "priority": 4,
-    "createdAt": "2025-12-10T00:00:00+09:00"
-  },
-  {
-    "id": "ever-100",
-    "title": "Checklist: Long-Term Data Portability Factors",
-    "angle": "Vendor lock-in, export formats, migration difficulty.",
-    "audience": "Users wanting multi-year stability",
-    "intent": "template",
-    "priority": 4,
-    "createdAt": "2025-12-10T00:00:00+09:00"
+    "id": "ht-ever-100",
+    "title": "How to Fix ‘Phone Keeps Restarting’ Issues",
+    "angle": "Universal thermal, app, battery, and OS troubleshooting.",
+    "audience": "Users with unstable smartphones",
+    "intent": "howto",
+    "priority": 1
   }
 ]
