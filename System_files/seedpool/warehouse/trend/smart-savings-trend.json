@@ -2,5 +2,26 @@
   "label": "smart-savings",
   "kind": "trend",
   "limit": 80,
-  "seeds": []
+  "seeds": [
+    {
+      "id": "save-tr-2025-001",
+      "title": "Cutting cloud storage costs with a hybrid S3 + R2 setup",
+      "angle": "Place hot data on S3 and cold backups on R2 to reduce egress and storage fees.",
+      "audience": "Individuals and small operators who want lower monthly infra bills",
+      "intent": "savings",
+      "priority": 1,
+      "expiresAt": "2026-03-01T00:00:00+09:00",
+      "notes": "옹스 블로그 실제 사례 기반으로 작성할 수 있어 매우 강한 Authority 주제."
+    },
+    {
+      "id": "save-tr-2025-002",
+      "title": "Best cheap cloud storage deals in 2025 (Google Drive, OneDrive, Dropbox)",
+      "angle": "Short-term promotions, regional differences, and how to stack savings.",
+      "audience": "Users seeking cheaper online storage options",
+      "intent": "savings",
+      "priority": 2,
+      "expiresAt": "2026-04-10T00:00:00+09:00",
+      "notes": "가격 변동이 잦아 트렌드 후보로 최적."
+    }
+  ]
 }
