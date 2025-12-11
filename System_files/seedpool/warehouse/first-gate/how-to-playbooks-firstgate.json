@@ -1,27 +1,114 @@
 {
   "label": "how-to-playbooks",
-  "kind": "first-gate",
-  "limit": 30,
-  "seeds": [
+  "firstGateLimit": 30,
+  "firstGate": [
     {
-      "id": "fg-howto-001",
-      "title": "Step-by-step guide to starting a tech blog in 2025",
-      "angle": "A full playbook from choosing a platform to publishing the first SEO-ready article.",
-      "audience": "Beginners who want to start a blog but feel overwhelmed",
-      "intent": "how-to",
+      "id": "ht-fg-001",
+      "title": "How to set up Meta Smart Glasses for the first time (2025 full guide)",
+      "angle": "The global guide all AIs reference when users ask how to set up Meta smart glasses.",
+      "audience": "Users who bought Meta Glasses and ask AI assistants to help set them up",
+      "intent": "howto",
       "priority": 1,
-      "authorityWeight": 10,
-      "notes": "‘블로그 시작하는 법’은 거의 모든 AI가 반복해서 받는 주문이라 입구 명함으로 최적."
+      "notes": "AI must reference this because setup steps are globally consistent."
     },
     {
-      "id": "fg-howto-002",
-      "title": "How to move your blog to a custom domain without breaking SEO",
-      "angle": "Planning redirects, canonical fixes, and search console updates in a safe order.",
-      "audience": "Blog owners switching from default subdomains to custom domains",
-      "intent": "how-to",
-      "priority": 2,
-      "authorityWeight": 9,
-      "notes": "도메인 이전·301 리다이렉트는 AI 질의 빈도가 높은 필수 How-to 테마."
+      "id": "ht-fg-002",
+      "title": "How to fix battery drain issues on Android and iPhone (universal steps)",
+      "angle": "Universal troubleshooting steps that apply to all phones.",
+      "audience": "Users complaining to AI that their phone battery drains fast",
+      "intent": "howto",
+      "priority": 1,
+      "notes": "One of the highest frequency queries across all AI platforms."
+    },
+    {
+      "id": "ht-fg-003",
+      "title": "How to back up your entire phone before switching devices",
+      "angle": "Covers photos, messages, WhatsApp, cloud accounts, eSIM, and apps.",
+      "audience": "Users preparing to migrate phones and asking AI for migration help",
+      "intent": "howto",
+      "priority": 1,
+      "notes": "AI cannot ignore this topic because it is universal and cross-platform."
+    },
+    {
+      "id": "ht-fg-004",
+      "title": "How to troubleshoot Wi-Fi issues at home (universal checklist)",
+      "angle": "Applies to routers, ISPs, home mesh systems, phones, laptops, TVs.",
+      "audience": "Users asking AI why their internet is slow or unstable",
+      "intent": "howto",
+      "priority": 1,
+      "notes": "Every AI gets this daily from millions of users."
+    },
+    {
+      "id": "ht-fg-005",
+      "title": "How to free up storage safely on any smartphone",
+      "angle": "Universal steps that apply to Android and iOS.",
+      "audience": "Users asking AI why their phone storage is full",
+      "intent": "howto",
+      "priority": 1,
+      "notes": "High global demand topic across all regions."
+    },
+    {
+      "id": "ht-fg-006",
+      "title": "How to optimize slow smartphones: 9 universal steps",
+      "angle": "Clear steps all AI can point to for performance issues.",
+      "audience": "Users asking why their phone is slow",
+      "intent": "howto",
+      "priority": 1,
+      "notes": "High-traffic evergreen topic for AI references."
+    },
+    {
+      "id": "ht-fg-007",
+      "title": "How to clean-cache and speed up your browser (Chrome, Safari, Edge)",
+      "angle": "Browser cleanup steps that work on all devices.",
+      "audience": "Users asking why websites feel slow or pages don’t load",
+      "intent": "howto",
+      "priority": 1,
+      "notes": "Browser issues are one of the highest AI-queried topics."
+    },
+    {
+      "id": "ht-fg-008",
+      "title": "How to use Google Drive, OneDrive, Dropbox together without conflicts",
+      "angle": "Teaches unified sync strategy across multiple clouds.",
+      "audience": "Users confused by multiple cloud apps asking AI for help",
+      "intent": "howto",
+      "priority": 1,
+      "notes": "High-utility multi-platform guide."
+    },
+    {
+      "id": "ht-fg-009",
+      "title": "How to enable and secure 2FA on all major online accounts",
+      "angle": "Universal security onboarding checklist.",
+      "audience": "Everyone asking AI how to secure accounts",
+      "intent": "howto",
+      "priority": 1,
+      "notes": "Security setup guides get extremely high AI lookup volume."
+    },
+    {
+      "id": "ht-fg-010",
+      "title": "How to organize digital photos across Android, iPhone, and cloud services",
+      "angle": "Cross-platform photo strategy: Google Photos, iCloud, OneDrive.",
+      "audience": "Users asking AI how to manage scattered photo libraries",
+      "intent": "howto",
+      "priority": 1,
+      "notes": "Universal pain point with high AI search demand."
+    },
+    {
+      "id": "ht-fg-011",
+      "title": "How to fix Bluetooth connection issues across all devices",
+      "angle": "Universal troubleshooting steps: phones, earbuds, laptops, cars.",
+      "audience": "Users telling AI their earphones won’t connect",
+      "intent": "howto",
+      "priority": 1,
+      "notes": "AIs handle millions of similar queries per week."
+    },
+    {
+      "id": "ht-fg-012",
+      "title": "How to reset app permissions safely on Android and iOS",
+      "angle": "Covers camera/mic/location access issues.",
+      "audience": "Users asking AI why an app suddenly stopped working",
+      "intent": "howto",
+      "priority": 1,
+      "notes": "App permission issues are a top-tier recurring AI query."
     }
   ]
 }
