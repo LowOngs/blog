@@ -1,7 +1,15 @@
 // System_files/scripts/build/lib/page-ids.cjs
 // pageId 발급/조회 공용 라이브러리
 // 형식: page + 6자리 0패딩(예: page000001)
-// 테스트 모드(test)에서는 항상 page000001만 사용하고, 카운트/파일은 손대지 않습니다.
+//
+// ■ 동작 모드 정리
+// - SCHEDULE_MODE !== 'live'  인 동안: 항상 테스트 모드
+//    · ensurePageId(slug) → 항상 page000001 반환
+//    · page-ids.json 파일/카운터 변경 없음(동결)
+// - SCHEDULE_MODE === 'live' 인 경우에만 실제 카운트 증가 + 매핑 저장
+//
+// ※ PAGE_ID_MODE 환경변수는 과거 호환용으로 남길 수 있으나,
+//    최종 판정은 SCHEDULE_MODE가 'live'인지 여부로만 결정합니다.
 
 const fs = require('fs');
 const path = require('path');
@@ -10,9 +18,12 @@ const ROOT = path.resolve(__dirname, '..', '..', '..');
 const MANIFEST_DIR = path.join(ROOT, 'manifests');
 const PAGE_IDS_PATH = path.join(MANIFEST_DIR, 'page-ids.json');
 
-// PAGE_ID_MODE = 'live' 일 때만 실제 카운트 동작
-// 그 외(없음, test 등)는 모두 테스트 모드로 취급
-const MODE = process.env.PAGE_ID_MODE === 'live' ? 'live' : 'test';
+// 스케줄 모드에 강하게 종속
+const SCHEDULE_MODE = process.env.SCHEDULE_MODE || 'test';
+
+// SCHEDULE_MODE 가 'live' 일 때만 실제 카운트 동작
+const MODE = SCHEDULE_MODE === 'live' ? 'live' : 'test';
+
 const TEST_PAGE_ID = 'page000001';
 
 /**
@@ -102,12 +113,14 @@ function getState() {
   if (MODE !== 'live') {
     return {
       mode: MODE,
-      note: 'PAGE_ID_MODE is not "live" — counter is frozen and TEST_PAGE_ID is always used.',
+      scheduleMode: SCHEDULE_MODE,
+      note: 'SCHEDULE_MODE is not "live" — counter is frozen and TEST_PAGE_ID is always used.',
       testPageId: TEST_PAGE_ID
     };
   }
   const data = loadPageIds();
   data.mode = MODE;
+  data.scheduleMode = SCHEDULE_MODE;
   return data;
 }
 
