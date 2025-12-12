@@ -135,16 +135,9 @@ jobs:
           test -f System_files/scripts/build/images-renew.cjs
           test -f System_files/scripts/build/images-build-og.cjs
           test -f System_files/scripts/build/lib/page-ids.cjs
-          echo "OK: required files present"
+          test -f System_files/scripts/build/ids.cjs
 
-      # === (firstgate 있으면) firstgate 큐/포스트 생성 ===
-      - name: Firstgate pick + queue-to-post (optional)
-        run: |
-          if [ -f System_files/scripts/build/firstgate-pick.cjs ]; then
-            node System_files/scripts/build/firstgate-pick.cjs
-          else
-            echo "firstgate-pick.cjs not found → skip"
-          fi
+          echo "OK: required files present"
 
       # === 오늘 발행 시드 선택 → 큐 생성 ===
       - name: Plan today posts from seedpool
@@ -152,6 +145,10 @@ jobs:
 
       - name: Generate posts from today queue
         run: node System_files/scripts/build/queue-to-posts.cjs
+
+      # === Page ID 발급(중요: render 이전) ===
+      - name: Issue page IDs (no_live / live)
+        run: node System_files/scripts/build/ids.cjs
 
       # === 본문 자동생성 ===
       - name: Generate article bodies (if body empty)
@@ -166,6 +163,9 @@ jobs:
       - name: Normalize article body paragraphs
         run: node System_files/scripts/build/normalize-body.cjs
 
+      - name: Copy tools (edit-request UI)
+        run: node System_files/scripts/build/copy-tools.cjs
+
       # === OG 이미지 / 이미지 업로드 ===
       - name: Renew OG manifest
         run: npm run images:renew
@@ -175,8 +175,7 @@ jobs:
 
       - name: Upload images to R2
         run: |
-          node -e "const s=require('./package.json').scripts||{}; process.exit(s['images:upload']?0:1)"
-          if [ $? -eq 0 ]; then
+          if npm run | grep -q "images:upload"; then
             npm run images:upload
           else
             node System_files/scripts/build/r2-upload.js
@@ -184,8 +183,7 @@ jobs:
 
       - name: Rewrite image URLs
         run: |
-          node -e "const s=require('./package.json').scripts||{}; process.exit(s['images:rewrite']?0:1)"
-          if [ $? -eq 0 ]; then
+          if npm run | grep -q "images:rewrite"; then
             npm run images:rewrite
           else
             node System_files/scripts/build/rewrite-images.js
