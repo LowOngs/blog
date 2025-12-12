@@ -16,25 +16,43 @@ env:
 
 jobs:
   build-queue:
-    if: ${{ github.event_name == 'workflow_dispatch' || secrets.SCHEDULE_MODE == 'live' }}
     runs-on: ubuntu-latest
 
     steps:
+      - name: Gate
+        id: gate
+        shell: bash
+        run: |
+          echo "event_name=${{ github.event_name }}"
+          echo "schedule_mode=${SCHEDULE_MODE}"
+
+          if [ "${{ github.event_name }}" != "workflow_dispatch" ] && [ "${SCHEDULE_MODE}" != "live" ]; then
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "Skipping by SCHEDULE_MODE"
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            echo "Proceeding"
+          fi
+
       - name: Checkout
+        if: ${{ steps.gate.outputs.run == 'true' }}
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Setup Node
+        if: ${{ steps.gate.outputs.run == 'true' }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Install dependencies
+        if: ${{ steps.gate.outputs.run == 'true' }}
         working-directory: google-blog/System_files
         run: npm ci
 
       - name: Build queue and artifacts
+        if: ${{ steps.gate.outputs.run == 'true' }}
         working-directory: google-blog/System_files
         run: |
           node scripts/build/firstgate-pick.cjs
