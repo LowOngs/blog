@@ -199,7 +199,8 @@ jobs:
 
       - name: Upload images to R2
         run: |
-          if npm run | grep -q "images:upload"; then
+          node -e "const s=require('./package.json').scripts||{}; process.exit(s['images:upload']?0:1)"
+          if [ $? -eq 0 ]; then
             npm run images:upload
           else
             node System_files/scripts/build/r2-upload.js
@@ -207,7 +208,8 @@ jobs:
 
       - name: Rewrite image URLs
         run: |
-          if npm run | grep -q "images:rewrite"; then
+          node -e "const s=require('./package.json').scripts||{}; process.exit(s['images:rewrite']?0:1)"
+          if [ $? -eq 0 ]; then
             npm run images:rewrite
           else
             node System_files/scripts/build/rewrite-images.js
