@@ -1,155 +1,151 @@
 // System_files/scripts/build/lib/page-ids.cjs
-// 목적: slug → pageId 매핑을 안정적으로 제공
-// 정책:
-// - PAGE_ID_MODE=live: 새 slug는 lastIssued+1로 발급하고 manifests/page-ids.json에 영구 기록
-// - PAGE_ID_MODE=test: 발급/기록 금지, 항상 page000001 반환(테스트에서 번호 낭비/중복 리스크 방지)
+// page id ledger (no_live / live)
 
 const fs = require('fs');
 const path = require('path');
-
-const ROOT = path.resolve(__dirname, '..', '..', '..'); // System_files
-const MANIFESTS_DIR = path.join(ROOT, 'manifests');
-const PAGE_IDS_FILE = path.join(MANIFESTS_DIR, 'page-ids.json');
 
 function pad6(n) {
   return String(n).padStart(6, '0');
 }
 
-function normalizeMode(v) {
-  const s = String(v || '').trim().toLowerCase();
-  return s === 'live' ? 'live' : 'test';
+function formatPageId(n) {
+  return `page${pad6(n)}`;
 }
 
-function ensureDir(p) {
-  fs.mkdirSync(p, { recursive: true });
+function nowISO() {
+  return new Date().toISOString();
 }
 
-function safeReadJson(file, fallback) {
+function readJsonSafe(filePath, fallback) {
   try {
-    if (!fs.existsSync(file)) return fallback;
-    const raw = fs.readFileSync(file, 'utf8');
+    if (!fs.existsSync(filePath)) return fallback;
+    const raw = fs.readFileSync(filePath, 'utf8');
     return JSON.parse(raw);
   } catch {
     return fallback;
   }
 }
 
-function atomicWriteJson(file, obj) {
-  ensureDir(path.dirname(file));
-  const tmp = file + '.tmp';
+function atomicWriteJson(filePath, obj) {
+  const dir = path.dirname(filePath);
+  fs.mkdirSync(dir, { recursive: true });
+
+  const tmp = `${filePath}.tmp`;
   fs.writeFileSync(tmp, JSON.stringify(obj, null, 2), 'utf8');
-  fs.renameSync(tmp, file);
+  fs.renameSync(tmp, filePath);
 }
 
-function initState() {
-  const fallback = {
-    meta: { lastIssued: 0, lastMode: '', updatedAt: '' },
-    map: {}
+function normalizeMode(mode) {
+  return (mode === 'live') ? 'live' : 'no_live';
+}
+
+function ledgerPathForMode(root, mode) {
+  const manifestsDir = path.join(root, 'manifests');
+  const livePath = path.join(manifestsDir, 'page-ids.json');
+  const noLivePath = path.join(manifestsDir, 'page-ids.no_live.json');
+  return mode === 'live' ? livePath : noLivePath;
+}
+
+function loadState(root, mode) {
+  const m = normalizeMode(mode);
+  const file = ledgerPathForMode(root, m);
+
+  const state = readJsonSafe(file, null);
+  if (state && typeof state === 'object') {
+    if (!state.issued || typeof state.issued !== 'object') state.issued = {};
+    if (!Number.isInteger(state.lastIssued)) state.lastIssued = 0;
+    if (!Number.isInteger(state.lastCommitted)) state.lastCommitted = state.lastIssued;
+    if (typeof state.mode !== 'string') state.mode = m;
+    if (typeof state.updatedAt !== 'string') state.updatedAt = nowISO();
+    return { file, mode: m, state };
+  }
+
+  return {
+    file,
+    mode: m,
+    state: {
+      mode: m,
+      lastIssued: 0,
+      lastCommitted: 0, // live 기준 “영구 기준점”
+      issued: {},
+      updatedAt: nowISO()
+    }
   };
-
-  const data = safeReadJson(PAGE_IDS_FILE, fallback);
-  if (!data || typeof data !== 'object') return fallback;
-
-  if (!data.meta || typeof data.meta !== 'object') data.meta = fallback.meta;
-  if (!data.map || typeof data.map !== 'object') data.map = {};
-
-  const li = Number(data.meta.lastIssued);
-  data.meta.lastIssued = Number.isFinite(li) && li >= 0 ? li : 0;
-
-  return data;
 }
 
-function parsePageIdToNumber(pageId) {
-  const m = String(pageId || '').match(/^page(\d{6,})$/i);
-  if (!m) return null;
-  const n = Number(m[1]);
-  return Number.isFinite(n) ? n : null;
+function saveState(ctx) {
+  ctx.state.updatedAt = nowISO();
+  atomicWriteJson(ctx.file, ctx.state);
 }
 
-function computeEffectiveLastIssued(state) {
-  let maxNum = Number(state?.meta?.lastIssued) || 0;
-  const map = state?.map || {};
-
-  for (const slug of Object.keys(map)) {
-    const n = parsePageIdToNumber(map[slug]);
-    if (Number.isFinite(n) && n > maxNum) maxNum = n;
-  }
-  return maxNum;
+function loadLiveBaseline(root) {
+  const file = ledgerPathForMode(root, 'live');
+  const s = readJsonSafe(file, null);
+  const lastCommitted = s && Number.isInteger(s.lastCommitted) ? s.lastCommitted : 0;
+  return lastCommitted;
 }
 
-function getTestPageId() {
-  return 'page000001';
-}
+// 핵심 규칙:
+// - live: lastCommitted 기준으로 +1, 영구 저장
+// - no_live: live의 lastCommitted 보다 큰 값만 사용(겹침 금지), no_live 파일에만 저장
+function createAllocator(root, mode) {
+  const m = normalizeMode(mode);
+  const liveBaseline = loadLiveBaseline(root);
 
-/**
- * slug의 pageId를 가져옵니다.
- * - live: 없으면 발급 + 파일 기록
- * - test: 항상 page000001
- */
-function getPageIdForSlug(slug) {
-  const mode = normalizeMode(process.env.PAGE_ID_MODE);
+  const ctx = loadState(root, m);
 
-  if (!slug) return mode === 'live' ? 'page000001' : getTestPageId();
+  // 안전 가드: 어떤 모드든 liveBaseline 이하로는 절대 내려가지 않음
+  if (ctx.state.lastIssued < liveBaseline) ctx.state.lastIssued = liveBaseline;
+  if (ctx.state.lastCommitted < liveBaseline) ctx.state.lastCommitted = liveBaseline;
 
-  if (mode !== 'live') {
-    return getTestPageId();
+  function getExisting(slug) {
+    return ctx.state.issued[slug] || null;
   }
 
-  const state = initState();
-
-  // 기존 매핑 있으면 그대로 반환
-  if (state.map[slug]) {
-    return state.map[slug];
+  function allocateNextNumber() {
+    const next = ctx.state.lastIssued + 1;
+    // liveBaseline 이하 금지
+    const safeNext = next <= liveBaseline ? (liveBaseline + 1) : next;
+    ctx.state.lastIssued = safeNext;
+    return safeNext;
   }
 
-  // 새 발급 (재사용 방지 보정 포함)
-  const last = computeEffectiveLastIssued(state);
-  const next = last + 1;
-  const pageId = `page${pad6(next)}`;
+  function assign(slug) {
+    if (!slug) throw new Error('slug is required');
 
-  state.map[slug] = pageId;
-  state.meta.lastIssued = next;
-  state.meta.lastMode = 'live';
-  state.meta.updatedAt = new Date().toISOString();
+    const exist = getExisting(slug);
+    if (exist) return exist;
 
-  atomicWriteJson(PAGE_IDS_FILE, state);
-  return pageId;
-}
+    const n = allocateNextNumber();
+    const pid = formatPageId(n);
+    ctx.state.issued[slug] = pid;
 
-/**
- * 외부에서 pageId를 강제로 박아넣고 싶을 때 사용(예: 이미 확정된 pageId 이관)
- * - live에서만 기록
- * - lastIssued 자동 보정(더 큰 번호가 들어오면 lastIssued를 끌어올림)
- */
-function setPageIdForSlug(slug, pageId) {
-  const mode = normalizeMode(process.env.PAGE_ID_MODE);
-  if (mode !== 'live') return false;
-  if (!slug || !pageId) return false;
+    if (m === 'live') {
+      // live에서만 영구 커밋 기준점 갱신
+      if (n > ctx.state.lastCommitted) ctx.state.lastCommitted = n;
+    }
 
-  const state = initState();
-  state.map[slug] = pageId;
+    // 두 모드 모두 파일에 기록(단, no_live는 no_live 파일에만)
+    saveState(ctx);
+    return pid;
+  }
 
-  const n = parsePageIdToNumber(pageId);
-  const last = computeEffectiveLastIssued(state);
-  // map 반영 후 last를 다시 계산했으니, meta.lastIssued를 last로 동기화
-  state.meta.lastIssued = last;
-  state.meta.lastMode = 'live';
-  state.meta.updatedAt = new Date().toISOString();
+  function getStateSummary() {
+    return {
+      mode: m,
+      file: ctx.file,
+      liveBaseline,
+      lastIssued: ctx.state.lastIssued,
+      lastCommitted: ctx.state.lastCommitted,
+      issuedCount: Object.keys(ctx.state.issued || {}).length
+    };
+  }
 
-  atomicWriteJson(PAGE_IDS_FILE, state);
-  return true;
-}
-
-/**
- * (선택) manifest를 읽기만 하고 싶을 때
- */
-function readPageIdsManifest() {
-  return initState();
+  return { assign, getExisting, getStateSummary };
 }
 
 module.exports = {
-  getPageIdForSlug,
-  setPageIdForSlug,
-  readPageIdsManifest,
-  PAGE_IDS_FILE
+  createAllocator,
+  formatPageId,
+  normalizeMode
 };
