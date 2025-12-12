@@ -144,16 +144,51 @@ function createAllocator(root, mode) {
   return { assign, getExisting, getStateSummary };
 }
 
+// ────────────────────────────────────
+// 모듈 레벨 helper (validate-repair.cjs / ids.cjs 용)
+// ────────────────────────────────────
+
+// lib/page-ids.cjs 위치: System_files/scripts/build/lib
+// ROOT = System_files
+const DEFAULT_ROOT = path.resolve(__dirname, '..', '..', '..');
+
+const allocatorCache = new Map(); // key = `${root}::${mode}`
+
+function getAllocator(root = DEFAULT_ROOT, mode = process.env.PAGE_ID_MODE) {
+  const m = normalizeMode(mode);
+  const key = `${root}::${m}`;
+  if (!allocatorCache.has(key)) {
+    allocatorCache.set(key, createAllocator(root, m));
+  }
+  return allocatorCache.get(key);
+}
+
+// ✅ validate-repair.cjs가 기대하는 함수 이름
+function ensurePageId(slug, mode) {
+  const alloc = getAllocator(DEFAULT_ROOT, mode || process.env.PAGE_ID_MODE);
+  return alloc.assign(slug);
+}
+
+// (선택) 상태 확인용
+function getExisting(slug, mode) {
+  const alloc = getAllocator(DEFAULT_ROOT, mode || process.env.PAGE_ID_MODE);
+  return alloc.getExisting(slug);
+}
+
+function getStateSummary(mode) {
+  const alloc = getAllocator(DEFAULT_ROOT, mode || process.env.PAGE_ID_MODE);
+  return alloc.getStateSummary();
+}
+
 module.exports = {
+  // core
   createAllocator,
   formatPageId,
   normalizeMode,
 
-  // ✅ validate-repair.cjs 호환(별칭)
-  ensurePageId: assign,
-
-  // ✅ 나중에 점검/디버그용(선택이지만 강추)
-  assign,
+  // helpers
+  ensurePageId,
+  getAllocator,
   getExisting,
   getStateSummary,
 };
