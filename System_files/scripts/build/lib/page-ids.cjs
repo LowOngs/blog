@@ -147,5 +147,13 @@ function createAllocator(root, mode) {
 module.exports = {
   createAllocator,
   formatPageId,
-  normalizeMode
+  normalizeMode,
+
+  // ✅ validate-repair.cjs 호환(별칭)
+  ensurePageId: assign,
+
+  // ✅ 나중에 점검/디버그용(선택이지만 강추)
+  assign,
+  getExisting,
+  getStateSummary,
 };
