@@ -37,18 +37,17 @@ jobs:
       TIME_ZONE:       America/Los_Angeles
       AOIA_ENABLE:     "false"
 
-      # === 스케줄 모드 / 페이지ID 모드 ===
+      # === 스케줄 모드 ===
       SCHEDULE_MODE:   ${{ secrets.SCHEDULE_MODE }}
-      PAGE_ID_MODE:    ${{ secrets.PAGE_ID_MODE }}
 
       # === OpenAI (본문 생성기) ===
       OPENAI_API_KEY:  ${{ secrets.OPENAI_API_KEY }}
       OPENAI_MODEL:    "gpt-4.1-mini"
 
       # === 스케줄 기본 파라미터 ===
-      SCHEDULE_LABEL:         ""
-      SCHEDULE_MAX_POSTS:     "3"
-      SCHEDULE_DRY_RUN:       "false"
+      SCHEDULE_LABEL:     ""
+      SCHEDULE_MAX_POSTS: "3"
+      SCHEDULE_DRY_RUN:   "false"
 
       # === 이미지 처리(R2) ===
       IMAGES_DIR:      System_files/assets/images
@@ -63,9 +62,6 @@ jobs:
       GOOGLE_CLIENT_ID:      ${{ secrets.GOOGLE_CLIENT_ID }}
       GOOGLE_CLIENT_SECRET:  ${{ secrets.GOOGLE_CLIENT_SECRET }}
       GOOGLE_REFRESH_TOKEN:  ${{ secrets.GOOGLE_REFRESH_TOKEN }}
-
-      # === Page ID 시퀀스 ===
-      PAGEID_SECRET:         ${{ secrets.PAGEID_SECRET }}
 
     steps:
       - name: Checkout
@@ -109,19 +105,11 @@ jobs:
             echo "LABEL=$LABEL_VALUE" >> $GITHUB_ENV
             echo "MAX_POSTS=$MAX_POSTS_VALUE" >> $GITHUB_ENV
             echo "DRY_RUN=$RAW_DRY_RUN" >> $GITHUB_ENV
-            echo "CATEGORY_RAW=$RAW_CATEGORY" >> $GITHUB_ENV
           else
             echo "LABEL=${{ env.SCHEDULE_LABEL }}" >> $GITHUB_ENV
             echo "MAX_POSTS=${{ env.SCHEDULE_MAX_POSTS }}" >> $GITHUB_ENV
             echo "DRY_RUN=${{ env.SCHEDULE_DRY_RUN }}" >> $GITHUB_ENV
-            echo "CATEGORY_RAW=Schedule(default)" >> $GITHUB_ENV
           fi
-
-          echo "Resolved:"
-          echo "  LABEL=$LABEL"
-          echo "  CATEGORY_RAW=$CATEGORY_RAW"
-          echo "  MAX_POSTS=$MAX_POSTS"
-          echo "  DRY_RUN=$DRY_RUN"
 
       - name: Verify required files exist
         run: |
@@ -137,8 +125,6 @@ jobs:
           test -f System_files/scripts/build/lib/page-ids.cjs
           test -f System_files/scripts/build/ids.cjs
 
-          echo "OK: required files present"
-
       # === 오늘 발행 시드 선택 → 큐 생성 ===
       - name: Plan today posts from seedpool
         run: node System_files/scripts/build/seed-scheduler.cjs
@@ -146,15 +132,13 @@ jobs:
       - name: Generate posts from today queue
         run: node System_files/scripts/build/queue-to-posts.cjs
 
-      # === Page ID 발급(중요: render 이전) ===
-      - name: Issue page IDs (no_live / live)
+      # === Page ID 발급 (DRY_RUN=true → no_live 자동 강제) ===
+      - name: Issue page IDs
         run: node System_files/scripts/build/ids.cjs
 
       # === 본문 자동생성 ===
       - name: Generate article bodies (if body empty)
-        run: |
-          echo "Running generate-body.cjs with SCHEDULE_MODE=$SCHEDULE_MODE"
-          node System_files/scripts/build/generate-body.cjs
+        run: node System_files/scripts/build/generate-body.cjs
 
       # === JSON → HTML 렌더 ===
       - name: Render posts (JSON → HTML)
@@ -162,9 +146,6 @@ jobs:
 
       - name: Normalize article body paragraphs
         run: node System_files/scripts/build/normalize-body.cjs
-
-      - name: Copy tools (edit-request UI)
-        run: node System_files/scripts/build/copy-tools.cjs
 
       # === OG 이미지 / 이미지 업로드 ===
       - name: Renew OG manifest
@@ -174,49 +155,22 @@ jobs:
         run: npm run images:build:og
 
       - name: Upload images to R2
-        run: |
-          if npm run | grep -q "images:upload"; then
-            npm run images:upload
-          else
-            node System_files/scripts/build/r2-upload.js
-          fi
+        run: node System_files/scripts/build/r2-upload.js
 
       - name: Rewrite image URLs
-        run: |
-          if npm run | grep -q "images:rewrite"; then
-            npm run images:rewrite
-          else
-            node System_files/scripts/build/rewrite-images.js
-          fi
+        run: node System_files/scripts/build/rewrite-images.js
 
-      # === AIO/SEO 교정 ===
+      # === AIO / SEO 교정 ===
       - name: Validate & auto-repair
         run: npm run posts:validate
-
-      # === Token Refresh ===
-      - name: Token refresh check
-        env:
-          C_ID:     ${{ secrets.GOOGLE_CLIENT_ID }}
-          C_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-          R_TOKEN:  ${{ secrets.GOOGLE_REFRESH_TOKEN }}
-        run: |
-          echo "Refreshing access token…"
-          RESP=$(curl -s -X POST https://oauth2.googleapis.com/token \
-            -d client_id="$C_ID" \
-            -d client_secret="$C_SECRET" \
-            -d refresh_token="$R_TOKEN" \
-            -d grant_type=refresh_token)
-          echo "$RESP" | grep -q access_token && echo "OK" || (echo "token refresh failed"; exit 1)
 
       # === 발행 ===
       - name: Publish to Blogger
         env:
-          LABEL:      ${{ env.LABEL }}
-          MAX_POSTS:  ${{ env.MAX_POSTS }}
-          DRY_RUN:    ${{ env.DRY_RUN }}
-        run: |
-          echo "LABEL=$LABEL MAX_POSTS=$MAX_POSTS DRY_RUN=$DRY_RUN"
-          npm run publish:blogger
+          LABEL:     ${{ env.LABEL }}
+          MAX_POSTS: ${{ env.MAX_POSTS }}
+          DRY_RUN:   ${{ env.DRY_RUN }}
+        run: npm run publish:blogger
 
       # === 아티팩트 보관 ===
       - name: Upload artifacts
