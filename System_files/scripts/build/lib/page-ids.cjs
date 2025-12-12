@@ -1,132 +1,165 @@
 // System_files/scripts/build/lib/page-ids.cjs
-// pageId 발급/조회 공용 라이브러리
-// 형식: page + 6자리 0패딩(예: page000001)
-//
-// ■ 동작 모드 정리
-// - SCHEDULE_MODE !== 'live'  인 동안: 항상 테스트 모드
-//    · ensurePageId(slug) → 항상 page000001 반환
-//    · page-ids.json 파일/카운터 변경 없음(동결)
-// - SCHEDULE_MODE === 'live' 인 경우에만 실제 카운트 증가 + 매핑 저장
-//
-// ※ PAGE_ID_MODE 환경변수는 과거 호환용으로 남길 수 있으나,
-//    최종 판정은 SCHEDULE_MODE가 'live'인지 여부로만 결정합니다.
 
 const fs = require('fs');
 const path = require('path');
+const fg = require('fast-glob');
 
-const ROOT = path.resolve(__dirname, '..', '..', '..');
-const MANIFEST_DIR = path.join(ROOT, 'manifests');
-const PAGE_IDS_PATH = path.join(MANIFEST_DIR, 'page-ids.json');
+const ROOT = path.resolve(__dirname, '..', '..'); // System_files
+const POSTS_DIR = path.join(ROOT, 'content', 'posts');
+const MANIFESTS_DIR = path.join(ROOT, 'manifests');
+const PAGE_IDS_FILE = path.join(MANIFESTS_DIR, 'page-ids.json');
 
-// 스케줄 모드에 강하게 종속
-const SCHEDULE_MODE = process.env.SCHEDULE_MODE || 'test';
+function log(...a) {
+  console.log('[ids]', ...a);
+}
 
-// SCHEDULE_MODE 가 'live' 일 때만 실제 카운트 동작
-const MODE = SCHEDULE_MODE === 'live' ? 'live' : 'test';
+function pad6(n) {
+  return String(n).padStart(6, '0');
+}
 
-const TEST_PAGE_ID = 'page000001';
+function ensureDir(p) {
+  fs.mkdirSync(p, { recursive: true });
+}
 
-/**
- * 내부용: page-ids.json 로드 (없으면 기본값 반환)
- * (test 모드에서는 호출하지 않음)
- */
-function loadPageIds() {
+function safeReadJson(file, fallback) {
   try {
-    const raw = fs.readFileSync(PAGE_IDS_PATH, 'utf8');
-    const data = JSON.parse(raw);
-
-    if (typeof data.lastPageNumber !== 'number') {
-      data.lastPageNumber = 0;
-    }
-    if (!data.pages || typeof data.pages !== 'object') {
-      data.pages = {};
-    }
-    return data;
+    if (!fs.existsSync(file)) return fallback;
+    const raw = fs.readFileSync(file, 'utf8');
+    return JSON.parse(raw);
   } catch (e) {
-    return {
-      version: 1,
-      lastPageNumber: 0,
-      pages: {},
-      updatedAt: new Date().toISOString()
-    };
+    log('WARN read/parse failed:', path.basename(file), e.message || e);
+    return fallback;
   }
 }
 
-/**
- * 내부용: page-ids.json 저장
- * (live 모드에서만 호출)
- */
-function savePageIds(data) {
-  data.version = 1;
-  data.updatedAt = new Date().toISOString();
-
-  fs.mkdirSync(MANIFEST_DIR, { recursive: true });
-  fs.writeFileSync(PAGE_IDS_PATH, JSON.stringify(data, null, 2), 'utf8');
+function atomicWriteJson(file, obj) {
+  const dir = path.dirname(file);
+  ensureDir(dir);
+  const tmp = file + '.tmp';
+  fs.writeFileSync(tmp, JSON.stringify(obj, null, 2), 'utf8');
+  fs.renameSync(tmp, file);
 }
 
-/**
- * slug에 대한 pageId를 보장해서 돌려줌.
- * - test 모드: 항상 page000001 반환, 파일/카운트 변경 없음
- * - live 모드:
- *    · 이미 있으면 그대로 반환
- *    · 없으면 next 번호로 신규 발급 후 저장
- */
-function ensurePageId(slug) {
-  // 테스트 모드: 카운트 동결, 항상 1번으로 테스트
-  if (MODE !== 'live') {
-    return TEST_PAGE_ID;
+function normalizeMode(v) {
+  const s = String(v || '').trim().toLowerCase();
+  if (s === 'live') return 'live';
+  return 'test';
+}
+
+function extractSlugFromPostFilename(filename) {
+  // content/posts/<slug>.json
+  return filename.replace(/\.json$/i, '');
+}
+
+function getNowISO() {
+  return new Date().toISOString();
+}
+
+function initState() {
+  const fallback = {
+    meta: {
+      lastIssued: 0,
+      lastMode: '',
+      updatedAt: ''
+    },
+    map: {}
+  };
+
+  const data = safeReadJson(PAGE_IDS_FILE, fallback);
+
+  if (!data || typeof data !== 'object') return fallback;
+  if (!data.meta || typeof data.meta !== 'object') data.meta = fallback.meta;
+  if (!data.map || typeof data.map !== 'object') data.map = {};
+
+  const li = Number(data.meta.lastIssued);
+  data.meta.lastIssued = Number.isFinite(li) && li >= 0 ? li : 0;
+
+  return data;
+}
+
+function parsePageIdToNumber(pageId) {
+  const m = String(pageId || '').match(/^page(\d{6,})$/i);
+  if (!m) return null;
+  const n = Number(m[1]);
+  return Number.isFinite(n) ? n : null;
+}
+
+function computeEffectiveLastIssued(state) {
+  let maxNum = Number(state?.meta?.lastIssued) || 0;
+
+  // 혹시 lastIssued가 깨졌거나 map에 더 큰 값이 있으면 보정(재발급 방지)
+  const map = state?.map || {};
+  for (const k of Object.keys(map)) {
+    const n = parsePageIdToNumber(map[k]);
+    if (Number.isFinite(n) && n > maxNum) maxNum = n;
   }
 
-  const data = loadPageIds();
+  return maxNum;
+}
 
-  if (data.pages[slug]) {
-    return data.pages[slug];
+function getOrCreatePageId(state, slug) {
+  const existing = state.map[slug];
+  if (existing) {
+    // lastIssued보다 작게 저장돼 있어도 기존 매핑은 유지(재발급/중복 방지 목적)
+    return existing;
   }
 
-  const nextNumber = (data.lastPageNumber || 0) + 1;
-  const pageId = 'page' + String(nextNumber).padStart(6, '0');
+  const lastIssued = computeEffectiveLastIssued(state);
+  const next = lastIssued + 1;
+  const pageId = `page${pad6(next)}`;
 
-  data.lastPageNumber = nextNumber;
-  data.pages[slug] = pageId;
-  savePageIds(data);
+  state.map[slug] = pageId;
+  state.meta.lastIssued = next;
+  state.meta.updatedAt = getNowISO();
+  state.meta.lastMode = 'live';
 
   return pageId;
 }
 
-/**
- * slug에 대한 pageId 조회만 (없으면 null)
- * - test 모드에서는 항상 null 반환(실제 매핑 없음)
- */
-function getPageId(slug) {
-  if (MODE !== 'live') {
-    return null;
-  }
-  const data = loadPageIds();
-  return data.pages[slug] || null;
-}
+(async function main() {
+  const mode = normalizeMode(process.env.PAGE_ID_MODE);
+  const scheduleMode = String(process.env.SCHEDULE_MODE || '').trim();
 
-/**
- * 디버그/관리용: 전체 상태 반환
- * - test 모드에서는 "카운트 동결 상태"만 간단히 돌려줌
- */
-function getState() {
-  if (MODE !== 'live') {
-    return {
-      mode: MODE,
-      scheduleMode: SCHEDULE_MODE,
-      note: 'SCHEDULE_MODE is not "live" — counter is frozen and TEST_PAGE_ID is always used.',
-      testPageId: TEST_PAGE_ID
-    };
-  }
-  const data = loadPageIds();
-  data.mode = MODE;
-  data.scheduleMode = SCHEDULE_MODE;
-  return data;
-}
+  log('ROOT =', ROOT);
+  log('PAGE_ID_MODE =', mode, scheduleMode ? `(SCHEDULE_MODE=${scheduleMode})` : '');
 
-module.exports = {
-  ensurePageId,
-  getPageId,
-  getState,
-  PAGE_IDS_PATH
-};
+  if (!fs.existsSync(POSTS_DIR)) {
+    log('No posts dir:', POSTS_DIR);
+    process.exit(0);
+  }
+
+  const files = fg.sync('*.json', { cwd: POSTS_DIR }).sort();
+  const slugs = files.map(extractSlugFromPostFilename);
+
+  log('posts =', slugs.length);
+
+  if (mode !== 'live') {
+    // test 모드: 절대 기록하지 않음
+    log('test mode: no persistence');
+    process.exit(0);
+  }
+
+  const state = initState();
+  const beforeLast = computeEffectiveLastIssued(state);
+
+  let created = 0;
+  for (const slug of slugs) {
+    if (!slug) continue;
+    const existed = !!state.map[slug];
+    const pid = getOrCreatePageId(state, slug);
+    if (!existed) created++;
+    log(`${slug} -> ${pid}${existed ? '' : ' (new)'}`);
+  }
+
+  const afterLast = computeEffectiveLastIssued(state);
+
+  ensureDir(MANIFESTS_DIR);
+  atomicWriteJson(PAGE_IDS_FILE, state);
+
+  log('manifest =', PAGE_IDS_FILE);
+  log('lastIssued:', beforeLast, '->', afterLast);
+  log('new mappings:', created);
+})().catch((e) => {
+  console.error('[ids][FAIL]', e.message || e);
+  process.exit(1);
+});
