@@ -1,0 +1,50 @@
+name: firstgate-daily
+
+on:
+  schedule:
+    # 매일 UTC 23:40
+    - cron: '40 23 * * *'
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '20'
+  SCHEDULE_MODE: ${{ secrets.SCHEDULE_MODE }}
+  PAGE_ID_MODE: ${{ secrets.PAGE_ID_MODE }}
+  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+  OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
+  CANONICAL_BASE: ${{ secrets.CANONICAL_BASE }}
+  CDN_BASE: ${{ secrets.CDN_BASE }}
+
+jobs:
+  build-firstgate:
+    # 스케줄 모드는 live 일 때만 자동 실행,
+    # test 모드에서는 수동 실행(workflow_dispatch)만 허용
+    if: ${{ github.event_name == 'workflow_dispatch' || env.SCHEDULE_MODE == 'live' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        working-directory: google-blog/System_files
+        run: npm ci
+
+      - name: Build firstgate queue and posts
+        working-directory: google-blog/System_files
+        run: |
+          node scripts/build/firstgate-pick.cjs
+          node scripts/build/firstgate-queue-to-post.cjs
+          node scripts/build/generate-body.cjs
+          node scripts/build/render-posts.cjs
+          node scripts/build/images-renew.cjs
+          node scripts/build/images-build-og.cjs
+          node scripts/build/rewrite-images.js
+          node scripts/build/validate-repair.cjs
