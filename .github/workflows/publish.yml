@@ -132,11 +132,40 @@ jobs:
           test -f System_files/scripts/publish/blogger.cjs
           test -f System_files/scripts/build/seed-scheduler.cjs
           test -f System_files/scripts/build/queue-to-posts.cjs
+          test -f System_files/scripts/build/generate-body.cjs
           test -f System_files/scripts/build/images-renew.cjs
           test -f System_files/scripts/build/images-build-og.cjs
           test -f System_files/scripts/build/lib/page-ids.cjs
 
+          # optional queue builder
+          test -f System_files/scripts/build/firstgate-pick.cjs
+          test -f System_files/scripts/build/firstgate-queue-to-post.cjs
+
           echo "OK: required files present"
+
+      - name: Build optional queue (gate)
+        id: opt_gate
+        shell: bash
+        run: |
+          echo "event_name=${{ github.event_name }}"
+          echo "schedule_mode=${SCHEDULE_MODE}"
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [ "${SCHEDULE_MODE}" = "live" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build optional queue
+        if: ${{ steps.opt_gate.outputs.run == 'true' }}
+        run: |
+          node System_files/scripts/build/firstgate-pick.cjs
+          node System_files/scripts/build/firstgate-queue-to-post.cjs
 
       # === 오늘 발행 시드 선택 → 큐 생성 ===
       - name: Plan today posts from seedpool
@@ -144,6 +173,63 @@ jobs:
 
       - name: Generate posts from today queue
         run: node System_files/scripts/build/queue-to-posts.cjs
+
+      - name: Ensure bodyPrompt exists for new posts
+        shell: bash
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+
+          const ROOT = path.resolve(process.cwd(), 'System_files');
+          const POSTS_DIR = path.join(ROOT, 'content', 'posts');
+
+          const files = fs.readdirSync(POSTS_DIR).filter(f => f.endsWith('.json'));
+          let changed = 0;
+
+          function buildPrompt(p) {
+            const title = (p.title || '').trim();
+            const label = (p.label || (Array.isArray(p.labels) ? p.labels[0] : '') || '').trim();
+            const intent = (p.intent || (p.seedMeta && p.seedMeta.intent) || '').trim();
+            const angle = (p.seedMeta && p.seedMeta.angle) ? String(p.seedMeta.angle).trim() : '';
+            const audience = (p.seedMeta && p.seedMeta.audience) ? String(p.seedMeta.audience).trim() : '';
+            const notes = (p.seedMeta && p.seedMeta.notes) ? String(p.seedMeta.notes).trim() : '';
+
+            const lines = [
+              'Write a complete blog post in English for a tech/product blog.',
+              'Use a clear structure with headings and short paragraphs.',
+              '',
+              `Title: ${title || '(Untitled)'}`,
+              label ? `Label: ${label}` : '',
+              intent ? `Intent: ${intent}` : '',
+              angle ? `Angle: ${angle}` : '',
+              audience ? `Audience: ${audience}` : '',
+              notes ? `Notes: ${notes}` : '',
+              '',
+              'Deliver practical steps, examples, and a concise summary.'
+            ].filter(Boolean);
+
+            return lines.join('\n');
+          }
+
+          for (const f of files) {
+            const fp = path.join(POSTS_DIR, f);
+            const raw = fs.readFileSync(fp, 'utf8');
+            let json;
+            try { json = JSON.parse(raw); } catch { continue; }
+
+            const hasPrompt = typeof json.bodyPrompt === 'string' && json.bodyPrompt.trim().length > 0;
+            const hasBody = typeof json.body === 'string' && json.body.trim().length > 0;
+
+            if (!hasPrompt && !hasBody) {
+              json.bodyPrompt = buildPrompt(json);
+              fs.writeFileSync(fp, JSON.stringify(json, null, 2), 'utf8');
+              changed++;
+            }
+          }
+
+          console.log(`[ensure-bodyPrompt] changed=${changed} (posts scanned=${files.length})`);
+          NODE
 
       # === 본문 자동생성 ===
       - name: Generate article bodies (if body empty)
