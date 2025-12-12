@@ -14,20 +14,6 @@ function log(...a) {
 const ROOT = path.resolve(__dirname, '..', '..'); // System_files
 const POSTS_DIR = path.join(ROOT, 'content', 'posts');
 
-function envBool(name, fallback = false) {
-  const v = (process.env[name] || '').trim().toLowerCase();
-  if (!v) return fallback;
-  return v === '1' || v === 'true' || v === 'yes' || v === 'on';
-}
-
-function getEffectiveMode() {
-  // 강력 가드: DRY_RUN=true면 무조건 no_live
-  const dryRun = envBool('DRY_RUN', false);
-  const rawMode = (process.env.PAGE_ID_MODE || 'no_live').trim();
-  const mode = normalizeMode(rawMode);
-  return dryRun ? 'no_live' : mode;
-}
-
 function readJson(filePath) {
   const raw = fs.readFileSync(filePath, 'utf8');
   return JSON.parse(raw);
@@ -35,6 +21,13 @@ function readJson(filePath) {
 
 function writeJson(filePath, obj) {
   fs.writeFileSync(filePath, JSON.stringify(obj, null, 2), 'utf8');
+}
+
+function getEffectiveMode() {
+  // ✅ DRY_RUN과 분리: PAGE_ID_MODE가 곧 정답
+  // (미설정이면 안전하게 no_live)
+  const rawMode = (process.env.PAGE_ID_MODE || 'no_live').trim();
+  return normalizeMode(rawMode);
 }
 
 (async function main() {
