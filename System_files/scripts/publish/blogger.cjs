@@ -5,8 +5,6 @@ const path = require('path');
 
 // 루트(.env) 강제 로드: C:\google-blog\.env 기준
 require('dotenv').config({
-  // __dirname = System_files/scripts/publish
-  // ../../../.env = C:\google-blog\.env
   path: path.resolve(__dirname, '../../../.env'),
 });
 
@@ -22,7 +20,7 @@ const CODE_TO_LABEL = {
   'subscription-services':    'Subscription & Services',
   'how-to-playbooks':         'How to Playbooks',
   'smart-savings':            'Smart Savings',
-  'templates-checklists':     'Templates Checklists'
+  'templates-checklists':     'Templates & Checklists'
 };
 
 // 파일명 prefix → 내부 라벨 코드
@@ -137,7 +135,17 @@ function extractBody(html) {
 // 파일명 → 내부 라벨 코드(app-reviews 등)
 function inferLabelCodeFromFilename(name) {
   const base = name.replace(/\.html$/i, '').toLowerCase();
-  const prefix = base.split(/[-_]/)[0]; // app-2025..., howto-..., smart-...
+
+  // ✅ firstgate-how-to-playbooks-... 형태 지원
+  // base = firstgate-how-to-playbooks-ht-fg-001-2025-12-12
+  if (base.startsWith('firstgate-')) {
+    const rest = base.slice('firstgate-'.length); // how-to-playbooks-...
+    const m = rest.match(/^(app-reviews|device-reviews|subscription-services|how-to-playbooks|smart-savings|templates-checklists)\b/);
+    if (m && m[1]) return m[1];
+  }
+
+  // 기존: prefix 기반(app-..., howto-..., smart-...)
+  const prefix = base.split(/[-_]/)[0];
   return PREFIX_TO_CODE[prefix] || null;
 }
 
@@ -150,9 +158,7 @@ async function createPost(token, { title, content, labels }) {
     title,
     content
   };
-  if (labels && labels.length) {
-    body.labels = labels;
-  }
+  if (labels && labels.length) body.labels = labels;
 
   const res = await fetch(url, {
     method: 'POST',
@@ -202,7 +208,6 @@ async function createPost(token, { title, content, labels }) {
   }
   log('[blogger] 대상 파일:', files.length);
 
-  // DRY_RUN이 아니면 토큰 발급
   let token = null;
   if (!DRY_RUN) {
     token = await backoff(getAccessToken, { label: 'token' });
@@ -215,7 +220,6 @@ async function createPost(token, { title, content, labels }) {
   let used = 0;
 
   for (const name of files) {
-    // MAX_POSTS 제한 체크 (0 = 제한 없음)
     if (MAX_POSTS_NUM > 0 && used >= MAX_POSTS_NUM) {
       log(`[blogger] MAX_POSTS=${MAX_POSTS_NUM} 도달, 이후 파일은 건너뜀 (총 시도 ${used}개)`);
       break;
@@ -223,15 +227,11 @@ async function createPost(token, { title, content, labels }) {
 
     const p = path.join(OUTDIR, name);
 
-    // 파일명에서 라벨 코드 추론
     const labelCode = inferLabelCodeFromFilename(name);
     const humanLabel = labelCode && CODE_TO_LABEL[labelCode] ? CODE_TO_LABEL[labelCode] : null;
 
-    // LABEL_FILTER가 지정된 경우, 라벨 코드 불일치면 건너뛰기
     if (LABEL_FILTER && labelCode !== LABEL_FILTER) {
-      log(
-        `[blogger] skip ${name} (label mismatch: need="${LABEL_FILTER}", got="${labelCode || '-'}")`
-      );
+      log(`[blogger] skip ${name} (label mismatch: need="${LABEL_FILTER}", got="${labelCode || '-'}")`);
       continue;
     }
 
@@ -243,32 +243,19 @@ async function createPost(token, { title, content, labels }) {
       const bloggerLabels = humanLabel ? [humanLabel] : [];
 
       if (DRY_RUN) {
-        log(
-          `[DRY_RUN] ${name} → title="${title}" labels=[${bloggerLabels.join(
-            ', '
-          )}] (실제 발행 안 함)`
-        );
+        log(`[DRY_RUN] ${name} → title="${title}" labels=[${bloggerLabels.join(', ')}] (실제 발행 안 함)`);
         ok++;
         used++;
         continue;
       }
 
       const result = await backoff(
-        () =>
-          createPost(token, {
-            title,
-            content: body,
-            labels: bloggerLabels
-          }),
+        () => createPost(token, { title, content: body, labels: bloggerLabels }),
         { label: `publish:${name}` }
       );
 
       if (result && result.id) {
-        log(
-          `POST OK ${name} → id=${result.id} url=${result.url || ''} labels=[${bloggerLabels.join(
-            ', '
-          )}]`
-        );
+        log(`POST OK ${name} → id=${result.id} url=${result.url || ''} labels=[${bloggerLabels.join(', ')}]`);
         ok++;
       } else {
         warn(`POST NG ${name}`);
@@ -282,14 +269,10 @@ async function createPost(token, { title, content, labels }) {
     }
   }
 
-  const summaryLine = `[${new Date().toISOString()}] publish result ok=${ok} bad=${bad} used=${used} LABEL_FILTER="${LABEL_FILTER}" MAX_POSTS=${MAX_POSTS_NUM ||
-    0} DRY_RUN=${DRY_RUN}`;
+  const summaryLine = `[${new Date().toISOString()}] publish result ok=${ok} bad=${bad} used=${used} LABEL_FILTER="${LABEL_FILTER}" MAX_POSTS=${MAX_POSTS_NUM || 0} DRY_RUN=${DRY_RUN}`;
   append(SUMMARY_LOG, summaryLine);
   log('요약 로그 기록 →', SUMMARY_LOG);
   log(`✨ publish 완료: 성공 ${ok} / 실패 ${bad} | 로그: ${DETAIL_LOG}`);
-
-  // 실패를 워크플로 실패로 처리하려면 아래 주석 해제
-  // if (bad > 0) process.exit(1);
 })().catch((e) => {
   fail(e.message || e);
 });
