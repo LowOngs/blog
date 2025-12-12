@@ -7,7 +7,7 @@ const path = require('path');
 // ────────────────────────────────────
 //  경로 설정
 // ────────────────────────────────────
-const ROOT        = path.resolve(__dirname, '..', '..');           // System_files
+const ROOT        = path.resolve(__dirname, '..', '..'); // System_files
 const QUEUE_DIR   = path.join(ROOT, 'dist', 'queue');
 const QUEUE_FILE  = path.join(QUEUE_DIR, 'today.json');
 const CONTENT_DIR = path.join(ROOT, 'content', 'posts');
@@ -19,12 +19,11 @@ function log(...a) {
 }
 
 // ────────────────────────────────────
-//  프로필 로딩 (라벨 → profileId, profile 정의)
+//  프로필 로딩 (라벨 → profileId 매핑만 사용)
 // ────────────────────────────────────
-const SEEDPOOL_DIR        = path.join(ROOT, 'seedpool');
-const PROFILES_DIR        = path.join(SEEDPOOL_DIR, 'profiles');
-const LABELS_FILE         = path.join(PROFILES_DIR, 'labels.json');
-const LABEL_PROFILES_FILE = path.join(PROFILES_DIR, 'label-profiles.json');
+const SEEDPOOL_DIR = path.join(ROOT, 'seedpool');
+const PROFILES_DIR = path.join(SEEDPOOL_DIR, 'profiles');
+const LABELS_FILE  = path.join(PROFILES_DIR, 'labels.json');
 
 function safeReadJson(file, fallback) {
   try {
@@ -41,7 +40,6 @@ function safeReadJson(file, fallback) {
 }
 
 const LABEL_TO_PROFILE_ID = safeReadJson(LABELS_FILE, {});
-const PROFILE_DEFS        = safeReadJson(LABEL_PROFILES_FILE, {});
 
 function getProfileIdForLabel(label) {
   const pid = LABEL_TO_PROFILE_ID[label];
@@ -49,15 +47,11 @@ function getProfileIdForLabel(label) {
     log(`경고: 라벨에 대한 프로필 ID 없음 → label=${label}`);
     return null;
   }
-  if (!PROFILE_DEFS[pid]) {
-    log(`경고: 프로필 정의 누락 → label=${label}, profileId=${pid}`);
-    return null;
-  }
   return pid;
 }
 
 // ────────────────────────────────────
-//  today.json 존재 여부 확인
+//  today.json 로드
 // ────────────────────────────────────
 if (!fs.existsSync(QUEUE_FILE)) {
   log('today.json 없음. 생성할 포스트가 없어 건너뜀.');
@@ -73,7 +67,6 @@ try {
   process.exit(1);
 }
 
-// 스케줄 모드(test/live 등) 추출
 const scheduleMode = queue.mode || process.env.SCHEDULE_MODE || 'test';
 log(`today.json 로드 완료 → date=${queue.date || 'N/A'}, mode=${scheduleMode}`);
 
@@ -85,15 +78,15 @@ if (!items.length) {
 
 // ────────────────────────────────────
 //  라벨 → 파일 prefix 매핑
-//  (blogger.cjs 의 PREFIX_TO_CODE / CODE_TO_LABEL 와 일관성 유지)
+//  (blogger.cjs와 prefix가 어긋나면 slug/라벨 추적이 꼬입니다)
 // ────────────────────────────────────
 const LABEL_TO_PREFIX = {
   'app-reviews':            'app',
   'device-reviews':         'device',
-  'subscription-services':  'sub',
+  'subscription-services':  'subscription', // 기존 sub → subscription (혼선 방지)
   'how-to-playbooks':       'howto',
-  'smart-savings':          'smart',
-  'templates-checklists':   'tpl'
+  'smart-savings':          'smartsavings',  // 기존 smart → smartsavings (혼선 방지)
+  'templates-checklists':   'templates'      // 기존 tpl → templates (혼선 방지)
 };
 
 const counters = {}; // label별 일련번호
@@ -111,6 +104,44 @@ function getDateString(item) {
   return base.replace(/-/g, ''); // "YYYYMMDD"
 }
 
+function isoUtcMidnight(dateYYYYMMDD) {
+  // dateYYYYMMDD like 20251212
+  const y = dateYYYYMMDD.slice(0, 4);
+  const m = dateYYYYMMDD.slice(4, 6);
+  const d = dateYYYYMMDD.slice(6, 8);
+  return `${y}-${m}-${d}T00:00:00Z`;
+}
+
+function buildBodyPrompt(item, label) {
+  const title = (item.title || '').trim();
+  const angle = (item.angle || '').trim();
+  const audience = (item.audience || '').trim();
+  const intent = (item.intent || '').trim();
+  const notes = (item.notes || '').trim();
+
+  // generate-body.cjs가 그대로 받아서 글을 쓰기 좋은 형태로만 구성
+  // (여기서 길이/톤은 label-profiles.json에서 결정하도록 둠)
+  const lines = [
+    'Write a complete blog post in English for an English-speaking audience.',
+    'Use clear headings, short paragraphs, and practical examples.',
+    '',
+    `Title: ${title || '(Untitled)'}`,
+    `Label: ${label}`,
+    intent ? `Intent: ${intent}` : '',
+    angle ? `Angle: ${angle}` : '',
+    audience ? `Audience: ${audience}` : 'Audience: general readers who want clear, simple guidance',
+    notes ? `Notes: ${notes}` : '',
+    '',
+    'Include:',
+    '- A short TL;DR section',
+    '- Step-by-step guidance (when applicable)',
+    '- Common mistakes and quick fixes',
+    '- A concise conclusion'
+  ].filter(Boolean);
+
+  return lines.join('\n');
+}
+
 let created = 0;
 let skipped = 0;
 
@@ -122,8 +153,8 @@ for (const item of items) {
   if (!counters[label]) counters[label] = 1;
   else counters[label]++;
 
-  const idx  = pad3(counters[label]);              // 001, 002, ...
-  const slug = `${prefix}-${ymd}-${idx}`;          // 예: app-20251121-001
+  const idx  = pad3(counters[label]);     // 001, 002, ...
+  const slug = `${prefix}-${ymd}-${idx}`; // 예: app-20251212-001
 
   const targetPath = path.join(CONTENT_DIR, `${slug}.json`);
 
@@ -134,7 +165,8 @@ for (const item of items) {
   }
 
   const queueDate  = (item.date || queue.date || new Date().toISOString().slice(0, 10));
-  const updatedISO = `${queueDate}T00:00:00+09:00`;
+  const ymdISO     = queueDate.replace(/-/g, '');
+  const updatedISO = isoUtcMidnight(ymdISO);
 
   const profileId = getProfileIdForLabel(label);
 
@@ -145,24 +177,19 @@ for (const item of items) {
     labels: [label],
     intent: item.intent || 'review',
     updated: updatedISO,
-    // 모드 정보(테스트/라이브)도 상단에 한 번 박아둠
-    scheduleMode,
+
+    // 본문 생성기용 프롬프트 (없으면 generate-body가 스킵됨)
+    bodyPrompt: buildBodyPrompt(item, label),
+    body: "",
+
     aio: {
-      tldr: [
-        `This article is based on today's planned topic: "${item.title}".`,
-        item.angle || 'It focuses on practical, real-world usage rather than theory.',
-        `Written for: ${item.audience || 'general readers who want clear, simple guidance'}.`
-      ],
-      keyfacts: [
-        `Label: ${label}, mode: ${item.mode || 'trend'}.`,
-        `Priority: ${item.priority ?? 1}.`,
-        'Sources will be added from official sites when the full article is written.'
-      ],
+      tldr: [],
+      keyfacts: [],
       faq: [],
       sources: [],
-      sourcesNote: '실제 글 작성 시에는 공식 사이트·공식 문서 등 최소 2개 이상 Sources에 추가.'
+      sourcesNote: 'Add at least 2 official sources when finalizing the post.'
     },
-    body: "",
+
     seedMeta: {
       queueDate,
       label: item.label,
@@ -174,7 +201,6 @@ for (const item of items) {
       intent: item.intent,
       priority: item.priority,
       notes: item.notes,
-      // 여기에도 mode 함께 기록(나중에 분석/검증용)
       scheduleMode
     }
   };
