@@ -2,22 +2,21 @@ name: firstgate-daily
 
 on:
   schedule:
-    # 매일 UTC 23:40 (발행 20분 전)
     - cron: '40 23 * * *'
   workflow_dispatch:
 
 env:
   NODE_VERSION: '20'
-  SCHEDULE_MODE: ${{ secrets.SCHEDULE_MODE }}
-  PAGE_ID_MODE: ${{ secrets.PAGE_ID_MODE }}
   OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
   OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
   CANONICAL_BASE: ${{ secrets.CANONICAL_BASE }}
   CDN_BASE: ${{ secrets.CDN_BASE }}
+  PAGE_ID_MODE: ${{ secrets.PAGE_ID_MODE }}
+  SCHEDULE_MODE: ${{ secrets.SCHEDULE_MODE }}
 
 jobs:
   build-queue:
-    if: ${{ github.event_name == 'workflow_dispatch' || env.SCHEDULE_MODE == 'live' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || secrets.SCHEDULE_MODE == 'live' }}
     runs-on: ubuntu-latest
 
     steps:
