@@ -4,7 +4,7 @@
 /**
  * System_files/scripts/build/render-posts.cjs
  * - content/posts/*.json → dist/posts/*.html 렌더러
- * - meta.cjs(buildMeta)로 canonical/OG/schema/pageBadge 생성
+ * - meta.cjs(buildMeta)로 canonical/OG/schema 생성
  * - TL;DR / Key Facts / FAQ / Sources / Hero 이미지까지 한 번에 주입
  */
 
@@ -16,7 +16,6 @@ const POSTS_DIR     = path.join(ROOT, 'content', 'posts');
 const TEMPLATE_PATH = path.join(ROOT, 'templates', 'post.html');
 const OUTPUT_DIR    = path.join(ROOT, 'dist', 'posts');
 
-// meta.cjs (CJS 버전) 이용
 const { buildMeta } = require('./lib/meta.cjs');
 
 /* ───────────────────── 공통 유틸 ───────────────────── */
@@ -40,7 +39,6 @@ function escapeHtml(str) {
 }
 
 function escapeAttr(str) {
-  // 속성 전용
   return escapeHtml(str).replace(/\n/g, ' ');
 }
 
@@ -56,6 +54,11 @@ function firstNonEmpty(...vals) {
 function asArray(v) {
   if (!v) return [];
   return Array.isArray(v) ? v : [v];
+}
+
+function replaceAll(html, token, value) {
+  const safe = value == null ? '' : String(value);
+  return html.split(token).join(safe);
 }
 
 /* ───────────────────── AIO 블록 렌더러 ───────────────────── */
@@ -79,7 +82,6 @@ function normalizeFaq(raw) {
     if (!item) continue;
 
     if (typeof item === 'string') {
-      // 문자열 단독 FAQ → "질문/답변 한 줄 요약" 형태로 처리
       const text = item.trim();
       if (!text) continue;
       out.push({ q: text, a: text });
@@ -96,10 +98,6 @@ function normalizeFaq(raw) {
   return out;
 }
 
-/**
- * FAQ HTML 렌더링
- * - [object Object] 문제를 여기서 해결
- */
 function renderFaq(rawFaq) {
   const faqItems = normalizeFaq(rawFaq);
   if (!faqItems.length) return '';
@@ -170,7 +168,6 @@ function buildHeadMetaBlock(post, meta) {
   const ogImage     = meta.ogImage;
   const ogAlt       = meta.ogAlt || description || title;
 
-  // og:image 기본 사이즈(규칙상 1200x630)
   const OG_W = 1200;
   const OG_H = 630;
 
@@ -205,37 +202,25 @@ function buildHeadMetaBlock(post, meta) {
 
   // 시간 메타
   if (meta.publishedIso) {
-    lines.push(
-      `<meta property="article:published_time" content="${escapeAttr(meta.publishedIso)}">`
-    );
+    lines.push(`<meta property="article:published_time" content="${escapeAttr(meta.publishedIso)}">`);
   }
   if (meta.updatedIso) {
-    lines.push(
-      `<meta property="article:modified_time" content="${escapeAttr(meta.updatedIso)}">`
-    );
-    lines.push(
-      `<meta property="og:updated_time" content="${escapeAttr(meta.updatedIso)}">`
-    );
+    lines.push(`<meta property="article:modified_time" content="${escapeAttr(meta.updatedIso)}">`);
+    lines.push(`<meta property="og:updated_time" content="${escapeAttr(meta.updatedIso)}">`);
   }
 
   // LCP 이미지 preload + preconnect
   if (ogImage) {
     lines.push(
-      `<link rel="preload" as="image" href="${escapeAttr(
-        ogImage
-      )}" fetchpriority="high" imagesrcset="${escapeAttr(ogImage)}">`
+      `<link rel="preload" as="image" href="${escapeAttr(ogImage)}" fetchpriority="high" imagesrcset="${escapeAttr(ogImage)}">`
     );
   }
   const siteBase = (process.env.CANONICAL_BASE || 'https://ongsblog.com').replace(/\/+$/,'');
   lines.push(`<link rel="preconnect" href="${escapeAttr(siteBase)}" crossorigin>`);
 
   // JSON-LD 스키마(Article, Breadcrumb, FAQ, WebSite/authorityRef)
-  if (meta.schemaTag) {
-    lines.push(meta.schemaTag);
-  }
-  if (meta.authorityScript) {
-    lines.push(meta.authorityScript);
-  }
+  if (meta.schemaTag) lines.push(meta.schemaTag);
+  if (meta.authorityScript) lines.push(meta.authorityScript);
 
   return lines.join('\n');
 }
@@ -245,7 +230,7 @@ function buildHeadMetaBlock(post, meta) {
 function renderOne(template, postJson) {
   const slug = postJson.slug || path.basename(postJson.__file || 'sample_post.json', '.json');
 
-  // pageId는 validate-repair 등에서 이미 부여되었으면 우선 사용
+  // pageId 우선순위
   const pageId =
     postJson.pageId ||
     postJson.page_id ||
@@ -259,77 +244,76 @@ function renderOne(template, postJson) {
 
   let html = template;
 
-  // 제목 / description
+  // title/description (템플릿은 {{title}}지만, 안전하게 태그 교체 방식 유지)
   const title       = meta.title || postJson.title || 'Untitled';
   const description = meta.summary || postJson.description || '';
 
-  html = html.replace(
-    /<title>[\s\S]*?<\/title>/i,
-    `<title>${escapeHtml(title)}</title>`
-  );
-
+  html = html.replace(/<title>[\s\S]*?<\/title>/i, `<title>${escapeHtml(title)}</title>`);
   html = html.replace(
     /<meta\s+name=["']description["'][^>]*>/i,
     `<meta name="description" content="${escapeAttr(description)}" />`
   );
 
-  // Canonical + OG/Twitter/Schema 블록 삽입
+  // META 블록 삽입
   const headBlock = buildHeadMetaBlock(postJson, meta);
   html = html.replace(
     '<!-- Schema & 동적 메타(OG/Twitter/Preload/hreflang)는 렌더러가 주입 -->',
-    '<!-- Schema & 동적 메타(OG/Twitter/Preload/hreflang)는 렌더러가 주입 -->\n\n' +
-      headBlock
+    '<!-- Schema & 동적 메타(OG/Twitter/Preload/hreflang)는 렌더러가 주입 -->\n\n' + headBlock
   );
 
-  // Canonical 기본 라인에도 href 교체(템플릿에 placeholder가 있을 수 있으므로 재보정)
+  // Canonical 라인 재보정
   html = html.replace(
     /<link\s+rel=["']canonical["'][^>]*>/i,
     `<link rel="canonical" href="${escapeAttr(meta.canonicalUrl)}">`
   );
 
+  // 템플릿 플레이스홀더들 1차 치환(중복 안전)
+  html = replaceAll(html, '{{canonical}}', escapeAttr(meta.canonicalUrl));
+  html = replaceAll(html, '{{pageId}}', escapeHtml(pageId));
+  html = replaceAll(html, '{{title}}', escapeHtml(title));
+  html = replaceAll(html, '{{description}}', escapeAttr(description));
+
   // Updated 배지(YYYY-MM-DD)
   const updatedDate = (meta.updatedIso || '').slice(0, 10) || '';
   if (updatedDate) {
-    html = html.replace(
-      'Updated {{updated}}',
-      `Updated ${escapeHtml(updatedDate)}`
-    );
+    html = replaceAll(html, '{{updated}}', escapeHtml(updatedDate));
   }
 
-  // 페이지 배지 삽입 (SLOT 유지)
+  // 페이지 배지: 템플릿의 기본 배지를 meta.pageBadge로 교체(있으면), 없으면 유지
   if (meta.pageBadge) {
+    // 템플릿 기본 배지 <a ...>{{pageId}}</a> 부분을 통째로 교체
     html = html.replace(
-      '<!--SLOT:PAGE_BADGE-->',
-      `${meta.pageBadge}\n  <!--SLOT:PAGE_BADGE-->`
+      /<a\s+class=["']page-badge["'][\s\S]*?<\/a>/i,
+      meta.pageBadge
     );
   }
 
-  // 히어로 이미지
+  // 히어로 이미지: SLOT 기반 주입(템플릿과 정합)
   const heroAlt = meta.ogAlt || description || title || slug;
   const heroImg = meta.ogImage
     ? [
         '<figure class="post-hero">',
-        `  <img src="${escapeAttr(meta.ogImage)}" alt="${escapeAttr(
-          heroAlt
-        )}" loading="eager" fetchpriority="high" />`,
+        `  <img src="${escapeAttr(meta.ogImage)}" alt="${escapeAttr(heroAlt)}" loading="eager" fetchpriority="high" />`,
         '</figure>',
       ].join('\n')
     : '';
 
-  // 템플릿 주석 위치에 주입
   html = html.replace(
-    '<!-- 히어로 이미지 (자동 주입/교정) -->',
-    `<!-- 히어로 이미지 (자동 주입/교정) -->\n  ${heroImg}`
+    '<!--SLOT:HERO_IMAGE-->',
+    (heroImg ? `${heroImg}\n  ` : '') + '<!--SLOT:HERO_IMAGE-->'
   );
 
-  // TL;DR / Key Facts / Body / FAQ / Sources
-  const aio = postJson.aio || {};
+  // ✅ AIO 데이터는 "루트 필드 우선" + aio.* fallback
+  const tldr     = firstNonEmpty(postJson.tldr,     (postJson.aio && postJson.aio.tldr),     []);
+  const keyfacts = firstNonEmpty(postJson.keyfacts, (postJson.aio && postJson.aio.keyfacts), []);
+  const faq      = firstNonEmpty(postJson.faq,      (postJson.aio && postJson.aio.faq),      []);
+  const sources  = firstNonEmpty(postJson.sources,  (postJson.aio && postJson.aio.sources),  []);
 
-  html = html.replace('{{tldr}}', renderListItems(aio.tldr));
-  html = html.replace('{{keyfacts}}', renderListItems(aio.keyfacts));
-  html = html.replace('{{body}}', postJson.body || '');
-  html = html.replace('{{faq}}', renderFaq(aio.faq));
-  html = html.replace('{{sources}}', renderSources(aio.sources));
+  html = replaceAll(html, '{{tldr}}', renderListItems(tldr));
+  html = replaceAll(html, '{{keyfacts}}', renderListItems(keyfacts));
+  html = replaceAll(html, '{{body}}', postJson.body || '');
+  html = replaceAll(html, '{{faq}}', renderFaq(faq));
+  html = replaceAll(html, '{{sources}}', renderSources(sources));
 
   return html;
 }
@@ -401,4 +385,3 @@ function main() {
 if (require.main === module) {
   main();
 }
-
