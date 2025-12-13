@@ -7,9 +7,10 @@
  * - meta.cjs(buildMeta)로 canonical/OG/schema/pageBadge 생성
  * - TL;DR / Key Facts / FAQ / Sources / Hero 이미지까지 한 번에 주입
  *
- * 중요:
- * - pageId는 "랜덤 생성" 금지
- * - 없으면 ledger(ensurePageId)로 발급하고(가능 시) 원본 JSON에도 기록
+ * 중요(강제):
+ * - pageId는 랜덤 생성 금지
+ * - pageId 누락 시: ledger(ensurePageId)로 발급 → 원본 JSON에 "반드시" 기록 성공해야 진행
+ * - 기록 실패면 빌드 실패(중단) → 재시도/복구 루프에서 처리
  */
 
 const fs = require('fs');
@@ -36,8 +37,10 @@ function readJson(filePath) {
   return JSON.parse(raw);
 }
 
-function writeJson(filePath, obj) {
-  fs.writeFileSync(filePath, JSON.stringify(obj, null, 2) + '\n', 'utf8');
+function writeJsonAtomic(filePath, obj) {
+  const tmp = `${filePath}.tmp`;
+  fs.writeFileSync(tmp, JSON.stringify(obj, null, 2) + '\n', 'utf8');
+  fs.renameSync(tmp, filePath);
 }
 
 function escapeHtml(str) {
@@ -68,8 +71,21 @@ function asArray(v) {
 }
 
 function replaceAllSafe(html, needle, value) {
-  // 단순 문자열 placeholder 치환용
   return html.split(needle).join(value);
+}
+
+function isValidPageId(pid) {
+  return typeof pid === 'string' && /^page\d{6}$/.test(pid);
+}
+
+function getEffectivePageIdMode() {
+  // 우선순위: PAGE_ID_MODE > (DRY_RUN 기반 추론)
+  // (publish.yml에서 DRY_RUN이 최종 안전 스위치이므로 여기서도 동일 추론 지원)
+  const explicit = (process.env.PAGE_ID_MODE || '').trim();
+  if (explicit) return explicit;
+
+  const dry = String(process.env.DRY_RUN || 'false').toLowerCase() === 'true';
+  return dry ? 'no_live' : 'live';
 }
 
 /* ───────────────────── AIO 블록 렌더러 ───────────────────── */
@@ -95,7 +111,7 @@ function normalizeFaq(raw) {
     if (typeof item === 'string') {
       const text = item.trim();
       if (!text) continue;
-      // 문자열만 있는 FAQ는 품질이 애매하니, 최소 안전 변환(질문=답변)로 둠
+      // 문자열만 있는 FAQ는 최소 안전 변환(질문=답변)
       out.push({ q: text, a: text });
       continue;
     }
@@ -112,7 +128,7 @@ function normalizeFaq(raw) {
 
 /**
  * FAQ HTML 렌더링
- * - [object Object] 문제를 여기서 해결
+ * - [object Object] 문제 해결
  */
 function renderFaq(rawFaq) {
   const faqItems = normalizeFaq(rawFaq);
@@ -175,6 +191,44 @@ function renderSources(rawSources) {
   return items.join('\n');
 }
 
+/* ───────────────────── pageId 강제 보장(핵심) ───────────────────── */
+
+/**
+ * 반드시:
+ * 1) JSON에 pageId가 있으면 그 값을 사용
+ * 2) 없으면 ledger로 발급 (ensurePageId)
+ * 3) 원본 JSON에 영구 기록 성공까지 강제
+ * 4) 실패하면 throw (빌드 중단)
+ */
+function ensureAndPersistPageId(jsonPath, postJson, slug) {
+  const existing = firstNonEmpty(postJson.pageId, postJson.page_id, '');
+  if (isValidPageId(existing)) return { pageId: existing, assigned: false };
+
+  const mode = getEffectivePageIdMode();
+  const pid = ensurePageId(slug, mode);
+
+  if (!isValidPageId(pid)) {
+    throw new Error(`pageId ledger returned invalid value for slug=${slug}: ${String(pid)}`);
+  }
+
+  // 원본 JSON에 반드시 기록
+  const fresh = readJson(jsonPath);
+  fresh.slug = fresh.slug || slug;
+  fresh.pageId = pid;
+  writeJsonAtomic(jsonPath, fresh);
+
+  // 재확인(저장/경로 문제 방지)
+  const verify = readJson(jsonPath);
+  if (!isValidPageId(verify.pageId) || verify.pageId !== pid) {
+    throw new Error(`pageId persist verify failed: slug=${slug}, expected=${pid}, got=${String(verify.pageId)}`);
+  }
+
+  // 메모리 객체에도 반영
+  postJson.pageId = pid;
+
+  return { pageId: pid, assigned: true };
+}
+
 /* ───────────────────── 메타/헤드 블록 ───────────────────── */
 
 function buildHeadMetaBlock(post, meta) {
@@ -232,8 +286,6 @@ function buildHeadMetaBlock(post, meta) {
   const siteBase = (process.env.CANONICAL_BASE || 'https://ongsblog.com').replace(/\/+$/,'');
   lines.push(`<link rel="preconnect" href="${escapeAttr(siteBase)}" crossorigin>`);
 
-  // JSON-LD 스키마 (meta.cjs가 만들어 준 결과를 문자열로 주입하는 형태면 여기서 합쳐 넣을 수 있음)
-  // 현재 meta.cjs는 schemaTags 배열을 반환하므로, render 단계에서 <script> 생성하여 삽입
   if (meta.schemaTag) lines.push(meta.schemaTag);
   if (meta.authorityScript) lines.push(meta.authorityScript);
 
@@ -243,7 +295,6 @@ function buildHeadMetaBlock(post, meta) {
 /* ───────────────────── 스키마 태그 생성 ───────────────────── */
 
 function buildSchemaScriptFromMeta(meta) {
-  // meta.cjs는 { schemaTags: [obj, obj...] } 형태
   if (!meta || !Array.isArray(meta.schemaTags) || meta.schemaTags.length === 0) return '';
   const json = JSON.stringify(meta.schemaTags.length === 1 ? meta.schemaTags[0] : meta.schemaTags);
   return `<script type="application/ld+json">${json}</script>`;
@@ -252,7 +303,6 @@ function buildSchemaScriptFromMeta(meta) {
 /* ───────────────────── 개별 포스트 렌더링 ───────────────────── */
 
 function resolveAio(postJson) {
-  // 호환: aio.* 우선, 없으면 top-level(tldr/keyfacts/faq/sources)도 수용
   const aio = postJson.aio && typeof postJson.aio === 'object' ? postJson.aio : {};
   return {
     tldr: firstNonEmpty(aio.tldr, postJson.tldr, []),
@@ -263,41 +313,21 @@ function resolveAio(postJson) {
   };
 }
 
-function ensurePageIdForPost(postJson, slug) {
-  // 1) JSON에 이미 있으면 그걸 사용
-  const existing = firstNonEmpty(postJson.pageId, postJson.page_id, postJson.seedMeta && postJson.seedMeta.pageId, '');
-  if (typeof existing === 'string' && /^page\d{6}$/.test(existing)) return { pageId: existing, wroteJson: false };
-
-  // 2) 없으면 ledger로 발급 (랜덤 금지)
-  const pid = ensurePageId(slug);
-
-  // 3) 가능하면 원본 JSON에도 기록(추적/수정 안정성 확보)
-  //    __file가 있으면 content/posts/{file}에 저장
-  try {
-    if (postJson.__file) {
-      const p = path.join(POSTS_DIR, postJson.__file);
-      if (fs.existsSync(p)) {
-        const raw = fs.readFileSync(p, 'utf8');
-        const obj = JSON.parse(raw);
-        obj.pageId = pid;
-        fs.writeFileSync(p, JSON.stringify(obj, null, 2) + '\n', 'utf8');
-      }
-    }
-  } catch (_) {
-    // 렌더 자체는 계속 진행(단, 로그에서 잡히게 main에서 별도 표시)
+function injectDataPageIdAttr(html, pageId) {
+  // id="pageId"가 있는 앵커/태그에 data-page-id를 강제로 붙여 validate 1순위 회수 안정화
+  // 이미 있으면 덮어씀
+  const rx = /(<a\b[^>]*\bid=["']pageId["'][^>]*)(>)/i;
+  if (rx.test(html)) {
+    // 기존 data-page-id가 있으면 제거 후 추가
+    html = html.replace(/data-page-id=["']page\d{6}["']\s*/i, '');
+    return html.replace(rx, `$1 data-page-id="${escapeAttr(pageId)}"$2`);
   }
-
-  // 메모리 객체에도 반영
-  postJson.pageId = pid;
-  return { pageId: pid, wroteJson: true };
+  return html;
 }
 
-function renderOne(template, postJson) {
-  const slug = postJson.slug || path.basename(postJson.__file || 'sample_post.json', '.json');
-
-  // ✅ pageId 강제 보장
-  const pidRes = ensurePageIdForPost(postJson, slug);
-  const pageId = pidRes.pageId;
+function renderOne(template, postJson, ctx) {
+  const slug = ctx.slug;
+  const pageId = ctx.pageId;
 
   const siteBase = process.env.CANONICAL_BASE || process.env.SITE_BASE || 'https://ongsblog.com';
   const cdnBase  = process.env.CDN_BASE || (siteBase.replace(/\/+$/,'') + '/images');
@@ -374,9 +404,15 @@ function renderOne(template, postJson) {
   html = html.replace('{{faq}}', renderFaq(aio.faq));
   html = html.replace('{{sources}}', renderSources(aio.sources));
 
-  // pageId가 이 렌더에서 새로 발급된 경우(원본 JSON 누락) 표시용 주석(디버그)
-  if (pidRes.wroteJson) {
-    html = html.replace('</head>', `<!-- render-posts: pageId was missing; assigned ${escapeHtml(pageId)} -->\n</head>`);
+  // ✅ validate가 가장 안전하게 회수하도록 data-page-id 강제 주입
+  html = injectDataPageIdAttr(html, pageId);
+
+  // 디버그 주석(assigned 된 경우만)
+  if (ctx.assigned) {
+    html = html.replace(
+      '</head>',
+      `<!-- render-posts: pageId was missing; assigned & persisted ${escapeHtml(pageId)} -->\n</head>`
+    );
   }
 
   return html;
@@ -431,18 +467,28 @@ function main() {
     const outPath = path.join(OUTPUT_DIR, `${slug}.html`);
 
     try {
-      const html = renderOne(template, json);
+      // ✅ pageId는 렌더 직전에 "반드시" 보장 + 원본 JSON에 영구 기록 강제
+      const pidCtx = ensureAndPersistPageId(fullPath, json, slug);
+
+      const html = renderOne(template, json, {
+        slug,
+        pageId: pidCtx.pageId,
+        assigned: pidCtx.assigned
+      });
+
       fs.writeFileSync(outPath, html, 'utf8');
       console.log('[render-posts] ✓ 렌더 완료 →', path.basename(outPath));
       ok++;
     } catch (e) {
-      console.error('[render-posts] 렌더 실패:', file, e.message);
+      console.error('[render-posts] 렌더 실패:', file, e.message || e);
       fail++;
     }
   }
 
   console.log('────────────────────────────────────────────');
   console.log(`[render-posts] 결과: 성공=${ok}, 실패=${fail}`);
+
+  // ✅ pageId는 생명줄이므로 fail>0이면 빌드 실패로 처리
   if (fail > 0) process.exitCode = 1;
 }
 
