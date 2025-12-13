@@ -3,23 +3,37 @@ name: Publish Blog (Blogger)
 on:
   workflow_dispatch:
     inputs:
-      category:
-        description: "수동 발급 라벨 선택(0: 자동, 1~6: 블로그 라벨)"
+      RUN_MODE:
+        description: "auto = 강제 live+실발행 / manual = 선택 실행"
         required: true
-        default: "0: 자동 스케줄"
         type: choice
+        default: "manual"
         options:
-          - "0: 자동 스케줄"
-          - "1: App Reviews (app-reviews)"
-          - "2: Device Reviews (device-reviews)"
-          - "3: Subscription Services (subscription-services)"
-          - "4: How-to Playbooks (how-to-playbooks)"
-          - "5: Smart Savings (smart-savings)"
-          - "6: Templates & Checklists (templates-checklists)"
-      dry_run:
-        description: "true = 발행 시도만 로그 / false = 실제 Blogger 게시"
+          - "auto"
+          - "manual"
+
+      MANUAL_JOB:
+        description: "manual일 때만 의미: schedule 1회 또는 라벨 1회"
         required: true
+        type: choice
+        default: "schedule_once"
+        options:
+          - "schedule_once"
+          - "label_once_app-reviews"
+          - "label_once_device-reviews"
+          - "label_once_subscription-services"
+          - "label_once_how-to-playbooks"
+          - "label_once_smart-savings"
+          - "label_once_templates-checklists"
+
+      DRY_RUN:
+        description: "manual에서만 의미: true=no_live / false=live"
+        required: true
+        type: choice
         default: "true"
+        options:
+          - "true"
+          - "false"
 
   schedule:
     - cron: "30 0 * * *"
@@ -37,17 +51,12 @@ jobs:
       TIME_ZONE:       America/Los_Angeles
       AOIA_ENABLE:     "false"
 
-      # === 스케줄 모드 ===
+      # ✅ 2중 통제: schedule 자동발행 허용 스위치 (secrets)
       SCHEDULE_MODE:   ${{ secrets.SCHEDULE_MODE }}
 
       # === OpenAI (본문 생성기) ===
       OPENAI_API_KEY:  ${{ secrets.OPENAI_API_KEY }}
       OPENAI_MODEL:    "gpt-4.1-mini"
-
-      # === 스케줄 기본 파라미터 ===
-      SCHEDULE_LABEL:     ""
-      SCHEDULE_MAX_POSTS: "3"
-      SCHEDULE_DRY_RUN:   "false"
 
       # === 이미지 처리(R2) ===
       IMAGES_DIR:      System_files/assets/images
@@ -75,41 +84,73 @@ jobs:
             npm install
           fi
 
-      - name: Resolve inputs (dispatch vs schedule)
+      # ✅ schedule 자동발행 하드 가드 (SCHEDULE_MODE != live면 아무것도 안 하고 종료)
+      - name: Guard schedule (SCHEDULE_MODE must be live)
         run: |
           echo "event_name=${{ github.event_name }}"
+          echo "SCHEDULE_MODE=${SCHEDULE_MODE}"
 
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            RAW_CATEGORY="${{ github.event.inputs.category }}"
-            RAW_DRY_RUN="${{ github.event.inputs.dry_run }}"
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            if [ "${SCHEDULE_MODE}" != "live" ]; then
+              echo "[GUARD] schedule trigger blocked: SCHEDULE_MODE != live"
+              exit 0
+            fi
+          fi
 
-            CATEGORY_NUM="${RAW_CATEGORY%%:*}"
+      # ✅ 입력/모드 해석: RUN_MODE / MANUAL_JOB / DRY_RUN → LABEL/MAX_POSTS/DRY_RUN 세팅
+      - name: Resolve run mode
+        run: |
+          EVENT="${{ github.event_name }}"
 
+          # defaults
+          RUN_MODE="manual"
+          MANUAL_JOB="schedule_once"
+          DRY_RUN="true"
+
+          if [ "$EVENT" = "workflow_dispatch" ]; then
+            RUN_MODE="${{ github.event.inputs.RUN_MODE }}"
+            MANUAL_JOB="${{ github.event.inputs.MANUAL_JOB }}"
+            DRY_RUN="${{ github.event.inputs.DRY_RUN }}"
+          else
+            # schedule 트리거는 auto로 취급 (강제 live+실발행)
+            RUN_MODE="auto"
+            MANUAL_JOB="schedule_once"
+            DRY_RUN="false"
+          fi
+
+          LABEL_VALUE=""
+          MAX_POSTS_VALUE=""
+
+          if [ "$RUN_MODE" = "auto" ]; then
+            # ✅ auto는 무조건 live+실발행 강제
+            DRY_RUN="false"
             LABEL_VALUE=""
-            case "$CATEGORY_NUM" in
-              "1") LABEL_VALUE="app-reviews" ;;
-              "2") LABEL_VALUE="device-reviews" ;;
-              "3") LABEL_VALUE="subscription-services" ;;
-              "4") LABEL_VALUE="how-to-playbooks" ;;
-              "5") LABEL_VALUE="smart-savings" ;;
-              "6") LABEL_VALUE="templates-checklists" ;;
-              "0"|*) LABEL_VALUE="" ;;
-            esac
-
-            if [ "$CATEGORY_NUM" = "0" ]; then
+            MAX_POSTS_VALUE=""
+          else
+            # manual
+            if [ "$MANUAL_JOB" = "schedule_once" ]; then
+              LABEL_VALUE=""
               MAX_POSTS_VALUE=""
             else
+              # label_once_*
+              # 예: label_once_app-reviews → app-reviews
+              LABEL_VALUE="${MANUAL_JOB#label_once_}"
               MAX_POSTS_VALUE="1"
             fi
-
-            echo "LABEL=$LABEL_VALUE" >> $GITHUB_ENV
-            echo "MAX_POSTS=$MAX_POSTS_VALUE" >> $GITHUB_ENV
-            echo "DRY_RUN=$RAW_DRY_RUN" >> $GITHUB_ENV
-          else
-            echo "LABEL=${{ env.SCHEDULE_LABEL }}" >> $GITHUB_ENV
-            echo "MAX_POSTS=${{ env.SCHEDULE_MAX_POSTS }}" >> $GITHUB_ENV
-            echo "DRY_RUN=${{ env.SCHEDULE_DRY_RUN }}" >> $GITHUB_ENV
           fi
+
+          echo "RUN_MODE=$RUN_MODE"       >> $GITHUB_ENV
+          echo "MANUAL_JOB=$MANUAL_JOB"   >> $GITHUB_ENV
+          echo "LABEL=$LABEL_VALUE"       >> $GITHUB_ENV
+          echo "MAX_POSTS=$MAX_POSTS_VALUE" >> $GITHUB_ENV
+          echo "DRY_RUN=$DRY_RUN"         >> $GITHUB_ENV
+
+          echo "Resolved:"
+          echo "  RUN_MODE=$RUN_MODE"
+          echo "  MANUAL_JOB=$MANUAL_JOB"
+          echo "  LABEL=$LABEL_VALUE"
+          echo "  MAX_POSTS=$MAX_POSTS_VALUE"
+          echo "  DRY_RUN=$DRY_RUN"
 
       - name: Verify required files exist
         run: |
@@ -126,6 +167,7 @@ jobs:
           test -f System_files/scripts/build/ids.cjs
 
       # === 오늘 발행 시드 선택 → 큐 생성 ===
+      # manual label_once는 “발행 단계에서 1개만” 나가게 MAX_POSTS=1로 통제(추가 발급 사고 방지)
       - name: Plan today posts from seedpool
         run: node System_files/scripts/build/seed-scheduler.cjs
 
@@ -134,6 +176,8 @@ jobs:
 
       # === Page ID 발급 (DRY_RUN=true → no_live 자동 강제) ===
       - name: Issue page IDs
+        env:
+          DRY_RUN: ${{ env.DRY_RUN }}
         run: node System_files/scripts/build/ids.cjs
 
       # === 본문 자동생성 ===
