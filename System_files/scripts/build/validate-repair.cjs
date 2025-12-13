@@ -7,22 +7,20 @@
  *  - dist/posts/*.html을 돌면서
  *  - pageId 누락/불일치/OG 이미지 메타 누락을 자동 교정
  *
- * 핵심 원칙(옹스 룰):
- *  - validate 단계에서 "새 pageId 발급"은 금지.
- *  - pageId는 ids.cjs가 content/posts/*.json에 부여한 값이 '정답'이며,
- *    validate는 render 실수를 100% 커버(회수/삽입)해야 한다.
- *  - pageId를 끝까지 못 찾으면 빌드를 통과시키면 안 된다(생명).
+ * 옹스 룰(강제):
+ *  - validate 단계에서 ids.cjs 호출 금지(발급/복구 금지)
+ *  - pageId 정답은 content/posts/*.json 이다.
+ *  - HTML은 JSON의 pageId로 100% 교정 대상이다.
+ *  - HTML에도 없고 JSON에도 없으면 즉시 FAIL (통과 금지)
  */
 
 const fs = require('fs');
 const path = require('path');
-const { spawnSync } = require('child_process');
 
 const ROOT = path.resolve(__dirname, '..', '..'); // System_files
 const DIST_DIR = path.join(ROOT, 'dist', 'posts');
 const POSTS_DIR = path.join(ROOT, 'content', 'posts');
 
-const SITE_BASE = process.env.SITE_BASE || 'https://ongsblog.com';
 const CDN_BASE = (process.env.CDN_BASE || 'https://ongsblog.com/images').replace(/\/+$/, '');
 
 function listHtmlFiles(dir) {
@@ -55,53 +53,23 @@ function extractPageIdFromHtml(html) {
   return '';
 }
 
-function readJsonSafe(filePath, fallback) {
+function readJsonSafe(filePath) {
   try {
-    if (!fs.existsSync(filePath)) return fallback;
+    if (!fs.existsSync(filePath)) return null;
     const raw = fs.readFileSync(filePath, 'utf8');
     return JSON.parse(raw);
   } catch {
-    return fallback;
+    return null;
   }
 }
 
 function getPageIdFromPostJson(slugBase) {
   const file = path.join(POSTS_DIR, `${slugBase}.json`);
-  const doc = readJsonSafe(file, null);
+  const doc = readJsonSafe(file);
   if (!doc || typeof doc !== 'object') return '';
   const pid = doc.pageId;
   if (typeof pid === 'string' && /^page\d{6}$/.test(pid)) return pid;
   return '';
-}
-
-function runIdsOnceOrFail() {
-  // validate 안에서 ids를 무한 재시도하면 위험(과열)이라 1회만.
-  const script = path.join(ROOT, 'scripts', 'build', 'ids.cjs');
-  const r = spawnSync('node', [script], {
-    stdio: 'inherit',
-    env: process.env,
-  });
-  if (r.status !== 0) {
-    throw new Error('ids.cjs 실행 실패(복구 시도 실패)');
-  }
-}
-
-function ensurePageIdRecovered(slugBase, html) {
-  // ✅ 0) HTML에서 먼저 확인(이미 정상이라면 그대로)
-  const fromHtml = extractPageIdFromHtml(html);
-  if (fromHtml) return fromHtml;
-
-  // ✅ 1) posts JSON에서 회수
-  let pid = getPageIdFromPostJson(slugBase);
-  if (pid) return pid;
-
-  // ✅ 2) 그래도 없으면 ids 1회 호출(복구/재발급) 후 다시 회수
-  runIdsOnceOrFail();
-  pid = getPageIdFromPostJson(slugBase);
-  if (pid) return pid;
-
-  // ✅ 3) 최종 실패: 통과 금지
-  throw new Error(`pageId 회수 실패: slug=${slugBase} (HTML/JSON 모두 없음)`);
 }
 
 function upsertMetaTag(html, kind, nameOrProp, content) {
@@ -127,33 +95,21 @@ function upsertMetaTag(html, kind, nameOrProp, content) {
 }
 
 function upsertBadgeDataPageId(html, pageId) {
-  // 템플릿: <a ... id="pageId" data-page-id="{{pageId}}" ...>page000123</a>
-  // render가 실수하면 data-page-id가 비어있을 수 있으니 강제 교정(동일 pageId로)
   let changed = false;
 
-  // data-page-id="page000123" 교체/삽입
-  // id="pageId"가 있는 a 태그 안에서 data-page-id만 고칩니다.
   const rx = /(<a\b[^>]*\bid=["']pageId["'][^>]*)(>)/i;
   const m = html.match(rx);
-
   if (!m) return { html, changed: false };
 
   const aOpen = m[1];
   const restStart = m.index + aOpen.length;
 
-  if (/data-page-id=["']page\d{6}["']/i.test(aOpen)) {
-    const next = aOpen.replace(/data-page-id=["']page\d{6}["']/i, `data-page-id="${pageId}"`);
-    html = html.slice(0, m.index) + next + html.slice(restStart);
-    changed = true;
-  } else if (/data-page-id=["'][^"']*["']/i.test(aOpen)) {
-    const next = aOpen.replace(/data-page-id=["'][^"']*["']/i, `data-page-id="${pageId}"`);
-    html = html.slice(0, m.index) + next + html.slice(restStart);
-    changed = true;
-  } else {
-    const next = aOpen + ` data-page-id="${pageId}"`;
-    html = html.slice(0, m.index) + next + html.slice(restStart);
-    changed = true;
-  }
+  // data-page-id가 있든 없든 "정답(pageId)"로 강제
+  const cleaned = aOpen.replace(/data-page-id=["'][^"']*["']\s*/i, '');
+  const next = `${cleaned} data-page-id="${pageId}"`;
+
+  html = html.slice(0, m.index) + next + html.slice(restStart);
+  changed = true;
 
   return { html, changed };
 }
@@ -161,14 +117,21 @@ function upsertBadgeDataPageId(html, pageId) {
 function updateOgAndTwitterImage(html, slugBase) {
   let changed = false;
 
-  // ✅ pageId는 "회수"가 기본. 없으면 fail.
-  const pageId = ensurePageIdRecovered(slugBase, html);
-  const ogUrl = `${CDN_BASE}/og/${pageId}_${slugBase}_1200x630.jpg`;
+  const fromJson = getPageIdFromPostJson(slugBase);
+  const fromHtml = extractPageIdFromHtml(html);
 
-  // page badge data-page-id 교정(선행)
-  const b = upsertBadgeDataPageId(html, pageId);
+  // ✅ JSON이 정답. JSON이 없으면 통과 금지.
+  if (!fromJson) {
+    throw new Error(`pageId missing in JSON: content/posts/${slugBase}.json`);
+  }
+
+  // badge data-page-id 교정(선행)
+  const b = upsertBadgeDataPageId(html, fromJson);
   html = b.html;
   changed = changed || b.changed;
+
+  // og/twitter 이미지 강제 규칙
+  const ogUrl = `${CDN_BASE}/og/${fromJson}_${slugBase}_1200x630.jpg`;
 
   const r1 = upsertMetaTag(html, 'property', 'og:image', ogUrl);
   html = r1.html; changed = changed || r1.changed;
@@ -176,14 +139,16 @@ function updateOgAndTwitterImage(html, slugBase) {
   const r2 = upsertMetaTag(html, 'name', 'twitter:image', ogUrl);
   html = r2.html; changed = changed || r2.changed;
 
-  return { html, changed, pageId, ogUrl };
+  // 참고 로그용: HTML과 JSON이 달랐던 경우
+  const mismatch = fromHtml && fromHtml !== fromJson;
+
+  return { html, changed, pageId: fromJson, ogUrl, mismatch, fromHtml };
 }
 
 function main() {
   console.log('────────────────────────────────────────────');
   console.log('[validate] DIST      =', DIST_DIR);
   console.log('[validate] POSTS_DIR =', POSTS_DIR);
-  console.log('[validate] SITE_BASE =', SITE_BASE);
   console.log('[validate] CDN_BASE  =', CDN_BASE);
 
   const files = listHtmlFiles(DIST_DIR);
@@ -194,15 +159,22 @@ function main() {
 
   let fixedCount = 0;
   let failCount = 0;
+  let mismatchCount = 0;
 
   for (const file of files) {
     const filename = path.basename(file);
     const slugBase = filename.replace(/\.html$/i, '');
 
-    let html = fs.readFileSync(file, 'utf8');
+    const html = fs.readFileSync(file, 'utf8');
 
     try {
       const out = updateOgAndTwitterImage(html, slugBase);
+
+      if (out.mismatch) {
+        mismatchCount += 1;
+        console.warn(`[validate][WARN] pageId mismatch ${filename}: html=${out.fromHtml} json=${out.pageId}`);
+      }
+
       if (out.changed) {
         fs.writeFileSync(file, out.html, 'utf8');
         fixedCount += 1;
@@ -214,11 +186,10 @@ function main() {
     }
   }
 
-  console.log(`✨ validate-repair 완료 — 수정: ${fixedCount}/${files.length}`);
+  console.log(`✨ validate-repair 완료 — 수정: ${fixedCount}/${files.length}, mismatch=${mismatchCount}`);
 
   if (failCount > 0) {
-    // ✅ pageId는 생명: 하나라도 회수 실패면 빌드 통과 금지
-    console.error(`[validate][FAIL] pageId 회수 실패 ${failCount}건 → 빌드 중단`);
+    console.error(`[validate][FAIL] pageId 회수/검증 실패 ${failCount}건 → 빌드 중단`);
     process.exit(1);
   }
 }
