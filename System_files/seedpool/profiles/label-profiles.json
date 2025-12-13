@@ -1,373 +1,58 @@
 {
-  "app_reviews_v1": {
-    "id": "app_reviews_v1",
-    "label": "app-reviews",
-    "intent": "review",
-    "length": {
-      "minWords": 2500,
-      "maxWords": 6500
-    },
-    "tone": {
-      "style": "conversational but precise",
-      "voice": "experienced but neutral reviewer",
-      "avoid": [
-        "overly salesy language",
-        "first-person fake experience claims",
-        "clickbait style headings"
-      ],
-      "mustUse": [
-        "user-centric benefits",
-        "evidence-backed statements",
-        "clear pros and cons"
-      ]
-    },
-    "images": {
-      "min": 1,
-      "max": 1,
-      "layout": "single_hero",
-      "notes": "one representative image only to avoid ad-fatigue and save CDN cost"
-    },
-    "structure": [
-      "intro_context",
-      "who_is_this_for",
-      "app_overview",
-      "maker_background_mixed",
-      "core_features",
-      "experience_from_real_users",
-      "pricing_and_plans",
-      "strengths_and_limitations",
-      "rating_and_verdict",
-      "summary"
+  "review-common": {
+    "appliesTo": [
+      "app-reviews",
+      "device-reviews",
+      "subscription-services"
     ],
-    "rules": {
-      "makerBackground": {
-        "randomizedSubtopics": [
-          "company_size",
-          "history",
-          "vision_or_philosophy",
-          "flagship_products",
-          "update_cadence"
-        ],
-        "shufflePerPost": true
-      },
-      "rating": {
-        "ratingSource": "aggregated_external_reviews",
-        "voice": "based_on_many_users_not_my_personal_experience",
-        "showAverage": true
-      },
-      "experienceSection": {
-        "framing": "based_on_experiences_of_real_users",
-        "patternsFromReviews": true
+
+    "structure": {
+      "fixedHeadings": [
+        "Overview",
+        "Key Features",
+        "Specs & ROI",
+        "Insights",
+        "Ratings",
+        "Verdict"
+      ],
+      "optionalHeadingsPool": [
+        "Pros & Cons",
+        "Best For / Not For",
+        "Alternatives & Comparisons"
+      ],
+      "optionalRules": {
+        "min": 1,
+        "max": 2
       }
-    }
-  },
-  "device_reviews_v1": {
-    "id": "device_reviews_v1",
-    "label": "device-reviews",
-    "intent": "review",
-    "length": {
-      "minWords": 2500,
-      "maxWords": 6500
     },
-    "tone": {
-      "style": "conversational but slightly more technical",
-      "voice": "practical product reviewer",
+
+    "contentRules": {
+      "tone": "neutral-analytical",
+      "comparisonBias": "data-first",
       "avoid": [
-        "fanboy language",
-        "nationality stereotypes stated as facts",
-        "hard-sell copy"
-      ],
-      "mustUse": [
-        "real-world usage examples",
-        "clear trade-offs",
-        "ownership-like perspective without lying about usage"
+        "marketing hype",
+        "unverified claims",
+        "vague adjectives"
       ]
     },
-    "images": {
-      "min": 1,
-      "max": 1,
-      "layout": "single_hero"
-    },
-    "structure": [
-      "intro_context",
-      "who_is_this_for",
-      "design_and_build_quality",
-      "hardware_specs_and_origin",
-      "performance_and_thermals",
-      "usability_and_ergo",
-      "reliability_and_support",
-      "pricing_and_value",
-      "strengths_and_limitations",
-      "rating_and_verdict",
-      "summary"
-    ],
-    "rules": {
-      "hardwareSpecs": {
-        "mustInclude": [
-          "manufacturer",
-          "OEM_or_brand_relationship_if_relevant",
-          "country_of_origin_if_meaningful",
-          "key_specs_table"
-        ]
+
+    "reviewSignals": {
+      "ratings": {
+        "enabled": true,
+        "source": "ssot:review-ratings.json"
       },
-      "valueJudgement": {
-        "avoidBinaryMoneyWorth": true,
-        "replaceWith": "givecriteria_for_readers_to_decide_if_it_is_worth_it"
+      "insights": {
+        "enabled": true,
+        "source": "ssot:review-ratings.json"
       }
-    }
-  },
-  "subscription_reviews_v1": {
-    "id": "subscription_reviews_v1",
-    "label": "subscription-services",
-    "intent": "review",
-    "length": {
-      "minWords": 2500,
-      "maxWords": 6500
     },
-    "tone": {
-      "style": "calm, analytical, user-first",
-      "voice": "subscription coach",
-      "avoid": [
-        "FOMO-based messaging",
-        "lifetime_hype_language",
-        "one-size-fits-all verdicts"
-      ],
-      "mustUse": [
-        "different_usage_scenarios",
-        "clear_cost_breakdowns",
-        "cancellation_and_lock-in_details"
-      ]
-    },
-    "images": {
-      "min": 1,
-      "max": 1,
-      "layout": "single_hero"
-    },
-    "structure": [
-      "intro_context",
-      "who_is_this_for",
-      "service_overview",
-      "provider_background_and_region",
-      "features_and_limitations",
-      "content_or_capabilities_scope",
-      "pricing_and_hidden_costs",
-      "lock_in_and_cancellation_rules",
-      "experience_from_real_users",
-      "rating_and_verdict",
-      "summary"
-    ],
-    "rules": {
-      "providerInfo": {
-        "mustInclude": [
-          "country_or_region_of_operation",
-          "company_name",
-          "reputation_or_trust_signals_if_relevant"
-        ]
-      },
-      "riskDisclosure": {
-        "mustMention": [
-          "auto_renewal",
-          "price_after_promo_period",
-          "data_or_privacy_concerns_if_any"
-        ]
-      }
-    }
-  },
-  "howto_playbooks_v1": {
-    "id": "howto_playbooks_v1",
-    "label": "how-to-playbooks",
-    "intent": "how-to",
-    "length": {
-      "minWords": 1800,
-      "maxWords": 4000
-    },
-    "tone": {
-      "style": "friendly tutorial with clear guidance",
-      "voice": "patient instructor",
-      "avoid": [
-        "dry_procedural_only_lists",
-        "jargon_without_explanation",
-        "overly_short_step_lists"
-      ],
-      "mustUse": [
-        "dialog-like explanations",
-        "why_this_step_matters",
-        "gentle_warnings_and_rollback_tips"
-      ]
-    },
-    "images": {
-      "min": 1,
-      "max": 1,
-      "layout": "single_hero"
-    },
-    "structure": [
-      "intro_goal_and_outcome",
-      "prerequisites_and_checklist",
-      "step_by_step_playbook",
-      "validation_and_monitoring",
-      "rollback_plan",
-      "variations_by_environment",
-      "summary_and_next_steps"
-    ],
-    "rules": {
-      "stepByStep": {
-        "narrativeFirst": true,
-        "thenCompactStepsList": true,
-        "eachStepHas": [
-          "goal",
-          "actions",
-          "warnings_if_any"
-        ]
-      },
-      "failureSafety": {
-        "requireRollbackSection": true,
-        "explicitlyMarkIrreversibleSteps": true
-      }
-    }
-  },
-  "smart_savings_v2": {
-    "id": "smart_savings_v2",
-    "label": "smart-savings",
-    "intent": "savings",
-    "length": {
-      "minWords": 2000,
-      "maxWords": 4500
-    },
-    "tone": {
-      "style": "calm analytical advisor",
-      "voice": "neutral savings guide",
-      "avoid": [
-        "direct_recommendation_language",
-        "best_for_everyone_claims",
-        "hard_selling_any_plan_or_vendor"
-      ],
-      "mustUse": [
-        "scenario_based_comparisons",
-        "total_cost_of_ownership_view",
-        "clear_disclaimers_about_variability"
-      ]
-    },
-    "images": {
-      "min": 1,
-      "max": 1,
-      "layout": "single_hero_chart_or_visual_if_possible"
-    },
-    "structure": [
-      "intro_target_audience",
-      "key_metrics_overview",
-      "scenario_analysis",
-      "hidden_factors_and_traps",
-      "savings_tactics",
-      "dealer_tactics_decoder",
-      "decision_support_summary",
-      "final_notes_and_disclaimers"
-    ],
-    "rules": {
-      "keyMetrics": {
-        "mustInclude": [
-          "monthly_price_range",
-          "contract_length",
-          "type_of_commitment",
-          "data_or_usage_limits_if_relevant",
-          "penalties_or_exit_fees"
-        ],
-        "typeOfCommitmentExamples": [
-          "simple_term_contract",
-          "device_installment_plus_plan_bundle",
-          "card_spend_based_discount",
-          "promo_with_required_addons"
-        ]
-      },
-      "hiddenFactors": {
-        "mustCover": [
-          "promo_period_vs_normal_price",
-          "auto_renewal_terms",
-          "card_spend_requirements_if_any",
-          "bundling_effect_on_total_cost",
-          "device_or_asset_financing_links_if_any"
-        ]
-      },
-      "dealerTacticsDecoder": {
-        "patterns": [
-          "showing_only_monthly_price_hiding_total_cost",
-          "disguised_device_discounts_tied_to_expensive_plans",
-          "free_months_that_turn_into_expensive_addons",
-          "framing_subsidies_as_personal_gifts",
-          "today_only_or_now_or_never_pressure"
-        ],
-        "goal": "help_reader_detect_these_tricks_before_signing"
-      },
-      "decisionSummary": {
-        "mustSegmentBy": [
-          "low_usage_reader",
-          "heavy_user_or_power_user",
-          "stability_or_quality_first_reader"
-        ],
-        "neverSay": [
-          "you_should_definitely_choose_X",
-          "this_is_objectively_the_best_option"
-        ]
-      }
-    }
-  },
-  "templates_checklists_v2": {
-    "id": "templates_checklists_v2",
-    "label": "templates-checklists",
-    "intent": "template",
-    "length": {
-      "minWords": 1200,
-      "maxWords": 2500
-    },
-    "tone": {
-      "style": "clean, practical, no-nonsense",
-      "voice": "operations-minded helper",
-      "avoid": [
-        "emotional_storytelling",
-        "sales_copy",
-        "overly_long_intros"
-      ],
-      "mustUse": [
-        "clear_field_labels",
-        "copy_paste_ready_blocks",
-        "short_and_scannable_items"
-      ]
-    },
-    "images": {
-      "min": 0,
-      "max": 1,
-      "layout": "optional_hero_if_really_helpful"
-    },
-    "structure": [
-      "intro_use_cases",
-      "quick_overview",
-      "main_template_or_checklist_block",
-      "how_to_use",
-      "variations_optional",
-      "summary"
-    ],
-    "rules": {
-      "checklistSyntax": {
-        "allowed": "[ ] item_text",
-        "disallowed": [
-          "unicode_checkbox_symbols",
-          "radio_button_glyphs",
-          "complex_html_form_controls"
-        ]
-      },
-      "variables": {
-        "format": "{variable_name}",
-        "examplesRequired": true
-      },
-      "navigationExamples": {
-        "mustShowBeforeAfterCode": true,
-        "mustShowExact_location": true,
-        "mustAvoid": [
-          "just_saying_put_the_code_here_without_context"
-        ]
-      },
-      "templateBlock": {
-        "mustBeCopyPasteReady": true,
-        "no_explanatory_comments_inside_block": true
+
+    "aiPromptDirectives": {
+      "headingPolicy": "headings_must_exist",
+      "contentFreedom": "free_within_heading",
+      "variation": {
+        "introPattern": "variable",
+        "examples": "contextual"
       }
     }
   }
