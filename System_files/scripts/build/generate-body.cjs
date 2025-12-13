@@ -15,6 +15,13 @@
  * - (선택) SCHEDULE_MODE: 'live' 일 때만 실제 생성·저장, 그 외는 DRY-RUN
  */
 
+// ✅ 로컬 .env 로드 (GitHub Actions에서는 Secrets가 env로 주입되므로 영향 없음)
+try {
+  require('dotenv').config();
+} catch (_) {
+  // dotenv 미설치/미사용 환경에서도 동작하게 조용히 무시
+}
+
 const fs = require('fs');
 const fsp = fs.promises;
 const path = require('path');
@@ -154,7 +161,9 @@ async function main() {
   console.log('[generate-body] 시작');
   console.log(`[generate-body] ROOT        = ${ROOT}`);
   console.log(`[generate-body] POSTS_DIR   = ${POSTS_DIR}`);
-  console.log(`[generate-body] SCHEDULE_MODE = ${SCHEDULE_MODE} (${IS_LIVE ? 'LIVE' : 'DRY-RUN'})`);
+  console.log(
+    `[generate-body] SCHEDULE_MODE = ${SCHEDULE_MODE} (${IS_LIVE ? 'LIVE' : 'DRY-RUN'})`
+  );
 
   if (!OPENAI_API_KEY) {
     console.error(
