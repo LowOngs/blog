@@ -4,11 +4,17 @@
 /**
  * System_files/scripts/build/render-posts.cjs
  * - content/posts/*.json → dist/posts/*.html 렌더러
- * - meta.cjs(buildMeta)로 canonical/OG/schema 생성
- * - TL;DR / Key Facts / FAQ / Sources / Hero 이미지까지 한 번에 주입
+ * - buildMeta(meta.cjs)로 canonical/OG/schema(배열) 생성
+ * - 템플릿(post.html)의 placeholder/slot에 정확히 주입
+ *
+ * 핵심 포인트:
+ * 1) {{title}}, {{description}}, {{canonical}}, {{pageId}}, {{updated}} 치환
+ * 2) <!--META--> 에 OG/Twitter/Schema/시간메타/프리로드 주입
+ * 3) <!--SLOT:HERO_IMAGE--> 에 히어로 이미지 주입
+ * 4) aio 데이터가 없거나(top-level에만 있거나) 섞여 있어도 흡수
  */
 
-const fs   = require('fs');
+const fs = require('fs');
 const path = require('path');
 
 const ROOT          = path.resolve(__dirname, '..', '..');   // System_files
@@ -54,6 +60,12 @@ function firstNonEmpty(...vals) {
 function asArray(v) {
   if (!v) return [];
   return Array.isArray(v) ? v : [v];
+}
+
+function replaceAllSafe(haystack, needle, replacement) {
+  // Node 환경별 replaceAll 미지원 대비
+  if (typeof haystack.replaceAll === 'function') return haystack.replaceAll(needle, replacement);
+  return haystack.split(needle).join(replacement);
 }
 
 /* ───────────────────── AIO 블록 렌더러 ───────────────────── */
@@ -150,28 +162,48 @@ function renderSources(rawSources) {
   return items.join('\n');
 }
 
-/* ───────────────────── 메타/헤드 블록 ───────────────────── */
+/* ───────────────────── AIO 데이터 흡수(중요) ───────────────────── */
+/**
+ * 케이스:
+ * A) queue-to-posts가 만든 문서: aio: {tldr,keyfacts,faq,sources} 존재
+ * B) 샘플처럼 top-level(tldr/keyfacts/faq/sources)만 있고 aio가 비어있을 수 있음
+ * C) 둘 다 섞여 있어도 aio 우선, 없으면 top-level로 보완
+ */
+function getAio(postJson) {
+  const aio = postJson.aio && typeof postJson.aio === 'object' ? postJson.aio : {};
 
-function buildHeadMetaBlock(post, meta) {
-  const title       = meta.title || post.title || 'Untitled';
-  const description = meta.summary || post.description || '';
-  const canonical   = meta.canonicalUrl;
-  const ogImage     = meta.ogImage;
-  const ogAlt       = meta.ogAlt || description || title;
+  const tldr     = asArray(firstNonEmpty(aio.tldr, postJson.tldr, []));
+  const keyfacts = asArray(firstNonEmpty(aio.keyfacts, postJson.keyfacts, []));
+  const faq      = asArray(firstNonEmpty(aio.faq, postJson.faq, []));
+  const sources  = asArray(firstNonEmpty(aio.sources, postJson.sources, []));
+
+  return { tldr, keyfacts, faq, sources };
+}
+
+/* ───────────────────── HEAD 메타 블록 ───────────────────── */
+
+function buildMetaHeadBlock(postJson, meta) {
+  const title       = firstNonEmpty(postJson.title, meta?.metaTags?.og?.title, 'Untitled');
+  const description = firstNonEmpty(postJson.description, meta?.metaTags?.og?.description, '');
+
+  const canonical = meta.canonicalUrl || '';
+  const ogImage   = meta.ogImage || '';
+  const ogAlt     = meta.ogAlt || description || title;
 
   const OG_W = 1200;
   const OG_H = 630;
 
   const lines = [];
 
-  lines.push(`<link rel="canonical" href="${escapeAttr(canonical)}">`);
+  // Canonical(안전상 한 번 더)
+  if (canonical) lines.push(`<link rel="canonical" href="${escapeAttr(canonical)}">`);
 
+  // OG/Twitter
   lines.push(`<meta property="og:type" content="article">`);
-  lines.push(`<meta property="og:url" content="${escapeAttr(canonical)}">`);
+  if (canonical) lines.push(`<meta property="og:url" content="${escapeAttr(canonical)}">`);
   lines.push(`<meta property="og:title" content="${escapeAttr(title)}">`);
-  if (description) {
-    lines.push(`<meta property="og:description" content="${escapeAttr(description)}">`);
-  }
+  if (description) lines.push(`<meta property="og:description" content="${escapeAttr(description)}">`);
+
   if (ogImage) {
     lines.push(`<meta property="og:image" content="${escapeAttr(ogImage)}">`);
     lines.push(`<meta property="og:image:alt" content="${escapeAttr(ogAlt)}">`);
@@ -181,14 +213,13 @@ function buildHeadMetaBlock(post, meta) {
 
   lines.push(`<meta name="twitter:card" content="summary_large_image">`);
   lines.push(`<meta name="twitter:title" content="${escapeAttr(title)}">`);
-  if (description) {
-    lines.push(`<meta name="twitter:description" content="${escapeAttr(description)}">`);
-  }
+  if (description) lines.push(`<meta name="twitter:description" content="${escapeAttr(description)}">`);
   if (ogImage) {
     lines.push(`<meta name="twitter:image" content="${escapeAttr(ogImage)}">`);
     lines.push(`<meta name="twitter:image:alt" content="${escapeAttr(ogAlt)}">`);
   }
 
+  // 시간 메타
   if (meta.publishedIso) {
     lines.push(`<meta property="article:published_time" content="${escapeAttr(meta.publishedIso)}">`);
   }
@@ -197,17 +228,28 @@ function buildHeadMetaBlock(post, meta) {
     lines.push(`<meta property="og:updated_time" content="${escapeAttr(meta.updatedIso)}">`);
   }
 
+  // LCP preload + preconnect
   if (ogImage) {
     lines.push(
       `<link rel="preload" as="image" href="${escapeAttr(ogImage)}" fetchpriority="high" imagesrcset="${escapeAttr(ogImage)}">`
     );
   }
 
-  const siteBase = (process.env.CANONICAL_BASE || 'https://ongsblog.com').replace(/\/+$/,'');
+  const siteBase = (process.env.CANONICAL_BASE || process.env.SITE_BASE || 'https://ongsblog.com')
+    .replace(/\/+$/, '');
   lines.push(`<link rel="preconnect" href="${escapeAttr(siteBase)}" crossorigin>`);
 
-  // ✅ meta.cjs에서 schemaTag를 문자열로 제공하면 여기서 삽입
-  if (meta.schemaTag) lines.push(meta.schemaTag);
+  // JSON-LD 스키마(meta.cjs는 schemaTags 배열을 반환)
+  if (meta.schemaTags && Array.isArray(meta.schemaTags) && meta.schemaTags.length) {
+    for (const obj of meta.schemaTags) {
+      try {
+        const json = JSON.stringify(obj);
+        lines.push(`<script type="application/ld+json">${json}</script>`);
+      } catch (_) {
+        // 스키마 직렬화 실패는 조용히 스킵(빌드 중단 방지)
+      }
+    }
+  }
 
   return lines.join('\n');
 }
@@ -217,6 +259,7 @@ function buildHeadMetaBlock(post, meta) {
 function renderOne(template, postJson) {
   const slug = postJson.slug || path.basename(postJson.__file || 'sample_post.json', '.json');
 
+  // pageId 우선순위: JSON이 들고 있으면 그대로 사용
   const pageId =
     postJson.pageId ||
     postJson.page_id ||
@@ -224,39 +267,41 @@ function renderOne(template, postJson) {
     `page${Math.floor(100000 + Math.random() * 900000)}`;
 
   const siteBase = process.env.CANONICAL_BASE || process.env.SITE_BASE || 'https://ongsblog.com';
-  const cdnBase  = process.env.CDN_BASE || (siteBase.replace(/\/+$/,'') + '/images');
+  const cdnBase  = process.env.CDN_BASE || (siteBase.replace(/\/+$/, '') + '/images');
 
   const meta = buildMeta(postJson, { slug, pageId, siteBase, cdnBase });
 
+  // 템플릿 기반 치환
   let html = template;
 
-  const title       = meta.title || postJson.title || 'Untitled';
-  const description = meta.summary || postJson.description || '';
+  const title       = firstNonEmpty(postJson.title, meta?.metaTags?.og?.title, slug);
+  const description = firstNonEmpty(postJson.description, meta?.metaTags?.og?.description, '');
+  const canonical   = meta.canonicalUrl || (siteBase.replace(/\/+$/, '') + '/' + slug + '.html');
 
-  html = html.replace(/<title>[\s\S]*?<\/title>/i, `<title>${escapeHtml(title)}</title>`);
-  html = html.replace(
-    /<meta\s+name=["']description["'][^>]*>/i,
-    `<meta name="description" content="${escapeAttr(description)}" />`
-  );
+  // 템플릿 placeholder 채우기
+  html = replaceAllSafe(html, '{{title}}', escapeHtml(title));
+  html = replaceAllSafe(html, '{{description}}', escapeAttr(description));
+  html = replaceAllSafe(html, '{{canonical}}', escapeAttr(canonical));
+  html = replaceAllSafe(html, '{{pageId}}', escapeHtml(pageId));
 
-  // Canonical + OG/Twitter/Schema
-  const headBlock = buildHeadMetaBlock(postJson, meta);
-  html = html.replace(
-    '<!-- Schema & 동적 메타(OG/Twitter/Preload/hreflang)는 렌더러가 주입 -->',
-    '<!-- Schema & 동적 메타(OG/Twitter/Preload/hreflang)는 렌더러가 주입 -->\n\n' + headBlock
-  );
-
-  // ✅ 템플릿의 {{canonical}} / {{pageId}} 치환 (page badge placeholder 해결)
-  html = html.replace(/{{canonical}}/g, escapeAttr(meta.canonicalUrl));
-  html = html.replace(/{{pageId}}/g, escapeHtml(pageId));
-
-  // Updated 배지
+  // Updated {{updated}} (YYYY-MM-DD)
   const updatedDate = (meta.updatedIso || '').slice(0, 10) || '';
-  if (updatedDate) {
-    html = html.replace('Updated {{updated}}', `Updated ${escapeHtml(updatedDate)}`);
-  }
+  html = replaceAllSafe(html, '{{updated}}', escapeHtml(updatedDate));
 
-  // ✅ HERO_IMAGE 슬롯에 정확히 주입
+  // META 슬롯 주입
+  const headBlock = buildMetaHeadBlock(postJson, meta);
+  html = html.replace('<!--META-->', `<!--META-->\n${headBlock}`);
+
+  // canonical 태그가 템플릿 외에도 있을 수 있으니 1회 더 교정
+  html = html.replace(
+    /<link\s+rel=["']canonical["'][^>]*>/i,
+    `<link rel="canonical" href="${escapeAttr(canonical)}">`
+  );
+
+  // PAGE_BADGE 슬롯은 "추가 배지"가 있을 때만 (기본 배지는 템플릿이 이미 가짐)
+  // (현재는 별도 pageBadge 생성 로직이 없으므로 SLOT 유지)
+
+  // HERO_IMAGE 슬롯 주입
   const heroAlt = meta.ogAlt || description || title || slug;
   const heroImg = meta.ogImage
     ? [
@@ -266,20 +311,18 @@ function renderOne(template, postJson) {
       ].join('\n')
     : '';
 
-  html = html.replace('<!--SLOT:HERO_IMAGE-->', `${heroImg}\n  <!--SLOT:HERO_IMAGE-->`);
+  html = html.replace('<!--SLOT:HERO_IMAGE-->', `<!--SLOT:HERO_IMAGE-->\n${heroImg}`);
 
-  // ✅ AIO: aio.* 우선, 없으면 최상위 필드 fallback
-  const aio = postJson.aio || {};
-  const tldr    = firstNonEmpty(aio.tldr, postJson.tldr, []);
-  const keyfacts= firstNonEmpty(aio.keyfacts, postJson.keyfacts, []);
-  const faq     = firstNonEmpty(aio.faq, postJson.faq, []);
-  const sources = firstNonEmpty(aio.sources, postJson.sources, []);
+  // AIO 블록(흡수)
+  const aio = getAio(postJson);
 
-  html = html.replace('{{tldr}}', renderListItems(tldr));
-  html = html.replace('{{keyfacts}}', renderListItems(keyfacts));
-  html = html.replace('{{body}}', postJson.body || '');
-  html = html.replace('{{faq}}', renderFaq(faq));
-  html = html.replace('{{sources}}', renderSources(sources));
+  html = replaceAllSafe(html, '{{tldr}}', renderListItems(aio.tldr));
+  html = replaceAllSafe(html, '{{keyfacts}}', renderListItems(aio.keyfacts));
+  html = replaceAllSafe(html, '{{faq}}', renderFaq(aio.faq));
+  html = replaceAllSafe(html, '{{sources}}', renderSources(aio.sources));
+
+  // 본문
+  html = replaceAllSafe(html, '{{body}}', postJson.body || '');
 
   return html;
 }
