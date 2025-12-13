@@ -38,6 +38,11 @@ on:
   schedule:
     - cron: "30 0 * * *"
 
+# ✅ 동시 실행 방지(ledger/발행 사고 차단)
+concurrency:
+  group: ongsblog-publish
+  cancel-in-progress: false
+
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
@@ -167,7 +172,6 @@ jobs:
           test -f System_files/scripts/build/ids.cjs
 
       # === 오늘 발행 시드 선택 → 큐 생성 ===
-      # manual label_once는 “발행 단계에서 1개만” 나가게 MAX_POSTS=1로 통제(추가 발급 사고 방지)
       - name: Plan today posts from seedpool
         run: node System_files/scripts/build/seed-scheduler.cjs
 
@@ -175,10 +179,26 @@ jobs:
         run: node System_files/scripts/build/queue-to-posts.cjs
 
       # === Page ID 발급 (DRY_RUN=true → no_live 자동 강제) ===
-      - name: Issue page IDs
+      # ✅ ids는 생명: 1~2회 재시도(일시오류/복구 포함). 그래도 실패면 즉시 종료.
+      - name: Issue page IDs (retry 2)
         env:
           DRY_RUN: ${{ env.DRY_RUN }}
-        run: node System_files/scripts/build/ids.cjs
+        run: |
+          set -e
+          tries=2
+          for i in $(seq 1 $tries); do
+            echo "[ids] attempt $i/$tries"
+            if node System_files/scripts/build/ids.cjs; then
+              echo "[ids] OK"
+              exit 0
+            fi
+            if [ "$i" -lt "$tries" ]; then
+              echo "[ids] FAIL, retry after backoff..."
+              sleep $((2 ** i))
+            fi
+          done
+          echo "[ids] FAIL after retries"
+          exit 1
 
       # === 본문 자동생성 ===
       - name: Generate article bodies (if body empty)
