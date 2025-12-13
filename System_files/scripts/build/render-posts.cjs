@@ -56,11 +56,6 @@ function asArray(v) {
   return Array.isArray(v) ? v : [v];
 }
 
-function replaceAll(html, token, value) {
-  const safe = value == null ? '' : String(value);
-  return html.split(token).join(safe);
-}
-
 /* ───────────────────── AIO 블록 렌더러 ───────────────────── */
 
 function renderListItems(list) {
@@ -116,10 +111,6 @@ function renderFaq(rawFaq) {
     .join('\n');
 }
 
-/**
- * Sources 렌더링
- * - 문자열 / {label,url} / {name,url,note} 등 유연 대응
- */
 function renderSources(rawSources) {
   const sources = asArray(rawSources);
   if (!sources.length) return '';
@@ -173,10 +164,8 @@ function buildHeadMetaBlock(post, meta) {
 
   const lines = [];
 
-  // Canonical
   lines.push(`<link rel="canonical" href="${escapeAttr(canonical)}">`);
 
-  // OG / Twitter
   lines.push(`<meta property="og:type" content="article">`);
   lines.push(`<meta property="og:url" content="${escapeAttr(canonical)}">`);
   lines.push(`<meta property="og:title" content="${escapeAttr(title)}">`);
@@ -200,7 +189,6 @@ function buildHeadMetaBlock(post, meta) {
     lines.push(`<meta name="twitter:image:alt" content="${escapeAttr(ogAlt)}">`);
   }
 
-  // 시간 메타
   if (meta.publishedIso) {
     lines.push(`<meta property="article:published_time" content="${escapeAttr(meta.publishedIso)}">`);
   }
@@ -209,18 +197,17 @@ function buildHeadMetaBlock(post, meta) {
     lines.push(`<meta property="og:updated_time" content="${escapeAttr(meta.updatedIso)}">`);
   }
 
-  // LCP 이미지 preload + preconnect
   if (ogImage) {
     lines.push(
       `<link rel="preload" as="image" href="${escapeAttr(ogImage)}" fetchpriority="high" imagesrcset="${escapeAttr(ogImage)}">`
     );
   }
+
   const siteBase = (process.env.CANONICAL_BASE || 'https://ongsblog.com').replace(/\/+$/,'');
   lines.push(`<link rel="preconnect" href="${escapeAttr(siteBase)}" crossorigin>`);
 
-  // JSON-LD 스키마(Article, Breadcrumb, FAQ, WebSite/authorityRef)
+  // ✅ meta.cjs에서 schemaTag를 문자열로 제공하면 여기서 삽입
   if (meta.schemaTag) lines.push(meta.schemaTag);
-  if (meta.authorityScript) lines.push(meta.authorityScript);
 
   return lines.join('\n');
 }
@@ -230,7 +217,6 @@ function buildHeadMetaBlock(post, meta) {
 function renderOne(template, postJson) {
   const slug = postJson.slug || path.basename(postJson.__file || 'sample_post.json', '.json');
 
-  // pageId 우선순위
   const pageId =
     postJson.pageId ||
     postJson.page_id ||
@@ -244,7 +230,6 @@ function renderOne(template, postJson) {
 
   let html = template;
 
-  // title/description (템플릿은 {{title}}지만, 안전하게 태그 교체 방식 유지)
   const title       = meta.title || postJson.title || 'Untitled';
   const description = meta.summary || postJson.description || '';
 
@@ -254,41 +239,24 @@ function renderOne(template, postJson) {
     `<meta name="description" content="${escapeAttr(description)}" />`
   );
 
-  // META 블록 삽입
+  // Canonical + OG/Twitter/Schema
   const headBlock = buildHeadMetaBlock(postJson, meta);
   html = html.replace(
     '<!-- Schema & 동적 메타(OG/Twitter/Preload/hreflang)는 렌더러가 주입 -->',
     '<!-- Schema & 동적 메타(OG/Twitter/Preload/hreflang)는 렌더러가 주입 -->\n\n' + headBlock
   );
 
-  // Canonical 라인 재보정
-  html = html.replace(
-    /<link\s+rel=["']canonical["'][^>]*>/i,
-    `<link rel="canonical" href="${escapeAttr(meta.canonicalUrl)}">`
-  );
+  // ✅ 템플릿의 {{canonical}} / {{pageId}} 치환 (page badge placeholder 해결)
+  html = html.replace(/{{canonical}}/g, escapeAttr(meta.canonicalUrl));
+  html = html.replace(/{{pageId}}/g, escapeHtml(pageId));
 
-  // 템플릿 플레이스홀더들 1차 치환(중복 안전)
-  html = replaceAll(html, '{{canonical}}', escapeAttr(meta.canonicalUrl));
-  html = replaceAll(html, '{{pageId}}', escapeHtml(pageId));
-  html = replaceAll(html, '{{title}}', escapeHtml(title));
-  html = replaceAll(html, '{{description}}', escapeAttr(description));
-
-  // Updated 배지(YYYY-MM-DD)
+  // Updated 배지
   const updatedDate = (meta.updatedIso || '').slice(0, 10) || '';
   if (updatedDate) {
-    html = replaceAll(html, '{{updated}}', escapeHtml(updatedDate));
+    html = html.replace('Updated {{updated}}', `Updated ${escapeHtml(updatedDate)}`);
   }
 
-  // 페이지 배지: 템플릿의 기본 배지를 meta.pageBadge로 교체(있으면), 없으면 유지
-  if (meta.pageBadge) {
-    // 템플릿 기본 배지 <a ...>{{pageId}}</a> 부분을 통째로 교체
-    html = html.replace(
-      /<a\s+class=["']page-badge["'][\s\S]*?<\/a>/i,
-      meta.pageBadge
-    );
-  }
-
-  // 히어로 이미지: SLOT 기반 주입(템플릿과 정합)
+  // ✅ HERO_IMAGE 슬롯에 정확히 주입
   const heroAlt = meta.ogAlt || description || title || slug;
   const heroImg = meta.ogImage
     ? [
@@ -298,22 +266,20 @@ function renderOne(template, postJson) {
       ].join('\n')
     : '';
 
-  html = html.replace(
-    '<!--SLOT:HERO_IMAGE-->',
-    (heroImg ? `${heroImg}\n  ` : '') + '<!--SLOT:HERO_IMAGE-->'
-  );
+  html = html.replace('<!--SLOT:HERO_IMAGE-->', `${heroImg}\n  <!--SLOT:HERO_IMAGE-->`);
 
-  // ✅ AIO 데이터는 "루트 필드 우선" + aio.* fallback
-  const tldr     = firstNonEmpty(postJson.tldr,     (postJson.aio && postJson.aio.tldr),     []);
-  const keyfacts = firstNonEmpty(postJson.keyfacts, (postJson.aio && postJson.aio.keyfacts), []);
-  const faq      = firstNonEmpty(postJson.faq,      (postJson.aio && postJson.aio.faq),      []);
-  const sources  = firstNonEmpty(postJson.sources,  (postJson.aio && postJson.aio.sources),  []);
+  // ✅ AIO: aio.* 우선, 없으면 최상위 필드 fallback
+  const aio = postJson.aio || {};
+  const tldr    = firstNonEmpty(aio.tldr, postJson.tldr, []);
+  const keyfacts= firstNonEmpty(aio.keyfacts, postJson.keyfacts, []);
+  const faq     = firstNonEmpty(aio.faq, postJson.faq, []);
+  const sources = firstNonEmpty(aio.sources, postJson.sources, []);
 
-  html = replaceAll(html, '{{tldr}}', renderListItems(tldr));
-  html = replaceAll(html, '{{keyfacts}}', renderListItems(keyfacts));
-  html = replaceAll(html, '{{body}}', postJson.body || '');
-  html = replaceAll(html, '{{faq}}', renderFaq(faq));
-  html = replaceAll(html, '{{sources}}', renderSources(sources));
+  html = html.replace('{{tldr}}', renderListItems(tldr));
+  html = html.replace('{{keyfacts}}', renderListItems(keyfacts));
+  html = html.replace('{{body}}', postJson.body || '');
+  html = html.replace('{{faq}}', renderFaq(faq));
+  html = html.replace('{{sources}}', renderSources(sources));
 
   return html;
 }
