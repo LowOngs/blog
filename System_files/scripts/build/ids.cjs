@@ -1,5 +1,9 @@
+#!/usr/bin/env node
+'use strict';
+
 // System_files/scripts/build/ids.cjs
 // content/posts/*.json 에 pageId가 없으면 자동 발급해 채워넣음 (no_live / live)
+// ✅ 규칙: DRY_RUN=true 이면 무조건 no_live 강제 (최후 방어선)
 
 const fs = require('fs');
 const path = require('path');
@@ -20,12 +24,23 @@ function readJson(filePath) {
 }
 
 function writeJson(filePath, obj) {
-  fs.writeFileSync(filePath, JSON.stringify(obj, null, 2), 'utf8');
+  fs.writeFileSync(filePath, JSON.stringify(obj, null, 2) + '\n', 'utf8');
+}
+
+function parseBool(v) {
+  if (v === true) return true;
+  if (v === false) return false;
+  const s = String(v || '').trim().toLowerCase();
+  return s === 'true' || s === '1' || s === 'yes' || s === 'y';
 }
 
 function getEffectiveMode() {
-  // ✅ DRY_RUN과 분리: PAGE_ID_MODE가 곧 정답
-  // (미설정이면 안전하게 no_live)
+  // ✅ 최후 방어선: DRY_RUN이면 무조건 no_live
+  const dryRun = parseBool(process.env.DRY_RUN);
+
+  if (dryRun) return 'no_live';
+
+  // DRY_RUN=false일 때만 PAGE_ID_MODE를 존중 (미설정이면 안전하게 no_live)
   const rawMode = (process.env.PAGE_ID_MODE || 'no_live').trim();
   return normalizeMode(rawMode);
 }
@@ -76,6 +91,8 @@ function getEffectiveMode() {
   }
 
   const s = allocator.getStateSummary();
+  log('DRY_RUN =', String(process.env.DRY_RUN || ''));
+  log('PAGE_ID_MODE =', String(process.env.PAGE_ID_MODE || ''));
   log('mode =', mode);
   log('ledger =', s.file);
   log('liveBaseline =', s.liveBaseline);
