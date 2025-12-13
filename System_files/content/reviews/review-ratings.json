@@ -1,56 +1,27 @@
 {
   "bySlug": {
-    "app-20251121-001": {
-      "slug": "app-20251121-001",
-      "name": "5 must-have productivity apps in 2025",
-      "label": "app-reviews",
+    "app-20251207-001": {
+      "lastChecked": "2025-12-13",
+      "status": "ok",
       "store": "multi",
-      "lastChecked": "2025-12-01T00:00:00+09:00",
-      "ratingCurrent": 4.4,
-      "ratingPrevious": 4.3,
+      "ratingCurrent": 4.6,
+      "ratingPrevious": 4.5,
       "ratingDiff": 0.1,
-      "votesCurrent": 200000,
-      "votesPrevious": 180000,
-      "votesDiff": 20000,
-      "status": "steady",
+      "votesCurrent": 128400,
+      "votesPrevious": 121900,
+      "votesDiff": 6500,
       "histogram": {
-        "5": 60,
-        "4": 25,
-        "3": 10,
-        "2": 3,
+        "5": 72,
+        "4": 18,
+        "3": 6,
+        "2": 2,
         "1": 2
       },
       "insights": [
-        "Average rating has stayed comfortably above 4.0 over the last 90 days.",
-        "Ratings count keeps increasing steadily, without sudden spikes or drops."
-      ],
-      "note": "Seed sample for app-20251121-001. Replace with real crawled values later."
-    },
-    "app-20251205-001": {
-      "slug": "app-20251205-001",
-      "name": "5 must-have productivity apps in 2025",
-      "label": "app-reviews",
-      "store": "multi",
-      "lastChecked": "2025-12-05T00:00:00+09:00",
-      "ratingCurrent": 4.4,
-      "ratingPrevious": 4.3,
-      "ratingDiff": 0.1,
-      "votesCurrent": 200000,
-      "votesPrevious": 180000,
-      "votesDiff": 20000,
-      "status": "steady",
-      "histogram": {
-        "5": 60,
-        "4": 25,
-        "3": 10,
-        "2": 3,
-        "1": 2
-      },
-      "insights": [
-        "Average rating has stayed comfortably above 4.0 over the last 90 days.",
-        "Ratings count keeps increasing steadily, without sudden spikes or drops."
-      ],
-      "note": "Seed sample for app-20251205-001. Replace with real crawled values later."
+        "Fast capture and quick add are consistently praised.",
+        "Cross-device sync is reliable, but some users dislike the price jump.",
+        "Power users want fewer clicks for recurring tasks."
+      ]
     }
   }
 }
