@@ -1,1 +1,15 @@
 
+{
+  "bySlug": {
+    "app-20251207-001": [
+      {
+        "label": "Todoist Help Center",
+        "url": "https://todoist.com/help"
+      },
+      {
+        "label": "Microsoft To Do Support",
+        "url": "https://support.microsoft.com/"
+      }
+    ]
+  }
+}
