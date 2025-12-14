@@ -37,10 +37,8 @@ const IS_LIVE = SCHEDULE_MODE === 'live';
 
 // 재시도 규칙(확정)
 const MAX_GENERATE_ATTEMPTS = 2; // 1~2회: 생성
-// 3회는 "생성 재시도"가 아니라 "폴백 주입"입니다.
 
 // 검증 최소 기준(가볍게, 그러나 실패 원인 잡을 만큼)
-const VALIDATE_MIN_H2 = 4;
 const VALIDATE_MIN_P = 8;
 const VALIDATE_MIN_CHARS = 1200;
 
@@ -88,27 +86,33 @@ function getLabelHint(label) {
 }
 
 /* ─────────────────────────────────────────────
- * 리뷰(3라벨) 공용 헤딩 스캐폴드
- * - app-reviews / device-reviews / subscription-services 에만 적용
- * - 고정 6개 + 선택 1~2개(랜덤)
- * - 공용 설정은 seedpool/profiles/label-profiles.json 의 reviewCommon 에서 관리
+ * 리뷰(3라벨) 공용 헤딩 스캐폴드 + 강제 검증
+ * - SSOT(설정): seedpool/profiles/label-profiles.json 의 "review-common"
+ * - appliesTo 라벨에만 적용
+ * - 생성 결과에서 H2 텍스트를 뽑아 “정확히 일치” 검증
  * ───────────────────────────────────────────── */
 
-const REVIEW_LABELS = new Set(['app-reviews', 'device-reviews', 'subscription-services']);
-
-function isReviewLabel(label) {
-  return REVIEW_LABELS.has(String(label || ''));
-}
-
-function loadReviewCommon() {
+function loadLabelProfilesJSON() {
   const p = path.join(ROOT, 'seedpool', 'profiles', 'label-profiles.json');
   try {
     if (!fs.existsSync(p)) return null;
-    const j = JSON.parse(fs.readFileSync(p, 'utf8'));
-    return j && j.reviewCommon ? j.reviewCommon : null;
+    return JSON.parse(fs.readFileSync(p, 'utf8'));
   } catch (_) {
     return null;
   }
+}
+
+function getReviewCommonConfig() {
+  const j = loadLabelProfilesJSON();
+  if (!j || typeof j !== 'object') return null;
+  const rc = j['review-common'];
+  if (!rc || typeof rc !== 'object') return null;
+  return rc;
+}
+
+function isReviewLabelByConfig(label, reviewCommon) {
+  const arr = (reviewCommon && Array.isArray(reviewCommon.appliesTo)) ? reviewCommon.appliesTo : [];
+  return arr.includes(String(label || ''));
 }
 
 function pickRandom(arr, n) {
@@ -120,36 +124,31 @@ function pickRandom(arr, n) {
   return a.slice(0, Math.max(0, n));
 }
 
-function buildReviewHeadingScaffold({ common }) {
-  const fixed = (common && Array.isArray(common.fixedHeadings) && common.fixedHeadings.length)
-    ? common.fixedHeadings
-    : [
-        'Overview',
-        'Key features',
-        'Pricing & ROI',
-        'Real-world insights',
-        'User ratings snapshot',
-        'Verdict'
-      ];
+function buildReviewHeadingPlan(reviewCommon) {
+  const structure = (reviewCommon && reviewCommon.structure && typeof reviewCommon.structure === 'object')
+    ? reviewCommon.structure
+    : {};
 
-  const optional = (common && Array.isArray(common.optionalHeadings) && common.optionalHeadings.length)
-    ? common.optionalHeadings
-    : [
-        'Best for / Not for',
-        'What’s new in the last 90 days',
-        'Alternatives',
-        'Setup & onboarding notes',
-        'Privacy & data considerations',
-        'Limitations & deal-breakers'
-      ];
+  const fixed = Array.isArray(structure.fixedHeadings) && structure.fixedHeadings.length
+    ? structure.fixedHeadings
+    : ['Overview', 'Key Features', 'Specs & ROI', 'Insights', 'Ratings', 'Verdict'];
 
-  const pickMin = (common && typeof common.pickOptionalMin === 'number') ? common.pickOptionalMin : 1;
-  const pickMax = (common && typeof common.pickOptionalMax === 'number') ? common.pickOptionalMax : 2;
-  const pickCount = Math.max(pickMin, Math.min(pickMax, 2));
-  const picked = pickRandom(optional, pickCount);
+  const pool = Array.isArray(structure.optionalHeadingsPool) ? structure.optionalHeadingsPool : [];
+  const rules = (structure.optionalRules && typeof structure.optionalRules === 'object') ? structure.optionalRules : {};
+  const min = (typeof rules.min === 'number') ? rules.min : 1;
+  const max = (typeof rules.max === 'number') ? rules.max : 2;
 
-  const all = fixed.concat(picked);
+  const pickCount = Math.max(min, Math.min(max, 2));
+  const picked = pickRandom(pool, pickCount);
 
+  return {
+    fixedHeadings: fixed,
+    optionalHeadingsPicked: picked,
+    expectedH2: fixed.concat(picked),
+  };
+}
+
+function buildReviewHeadingScaffold(plan) {
   const lines = [
     'REVIEW STRUCTURE RULE (must follow):',
     '- Use the exact H2 headings listed below, in the same order.',
@@ -157,15 +156,39 @@ function buildReviewHeadingScaffold({ common }) {
     '- You may add H3 subheadings inside sections if helpful.',
     '',
     'Required H2 headings:',
-    ...all.map(h => `- ${h}`),
+    ...plan.expectedH2.map(h => `- ${h}`),
     '',
     'Important:',
     '- Write only the article BODY HTML fragment.',
     '- Do NOT add TL;DR / Key Facts / FAQ / Sources sections (handled elsewhere).',
-    '- “User ratings snapshot” section must NOT invent numbers. If you do not have verified figures, describe how readers should interpret ratings and what to watch for.',
+    '- “Ratings” section must NOT invent numbers. If you do not have verified figures, explain what to look for and how to interpret ratings.',
   ];
-
   return lines.join('\n');
+}
+
+// HTML에서 H2 텍스트만 추출(정확 비교용)
+function stripTags(s) {
+  return String(s || '').replace(/<[^>]+>/g, '').trim();
+}
+function extractH2Headings(html) {
+  const out = [];
+  const re = /<h2\b[^>]*>([\s\S]*?)<\/h2>/gi;
+  let m;
+  while ((m = re.exec(html)) !== null) {
+    out.push(stripTags(m[1]));
+  }
+  return out;
+}
+function validateExactH2Sequence(actualH2, expectedH2) {
+  if (actualH2.length < expectedH2.length) {
+    return { ok: false, reason: `review headings missing (h2Count=${actualH2.length} < expected=${expectedH2.length})` };
+  }
+  for (let i = 0; i < expectedH2.length; i++) {
+    if (actualH2[i] !== expectedH2[i]) {
+      return { ok: false, reason: `review heading mismatch at #${i + 1}: actual="${actualH2[i] || ''}" expected="${expectedH2[i]}"` };
+    }
+  }
+  return { ok: true };
 }
 
 // ===== 유틸 =====
@@ -200,7 +223,7 @@ function safeStr(v) {
 }
 
 // OpenAI 호출
-async function generateBodyFromPrompt({ slug, label, bodyPrompt }) {
+async function generateBodyFromPrompt({ slug, label, bodyPrompt, reviewPlan, reviewCommon }) {
   if (!OPENAI_API_KEY) throw new Error('OPENAI_API_KEY is not set in environment.');
 
   const systemPrompt = [
@@ -209,8 +232,8 @@ async function generateBodyFromPrompt({ slug, label, bodyPrompt }) {
     'Write in natural, clear English suitable for a global audience.',
   ].join(' ');
 
-  const common = loadReviewCommon();
-  const scaffold = isReviewLabel(label) ? buildReviewHeadingScaffold({ common }) : '';
+  const isReview = !!(reviewCommon && reviewPlan && isReviewLabelByConfig(label, reviewCommon));
+  const scaffold = isReview ? buildReviewHeadingScaffold(reviewPlan) : '';
 
   const userPrompt = [
     scaffold ? scaffold : '',
@@ -269,19 +292,23 @@ function sanitizeModelOutput(txt) {
   return s.trim();
 }
 
-// 품질 검증(경량)
-function validateBodyHtml(html) {
+// 품질 검증(경량 + 리뷰 헤딩 강제)
+function validateBodyHtml(html, opts = {}) {
   const s = safeStr(html).trim();
   if (s.length < VALIDATE_MIN_CHARS) return { ok: false, reason: `too short (<${VALIDATE_MIN_CHARS} chars)` };
 
-  const h2Count = (s.match(/<h2\b/gi) || []).length;
   const pCount  = (s.match(/<p\b/gi) || []).length;
-
-  if (h2Count < VALIDATE_MIN_H2) return { ok: false, reason: `not enough <h2> (${h2Count} < ${VALIDATE_MIN_H2})` };
   if (pCount  < VALIDATE_MIN_P)  return { ok: false, reason: `not enough <p> (${pCount} < ${VALIDATE_MIN_P})` };
 
   for (const bad of FORBIDDEN_SNIPPETS) {
     if (s.includes(bad)) return { ok: false, reason: `contains forbidden snippet: ${bad}` };
+  }
+
+  // ✅ 리뷰 라벨이면: H2 시퀀스 “정확히” 강제
+  if (opts.isReview && Array.isArray(opts.expectedH2) && opts.expectedH2.length) {
+    const actual = extractH2Headings(s);
+    const vr = validateExactH2Sequence(actual, opts.expectedH2);
+    if (!vr.ok) return vr;
   }
 
   return { ok: true };
@@ -318,7 +345,6 @@ function buildFallbackBody(data) {
     `<h2>Next step</h2>`,
     `<p>Pick one small action you can complete in 10 minutes. Consistency beats complexity.</p>`,
 
-    // label별 아주 약한 힌트(내용 왜곡/허위 방지 위해 ‘일반론’만)
     `<h2>Notes for ${escapeHtml(label)}</h2>`,
     `<p>This section will be updated to match the label’s format and include relevant examples tied to “${escapeHtml(title)}”.</p>`,
   ].join('\n');
@@ -348,6 +374,8 @@ async function main() {
     process.exitCode = 1;
     return;
   }
+
+  const reviewCommon = getReviewCommonConfig();
 
   const files = await listPostFiles();
   console.log(`[generate-body] JSON 파일 수 = ${files.length}`);
@@ -395,8 +423,11 @@ async function main() {
       continue;
     }
 
+    const isReview = !!(reviewCommon && isReviewLabelByConfig(label, reviewCommon));
+    const reviewPlan = isReview ? buildReviewHeadingPlan(reviewCommon) : null;
+
     console.log('────────────────────────────────────────────');
-    console.log(`[generate-body] [TARGET] slug=${slug}, label=${label}`);
+    console.log(`[generate-body] [TARGET] slug=${slug}, label=${label}${isReview ? ' (REVIEW-STRICT)' : ''}`);
 
     let ok = false;
     let lastErr = '';
@@ -405,12 +436,19 @@ async function main() {
     for (let attempt = 1; attempt <= MAX_GENERATE_ATTEMPTS; attempt++) {
       try {
         console.log(`[generate-body] attempt ${attempt}/${MAX_GENERATE_ATTEMPTS} — generating...`);
-        const bodyHtml = await generateBodyFromPrompt({ slug, label, bodyPrompt });
+        const bodyHtml = await generateBodyFromPrompt({
+          slug,
+          label,
+          bodyPrompt,
+          reviewPlan,
+          reviewCommon
+        });
 
-        const v = validateBodyHtml(bodyHtml);
-        if (!v.ok) {
-          throw new Error(`validation failed: ${v.reason}`);
-        }
+        const v = validateBodyHtml(bodyHtml, {
+          isReview,
+          expectedH2: isReview && reviewPlan ? reviewPlan.expectedH2 : null
+        });
+        if (!v.ok) throw new Error(`validation failed: ${v.reason}`);
 
         data.body = bodyHtml;
         data.bodyGen = {
@@ -418,6 +456,10 @@ async function main() {
           model: OPENAI_MODEL,
           attemptsUsed: attempt,
           updatedAt: new Date().toISOString(),
+          reviewStrict: isReview ? {
+            expectedH2: reviewPlan.expectedH2,
+            optionalPicked: reviewPlan.optionalHeadingsPicked
+          } : null
         };
 
         await writeJson(filePath, data);
@@ -436,13 +478,6 @@ async function main() {
       try {
         console.log(`[generate-body] [FALLBACK] slug=${slug} — 2회 실패 → A안 폴백 주입`);
         const fb = buildFallbackBody(data);
-
-        // 폴백도 최소 검증(너무 짧지만 않게)
-        const v2 = validateBodyHtml(fb);
-        // 폴백은 구조가 짧을 수 있어 검증 완화: 길이만 체크
-        if (!v2.ok && !String(v2.reason).includes('too short')) {
-          // 길이 이슈 외에는 통과 취급(폴백은 “비어있지 않게”가 목적)
-        }
 
         data.body = fb;
         data.bodyGen = {
