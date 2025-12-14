@@ -1,20 +1,19 @@
 #!/usr/bin/env node
 /**
  * generate-body.cjs
- * - Review normalization FIRST (generator 단계)
- * - Render는 조립만 수행
+ * Review normalization at generator stage (CJS compatible)
  */
 
-import fs from "fs";
-import path from "path";
-import crypto from "crypto";
-import process from "process";
+const fs = require("fs");
+const path = require("path");
+const crypto = require("crypto");
+const process = require("process");
 
 const ROOT = path.resolve(process.cwd(), "System_files");
 const POSTS_DIR = path.join(ROOT, "content", "posts");
 
 const MODEL = process.env.OPENAI_MODEL || "gpt-4.1-mini";
-const SCHEDULE_MODE = process.env.SCHEDULE_MODE || "test"; // test | live
+const SCHEDULE_MODE = process.env.SCHEDULE_MODE || "test";
 const IS_LIVE = SCHEDULE_MODE === "live";
 
 console.log("────────────────────────────────────────────");
@@ -48,7 +47,6 @@ const REVIEW_COMMON = {
   }
 };
 
-// ─────────────────────────────────────────────
 // utils
 function readJSON(p) {
   return JSON.parse(fs.readFileSync(p, "utf-8"));
@@ -68,15 +66,12 @@ function hasAnyLabel(labels, targets) {
   return labels.some(l => targets.includes(l));
 }
 
-// ─────────────────────────────────────────────
 // review heading builder
 function buildReviewHeadingPlan() {
   const fixed = REVIEW_COMMON.structure.fixedHeadings;
   const opt = REVIEW_COMMON.structure.optionalHeadingsPool;
   const { min, max } = REVIEW_COMMON.structure.optionalRules;
-
-  const pickedOptional = pickRandom(opt, min, max);
-  return [...fixed, ...pickedOptional];
+  return [...fixed, ...pickRandom(opt, min, max)];
 }
 
 function buildHeadingSkeleton(headings) {
@@ -85,31 +80,22 @@ function buildHeadingSkeleton(headings) {
     .join("\n\n");
 }
 
-// ─────────────────────────────────────────────
-// fake LLM call placeholder
-// 실제 OpenAI 호출은 기존 구현 그대로 두고,
-// 여기서는 구조 제어만 수행
-async function generateBodyText({ title, label, isReview }) {
+// generator stub (LLM 호출 전 구조 고정)
+function generateBodyText({ title, isReview }) {
   if (isReview) {
     const headings = buildReviewHeadingPlan();
     return buildHeadingSkeleton(headings);
   }
-
-  // 비리뷰: 기존 자유 생성 (간단 스텁)
   return `<h2>${title}</h2>\n<p><!-- generated content --></p>`;
 }
 
-// ─────────────────────────────────────────────
 // main
-const files = fs
-  .readdirSync(POSTS_DIR)
-  .filter(f => f.endsWith(".json"));
+const files = fs.readdirSync(POSTS_DIR).filter(f => f.endsWith(".json"));
 
 console.log("[generate-body] JSON 파일 수 =", files.length);
 
 let created = 0;
 let skipped = 0;
-let fallback = 0;
 let failed = 0;
 
 for (const file of files) {
@@ -117,13 +103,12 @@ for (const file of files) {
   const post = readJSON(full);
 
   if (post.body && post.body.trim()) {
-    console.log(`[generate-body] [SKIP] slug=${post.slug} — body 이미 존재`);
+    console.log(`[SKIP] ${post.slug} — body 이미 존재`);
     skipped++;
     continue;
   }
-
   if (!post.bodyPrompt) {
-    console.log(`[generate-body] [SKIP] slug=${post.slug} — bodyPrompt 없음`);
+    console.log(`[SKIP] ${post.slug} — bodyPrompt 없음`);
     skipped++;
     continue;
   }
@@ -131,14 +116,9 @@ for (const file of files) {
   const labels = post.labels || [];
   const isReview = hasAnyLabel(labels, REVIEW_COMMON.appliesTo);
 
-  console.log(
-    `[generate-body] [TARGET] slug=${post.slug}, review=${isReview}`
-  );
-
   try {
-    const body = await generateBodyText({
+    const body = generateBodyText({
       title: post.title,
-      label: labels[0],
       isReview
     });
 
@@ -146,12 +126,10 @@ for (const file of files) {
     post.bodyGen = {
       mode: "generated",
       model: MODEL,
-      attemptsUsed: 1,
       reviewStrict: isReview || null,
       updatedAt: new Date().toISOString()
     };
 
-    // 리뷰 메타 선반영 (90일 프레쉬니스 대상)
     if (isReview) {
       post.reviewMeta = {
         ratings: { source: "ssot:review-ratings.json", freshnessDays: 90 },
@@ -162,30 +140,21 @@ for (const file of files) {
 
     if (IS_LIVE) {
       writeJSON(full, post);
-      console.log(
-        `[generate-body] [OK] slug=${post.slug} — body 생성 저장 완료`
-      );
+      console.log(`[OK] ${post.slug} — 저장 완료`);
       created++;
     } else {
-      console.log(
-        `[generate-body] [DRY] slug=${post.slug} — 생성만 수행`
-      );
+      console.log(`[DRY] ${post.slug} — 생성만 수행`);
     }
   } catch (e) {
     failed++;
-    console.error(
-      `[generate-body] [FAIL] slug=${post.slug}`,
-      e.message
-    );
+    console.error(`[FAIL] ${post.slug}`, e.message);
   }
 }
 
 console.log("────────────────────────────────────────────");
 console.log("[generate-body] 요약");
-console.log("  총 파일 수                 =", files.length);
-console.log("  생성 완료(LIVE)           =", created);
-console.log("  폴백 주입(LIVE)           =", fallback);
-console.log("  SKIP                      =", skipped);
-console.log("  실패                      =", failed);
+console.log("  생성 완료 =", created);
+console.log("  SKIP      =", skipped);
+console.log("  실패      =", failed);
 console.log("────────────────────────────────────────────");
 console.log("[generate-body] 완료");
