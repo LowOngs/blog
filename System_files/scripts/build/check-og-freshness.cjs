@@ -6,7 +6,9 @@
  * - how-to/smart-savings/templates 계열에 대한 OG/산출물 상태 경고
  * - 기준:
  *   A) dist/posts/*.html 내 og:image 존재 여부
- *   B) content/posts/*.json 의 updated(UTC) 기준 89일 WARN
+ *   B) content/posts/*.json 의 updated(UTC) 우선 사용
+ *      - updated 없으면 seedMeta.queueDate(YYYY-MM-DD)를 UTC 00:00:00Z로 임시 해석
+ * - WARN: ageDays >= 89
  *
  * 실행:
  *   C:\google-blog> node .\System_files\scripts\build\check-og-freshness.cjs
@@ -43,6 +45,16 @@ function parseUtcDate(input) {
   return d;
 }
 
+// queueDate: "YYYY-MM-DD" -> Date("YYYY-MM-DDT00:00:00Z")
+function parseQueueDateAsUtc(queueDate) {
+  if (!queueDate) return null;
+  const s = String(queueDate).trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return null;
+  const d = new Date(`${s}T00:00:00Z`);
+  if (Number.isNaN(d.getTime())) return null;
+  return d;
+}
+
 function daysBetweenUtc(a, b) {
   const ms = b.getTime() - a.getTime();
   return Math.floor(ms / (1000 * 60 * 60 * 24));
@@ -56,7 +68,6 @@ function pickLabel(data) {
 }
 
 function extractOgImage(html) {
-  // 가장 단순/안전: og:image meta 한 줄만 체크
   const m = html.match(/<meta\s+property=["']og:image["']\s+content=["']([^"']+)["']\s*\/?>/i);
   return m ? m[1] : '';
 }
@@ -93,6 +104,7 @@ function main() {
   const ogMissingSlugs = [];
   const updatedMissingSlugs = [];
   const warnOldSlugs = [];
+  const updatedDerivedSlugs = [];
 
   for (const p of jsonFiles) {
     const data = readJsonSafe(p, null);
@@ -104,7 +116,7 @@ function main() {
 
     targets += 1;
 
-    // A) OG 존재 체크: dist html에서 og:image 있는지 확인
+    // A) OG 존재 체크
     const htmlPath = path.join(DIST_DIR, `${slug}.html`);
     if (fs.existsSync(htmlPath)) {
       const html = fs.readFileSync(htmlPath, 'utf8');
@@ -114,18 +126,26 @@ function main() {
         ogMissingSlugs.push(slug);
       }
     } else {
-      // html 자체가 없으면 OG도 없다고 봄
       ogMissing += 1;
       ogMissingSlugs.push(slug);
     }
 
-    // B) updated(UTC) 기준 오래된 글 경고(업데이트/OG 재생성 유도)
-    const ud = parseUtcDate(data.updated);
+    // B) updated 체크(없으면 queueDate로 임시 해석)
+    let ud = parseUtcDate(data.updated);
     if (!ud) {
       updatedMissing += 1;
       updatedMissingSlugs.push(slug);
-      continue;
+
+      const qd = parseQueueDateAsUtc(data.seedMeta && data.seedMeta.queueDate);
+      if (qd) {
+        ud = qd;
+        updatedDerivedSlugs.push(slug);
+      } else {
+        // 날짜 기준 자체가 없으면 warnOld 계산 불가
+        continue;
+      }
     }
+
     const ageDays = daysBetweenUtc(ud, now);
     if (ageDays >= WARN_DAYS) {
       warnOld += 1;
@@ -136,6 +156,7 @@ function main() {
   log('done:', `targets=${targets}`, `ogMissing=${ogMissing}`, `updatedMissing=${updatedMissing}`, `warnOld=${warnOld}`);
   if (ogMissingSlugs.length) log('OG_MISSING slugs:', ogMissingSlugs.join(', '));
   if (updatedMissingSlugs.length) log('UPDATED_MISSING slugs:', updatedMissingSlugs.join(', '));
+  if (updatedDerivedSlugs.length) log('UPDATED_DERIVED_FROM_queueDate slugs:', updatedDerivedSlugs.join(', '));
   if (warnOldSlugs.length) log('WARN_OLD slugs:', warnOldSlugs.join(', '));
 
   if (!ogMissing && !updatedMissing && !warnOld) {
