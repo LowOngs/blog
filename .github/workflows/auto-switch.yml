@@ -1,1 +1,60 @@
+name: Auto Publish Switch
 
+on:
+  workflow_dispatch:
+    inputs:
+      auto_enable:
+        description: "Auto publishing (scheduled) mode"
+        required: true
+        type: choice
+        options:
+          - "disable"
+          - "enable"
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  toggle:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set AUTO_ENABLE variable
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.event.repository.name }}
+          MODE: ${{ inputs.auto_enable }}
+        run: |
+          set -e
+          if [ "$MODE" = "enable" ]; then
+            VALUE="true"
+          else
+            VALUE="false"
+          fi
+
+          echo "[auto-switch] requested MODE=$MODE -> AUTO_ENABLE=$VALUE"
+
+          # Update if exists, otherwise create
+          API="https://api.github.com/repos/${OWNER}/${REPO}/actions/variables/AUTO_ENABLE"
+          CODE=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" "$API")
+
+          if [ "$CODE" = "200" ]; then
+            curl -s -X PATCH \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              "$API" \
+              -d "{\"name\":\"AUTO_ENABLE\",\"value\":\"$VALUE\"}" >/dev/null
+            echo "[auto-switch] UPDATED AUTO_ENABLE=$VALUE"
+          else
+            curl -s -X POST \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/${OWNER}/${REPO}/actions/variables" \
+              -d "{\"name\":\"AUTO_ENABLE\",\"value\":\"$VALUE\"}" >/dev/null
+            echo "[auto-switch] CREATED AUTO_ENABLE=$VALUE"
+          fi
+
+      - name: Print result note
+        run: |
+          echo "Done. Next scheduled auto run will be allowed only when AUTO_ENABLE=true."
