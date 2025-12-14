@@ -2,7 +2,9 @@ name: Publish Blog (Auto)
 
 on:
   schedule:
-    - cron: "20 2 * * *"   # 기존 쓰시던 시간 유지 (UTC 기준)
+    # 매일 11:20 KST 기준이면 UTC로 02:20 입니다.
+    # 필요 시 옹스님 실제 운영 타임존에 맞게 조정하세요.
+    - cron: "20 2 * * *"
   workflow_dispatch:
 
 permissions:
@@ -14,58 +16,47 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # ✅ 1) 진짜 이벤트명 출력 (하드코딩 금지)
-      - name: Print event info
+      - name: Install deps
         run: |
-          echo "event_name=${{ github.event_name }}"
+          npm ci
 
-      # ✅ 2) schedule일 때만: SCHEDULE_MODE=live여야 통과
-      - name: Guard — schedule allowed only when SCHEDULE_MODE=live
-        if: ${{ github.event_name == 'schedule' }}
+      # ✅ 오토(스케줄)일 때만 강하게 차단/허용
+      - name: Guard — scheduled run allowed only when SCHEDULE_MODE=live
         env:
           SCHEDULE_MODE: ${{ secrets.SCHEDULE_MODE }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
-          set -euo pipefail
+          echo "event_name=$EVENT_NAME"
           echo "SCHEDULE_MODE=$SCHEDULE_MODE"
-          if [ "$SCHEDULE_MODE" != "live" ]; then
-            echo "[GUARD] schedule blocked: SCHEDULE_MODE != live"
-            exit 0
+
+          if [ "$EVENT_NAME" = "schedule" ]; then
+            if [ "$SCHEDULE_MODE" != "live" ]; then
+              echo "[GUARD] schedule trigger blocked: SCHEDULE_MODE != live"
+              exit 0
+            fi
           fi
-          echo "[GUARD] schedule allowed by SCHEDULE_MODE=live"
-
-      # ✅ 3) schedule일 때만: auto-enable.json true여야 통과 (폭주 방지 핵심)
-      - name: Guard — schedule allowed only when auto-enable.json is true
-        if: ${{ github.event_name == 'schedule' }}
-        run: |
-          set -euo pipefail
-          FILE="System_files/manifests/auto-enable.json"
-
-          if [ ! -f "$FILE" ]; then
-            echo "[GUARD] $FILE missing -> block schedule"
-            exit 0
-          fi
-
-          ENABLE=$(node -e "const fs=require('fs'); const j=JSON.parse(fs.readFileSync('$FILE','utf8')); console.log(j.autoEnable===true?'true':'false');")
-          echo "[GUARD] autoEnable=$ENABLE"
-
-          if [ "$ENABLE" != "true" ]; then
-            echo "[GUARD] schedule blocked: autoEnable != true"
-            exit 0
-          fi
-
-          echo "[GUARD] schedule allowed by autoEnable=true"
 
       - name: Build & Publish (auto)
         env:
           RUN_MODE: auto
           DRY_RUN: "false"
+          # 아래 SCHEDULE_MODE=live는 '내부 파이프라인 흐름'용이고,
+          # 실제 자동발행 차단/허용은 위 GUARD가 secrets.SCHEDULE_MODE로 결정합니다.
           SCHEDULE_MODE: live
         run: |
           set -euo pipefail
-          npm ci
+
           node System_files/scripts/build/seed-scheduler.cjs
           node System_files/scripts/build/queue-to-posts.cjs
           node System_files/scripts/build/generate-body.cjs
+
           npm run posts:render
+          node System_files/scripts/build/normalize-body.cjs
+
+          npm run images:renew
+          npm run images:build:og
+          node System_files/scripts/build/r2-upload.js
+          node System_files/scripts/build/rewrite-images.js
+
           npm run posts:validate
           npm run publish:blogger
