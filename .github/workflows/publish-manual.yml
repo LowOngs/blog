@@ -2,43 +2,24 @@ name: Publish Blog (Manual)
 
 on:
   workflow_dispatch:
-    inputs:
-      RUN_MODE:
-        description: "manual only (auto not allowed here)"
-        required: false
-        default: "manual"
-      MANUAL_JOB:
-        description: "label_once / schedule_once"
-        required: false
-        default: "schedule_once"
-      DRY_RUN:
-        description: "true = no publish"
-        required: false
-        default: "true"
 
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
-      - name: Guard — manual only
-        run: |
-          echo "Manual workflow invoked"
-          echo "RUN_MODE=manual enforced"
-
-      - name: Build & Publish (manual)
+      - name: Build (manual)
         env:
           RUN_MODE: manual
-          MANUAL_JOB: ${{ inputs.MANUAL_JOB }}
-          DRY_RUN: ${{ inputs.DRY_RUN }}
+          MANUAL_JOB: schedule_once
+          DRY_RUN: "true"
           SCHEDULE_MODE: ${{ secrets.SCHEDULE_MODE }}
         run: |
           npm ci
-          node System_files/scripts/build/seed-scheduler.cjs || true
-          node System_files/scripts/build/queue-to-posts.cjs || true
-          node System_files/scripts/build/generate-body.cjs
+          node System_files/scripts/build/generate-body.cjs || true
           npm run posts:render
           npm run posts:validate
+          node System_files/scripts/build/check-review-freshness.cjs || true
+          node System_files/scripts/build/check-og-freshness.cjs || true
           npm run publish:blogger
