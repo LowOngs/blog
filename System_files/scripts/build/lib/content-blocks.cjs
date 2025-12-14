@@ -1,177 +1,131 @@
-// System_files/scripts/build/lib/blocks.cjs
-// CommonJS (CJS) only: require/module.exports
-// 목적:
-// - FAQ / Sources / Review 슬롯을 "항상 같은 DOM 구조"로 렌더링
-// - 데이터가 없으면 섹션 자체를 숨김(=출력하지 않음)
-// - 입력 스키마가 흔들려도(배열/객체/문자열) 안전하게 정규화
+'use strict';
 
-function esc(s) {
-  return String(s ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+/**
+ * content-blocks.cjs
+ * - post JSON에서 TL;DR / KeyFacts / Body / FAQ / Sources 를 "표준 형태"로 정규화
+ * - 목적: render-posts가 어떤 입력을 받아도 항상 같은 자료형으로 받게 하기
+ *
+ * 원칙
+ * - 비어있으면 빈 배열/빈 문자열로 정리
+ * - [object Object]가 나오는 형태(객체 그대로 출력)를 사전에 방지
+ * - FAQ/Sources는 string/object 혼용 입력을 모두 받아 표준 구조로 변환
+ */
+
+function asArray(v) {
+  if (v == null) return [];
+  return Array.isArray(v) ? v : [v];
 }
 
-function isNonEmptyString(v) {
-  return typeof v === "string" && v.trim().length > 0;
+function trimStr(v) {
+  if (v == null) return '';
+  return String(v).trim();
 }
 
-function normalizeFaq(faq) {
-  // 허용:
-  // - [{q, a}] / [{question, answer}]
-  // - { q1: a1, q2: a2 }
-  // - ["Q?::A", ...] (최후 폴백)
-  if (!faq) return [];
+function firstNonEmpty(...vals) {
+  for (const v of vals) {
+    if (v == null) continue;
+    const s = typeof v === 'string' ? v : v;
+    if (typeof s === 'string') {
+      if (s.trim() !== '') return s;
+    } else if (Array.isArray(s)) {
+      if (s.length) return s;
+    } else if (typeof s === 'object') {
+      // object는 빈 객체 여부만 판단
+      if (Object.keys(s).length) return s;
+    } else {
+      return s;
+    }
+  }
+  return '';
+}
+
+function normalizeTextList(raw) {
+  // TL;DR / KeyFacts 용: string | string[] | mixed → string[]
   const out = [];
-
-  if (Array.isArray(faq)) {
-    for (const item of faq) {
-      if (!item) continue;
-      if (typeof item === "object") {
-        const q = item.q ?? item.question ?? item.Q ?? item.title;
-        const a = item.a ?? item.answer ?? item.A ?? item.body;
-        if (isNonEmptyString(q) && isNonEmptyString(a)) out.push({ q: String(q), a: String(a) });
-      } else if (isNonEmptyString(item)) {
-        const s = String(item);
-        const parts = s.split("::");
-        if (parts.length >= 2) out.push({ q: parts[0].trim(), a: parts.slice(1).join("::").trim() });
-      }
-    }
-    return out;
+  for (const item of asArray(raw)) {
+    const s = trimStr(item);
+    if (!s) continue;
+    out.push(s);
   }
-
-  if (typeof faq === "object") {
-    for (const [k, v] of Object.entries(faq)) {
-      if (isNonEmptyString(k) && isNonEmptyString(v)) out.push({ q: String(k), a: String(v) });
-    }
-    return out;
-  }
-
   return out;
 }
 
-function normalizeSources(sources) {
-  // 허용:
-  // - [{title,name,label, url, href}]
-  // - ["https://...", ...]
-  // - { "Microsoft Support": "https://..." }
-  if (!sources) return [];
-
+function normalizeFaq(rawFaq) {
+  // 허용 입력:
+  // - ["Q? A."] 같은 문자열
+  // - [{q, a}] / {question, answer} 등
   const out = [];
+  for (const item of asArray(rawFaq)) {
+    if (!item) continue;
 
-  if (Array.isArray(sources)) {
-    for (const item of sources) {
-      if (!item) continue;
-      if (typeof item === "object") {
-        const title = item.title ?? item.name ?? item.label ?? item.text ?? "";
-        const url = item.url ?? item.href ?? item.link ?? "";
-        if (isNonEmptyString(url)) out.push({ title: isNonEmptyString(title) ? String(title) : "", url: String(url) });
-      } else if (isNonEmptyString(item)) {
-        out.push({ title: "", url: String(item) });
-      }
+    if (typeof item === 'string') {
+      const s = item.trim();
+      if (!s) continue;
+      // 문자열만 있으면 q=a 로라도 넣어서 [object Object] 방지
+      out.push({ q: s, a: s });
+      continue;
     }
-    return out;
-  }
 
-  if (typeof sources === "object") {
-    for (const [k, v] of Object.entries(sources)) {
-      if (isNonEmptyString(v)) out.push({ title: isNonEmptyString(k) ? String(k) : "", url: String(v) });
+    if (typeof item === 'object') {
+      const q = trimStr(firstNonEmpty(item.q, item.question, item.Q, item.title, ''));
+      const a = trimStr(firstNonEmpty(item.a, item.answer, item.A, item.body, ''));
+      if (!q || !a) continue;
+      out.push({ q, a });
     }
-    return out;
   }
-
-  if (isNonEmptyString(sources)) {
-    out.push({ title: "", url: String(sources) });
-  }
-
   return out;
 }
 
-function renderFaqHTML(faq) {
-  const items = normalizeFaq(faq);
-  if (items.length === 0) return ""; // 섹션 자체 숨김
+function normalizeSources(rawSources) {
+  // 허용 입력:
+  // - ["https://...", "Doc name - https://..."] 같은 문자열
+  // - [{label,url,note}] / {name,href} 등
+  const out = [];
+  for (const item of asArray(rawSources)) {
+    if (!item) continue;
 
-  const inner = items
-    .map(({ q, a }) => {
-      return [
-        `<article class="faq-item">`,
-        `  <h4>${esc(q)}</h4>`,
-        `  <p>${esc(a)}</p>`,
-        `</article>`,
-      ].join("\n");
-    })
-    .join("\n");
+    if (typeof item === 'string') {
+      const s = item.trim();
+      if (!s) continue;
+      // url 판별을 강요하지 않고 label로만 유지
+      out.push({ label: s, url: '', note: '' });
+      continue;
+    }
 
-  // ⚠️ 템플릿의 ID 구조 유지: id="faq", 내부 .faq
-  return [
-    `<details class="collapsible" id="faq">`,
-    `  <summary>FAQ</summary>`,
-    `  <div class="panel">`,
-    `    <section class="faq">`,
-    inner,
-    `    </section>`,
-    `  </div>`,
-    `</details>`,
-  ].join("\n");
-}
-
-function renderSourcesHTML(sources) {
-  const items = normalizeSources(sources);
-  if (items.length === 0) return ""; // 섹션 자체 숨김
-
-  const li = items
-    .map(({ title, url }) => {
-      const safeUrl = esc(url);
-      const label = isNonEmptyString(title) ? esc(title) : safeUrl;
-      // 정책: nofollow noopener 유지(기존 규칙)
-      return `  <li><a href="${safeUrl}" rel="nofollow noopener" target="_blank">${label}</a></li>`;
-    })
-    .join("\n");
-
-  // ⚠️ 템플릿의 ID 구조 유지: id="sources", 내부 h3 + ul
-  return [
-    `<section id="sources" class="sources">`,
-    `  <h3>Sources</h3>`,
-    `  <ul>`,
-    li,
-    `  </ul>`,
-    `</section>`,
-  ].join("\n");
-}
-
-function renderReviewSlotsHTML(label) {
-  // Review 슬롯은 "리뷰 라벨 3개만" 유지하고,
-  // 해당 라벨이 아니면 아예 출력하지 않게(=DOM 안정 + 불필요 블록 제거)
-  const reviewLabels = new Set(["app-reviews", "device-reviews", "subscription-services"]);
-  if (!reviewLabels.has(String(label || ""))) return "";
-
-  return [
-    `<section id="review-rating-block" class="review-block">`,
-    `  <!--SLOT:REVIEW_RATING-->`,
-    `</section>`,
-    ``,
-    `<section id="review-insights-block" class="review-block">`,
-    `  <!--SLOT:REVIEW_INSIGHTS-->`,
-    `</section>`,
-  ].join("\n");
-}
-
-function assertNoObjectObject(html, slug) {
-  if (html.includes("[object Object]")) {
-    const msg = `[blocks][FAIL] ${slug}: found "[object Object]" in output (FAQ/Sources renderer not applied)`;
-    const err = new Error(msg);
-    err.code = "BLOCKS_OBJECT_OBJECT";
-    throw err;
+    if (typeof item === 'object') {
+      const url = trimStr(item.url || item.href || item.link || '');
+      const label = trimStr(firstNonEmpty(item.label, item.name, item.title, url, ''));
+      const note = trimStr(item.note || item.desc || item.description || '');
+      if (!label && !url) continue;
+      out.push({ label: label || url, url, note });
+    }
   }
+  return out;
+}
+
+function normalizeBlocks(postJson) {
+  const aio = postJson && typeof postJson.aio === 'object' ? postJson.aio : {};
+
+  // TL;DR / KeyFacts: aio 우선, 없으면 루트 fallback
+  const tldrRaw = firstNonEmpty(aio.tldr, postJson.tldr, []);
+  const keyfactsRaw = firstNonEmpty(aio.keyfacts, postJson.keyfacts, []);
+
+  // FAQ / Sources: aio 우선, 없으면 루트 fallback
+  const faqRaw = firstNonEmpty(aio.faq, postJson.faq, []);
+  const sourcesRaw = firstNonEmpty(aio.sources, postJson.sources, []);
+
+  // Body: 루트 body가 정답
+  const body = trimStr(postJson.body || '');
+
+  return {
+    tldr: normalizeTextList(tldrRaw),
+    keyfacts: normalizeTextList(keyfactsRaw),
+    body,
+    faq: normalizeFaq(faqRaw),
+    sources: normalizeSources(sourcesRaw),
+  };
 }
 
 module.exports = {
-  normalizeFaq,
-  normalizeSources,
-  renderFaqHTML,
-  renderSourcesHTML,
-  renderReviewSlotsHTML,
-  assertNoObjectObject,
+  normalizeBlocks,
 };
