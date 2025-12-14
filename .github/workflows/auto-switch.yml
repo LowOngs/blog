@@ -1,15 +1,15 @@
 name: Auto Publish Switch
 
-on:
+"on":
   workflow_dispatch:
     inputs:
       auto_enable:
-        description: "Auto publishing (scheduled) mode"
+        description: Auto publishing (scheduled) mode
         required: true
         type: choice
         options:
-          - "disable"
-          - "enable"
+          - disable
+          - enable
 
 permissions:
   actions: write
@@ -24,9 +24,10 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           OWNER: ${{ github.repository_owner }}
           REPO: ${{ github.event.repository.name }}
-          MODE: ${{ inputs.auto_enable }}
+          MODE: ${{ github.event.inputs.auto_enable }}
         run: |
           set -e
+
           if [ "$MODE" = "enable" ]; then
             VALUE="true"
           else
@@ -35,9 +36,11 @@ jobs:
 
           echo "[auto-switch] requested MODE=$MODE -> AUTO_ENABLE=$VALUE"
 
-          # Update if exists, otherwise create
           API="https://api.github.com/repos/${OWNER}/${REPO}/actions/variables/AUTO_ENABLE"
-          CODE=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" "$API")
+          CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "$API")
 
           if [ "$CODE" = "200" ]; then
             curl -s -X PATCH \
