@@ -133,7 +133,7 @@ function buildBodyPrompt(item, label) {
     notes ? `Notes: ${notes}` : '',
     '',
     'Include:',
-    '- A short TL;DR section',
+    '- Do NOT write TL;DR, Key Facts, FAQ, or Sources (they are injected separately).',
     '- Step-by-step guidance (when applicable)',
     '- Common mistakes and quick fixes',
     '- A concise conclusion'
