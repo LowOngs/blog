@@ -1,8 +1,7 @@
 name: Publish Blog (Auto)
 
 on:
-  schedule:
-    - cron: "20 2 * * *"
+ workflow_dispatch:
 
 jobs:
   build-and-publish:
