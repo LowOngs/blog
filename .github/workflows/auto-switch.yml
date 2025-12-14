@@ -1,4 +1,4 @@
-name: Auto Publish Switch
+name: Auto Publish Switch (file-based)
 
 on:
   workflow_dispatch:
@@ -12,18 +12,17 @@ on:
           - "enable"
 
 permissions:
-  actions: write
-  contents: read
+  contents: write
 
 jobs:
   toggle:
     runs-on: ubuntu-latest
     steps:
-      - name: Set AUTO_ENABLE variable
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Write toggle file
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          OWNER: ${{ github.repository_owner }}
-          REPO: ${{ github.event.repository.name }}
           MODE: ${{ inputs.auto_enable }}
         run: |
           set -euo pipefail
@@ -34,59 +33,30 @@ jobs:
             VALUE="false"
           fi
 
-          echo "[auto-switch] requested MODE=$MODE -> AUTO_ENABLE=$VALUE"
+          mkdir -p System_files/manifests
+          cat > System_files/manifests/auto-enable.json <<EOF
+          {
+            "autoEnable": ${VALUE},
+            "updatedAtUtc": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+          }
+          EOF
 
-          API="https://api.github.com/repos/${OWNER}/${REPO}/actions/variables/AUTO_ENABLE"
+          echo "[auto-switch] wrote System_files/manifests/auto-enable.json -> autoEnable=$VALUE"
+          cat System_files/manifests/auto-enable.json
 
-          # 1) 존재 여부 확인 (GET)
-          CODE=$(curl -s -o /tmp/resp.json -w "%{http_code}" \
-            -H "Authorization: Bearer $GH_TOKEN" \
-            -H "Accept: application/vnd.github+json" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            "$API")
+      - name: Commit & push
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          if [ "$CODE" = "200" ]; then
-            echo "[auto-switch] variable exists -> PATCH"
+          git add System_files/manifests/auto-enable.json
 
-            PATCH_CODE=$(curl -s -o /tmp/patch.json -w "%{http_code}" -X PATCH \
-              -H "Authorization: Bearer $GH_TOKEN" \
-              -H "Accept: application/vnd.github+json" \
-              -H "X-GitHub-Api-Version: 2022-11-28" \
-              "$API" \
-              -d "{\"name\":\"AUTO_ENABLE\",\"value\":\"$VALUE\"}")
-
-            if [ "$PATCH_CODE" = "204" ] || [ "$PATCH_CODE" = "200" ]; then
-              echo "[auto-switch] UPDATED AUTO_ENABLE=$VALUE (http=$PATCH_CODE)"
-            else
-              echo "[auto-switch][ERROR] PATCH failed (http=$PATCH_CODE)"
-              cat /tmp/patch.json || true
-              exit 1
-            fi
-
-          elif [ "$CODE" = "404" ]; then
-            echo "[auto-switch] variable not found -> POST(create)"
-
-            POST_CODE=$(curl -s -o /tmp/post.json -w "%{http_code}" -X POST \
-              -H "Authorization: Bearer $GH_TOKEN" \
-              -H "Accept: application/vnd.github+json" \
-              -H "X-GitHub-Api-Version: 2022-11-28" \
-              "https://api.github.com/repos/${OWNER}/${REPO}/actions/variables" \
-              -d "{\"name\":\"AUTO_ENABLE\",\"value\":\"$VALUE\"}")
-
-            if [ "$POST_CODE" = "201" ]; then
-              echo "[auto-switch] CREATED AUTO_ENABLE=$VALUE (http=$POST_CODE)"
-            else
-              echo "[auto-switch][ERROR] POST failed (http=$POST_CODE)"
-              cat /tmp/post.json || true
-              exit 1
-            fi
-
-          else
-            echo "[auto-switch][ERROR] GET unexpected status (http=$CODE)"
-            cat /tmp/resp.json || true
-            exit 1
+          if git diff --cached --quiet; then
+            echo "[auto-switch] no change (already desired state)"
+            exit 0
           fi
 
-      - name: Print result note
-        run: |
-          echo "Done. Next scheduled auto run will be allowed only when AUTO_ENABLE=true."
+          git commit -m "chore: set auto-enable (scheduled publish switch)"
+          git push
+          echo "[auto-switch] pushed"
