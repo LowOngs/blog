@@ -298,8 +298,16 @@ function validateBodyHtml(html, opts = {}) {
   if (s.length < VALIDATE_MIN_CHARS) return { ok: false, reason: `too short (<${VALIDATE_MIN_CHARS} chars)` };
 
   const pCount  = (s.match(/<p\b/gi) || []).length;
-  if (pCount  < VALIDATE_MIN_P)  return { ok: false, reason: `not enough <p> (${pCount} < ${VALIDATE_MIN_P})` };
+const liCount = (s.match(/<li\b/gi) || []).length;
 
+// 문단 + 리스트 항목을 “텍스트 블록”으로 같이 인정
+const textBlocks = pCount + liCount;
+
+// 기존 VALIDATE_MIN_P는 “참고용”으로 두고, 실제 통과 기준은 textBlocks로
+const MIN_TEXT_BLOCKS = 12;
+if (textBlocks < MIN_TEXT_BLOCKS) {
+  return { ok: false, reason: `not enough text blocks (p+li=${textBlocks} < ${MIN_TEXT_BLOCKS})` };
+}
   for (const bad of FORBIDDEN_SNIPPETS) {
     if (s.includes(bad)) return { ok: false, reason: `contains forbidden snippet: ${bad}` };
   }
