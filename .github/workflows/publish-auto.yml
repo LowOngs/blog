@@ -1,1 +1,36 @@
+name: Publish Blog (Auto)
 
+on:
+  schedule:
+    - cron: "20 2 * * *" # UTC 기준 → KST 11:20
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Guard — schedule allowed only in live
+        env:
+          SCHEDULE_MODE: ${{ secrets.SCHEDULE_MODE }}
+        run: |
+          echo "event_name=schedule"
+          if [ "$SCHEDULE_MODE" != "live" ]; then
+            echo "[GUARD] schedule trigger blocked: SCHEDULE_MODE != live"
+            exit 0
+          fi
+
+      - name: Build & Publish (auto)
+        env:
+          RUN_MODE: auto
+          DRY_RUN: false
+          SCHEDULE_MODE: live
+        run: |
+          npm ci
+          node System_files/scripts/build/seed-scheduler.cjs
+          node System_files/scripts/build/queue-to-posts.cjs
+          node System_files/scripts/build/generate-body.cjs
+          npm run posts:render
+          npm run posts:validate
+          npm run publish:blogger
