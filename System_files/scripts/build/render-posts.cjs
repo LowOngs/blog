@@ -31,6 +31,18 @@ const { buildMeta } = require('./lib/meta.cjs');
 // ledger (정상 루트)
 const { ensurePageId } = require('./lib/page-ids.cjs');
 
+/**
+ * [PATCH] 신규 블록 모듈 (옹스님이 이미 생성)
+ * - export 이름이 정확히 뭔지 모를 수 있으니 “있으면 우선 사용” 방식으로 연결
+ */
+let contentBlocks = null;
+try {
+  contentBlocks = require('./lib/content-blocks.cjs');
+} catch (_) {
+  // 없는 경우에도 기존 내장 렌더러로 계속 동작하게 둠
+  contentBlocks = null;
+}
+
 /* ───────────────────── 공통 유틸 ───────────────────── */
 
 function ensureDir(dir) {
@@ -116,7 +128,11 @@ function recoverPageIdFromJournal(slug) {
   return '';
 }
 
-/* ───────────────────── AIO 블록 렌더러 ───────────────────── */
+/* ───────────────────── AIO 블록 렌더러 (기존 내장) ───────────────────── */
+/**
+ * [PATCH] 실제 사용은 content-blocks.cjs가 있으면 그걸 우선 쓰고,
+ *         없으면 아래 내장 렌더러로 fallback 합니다.
+ */
 
 function renderListItems(list) {
   const arr = asArray(list)
@@ -322,7 +338,7 @@ function ensurePageIdForPost(postJson, slug, jsonPath) {
 
 /* ───────────────────── 개별 포스트 렌더링 ───────────────────── */
 
-function resolveAio(postJson) {
+function resolveAioLocal(postJson) {
   const aio = postJson.aio && typeof postJson.aio === 'object' ? postJson.aio : {};
   return {
     tldr: firstNonEmpty(aio.tldr, postJson.tldr, []),
@@ -330,6 +346,41 @@ function resolveAio(postJson) {
     faq: firstNonEmpty(aio.faq, postJson.faq, []),
     sources: firstNonEmpty(aio.sources, postJson.sources, []),
     heroImage: aio.heroImage || null
+  };
+}
+
+/**
+ * [PATCH] blocks 우선순위:
+ * - content-blocks.cjs가 있고, 거기에 함수가 있으면 그걸 사용
+ * - 없으면 기존 내장 렌더러 사용
+ */
+function pickBlocks(postJson) {
+  const aio = (contentBlocks && typeof contentBlocks.resolveAio === 'function')
+    ? contentBlocks.resolveAio(postJson)
+    : resolveAioLocal(postJson);
+
+  const renderTldrFn = (contentBlocks && (contentBlocks.renderTldr || contentBlocks.renderListItems)) || null;
+  const renderKeyFactsFn = (contentBlocks && (contentBlocks.renderKeyFacts || contentBlocks.renderListItems)) || null;
+  const renderFaqFn = (contentBlocks && contentBlocks.renderFaq) || null;
+  const renderSourcesFn = (contentBlocks && contentBlocks.renderSources) || null;
+
+  return {
+    aio,
+    renderTldr: renderTldrFn
+      ? (v) => renderTldrFn(v)
+      : (v) => renderListItems(v),
+
+    renderKeyFacts: renderKeyFactsFn
+      ? (v) => renderKeyFactsFn(v)
+      : (v) => renderListItems(v),
+
+    renderFaq: renderFaqFn
+      ? (v) => renderFaqFn(v)
+      : (v) => renderFaq(v),
+
+    renderSources: renderSourcesFn
+      ? (v) => renderSourcesFn(v)
+      : (v) => renderSources(v),
   };
 }
 
@@ -391,13 +442,15 @@ function renderOne(template, postJson, jsonPath) {
 
   html = html.replace('<!--SLOT:HERO_IMAGE-->', heroImg ? `${heroImg}\n  <!--SLOT:HERO_IMAGE-->` : '<!--SLOT:HERO_IMAGE-->');
 
-  const aio = resolveAio(postJson);
+  // [PATCH] 여기부터 AIO 블록 치환은 blocks 모듈 우선 사용
+  const blocks = pickBlocks(postJson);
+  const aio = blocks.aio;
 
-  html = html.replace('{{tldr}}', renderListItems(aio.tldr));
-  html = html.replace('{{keyfacts}}', renderListItems(aio.keyfacts));
+  html = html.replace('{{tldr}}', blocks.renderTldr(aio.tldr));
+  html = html.replace('{{keyfacts}}', blocks.renderKeyFacts(aio.keyfacts));
   html = html.replace('{{body}}', postJson.body || '');
-  html = html.replace('{{faq}}', renderFaq(aio.faq));
-  html = html.replace('{{sources}}', renderSources(aio.sources));
+  html = html.replace('{{faq}}', blocks.renderFaq(aio.faq));
+  html = html.replace('{{sources}}', blocks.renderSources(aio.sources));
 
   // 디버그 주석
   html = html.replace(
