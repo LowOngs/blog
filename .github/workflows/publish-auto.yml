@@ -1,7 +1,12 @@
 name: Publish Blog (Auto)
 
 on:
- workflow_dispatch:
+  schedule:
+    - cron: "20 2 * * *"   # 기존 쓰시던 시간 유지 (UTC 기준)
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   build-and-publish:
@@ -9,16 +14,46 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Guard — schedule allowed only in live
+      # ✅ 1) 진짜 이벤트명 출력 (하드코딩 금지)
+      - name: Print event info
+        run: |
+          echo "event_name=${{ github.event_name }}"
+
+      # ✅ 2) schedule일 때만: SCHEDULE_MODE=live여야 통과
+      - name: Guard — schedule allowed only when SCHEDULE_MODE=live
+        if: ${{ github.event_name == 'schedule' }}
         env:
           SCHEDULE_MODE: ${{ secrets.SCHEDULE_MODE }}
         run: |
-          echo "event_name=schedule"
+          set -euo pipefail
           echo "SCHEDULE_MODE=$SCHEDULE_MODE"
           if [ "$SCHEDULE_MODE" != "live" ]; then
-            echo "[GUARD] schedule trigger blocked: SCHEDULE_MODE != live"
+            echo "[GUARD] schedule blocked: SCHEDULE_MODE != live"
             exit 0
           fi
+          echo "[GUARD] schedule allowed by SCHEDULE_MODE=live"
+
+      # ✅ 3) schedule일 때만: auto-enable.json true여야 통과 (폭주 방지 핵심)
+      - name: Guard — schedule allowed only when auto-enable.json is true
+        if: ${{ github.event_name == 'schedule' }}
+        run: |
+          set -euo pipefail
+          FILE="System_files/manifests/auto-enable.json"
+
+          if [ ! -f "$FILE" ]; then
+            echo "[GUARD] $FILE missing -> block schedule"
+            exit 0
+          fi
+
+          ENABLE=$(node -e "const fs=require('fs'); const j=JSON.parse(fs.readFileSync('$FILE','utf8')); console.log(j.autoEnable===true?'true':'false');")
+          echo "[GUARD] autoEnable=$ENABLE"
+
+          if [ "$ENABLE" != "true" ]; then
+            echo "[GUARD] schedule blocked: autoEnable != true"
+            exit 0
+          fi
+
+          echo "[GUARD] schedule allowed by autoEnable=true"
 
       - name: Build & Publish (auto)
         env:
@@ -26,6 +61,7 @@ jobs:
           DRY_RUN: "false"
           SCHEDULE_MODE: live
         run: |
+          set -euo pipefail
           npm ci
           node System_files/scripts/build/seed-scheduler.cjs
           node System_files/scripts/build/queue-to-posts.cjs
