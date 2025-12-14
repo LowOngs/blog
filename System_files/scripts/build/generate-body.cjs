@@ -87,6 +87,87 @@ function getLabelHint(label) {
   }
 }
 
+/* ─────────────────────────────────────────────
+ * 리뷰(3라벨) 공용 헤딩 스캐폴드
+ * - app-reviews / device-reviews / subscription-services 에만 적용
+ * - 고정 6개 + 선택 1~2개(랜덤)
+ * - 공용 설정은 seedpool/profiles/label-profiles.json 의 reviewCommon 에서 관리
+ * ───────────────────────────────────────────── */
+
+const REVIEW_LABELS = new Set(['app-reviews', 'device-reviews', 'subscription-services']);
+
+function isReviewLabel(label) {
+  return REVIEW_LABELS.has(String(label || ''));
+}
+
+function loadReviewCommon() {
+  const p = path.join(ROOT, 'seedpool', 'profiles', 'label-profiles.json');
+  try {
+    if (!fs.existsSync(p)) return null;
+    const j = JSON.parse(fs.readFileSync(p, 'utf8'));
+    return j && j.reviewCommon ? j.reviewCommon : null;
+  } catch (_) {
+    return null;
+  }
+}
+
+function pickRandom(arr, n) {
+  const a = Array.isArray(arr) ? arr.slice() : [];
+  for (let i = a.length - 1; i > 0; i--) {
+    const r = Math.floor(Math.random() * (i + 1));
+    [a[i], a[r]] = [a[r], a[i]];
+  }
+  return a.slice(0, Math.max(0, n));
+}
+
+function buildReviewHeadingScaffold({ common }) {
+  const fixed = (common && Array.isArray(common.fixedHeadings) && common.fixedHeadings.length)
+    ? common.fixedHeadings
+    : [
+        'Overview',
+        'Key features',
+        'Pricing & ROI',
+        'Real-world insights',
+        'User ratings snapshot',
+        'Verdict'
+      ];
+
+  const optional = (common && Array.isArray(common.optionalHeadings) && common.optionalHeadings.length)
+    ? common.optionalHeadings
+    : [
+        'Best for / Not for',
+        'What’s new in the last 90 days',
+        'Alternatives',
+        'Setup & onboarding notes',
+        'Privacy & data considerations',
+        'Limitations & deal-breakers'
+      ];
+
+  const pickMin = (common && typeof common.pickOptionalMin === 'number') ? common.pickOptionalMin : 1;
+  const pickMax = (common && typeof common.pickOptionalMax === 'number') ? common.pickOptionalMax : 2;
+  const pickCount = Math.max(pickMin, Math.min(pickMax, 2));
+  const picked = pickRandom(optional, pickCount);
+
+  const all = fixed.concat(picked);
+
+  const lines = [
+    'REVIEW STRUCTURE RULE (must follow):',
+    '- Use the exact H2 headings listed below, in the same order.',
+    '- Do not rename, merge, reorder, or remove these headings.',
+    '- You may add H3 subheadings inside sections if helpful.',
+    '',
+    'Required H2 headings:',
+    ...all.map(h => `- ${h}`),
+    '',
+    'Important:',
+    '- Write only the article BODY HTML fragment.',
+    '- Do NOT add TL;DR / Key Facts / FAQ / Sources sections (handled elsewhere).',
+    '- “User ratings snapshot” section must NOT invent numbers. If you do not have verified figures, describe how readers should interpret ratings and what to watch for.',
+  ];
+
+  return lines.join('\n');
+}
+
 // ===== 유틸 =====
 async function readJson(filePath) {
   const raw = await fsp.readFile(filePath, 'utf8');
@@ -128,12 +209,19 @@ async function generateBodyFromPrompt({ slug, label, bodyPrompt }) {
     'Write in natural, clear English suitable for a global audience.',
   ].join(' ');
 
+  const common = loadReviewCommon();
+  const scaffold = isReviewLabel(label) ? buildReviewHeadingScaffold({ common }) : '';
+
+  const userPrompt = [
+    scaffold ? scaffold : '',
+    'Use the following instructions as the main brief for the article body:',
+    '',
+    bodyPrompt
+  ].filter(Boolean).join('\n');
+
   const messages = [
     { role: 'system', content: systemPrompt },
-    {
-      role: 'user',
-      content: 'Use the following instructions as the main brief for the article body:\n\n' + bodyPrompt
-    }
+    { role: 'user', content: userPrompt }
   ];
 
   const res = await fetchFn('https://api.openai.com/v1/chat/completions', {
@@ -354,7 +442,6 @@ async function main() {
         // 폴백은 구조가 짧을 수 있어 검증 완화: 길이만 체크
         if (!v2.ok && !String(v2.reason).includes('too short')) {
           // 길이 이슈 외에는 통과 취급(폴백은 “비어있지 않게”가 목적)
-          // (필요하면 여기 더 엄격히 바꿀 수 있습니다)
         }
 
         data.body = fb;
