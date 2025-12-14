@@ -4,7 +4,7 @@ on:
   schedule:
     # 매일 11:20 KST 기준이면 UTC로 02:20 입니다.
     # 필요 시 옹스님 실제 운영 타임존에 맞게 조정하세요.
-    - cron: "20 2 * * *"
+    - cron: "20 3 * * *"
   workflow_dispatch:
 
 permissions:
