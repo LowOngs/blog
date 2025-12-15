@@ -5,13 +5,19 @@ on:
     - cron: '40 23 * * *'
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ongsblog-publish
+  cancel-in-progress: false
+
 env:
   NODE_VERSION: '20'
   OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
   OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
   CANONICAL_BASE: ${{ secrets.CANONICAL_BASE }}
   CDN_BASE: ${{ secrets.CDN_BASE }}
-  PAGE_ID_MODE: ${{ secrets.PAGE_ID_MODE }}
   SCHEDULE_MODE: ${{ secrets.SCHEDULE_MODE }}
 
 jobs:
@@ -19,47 +25,46 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Gate
-        id: gate
+      - name: Guard (switch-only)
         shell: bash
         run: |
           echo "event_name=${{ github.event_name }}"
-          echo "schedule_mode=${SCHEDULE_MODE}"
+          echo "SCHEDULE_MODE=${SCHEDULE_MODE}"
 
-          if [ "${{ github.event_name }}" != "workflow_dispatch" ] && [ "${SCHEDULE_MODE}" != "live" ]; then
-            echo "run=false" >> "$GITHUB_OUTPUT"
-            echo "Skipping by SCHEDULE_MODE"
-          else
-            echo "run=true" >> "$GITHUB_OUTPUT"
-            echo "Proceeding"
+          # ✅ 옹스님 원칙: 스위치 live가 아니면 수동/자동 모두 차단
+          if [ "${SCHEDULE_MODE}" != "live" ]; then
+            echo "[GUARD] blocked: SCHEDULE_MODE != live"
+            exit 0
           fi
 
       - name: Checkout
-        if: ${{ steps.gate.outputs.run == 'true' }}
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Setup Node
-        if: ${{ steps.gate.outputs.run == 'true' }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Install dependencies
-        if: ${{ steps.gate.outputs.run == 'true' }}
-        working-directory: google-blog/System_files
-        run: npm ci
-
-      - name: Build queue and artifacts
-        if: ${{ steps.gate.outputs.run == 'true' }}
-        working-directory: google-blog/System_files
         run: |
-          node scripts/build/firstgate-pick.cjs
-          node scripts/build/firstgate-queue-to-post.cjs
-          node scripts/build/generate-body.cjs
-          node scripts/build/render-posts.cjs
-          node scripts/build/images-renew.cjs
-          node scripts/build/images-build-og.cjs
-          node scripts/build/rewrite-images.js
-          node scripts/build/validate-repair.cjs
+          npm ci
+
+      - name: Build firstgate artifacts (no publish)
+        run: |
+          set -euo pipefail
+
+          node System_files/scripts/build/firstgate-pick.cjs
+          node System_files/scripts/build/firstgate-queue-to-post.cjs
+          node System_files/scripts/build/generate-body.cjs
+
+          node System_files/scripts/build/render-posts.cjs
+          node System_files/scripts/build/images-renew.cjs
+          node System_files/scripts/build/images-build-og.cjs
+
+          # 주의: 업로드 없이 rewrite만 하면 깨질 수 있음
+          # firstgate가 "실발행"이 목적이 아니면 rewrite는 빼는 게 안전합니다.
+          # node System_files/scripts/build/rewrite-images.js
+
+          node System_files/scripts/build/validate-repair.cjs
