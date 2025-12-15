@@ -2,9 +2,7 @@ name: Publish Blog (Auto)
 
 on:
   schedule:
-    # 매일 11:20 KST 기준이면 UTC로 02:20 입니다.
-    # 필요 시 옹스님 실제 운영 타임존에 맞게 조정하세요.
-    - cron: "20 3 * * *"
+    - cron: "20 3 * * *"   # UTC 03:20
   workflow_dispatch:
 
 permissions:
@@ -17,32 +15,59 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install deps
-        run: |
-          npm ci
+        run: npm ci
 
-      # ✅ 오토(스케줄)일 때만 강하게 차단/허용
-      - name: Guard — scheduled run allowed only when SCHEDULE_MODE=live
+      # 1) 스케줄일 때만 통제: (A) SCHEDULE_MODE=live (B) auto-enable.json=true
+      - name: Guard — allow schedule only when live + switch enabled
+        id: guard
+        shell: bash
         env:
-          SCHEDULE_MODE: ${{ secrets.SCHEDULE_MODE }}
           EVENT_NAME: ${{ github.event_name }}
+          SCHEDULE_MODE: ${{ secrets.SCHEDULE_MODE }}
         run: |
+          set -euo pipefail
           echo "event_name=$EVENT_NAME"
           echo "SCHEDULE_MODE=$SCHEDULE_MODE"
 
+          # 기본: 허용
+          allow="true"
+          reason="ok"
+
           if [ "$EVENT_NAME" = "schedule" ]; then
-            if [ "$SCHEDULE_MODE" != "live" ]; then
-              echo "[GUARD] schedule trigger blocked: SCHEDULE_MODE != live"
-              exit 0
+            # 1) secrets gate
+            if [ "${SCHEDULE_MODE}" != "live" ]; then
+              allow="false"
+              reason="blocked: SCHEDULE_MODE != live"
+            fi
+
+            # 2) file switch gate (auto-enable.json)
+            if [ "$allow" = "true" ]; then
+              if [ ! -f "System_files/manifests/auto-enable.json" ]; then
+                allow="false"
+                reason="blocked: missing auto-enable.json"
+              else
+                # node로 안전 파싱(없으면 false)
+                sw=$(node -e "try{const j=require('./System_files/manifests/auto-enable.json');process.stdout.write(String(!!j.autoEnable));}catch(e){process.stdout.write('false');}")
+                if [ "$sw" != "true" ]; then
+                  allow="false"
+                  reason="blocked: autoEnable != true"
+                fi
+              fi
             fi
           fi
 
+          echo "allow=$allow"   >> "$GITHUB_OUTPUT"
+          echo "reason=$reason" >> "$GITHUB_OUTPUT"
+          echo "[GUARD] allow=$allow / $reason"
+
+      # 2) 아래부터는 guard 통과한 경우에만 실행 (스케줄 폭주 방지 핵심)
       - name: Build & Publish (auto)
+        if: steps.guard.outputs.allow == 'true'
+        shell: bash
         env:
           RUN_MODE: auto
           DRY_RUN: "false"
-          # 아래 SCHEDULE_MODE=live는 '내부 파이프라인 흐름'용이고,
-          # 실제 자동발행 차단/허용은 위 GUARD가 secrets.SCHEDULE_MODE로 결정합니다.
-          SCHEDULE_MODE: live
+          SCHEDULE_MODE: ${{ secrets.SCHEDULE_MODE }}
         run: |
           set -euo pipefail
 
@@ -60,3 +85,9 @@ jobs:
 
           npm run posts:validate
           npm run publish:blogger
+
+      - name: Skipped note
+        if: steps.guard.outputs.allow != 'true'
+        run: |
+          echo "[SKIP] Auto publish blocked."
+          echo "reason=${{ steps.guard.outputs.reason }}"
