@@ -7,9 +7,15 @@ on:
         description: "Auto publishing (scheduled) mode"
         required: true
         type: choice
+        default: "disable"
         options:
           - "disable"
           - "enable"
+
+# ✅ 동시에 여러 번 눌러서 꼬이는 사고 방지
+concurrency:
+  group: ongsblog-auto-switch
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -17,9 +23,24 @@ permissions:
 jobs:
   toggle:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Print current switch (before)
+        run: |
+          echo "────────────────────────────────────────────"
+          if [ -f System_files/manifests/auto-enable.json ]; then
+            echo "[auto-switch] current file exists:"
+            cat System_files/manifests/auto-enable.json
+          else
+            echo "[auto-switch] current file: (no file yet)"
+          fi
+          echo "────────────────────────────────────────────"
 
       - name: Write toggle file
         env:
@@ -28,12 +49,13 @@ jobs:
           set -euo pipefail
 
           if [ "$MODE" = "enable" ]; then
-            VALUE="true"
+            VALUE=true
           else
-            VALUE="false"
+            VALUE=false
           fi
 
           mkdir -p System_files/manifests
+
           cat > System_files/manifests/auto-enable.json <<EOF
           {
             "autoEnable": ${VALUE},
@@ -41,22 +63,35 @@ jobs:
           }
           EOF
 
-          echo "[auto-switch] wrote System_files/manifests/auto-enable.json -> autoEnable=$VALUE"
+          echo "[auto-switch] requested MODE=$MODE -> autoEnable=$VALUE"
+          echo "[auto-switch] wrote System_files/manifests/auto-enable.json"
           cat System_files/manifests/auto-enable.json
 
       - name: Commit & push
         run: |
           set -euo pipefail
-          git config user.name "github-actions[bot]"
+
+          git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           git add System_files/manifests/auto-enable.json
 
           if git diff --cached --quiet; then
-            echo "[auto-switch] no change (already desired state)"
+            echo "[auto-switch] no change (already desired state) -> exit 0"
             exit 0
           fi
 
           git commit -m "chore: set auto-enable (scheduled publish switch)"
+
+          # ✅ push 충돌(앞서 다른 워크플로가 커밋한 경우) 방어
+          git pull --rebase
           git push
+
           echo "[auto-switch] pushed"
+
+      - name: Print current switch (after)
+        run: |
+          echo "────────────────────────────────────────────"
+          echo "[auto-switch] final state:"
+          cat System_files/manifests/auto-enable.json
+          echo "────────────────────────────────────────────"
