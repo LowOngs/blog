@@ -7,17 +7,17 @@
  * - meta.cjs(buildMeta)로 canonical/OG/schema/pageBadge 생성
  * - TL;DR / Key Facts / FAQ / Sources / Hero 이미지까지 한 번에 주입
  *
+ * + [ADD] 본문 이미지 1장(body image) 자동 삽입
+ *   - "외부 URL 자동삽입" 금지: dist/images/body 에 실제 파일이 있을 때만 붙임
+ *   - 리뷰 라벨은 "있으면 우선 삽입" (강제 성향)
+ *   - 타 라벨은 "있으면 삽입, 없으면 스킵"
+ *
  * 핵심(옹스 룰):
  * - pageId는 생명
  * - "새 발급 권한"은 ids.cjs에만 있다.
  * - render는 원칙적으로 JSON.pageId를 사용한다.
  * - 단, ledger/ensurePageId가 깨져도 pageId를 살리기 위해
  *   WAL 저널(manifests/pageid-journal.jsonl)에서 '회수'는 허용한다.
- *
- * [ADD] 본문 관련 이미지(최대 1장) 자동 삽입
- * - postJson.bodyImageUrl 또는 postJson.aio.bodyImageUrl/aio.bodyImage 가 있으면 1장 삽입
- * - 위치: 첫 <h2> 직후(없으면 첫 </p> 뒤, 없으면 본문 맨 앞)
- * - 중복 방지: 이미 data-role="body-image" 존재 시 스킵
  */
 
 const fs = require('fs');
@@ -31,13 +31,17 @@ const OUTPUT_DIR    = path.join(ROOT, 'dist', 'posts');
 const MANIFESTS_DIR = path.join(ROOT, 'manifests');
 const JOURNAL_FILE  = path.join(MANIFESTS_DIR, 'pageid-journal.jsonl');
 
+// body images live here (local build artifacts)
+const DIST_IMAGES_DIR = path.join(ROOT, 'dist', 'images');
+const DIST_BODY_DIR   = path.join(DIST_IMAGES_DIR, 'body');
+
 // meta.cjs
 const { buildMeta } = require('./lib/meta.cjs');
 // ledger (정상 루트)
 const { ensurePageId } = require('./lib/page-ids.cjs');
 
 /**
- * blocks 모듈(있으면 우선 사용)
+ * [PATCH] 신규 블록 모듈 (있으면 우선 사용)
  */
 let contentBlocks = null;
 try {
@@ -96,8 +100,6 @@ function replaceAllSafe(html, needle, value) {
   return html.split(needle).join(value);
 }
 
-/* ───────────────────── WAL 저널 회수 ───────────────────── */
-
 function readFileSafe(p) {
   try {
     if (!fs.existsSync(p)) return '';
@@ -106,6 +108,16 @@ function readFileSafe(p) {
     return '';
   }
 }
+
+function fileExists(p) {
+  try {
+    return fs.existsSync(p) && fs.statSync(p).isFile();
+  } catch {
+    return false;
+  }
+}
+
+/* ───────────────────── WAL 저널 회수 ───────────────────── */
 
 /**
  * 저널(JSONL)에서 slug에 해당하는 최신 pageId를 회수
@@ -229,6 +241,20 @@ function buildSchemaScriptFromMeta(meta) {
   return `<script type="application/ld+json">${json}</script>`;
 }
 
+/**
+ * [ADD] 본문 이미지(1장) 오버플로 방지용 최소 CSS를 head에 주입
+ * - 템플릿(post.html) 수정 없이 안전하게 처리
+ */
+function buildBodyImageSafetyCss() {
+  return [
+    '<style>',
+    '  figure.post-body-image{margin:16px 0;}',
+    '  figure.post-body-image img{display:block; width:100%; max-width:100%; height:auto;}',
+    '  figure.post-body-image figcaption{font-size:12px; opacity:.8; margin-top:6px;}',
+    '</style>'
+  ].join('\n');
+}
+
 function buildHeadMetaBlock(post, meta) {
   const title       = meta.title || post.title || 'Untitled';
   const description = meta.summary || post.description || '';
@@ -280,6 +306,9 @@ function buildHeadMetaBlock(post, meta) {
   const siteBase = (process.env.CANONICAL_BASE || 'https://ongsblog.com').replace(/\/+$/,'');
   lines.push(`<link rel="preconnect" href="${escapeAttr(siteBase)}" crossorigin>`);
 
+  // [ADD] body image safety CSS
+  lines.push(buildBodyImageSafetyCss());
+
   if (meta.schemaTag) lines.push(meta.schemaTag);
 
   return lines.join('\n');
@@ -309,6 +338,7 @@ function ensurePageIdForPost(postJson, slug, jsonPath) {
     if (isValidPageId(pid)) {
       postJson.pageId = pid;
       try {
+        // 원본 JSON에 기록
         const obj = readJson(jsonPath);
         obj.pageId = pid;
         writeJson(jsonPath, obj);
@@ -334,74 +364,91 @@ function ensurePageIdForPost(postJson, slug, jsonPath) {
   throw new Error(`pageId 확보 실패: slug=${slug} (JSON/ledger/journal 모두 실패)`);
 }
 
-/* ───────────────────── 본문 이미지(1장) 자동 삽입 ───────────────────── */
+/* ───────────────────── 본문 이미지 1장(Body Image) ───────────────────── */
 
-const REVIEW_LABELS = new Set(['app-reviews','device-reviews','subscription-services']);
-
-function getLabel(postJson) {
-  const raw = firstNonEmpty(postJson.label, postJson.mainLabel, postJson.category, '');
-  return String(raw || '').trim();
+function getLabels(postJson) {
+  const labels = [];
+  if (postJson.label) labels.push(String(postJson.label));
+  if (postJson.labels) labels.push(...asArray(postJson.labels).map(String));
+  if (postJson.tags) labels.push(...asArray(postJson.tags).map(String));
+  return labels.map((s) => s.trim()).filter(Boolean);
 }
 
-function pickBodyImageUrl(postJson) {
-  const aio = (postJson.aio && typeof postJson.aio === 'object') ? postJson.aio : {};
-  // 허용 키: bodyImageUrl / bodyImage
-  const url = firstNonEmpty(
-    aio.bodyImageUrl,
-    aio.bodyImage,
-    postJson.bodyImageUrl,
-    postJson.bodyImage,
-    ''
-  );
-  return String(url || '').trim();
+function isReviewLabel(postJson) {
+  const labels = getLabels(postJson);
+  const set = new Set(labels.map((x) => x.toLowerCase()));
+  return set.has('app-reviews') || set.has('device-reviews') || set.has('subscription-services');
 }
 
-function hasBodyImageAlready(bodyHtml) {
-  if (!bodyHtml) return false;
-  return /data-role=["']body-image["']/i.test(bodyHtml);
-}
-
-function buildBodyImageAlt(postJson, meta) {
-  const label = getLabel(postJson);
-  const product = firstNonEmpty(postJson.productName, postJson.product, postJson.appName, postJson.serviceName, '');
-  const title = firstNonEmpty(meta && meta.title, postJson.title, '');
-  // 실사처럼 보여도 OK. 다만 alt는 과장 없이 “무엇인지”만.
-  if (REVIEW_LABELS.has(label) && product) {
-    return `${String(product).trim()} product image`;
+/**
+ * dist/images/body에 실제 파일이 있을 때만, CDN URL로 변환해 반환
+ * - 외부 URL 자동 사용 금지(저작권/무단 이미지 리스크 차단)
+ */
+function resolveBodyImageFromLocal({ slug, pageId, cdnBase, postJson }) {
+  // 1) JSON에 명시된 bodyImage(내부 파일명/상대키만 허용)
+  //    - url 전체가 들어오면 거부(무단 외부 URL 방지)
+  const bi = postJson && postJson.aio && postJson.aio.bodyImage ? postJson.aio.bodyImage : postJson.bodyImage;
+  if (bi && typeof bi === 'object') {
+    const file = firstNonEmpty(bi.file, bi.filename, '');
+    if (file && !/^https?:\/\//i.test(file)) {
+      const local = path.join(DIST_BODY_DIR, file);
+      if (fileExists(local)) {
+        return {
+          url: `${cdnBase.replace(/\/+$/,'')}/body/${encodeURIComponent(file)}`.replace(/%2F/g,'/'),
+          alt: firstNonEmpty(bi.alt, bi.caption, postJson.title, slug),
+          caption: firstNonEmpty(bi.caption, '')
+        };
+      }
+    }
   }
-  return `${String(title || 'Article').trim()} image`;
+
+  // 2) 규칙 기반 자동 탐색(우선순위)
+  const candidates = [
+    `${pageId}_${slug}_800x800.webp`,
+    `${pageId}_${slug}_800x800.jpg`,
+    `${pageId}_${slug}_body_800x800.webp`,
+    `${pageId}_${slug}_body_800x800.jpg`,
+  ];
+
+  for (const name of candidates) {
+    const local = path.join(DIST_BODY_DIR, name);
+    if (fileExists(local)) {
+      return {
+        url: `${cdnBase.replace(/\/+$/,'')}/body/${name}`,
+        alt: firstNonEmpty(postJson.bodyImageAlt, postJson.title, slug),
+        caption: ''
+      };
+    }
+  }
+
+  return null;
 }
 
-function buildBodyImageFigure(url, alt) {
-  // CSS는 post.html 내에서 img {max-width:100%; height:auto;} 이미 보장되지만
-  // 본문 내에서도 안전하게 block 처리 + 여백만 넣음.
+function buildBodyImageFigure(bodyImage) {
+  if (!bodyImage || !bodyImage.url) return '';
+  const alt = escapeAttr(bodyImage.alt || 'Related image');
+  const cap = bodyImage.caption ? `<figcaption>${escapeHtml(bodyImage.caption)}</figcaption>` : '';
   return [
-    '<figure class="body-image" data-role="body-image" style="margin:14px 0;">',
-    `  <img src="${escapeAttr(url)}" alt="${escapeAttr(alt)}" loading="lazy" decoding="async" style="display:block;max-width:100%;height:auto;border-radius:10px;" />`,
+    '<figure class="post-body-image">',
+    `  <img src="${escapeAttr(bodyImage.url)}" alt="${alt}" loading="lazy" decoding="async" />`,
+    cap,
     '</figure>'
   ].join('\n');
 }
 
-function injectBodyImageIntoBody(bodyHtml, figureHtml) {
-  const body = String(bodyHtml || '');
-  if (!body.trim()) return body;                 // 본문이 비어있으면 넣지 않음(난잡 방지)
-  if (hasBodyImageAlready(body)) return body;    // 중복 방지
+/**
+ * 본문에 1장만 “무해하게” 넣기:
+ * - 본문에 이미 <img 가 있으면 추가 삽입 스킵(난잡 방지)
+ * - 위치: 본문 최상단(리뷰/비리뷰 공통)
+ */
+function injectBodyImageOnce(rawBodyHtml, bodyImageFigure) {
+  const body = String(rawBodyHtml || '');
+  if (!bodyImageFigure) return body;
 
-  // 1) 첫 <h2> 직후
-  const h2rx = /(<h2\b[^>]*>[\s\S]*?<\/h2>)/i;
-  const m = body.match(h2rx);
-  if (m && m[1]) {
-    return body.replace(h2rx, `${m[1]}\n${figureHtml}`);
-  }
+  // 이미 이미지가 있으면 추가 삽입 금지
+  if (/<img\b/i.test(body)) return body;
 
-  // 2) 첫 </p> 뒤
-  const prx = /<\/p>/i;
-  if (prx.test(body)) {
-    return body.replace(prx, `</p>\n${figureHtml}`);
-  }
-
-  // 3) 맨 앞
-  return `${figureHtml}\n${body}`;
+  return `${bodyImageFigure}\n${body}`;
 }
 
 /* ───────────────────── 개별 포스트 렌더링 ───────────────────── */
@@ -434,10 +481,21 @@ function pickBlocks(postJson) {
 
   return {
     aio,
-    renderTldr: renderTldrFn ? (v) => renderTldrFn(v) : (v) => renderListItems(v),
-    renderKeyFacts: renderKeyFactsFn ? (v) => renderKeyFactsFn(v) : (v) => renderListItems(v),
-    renderFaq: renderFaqFn ? (v) => renderFaqFn(v) : (v) => renderFaq(v),
-    renderSources: renderSourcesFn ? (v) => renderSourcesFn(v) : (v) => renderSources(v),
+    renderTldr: renderTldrFn
+      ? (v) => renderTldrFn(v)
+      : (v) => renderListItems(v),
+
+    renderKeyFacts: renderKeyFactsFn
+      ? (v) => renderKeyFactsFn(v)
+      : (v) => renderListItems(v),
+
+    renderFaq: renderFaqFn
+      ? (v) => renderFaqFn(v)
+      : (v) => renderFaq(v),
+
+    renderSources: renderSourcesFn
+      ? (v) => renderSourcesFn(v)
+      : (v) => renderSources(v),
   };
 }
 
@@ -506,25 +564,28 @@ function renderOne(template, postJson, jsonPath) {
   const blocks = pickBlocks(postJson);
   const aio = blocks.aio;
 
-  // [ADD] 본문 이미지 1장 삽입(가능할 때만)
-  let bodyHtml = String(postJson.body || '');
-  const bodyImageUrl = pickBodyImageUrl(postJson);
-  if (bodyImageUrl) {
-    const alt = buildBodyImageAlt(postJson, meta);
-    const fig = buildBodyImageFigure(bodyImageUrl, alt);
-    bodyHtml = injectBodyImageIntoBody(bodyHtml, fig);
-  }
-
   html = html.replace('{{tldr}}', blocks.renderTldr(aio.tldr));
   html = html.replace('{{keyfacts}}', blocks.renderKeyFacts(aio.keyfacts));
+
+  // [ADD] 본문 이미지 1장 삽입(파일이 있을 때만)
+  const bodyImage = resolveBodyImageFromLocal({ slug, pageId, cdnBase, postJson });
+  const figure = bodyImage ? buildBodyImageFigure(bodyImage) : '';
+
+  // 리뷰 라벨: 있으면 우선 삽입, 없으면 그냥 스킵(여기서 “발급/생성”은 하지 않음)
+  // 타 라벨: 동일(있으면 삽입, 없으면 스킵)
+  // => 생성/확보는 images 단계에서 수행하고, render는 “부착만” 담당 (리스크 최소화)
+  let bodyHtml = postJson.body || '';
+  bodyHtml = injectBodyImageOnce(bodyHtml, figure);
+
   html = html.replace('{{body}}', bodyHtml);
   html = html.replace('{{faq}}', blocks.renderFaq(aio.faq));
   html = html.replace('{{sources}}', blocks.renderSources(aio.sources));
 
   // 디버그 주석
+  const biNote = bodyImage ? `bodyImage=1` : `bodyImage=0`;
   html = html.replace(
     '</head>',
-    `<!-- render-posts: pageId=${escapeHtml(pageId)} via=${escapeHtml(pidRes.via)} bodyImage=${escapeHtml(bodyImageUrl || '')} -->\n</head>`
+    `<!-- render-posts: pageId=${escapeHtml(pageId)} via=${escapeHtml(pidRes.via)} ${biNote} -->\n</head>`
   );
 
   return html;
@@ -539,6 +600,7 @@ function main() {
   console.log('[render-posts] TEMPLATE  =', TEMPLATE_PATH);
   console.log('[render-posts] OUTPUT    =', OUTPUT_DIR);
   console.log('[render-posts] JOURNAL   =', JOURNAL_FILE);
+  console.log('[render-posts] BODY_DIR  =', DIST_BODY_DIR);
 
   ensureDir(OUTPUT_DIR);
   ensureDir(MANIFESTS_DIR);
