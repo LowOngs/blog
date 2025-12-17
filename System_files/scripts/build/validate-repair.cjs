@@ -12,6 +12,9 @@
  *  - pageId 정답은 content/posts/*.json 이다.
  *  - validate는 render 실수를 100% 커버(회수/삽입)해야 한다.
  *  - 끝까지 못 찾으면 빌드 통과 금지(생명).
+ *
+ * [PATCH v2]
+ *  - "이미지 본문 뚫고 나옴" 방지: hero figure/img + 모든 img에 max-width/height 보정
  */
 
 const fs = require('fs');
@@ -132,12 +135,10 @@ function ensurePageIdRecovered(slugBase, html) {
   let pid = getPageIdFromPostJson(slugBase);
   if (pid) return pid;
 
-  // ids 1회 복구 시도 (예: JSON에 pageId가 빠진 채로 넘어온 경우)
   runIdsOnceOrFail();
   pid = getPageIdFromPostJson(slugBase);
   if (pid) return pid;
 
-  // WAL 회수 (ledger가 깨져도 ids가 남긴 흔적이면 살릴 수 있음)
   pid = recoverPageIdFromJournal(slugBase);
   if (pid) return pid;
 
@@ -212,6 +213,69 @@ function updateOgAndTwitterImage(html, slugBase) {
   return { html, changed, pageId, ogUrl };
 }
 
+/* ───────────────────── [PATCH v2] 이미지 뚫고 나옴 방지 ───────────────────── */
+
+function ensureHeroFigureOverflowHidden(html) {
+  // figure.post-hero가 있으면 overflow:hidden을 인라인으로 강제(중복 삽입 방지)
+  let changed = false;
+  html = html.replace(/<figure\b([^>]*\bclass=["'][^"']*\bpost-hero\b[^"']*["'][^>]*)>/gi, (m, attrs) => {
+    if (/style\s*=/.test(attrs)) {
+      // style이 있으면 overflow:hidden만 합치기
+      const out = m.replace(/style\s*=\s*["']([^"']*)["']/i, (mm, css) => {
+        if (/overflow\s*:\s*hidden/i.test(css)) return mm;
+        const next = (css.trim().endsWith(';') ? css.trim() : (css.trim() ? css.trim() + ';' : '')) + 'overflow:hidden;';
+        changed = true;
+        return `style="${next}"`;
+      });
+      return out;
+    }
+    changed = true;
+    return `<figure${attrs} style="overflow:hidden;">`;
+  });
+  return { html, changed };
+}
+
+function ensureAllImagesResponsive(html) {
+  // 모든 img에 max-width:100%;height:auto;를 인라인으로 강제(이미 있으면 합침)
+  let changed = false;
+
+  html = html.replace(/<img\b([^>]*?)>/gi, (m, attrs) => {
+    // style 있으면 합치기
+    if (/style\s*=/.test(attrs)) {
+      let did = false;
+      const out = m.replace(/style\s*=\s*["']([^"']*)["']/i, (mm, css) => {
+        let nextCss = css || '';
+        if (!/max-width\s*:\s*100%/i.test(nextCss)) { nextCss += (nextCss.trim().endsWith(';') || nextCss.trim()==='' ? '' : ';') + 'max-width:100%;'; did = true; }
+        if (!/height\s*:\s*auto/i.test(nextCss))    { nextCss += (nextCss.trim().endsWith(';') || nextCss.trim()==='' ? '' : ';') + 'height:auto;'; did = true; }
+        if (!did) return mm;
+        changed = true;
+        return `style="${nextCss}"`;
+      });
+      return out;
+    }
+
+    // style 없으면 새로 추가
+    changed = true;
+    return `<img${attrs} style="max-width:100%;height:auto;">`;
+  });
+
+  return { html, changed };
+}
+
+function applyImageOverflowFix(html) {
+  let changed = false;
+
+  const a = ensureHeroFigureOverflowHidden(html);
+  html = a.html; changed = changed || a.changed;
+
+  const b = ensureAllImagesResponsive(html);
+  html = b.html; changed = changed || b.changed;
+
+  return { html, changed };
+}
+
+/* ───────────────────── main ───────────────────── */
+
 function main() {
   console.log('────────────────────────────────────────────');
   console.log('[validate] DIST      =', DIST_DIR);
@@ -233,14 +297,27 @@ function main() {
     const filename = path.basename(file);
     const slugBase = filename.replace(/\.html$/i, '');
 
-    const html = fs.readFileSync(file, 'utf8');
+    const html0 = fs.readFileSync(file, 'utf8');
+    let html = html0;
+    let changed = false;
 
     try {
+      // 1) 기존 OG/twitter/pageId 교정
       const out = updateOgAndTwitterImage(html, slugBase);
-      if (out.changed) {
-        fs.writeFileSync(file, out.html, 'utf8');
+      html = out.html;
+      changed = changed || out.changed;
+
+      // 2) ✅ [PATCH v2] 이미지 overflow 방지(최종 안전망)
+      const imgFix = applyImageOverflowFix(html);
+      html = imgFix.html;
+      changed = changed || imgFix.changed;
+
+      if (changed) {
+        fs.writeFileSync(file, html, 'utf8');
         fixedCount += 1;
-        console.log(`FIX ${filename} → pageId=${out.pageId}, og/twitter=${out.ogUrl}`);
+        // out.pageId/out.ogUrl은 out.changed가 false일 수도 있으니 안전하게 표시
+        const pid = extractPageIdFromHtml(html) || '(unknown)';
+        console.log(`FIX ${filename} → pageId=${pid}`);
       }
     } catch (e) {
       failCount += 1;
