@@ -1,10 +1,27 @@
 // System_files/scripts/build/seed-scheduler.cjs
 // 시드풀 → 오늘 발행할 큐(dist/queue/today.json) 생성
-// ✅ SCHEDULE_MODE 완전 제거 (이제 스케줄/발행 통제는 워크플로 + PUBLISH_MODE/BODY_WRITE_MODE로만)
-// - 이 스크립트는 "큐 생성"만 담당합니다.
+// ✅ SCHEDULE_MODE 완전 제거
+// - BODY_WRITE_MODE: local | active  (기본 local)
+// - PUBLISH_MODE:    disable | enable (기본 disable)
+// 이 파일은 “큐 생성”만 담당 (발급/발행 차단은 ids/publish 쪽에서 처리)
 
 const fs = require('fs');
 const path = require('path');
+
+// ────────────────────────────────────
+// 모드(새 안전장치) — normalize
+// ────────────────────────────────────
+function normBodyWriteMode(v) {
+  const x = String(v || '').trim().toLowerCase();
+  return (x === 'active') ? 'active' : 'local';
+}
+function normPublishMode(v) {
+  const x = String(v || '').trim().toLowerCase();
+  return (x === 'enable') ? 'enable' : 'disable';
+}
+
+const BODY_WRITE_MODE = normBodyWriteMode(process.env.BODY_WRITE_MODE);
+const PUBLISH_MODE = normPublishMode(process.env.PUBLISH_MODE);
 
 // ────────────────────────────────────
 // 기본 경로 설정
@@ -25,13 +42,12 @@ function getTodayInfo() {
   let weekday = now.getUTCDay();
   if (weekday === 0) weekday = 7;
 
-  // ISO 주차(대략적)
+  // ISO 주차(대략)
   const oneJan = new Date(Date.UTC(now.getUTCFullYear(), 0, 1));
   const diff   = (now - oneJan) / 86400000;
   const isoWeek = Math.floor((diff + oneJan.getUTCDay() + 1) / 7);
 
   const dateStr = now.toISOString().slice(0, 10); // YYYY-MM-DD
-
   return { now, dateStr, weekday, isoWeek };
 }
 
@@ -40,49 +56,42 @@ function getTodayInfo() {
 // ────────────────────────────────────
 function planForWeekday(weekday) {
   switch (weekday) {
-    case 1: // Mon
-      return [
-        { label: 'how-to-playbooks', mode: 'trend' },
-        { label: 'app-reviews',      mode: 'trend' },
-      ];
-    case 2: // Tue
-      return [
-        { label: 'how-to-playbooks', mode: 'trend' },
-      ];
-    case 3: // Wed
-      return [
-        { label: 'how-to-playbooks',     mode: 'trend' },
-        { label: 'app-reviews',          mode: 'trend' },
-        { label: 'templates-checklists', mode: 'trend' },
-      ];
-    case 4: // Thu
-      return [
-        { label: 'how-to-playbooks', mode: 'trend' },
-      ];
-    case 5: // Fri
-      return [
-        { label: 'how-to-playbooks', mode: 'trend' },
-        { label: 'app-reviews',      mode: 'trend' },
-      ];
-    case 6: // Sat
-      return [
-        { label: 'smart-savings', mode: 'trend' },
-      ];
-    case 7: // Sun
-      return [
-        { label: 'smart-savings', mode: 'trend' },
-      ];
-    default:
-      return [
-        { label: 'how-to-playbooks', mode: 'trend' },
-        { label: 'app-reviews',      mode: 'trend' },
-      ];
+    case 1: return [
+      { label: 'how-to-playbooks', mode: 'trend' },
+      { label: 'app-reviews',      mode: 'trend' },
+    ];
+    case 2: return [
+      { label: 'how-to-playbooks', mode: 'trend' },
+    ];
+    case 3: return [
+      { label: 'how-to-playbooks',     mode: 'trend' },
+      { label: 'app-reviews',          mode: 'trend' },
+      { label: 'templates-checklists', mode: 'trend' },
+    ];
+    case 4: return [
+      { label: 'how-to-playbooks', mode: 'trend' },
+    ];
+    case 5: return [
+      { label: 'how-to-playbooks', mode: 'trend' },
+      { label: 'app-reviews',      mode: 'trend' },
+    ];
+    case 6: return [
+      { label: 'smart-savings', mode: 'trend' },
+    ];
+    case 7: return [
+      { label: 'smart-savings', mode: 'trend' },
+    ];
+    default: return [
+      { label: 'how-to-playbooks', mode: 'trend' },
+      { label: 'app-reviews',      mode: 'trend' },
+    ];
   }
 }
 
 // ────────────────────────────────────
-// Fallback 라벨 설정
-// ────────────────────────────────────
+/**
+ * Fallback 라벨 설정
+ */
 const FALLBACK_LABELS = [
   'how-to-playbooks',
   'app-reviews',
@@ -97,7 +106,13 @@ function loadSeedConfig(label) {
   const file = path.join(SEEDDIR, `${label}.json`);
   if (!fs.existsSync(file)) {
     console.warn(`[seed-scheduler][WARN] 시드 파일 없음: ${file}`);
-    const empty = { label, trendLimit: 0, evergreenLimit: 0, trend: [], evergreen: [] };
+    const empty = {
+      label,
+      trendLimit: 0,
+      evergreenLimit: 0,
+      trend: [],
+      evergreen: [],
+    };
     SEED_CACHE.set(label, empty);
     return empty;
   }
@@ -188,9 +203,11 @@ function pickSeedForLabel(label, preferredMode, usedIds, todayStr) {
   console.log('[seed-scheduler] SEED   =', SEEDDIR);
   console.log('[seed-scheduler] OUTDIR =', OUTDIR);
   console.log('[seed-scheduler] DATE   =', dateStr, 'weekday=', weekday, 'isoWeek=', isoWeek);
+  console.log('[seed-scheduler] BODY_WRITE_MODE =', BODY_WRITE_MODE);
+  console.log('[seed-scheduler] PUBLISH_MODE    =', PUBLISH_MODE);
 
   const plan = planForWeekday(weekday);
-  console.log('[seed-scheduler] planned labels =', plan.map((p) => p.label).join(', '));
+  console.log('[seed-scheduler] planned labels =', plan.map(p => p.label).join(', '));
 
   const usedIds = new Set();
   const items = [];
@@ -223,11 +240,11 @@ function pickSeedForLabel(label, preferredMode, usedIds, todayStr) {
 
     const { seed, mode } = picked;
 
-    if (fallbackFrom) {
-      console.log(`[seed-scheduler][PICK] ${finalLabel} (fallback from ${fallbackFrom}) → ${mode} ${seed.id} | ${seed.title}`);
-    } else {
-      console.log(`[seed-scheduler][PICK] ${finalLabel} → ${mode} ${seed.id} | ${seed.title}`);
-    }
+    console.log(
+      fallbackFrom
+        ? `[seed-scheduler][PICK] ${finalLabel} (fallback from ${fallbackFrom}) → ${mode} ${seed.id} | ${seed.title}`
+        : `[seed-scheduler][PICK] ${finalLabel} → ${mode} ${seed.id} | ${seed.title}`
+    );
 
     const item = {
       date: dateStr,
@@ -243,12 +260,19 @@ function pickSeedForLabel(label, preferredMode, usedIds, todayStr) {
     };
 
     if (fallbackFrom) item.fallbackFrom = fallbackFrom;
-
     items.push(item);
   }
 
   const outFile = path.join(OUTDIR, 'today.json');
-  const outJson = { date: dateStr, items };
+  const outJson = {
+    date: dateStr,
+
+    // ✅ queue-to-posts가 참고할 수 있도록 “새 모드”를 남김
+    bodyWriteMode: BODY_WRITE_MODE,
+    publishMode: PUBLISH_MODE,
+
+    items,
+  };
 
   fs.writeFileSync(outFile, JSON.stringify(outJson, null, 2), 'utf8');
   console.log('[seed-scheduler] queue written →', outFile);
