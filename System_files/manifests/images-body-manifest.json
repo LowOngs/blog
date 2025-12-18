@@ -1,1 +1,35 @@
+{
+  "meta": {
+    "version": 1,
+    "policy": {
+      "maxImagesPerPost": 1,
+      "allowedSource": ["official", "generated"],
+      "fallback": "skip"
+    }
+  },
 
+  "items": {
+    "howto-20251215-001": {
+      "pageId": "page000005",
+      "label": "how-to-playbooks",
+      "sourceType": "generated",
+      "url": "https://ongsblog.com/images/body/page000005_howto-20251215-001_960x540.webp",
+      "alt": "Cloudflare placed in front of a Blogger site architecture diagram",
+      "width": 960,
+      "height": 540,
+      "safe": true
+    },
+
+    "device-review-20251216-002": {
+      "pageId": "page000006",
+      "label": "device-reviews",
+      "sourceType": "official",
+      "officialFrom": "Apple",
+      "url": "https://ongsblog.com/images/body/page000006_device-review_960x540.webp",
+      "alt": "Apple Watch Series design overview",
+      "width": 960,
+      "height": 540,
+      "safe": true
+    }
+  }
+}
