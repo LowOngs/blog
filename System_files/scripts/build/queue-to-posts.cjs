@@ -1,12 +1,10 @@
 // System_files/scripts/build/queue-to-posts.cjs
 // dist/queue/today.json → content/posts/*.json 자동 생성기
+// ✅ SCHEDULE_MODE 완전 제거 (이제 queue에는 mode가 없습니다)
 
 const fs = require('fs');
 const path = require('path');
 
-// ────────────────────────────────────
-//  경로 설정
-// ────────────────────────────────────
 const ROOT        = path.resolve(__dirname, '..', '..'); // System_files
 const QUEUE_DIR   = path.join(ROOT, 'dist', 'queue');
 const QUEUE_FILE  = path.join(QUEUE_DIR, 'today.json');
@@ -19,7 +17,7 @@ function log(...a) {
 }
 
 // ────────────────────────────────────
-//  프로필 로딩 (라벨 → profileId 매핑만 사용)
+// 프로필 로딩 (라벨 → profileId 매핑만 사용)
 // ────────────────────────────────────
 const SEEDPOOL_DIR = path.join(ROOT, 'seedpool');
 const PROFILES_DIR = path.join(SEEDPOOL_DIR, 'profiles');
@@ -51,7 +49,7 @@ function getProfileIdForLabel(label) {
 }
 
 // ────────────────────────────────────
-//  today.json 로드
+// today.json 로드
 // ────────────────────────────────────
 if (!fs.existsSync(QUEUE_FILE)) {
   log('today.json 없음. 생성할 포스트가 없어 건너뜀.');
@@ -67,8 +65,7 @@ try {
   process.exit(1);
 }
 
-const scheduleMode = queue.mode || process.env.SCHEDULE_MODE || 'test';
-log(`today.json 로드 완료 → date=${queue.date || 'N/A'}, mode=${scheduleMode}`);
+log(`today.json 로드 완료 → date=${queue.date || 'N/A'}`);
 
 const items = Array.isArray(queue.items) ? queue.items : [];
 if (!items.length) {
@@ -77,16 +74,16 @@ if (!items.length) {
 }
 
 // ────────────────────────────────────
-//  라벨 → 파일 prefix 매핑
-//  (blogger.cjs와 prefix가 어긋나면 slug/라벨 추적이 꼬입니다)
+// 라벨 → 파일 prefix 매핑
+// (blogger.cjs와 prefix가 어긋나면 slug/라벨 추적이 꼬입니다)
 // ────────────────────────────────────
 const LABEL_TO_PREFIX = {
   'app-reviews':            'app',
   'device-reviews':         'device',
-  'subscription-services':  'subscription', // 기존 sub → subscription (혼선 방지)
+  'subscription-services':  'subscription',
   'how-to-playbooks':       'howto',
-  'smart-savings':          'smartsavings',  // 기존 smart → smartsavings (혼선 방지)
-  'templates-checklists':   'templates'      // 기존 tpl → templates (혼선 방지)
+  'smart-savings':          'smartsavings',
+  'templates-checklists':   'templates'
 };
 
 const counters = {}; // label별 일련번호
@@ -105,7 +102,6 @@ function getDateString(item) {
 }
 
 function isoUtcMidnight(dateYYYYMMDD) {
-  // dateYYYYMMDD like 20251212
   const y = dateYYYYMMDD.slice(0, 4);
   const m = dateYYYYMMDD.slice(4, 6);
   const d = dateYYYYMMDD.slice(6, 8);
@@ -119,8 +115,6 @@ function buildBodyPrompt(item, label) {
   const intent = (item.intent || '').trim();
   const notes = (item.notes || '').trim();
 
-  // generate-body.cjs가 그대로 받아서 글을 쓰기 좋은 형태로만 구성
-  // (여기서 길이/톤은 label-profiles.json에서 결정하도록 둠)
   const lines = [
     'Write a complete blog post in English for an English-speaking audience.',
     'Use clear headings, short paragraphs, and practical examples.',
@@ -153,8 +147,8 @@ for (const item of items) {
   if (!counters[label]) counters[label] = 1;
   else counters[label]++;
 
-  const idx  = pad3(counters[label]);     // 001, 002, ...
-  const slug = `${prefix}-${ymd}-${idx}`; // 예: app-20251212-001
+  const idx  = pad3(counters[label]);
+  const slug = `${prefix}-${ymd}-${idx}`;
 
   const targetPath = path.join(CONTENT_DIR, `${slug}.json`);
 
@@ -180,7 +174,7 @@ for (const item of items) {
 
     // 본문 생성기용 프롬프트 (없으면 generate-body가 스킵됨)
     bodyPrompt: buildBodyPrompt(item, label),
-    body: "",
+    body: '',
 
     aio: {
       tldr: [],
@@ -200,8 +194,7 @@ for (const item of items) {
       audience: item.audience,
       intent: item.intent,
       priority: item.priority,
-      notes: item.notes,
-      scheduleMode
+      notes: item.notes
     }
   };
 
