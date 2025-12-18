@@ -1,10 +1,15 @@
 // System_files/scripts/build/queue-to-posts.cjs
-// dist/queue/today.json → content/posts/*.json 자동 생성기
-// ✅ SCHEDULE_MODE 완전 제거 (이제 queue에는 mode가 없습니다)
+// dist/queue/today.json → content/posts/*.json
+// ✅ SCHEDULE_MODE 제거
+// - queue.bodyWriteMode / queue.publishMode 사용
+// - 생성 자체는 항상 가능, 발급/발행 차단은 ids/publish 단계에서 통제
 
 const fs = require('fs');
 const path = require('path');
 
+// ────────────────────────────────────
+// 경로
+// ────────────────────────────────────
 const ROOT        = path.resolve(__dirname, '..', '..'); // System_files
 const QUEUE_DIR   = path.join(ROOT, 'dist', 'queue');
 const QUEUE_FILE  = path.join(QUEUE_DIR, 'today.json');
@@ -17,7 +22,7 @@ function log(...a) {
 }
 
 // ────────────────────────────────────
-// 프로필 로딩 (라벨 → profileId 매핑만 사용)
+// 프로필 로딩 (라벨 → profileId)
 // ────────────────────────────────────
 const SEEDPOOL_DIR = path.join(ROOT, 'seedpool');
 const PROFILES_DIR = path.join(SEEDPOOL_DIR, 'profiles');
@@ -25,57 +30,45 @@ const LABELS_FILE  = path.join(PROFILES_DIR, 'labels.json');
 
 function safeReadJson(file, fallback) {
   try {
-    if (!fs.existsSync(file)) {
-      log(`경고: ${path.basename(file)} 없음, 기본값 사용.`);
-      return fallback;
-    }
-    const raw = fs.readFileSync(file, 'utf8');
-    return JSON.parse(raw);
-  } catch (e) {
-    console.warn('[seed→post]', path.basename(file), '읽기/파싱 실패:', e.message || e);
+    if (!fs.existsSync(file)) return fallback;
+    return JSON.parse(fs.readFileSync(file, 'utf8'));
+  } catch {
     return fallback;
   }
 }
 
 const LABEL_TO_PROFILE_ID = safeReadJson(LABELS_FILE, {});
-
-function getProfileIdForLabel(label) {
-  const pid = LABEL_TO_PROFILE_ID[label];
-  if (!pid) {
-    log(`경고: 라벨에 대한 프로필 ID 없음 → label=${label}`);
-    return null;
-  }
-  return pid;
-}
+const getProfileIdForLabel = (label) => LABEL_TO_PROFILE_ID[label] || null;
 
 // ────────────────────────────────────
 // today.json 로드
 // ────────────────────────────────────
 if (!fs.existsSync(QUEUE_FILE)) {
-  log('today.json 없음. 생성할 포스트가 없어 건너뜀.');
+  log('today.json 없음 → 종료');
   process.exit(0);
 }
 
 let queue;
 try {
-  const raw = fs.readFileSync(QUEUE_FILE, 'utf8');
-  queue = JSON.parse(raw);
+  queue = JSON.parse(fs.readFileSync(QUEUE_FILE, 'utf8'));
 } catch (e) {
   console.error('[seed→post] today.json 파싱 실패:', e.message || e);
   process.exit(1);
 }
 
-log(`today.json 로드 완료 → date=${queue.date || 'N/A'}`);
+const bodyWriteMode = queue.bodyWriteMode || 'local';   // local | active
+const publishMode   = queue.publishMode   || 'disable'; // disable | enable
+
+log(`queue loaded → date=${queue.date || 'N/A'} bodyWriteMode=${bodyWriteMode} publishMode=${publishMode}`);
 
 const items = Array.isArray(queue.items) ? queue.items : [];
 if (!items.length) {
-  log('today.json 안에 items가 비어 있음. 건너뜀.');
+  log('items 비어 있음 → 종료');
   process.exit(0);
 }
 
 // ────────────────────────────────────
-// 라벨 → 파일 prefix 매핑
-// (blogger.cjs와 prefix가 어긋나면 slug/라벨 추적이 꼬입니다)
+// 라벨 → 파일 prefix
 // ────────────────────────────────────
 const LABEL_TO_PREFIX = {
   'app-reviews':            'app',
@@ -86,25 +79,18 @@ const LABEL_TO_PREFIX = {
   'templates-checklists':   'templates'
 };
 
-const counters = {}; // label별 일련번호
+const counters = {};
+const pad3 = (n) => String(n).padStart(3, '0');
 
-function pad3(n) {
-  return String(n).padStart(3, '0');
-}
-
-// queue.date 또는 item.date, 없으면 오늘 날짜 사용
 function getDateString(item) {
-  const base =
-    item.date ||
-    queue.date ||
-    new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
-  return base.replace(/-/g, ''); // "YYYYMMDD"
+  const base = item.date || queue.date || new Date().toISOString().slice(0, 10);
+  return base.replace(/-/g, '');
 }
 
-function isoUtcMidnight(dateYYYYMMDD) {
-  const y = dateYYYYMMDD.slice(0, 4);
-  const m = dateYYYYMMDD.slice(4, 6);
-  const d = dateYYYYMMDD.slice(6, 8);
+function isoUtcMidnight(yyyymmdd) {
+  const y = yyyymmdd.slice(0, 4);
+  const m = yyyymmdd.slice(4, 6);
+  const d = yyyymmdd.slice(6, 8);
   return `${y}-${m}-${d}T00:00:00Z`;
 }
 
@@ -115,7 +101,7 @@ function buildBodyPrompt(item, label) {
   const intent = (item.intent || '').trim();
   const notes = (item.notes || '').trim();
 
-  const lines = [
+  return [
     'Write a complete blog post in English for an English-speaking audience.',
     'Use clear headings, short paragraphs, and practical examples.',
     '',
@@ -131,11 +117,12 @@ function buildBodyPrompt(item, label) {
     '- Step-by-step guidance (when applicable)',
     '- Common mistakes and quick fixes',
     '- A concise conclusion'
-  ].filter(Boolean);
-
-  return lines.join('\n');
+  ].filter(Boolean).join('\n');
 }
 
+// ────────────────────────────────────
+// 생성
+// ────────────────────────────────────
 let created = 0;
 let skipped = 0;
 
@@ -144,21 +131,18 @@ for (const item of items) {
   const prefix  = LABEL_TO_PREFIX[label] || 'post';
   const ymd     = getDateString(item);
 
-  if (!counters[label]) counters[label] = 1;
-  else counters[label]++;
-
+  counters[label] = (counters[label] || 0) + 1;
   const idx  = pad3(counters[label]);
   const slug = `${prefix}-${ymd}-${idx}`;
 
   const targetPath = path.join(CONTENT_DIR, `${slug}.json`);
-
   if (fs.existsSync(targetPath)) {
-    log(`이미 존재 → ${path.basename(targetPath)} , 건너뜀.`);
+    log(`exists → ${slug}.json (skip)`);
     skipped++;
     continue;
   }
 
-  const queueDate  = (item.date || queue.date || new Date().toISOString().slice(0, 10));
+  const queueDate  = item.date || queue.date || new Date().toISOString().slice(0, 10);
   const ymdISO     = queueDate.replace(/-/g, '');
   const updatedISO = isoUtcMidnight(ymdISO);
 
@@ -172,7 +156,6 @@ for (const item of items) {
     intent: item.intent || 'review',
     updated: updatedISO,
 
-    // 본문 생성기용 프롬프트 (없으면 generate-body가 스킵됨)
     bodyPrompt: buildBodyPrompt(item, label),
     body: '',
 
@@ -186,7 +169,7 @@ for (const item of items) {
 
     seedMeta: {
       queueDate,
-      label: item.label,
+      label,
       mode: item.mode,
       profileId,
       id: item.id,
@@ -194,13 +177,15 @@ for (const item of items) {
       audience: item.audience,
       intent: item.intent,
       priority: item.priority,
-      notes: item.notes
+      notes: item.notes,
+      bodyWriteMode,
+      publishMode
     }
   };
 
   fs.writeFileSync(targetPath, JSON.stringify(doc, null, 2), 'utf8');
-  log(`created ${path.basename(targetPath)} from seed id=${item.id}`);
+  log(`created ${slug}.json (bodyWriteMode=${bodyWriteMode}, publishMode=${publishMode})`);
   created++;
 }
 
-log(`완료: created=${created}, skipped=${skipped}`);
+log(`done: created=${created}, skipped=${skipped}`);
