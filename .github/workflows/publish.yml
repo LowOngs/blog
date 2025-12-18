@@ -1,3 +1,4 @@
+# .github/workflows/publish.yml
 name: Publish Blog (Blogger)
 
 on:
@@ -8,9 +9,7 @@ on:
         required: true
         type: choice
         default: "manual"
-        options:
-          - "auto"
-          - "manual"
+        options: ["auto", "manual"]
 
       MANUAL_JOB:
         description: "manual일 때만 의미: schedule 1회 또는 라벨 1회"
@@ -27,17 +26,14 @@ on:
           - "label_once_templates-checklists"
 
       DRY_RUN:
-        description: "manual에서만 의미: true=no_live / false=live"
+        description: "manual에서만 의미: true=no_live / false=live(실행권한 필요)"
         required: true
         type: choice
         default: "true"
-        options:
-          - "true"
-          - "false"
+        options: ["true", "false"]
 
   schedule:
-    # 옹스님 운영 시간대에 맞게 유지/조정
-    - cron: "30 0 * * *"
+    - cron: "30 0 * * *" # UTC 기준. 필요 시 조정
 
 permissions:
   contents: read
@@ -48,16 +44,13 @@ concurrency:
 
 jobs:
   build-and-publish:
-    # ✅ 핵심: job-level 하드 가드 (blocked면 job 자체가 시작 불가)
-    # - schedule: SCHEDULE_MODE=live일 때만
-    # - workflow_dispatch:
-    #   - DRY_RUN=true면 스위치와 무관하게 허용(테스트)
-    #   - DRY_RUN=false면 SCHEDULE_MODE=live일 때만(실발행은 스위치만)
+    # ✅ 하드 가드: schedule은 PUBLISH_MODE=enable일 때만 시작
+    # ✅ 수동은 DRY_RUN=true면 항상 허용, DRY_RUN=false면 PUBLISH_MODE=enable일 때만
     if: >-
       ${{
-        (github.event_name == 'schedule' && secrets.SCHEDULE_MODE == 'live')
+        (github.event_name == 'schedule' && secrets.PUBLISH_MODE == 'enable')
         || (github.event_name == 'workflow_dispatch'
-            && (github.event.inputs.DRY_RUN == 'true' || secrets.SCHEDULE_MODE == 'live'))
+            && (github.event.inputs.DRY_RUN == 'true' || secrets.PUBLISH_MODE == 'enable'))
       }}
 
     runs-on: ubuntu-latest
@@ -71,10 +64,11 @@ jobs:
       TIME_ZONE:       America/Los_Angeles
       AOIA_ENABLE:     "false"
 
-      # ✅ 스위치(자동발행/실발행 권한)
-      SCHEDULE_MODE:   ${{ secrets.SCHEDULE_MODE }}
+      # ✅ 최종 안전장치(2개)
+      PUBLISH_MODE:    ${{ secrets.PUBLISH_MODE }}       # enable|disable
+      BODY_WRITE_MODE: ${{ secrets.BODY_WRITE_MODE }}    # live|dry (미설정이면 아래에서 dry로 보정)
 
-      # === OpenAI (본문 생성기) ===
+      # === OpenAI ===
       OPENAI_API_KEY:  ${{ secrets.OPENAI_API_KEY }}
       OPENAI_MODEL:    "gpt-4.1-mini"
 
@@ -104,65 +98,104 @@ jobs:
             npm install
           fi
 
-      - name: Guard (log only)
+      - name: Resolve effective modes (single source)
+        shell: bash
         run: |
-          echo "event_name=${{ github.event_name }}"
-          echo "SCHEDULE_MODE=${SCHEDULE_MODE}"
-          echo "DRY_RUN(input)=${{ github.event.inputs.DRY_RUN || '' }}"
-          echo "[GUARD] job-level if already decided execution."
+          set -euo pipefail
 
-      - name: Resolve run mode
-        run: |
           EVENT="${{ github.event_name }}"
 
           # defaults
           RUN_MODE="manual"
           MANUAL_JOB="schedule_once"
-          DRY_RUN="true"
+          INPUT_DRY_RUN="true"
 
           if [ "$EVENT" = "workflow_dispatch" ]; then
             RUN_MODE="${{ github.event.inputs.RUN_MODE }}"
             MANUAL_JOB="${{ github.event.inputs.MANUAL_JOB }}"
-            DRY_RUN="${{ github.event.inputs.DRY_RUN }}"
+            INPUT_DRY_RUN="${{ github.event.inputs.DRY_RUN }}"
           else
-            # schedule 트리거는 auto로 취급 (강제 live+실발행)
+            # schedule은 auto + 실발행으로 고정 (단, job-level if에서 PUBLISH_MODE=enable 아니면 시작 불가)
             RUN_MODE="auto"
             MANUAL_JOB="schedule_once"
-            DRY_RUN="false"
+            INPUT_DRY_RUN="false"
           fi
 
+          # BODY_WRITE_MODE 기본값 보정: 미설정이면 dry
+          BWM="${BODY_WRITE_MODE:-dry}"
+          if [ "$BWM" != "live" ]; then BWM="dry"; fi
+
+          # BODY_WRITE_MODE가 dry면 어떤 경우든 안전하게 DRY_RUN=true로 고정
+          EFFECTIVE_DRY_RUN="$INPUT_DRY_RUN"
+          if [ "$BWM" = "dry" ]; then
+            EFFECTIVE_DRY_RUN="true"
+          fi
+
+          # label_once_* 처리
           LABEL_VALUE=""
           MAX_POSTS_VALUE=""
 
           if [ "$RUN_MODE" = "auto" ]; then
-            # ✅ auto는 무조건 실발행(단, job-level if로 스위치 live가 아니면 실행 자체가 불가)
-            DRY_RUN="false"
             LABEL_VALUE=""
             MAX_POSTS_VALUE=""
+            EFFECTIVE_DRY_RUN="false" # auto는 실발행 전제 (단, BWM=dry면 위에서 true로 덮임)
           else
-            # manual
             if [ "$MANUAL_JOB" = "schedule_once" ]; then
               LABEL_VALUE=""
               MAX_POSTS_VALUE=""
             else
-              # label_once_*
               LABEL_VALUE="${MANUAL_JOB#label_once_}"
               MAX_POSTS_VALUE="1"
             fi
           fi
 
-          echo "RUN_MODE=$RUN_MODE"         >> $GITHUB_ENV
-          echo "MANUAL_JOB=$MANUAL_JOB"     >> $GITHUB_ENV
-          echo "LABEL=$LABEL_VALUE"         >> $GITHUB_ENV
-          echo "MAX_POSTS=$MAX_POSTS_VALUE" >> $GITHUB_ENV
-          echo "DRY_RUN=$DRY_RUN"           >> $GITHUB_ENV
+          # ✅ 레거시 호환(당장 코드 안 부수기용)
+          # - ids/page-ids는 PAGE_ID_MODE를 사용하므로 BODY_WRITE_MODE 기반으로 매핑
+          if [ "$BWM" = "live" ] && [ "$EFFECTIVE_DRY_RUN" = "false" ]; then
+            PAGE_ID_MODE="live"
+          else
+            PAGE_ID_MODE="no_live"
+          fi
+
+          # - generate-body 등 일부가 SCHEDULE_MODE를 참조할 수 있어 호환값 주입
+          #   (향후 제거 가능)
+          if [ "$EFFECTIVE_DRY_RUN" = "false" ]; then
+            SCHEDULE_MODE="live"
+          else
+            SCHEDULE_MODE="test"
+          fi
+
+          echo "RUN_MODE=$RUN_MODE"               >> $GITHUB_ENV
+          echo "MANUAL_JOB=$MANUAL_JOB"           >> $GITHUB_ENV
+          echo "LABEL=$LABEL_VALUE"               >> $GITHUB_ENV
+          echo "MAX_POSTS=$MAX_POSTS_VALUE"       >> $GITHUB_ENV
+          echo "DRY_RUN=$EFFECTIVE_DRY_RUN"       >> $GITHUB_ENV
+          echo "PAGE_ID_MODE=$PAGE_ID_MODE"       >> $GITHUB_ENV
+          echo "SCHEDULE_MODE=$SCHEDULE_MODE"     >> $GITHUB_ENV
+          echo "BODY_WRITE_MODE=$BWM"             >> $GITHUB_ENV
 
           echo "Resolved:"
+          echo "  EVENT=$EVENT"
+          echo "  PUBLISH_MODE=${PUBLISH_MODE}"
+          echo "  BODY_WRITE_MODE=$BWM"
           echo "  RUN_MODE=$RUN_MODE"
           echo "  MANUAL_JOB=$MANUAL_JOB"
+          echo "  DRY_RUN(input)=$INPUT_DRY_RUN -> DRY_RUN(effective)=$EFFECTIVE_DRY_RUN"
+          echo "  PAGE_ID_MODE=$PAGE_ID_MODE"
+          echo "  SCHEDULE_MODE(compat)=$SCHEDULE_MODE"
           echo "  LABEL=$LABEL_VALUE"
           echo "  MAX_POSTS=$MAX_POSTS_VALUE"
-          echo "  DRY_RUN=$DRY_RUN"
+
+      - name: Hard guard (dispatch only)
+        if: github.event_name == 'workflow_dispatch'
+        shell: bash
+        run: |
+          set -euo pipefail
+          # 수동에서 DRY_RUN=false(실발행)면 PUBLISH_MODE=enable이어야 함 (job-level if로도 막히지만, 로그 명확화)
+          if [ "${DRY_RUN}" = "false" ] && [ "${PUBLISH_MODE}" != "enable" ]; then
+            echo "[GUARD] blocked: DRY_RUN=false requires PUBLISH_MODE=enable"
+            exit 1
+          fi
 
       - name: Verify required files exist
         run: |
@@ -186,12 +219,12 @@ jobs:
 
       - name: Issue page IDs (retry 2)
         env:
-          DRY_RUN: ${{ env.DRY_RUN }}
+          PAGE_ID_MODE: ${{ env.PAGE_ID_MODE }}
         run: |
           set -e
           tries=2
           for i in $(seq 1 $tries); do
-            echo "[ids] attempt $i/$tries"
+            echo "[ids] attempt $i/$tries (PAGE_ID_MODE=$PAGE_ID_MODE)"
             if node System_files/scripts/build/ids.cjs; then
               echo "[ids] OK"
               exit 0
@@ -205,6 +238,8 @@ jobs:
           exit 1
 
       - name: Generate article bodies (if body empty)
+        env:
+          SCHEDULE_MODE: ${{ env.SCHEDULE_MODE }} # compat (향후 제거 가능)
         run: node System_files/scripts/build/generate-body.cjs
 
       - name: Render posts (JSON → HTML)
