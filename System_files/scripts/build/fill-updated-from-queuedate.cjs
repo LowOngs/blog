@@ -2,17 +2,18 @@
 'use strict';
 
 /**
- * fill-updated-from-queuedate.cjs
+ * fill-updated-from-queuedate.cjs  (manual tool)
  * - content/posts/*.json에서 updated가 비어있는 항목을 채움
  * - 우선순위:
  *   1) seedMeta.queueDate (YYYY-MM-DD) -> updated: YYYY-MM-DDT00:00:00Z
- * - SCHEDULE_MODE:
- *   - live: 실제 저장
- *   - test: DRY-RUN (로그만)
  *
- * 실행:
- *   C:\google-blog> $env:SCHEDULE_MODE="test"; node .\System_files\scripts\build\fill-updated-from-queuedate.cjs
- *   C:\google-blog> $env:SCHEDULE_MODE="live"; node .\System_files\scripts\build\fill-updated-from-queuedate.cjs
+ * ✅ 잔재 정리:
+ * - SCHEDULE_MODE 제거
+ * - BODY_WRITE_MODE로 "실제 저장" 여부만 통제
+ *
+ * 실행 예:
+ *   BODY_WRITE_MODE=disable node .\System_files\scripts\build\fill-updated-from-queuedate.cjs  (DRY)
+ *   BODY_WRITE_MODE=enable  node .\System_files\scripts\build\fill-updated-from-queuedate.cjs  (WRITE)
  */
 
 try { require('dotenv').config(); } catch (_) {}
@@ -23,8 +24,9 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..', '..'); // System_files
 const POSTS_DIR = path.join(ROOT, 'content', 'posts');
 
-const SCHEDULE_MODE = process.env.SCHEDULE_MODE || 'test';
-const IS_LIVE = SCHEDULE_MODE === 'live';
+// ✅ 새 안전장치: 본문/JSON 쓰기 통제
+const BODY_WRITE_MODE = (process.env.BODY_WRITE_MODE || 'disable').trim().toLowerCase();
+const CAN_WRITE = BODY_WRITE_MODE === 'enable';
 
 function log(...a) { console.log('[fill-updated]', ...a); }
 function warn(...a) { console.warn('[fill-updated][WARN]', ...a); }
@@ -60,7 +62,7 @@ function hasUpdated(v) {
 function main() {
   log('ROOT =', ROOT);
   log('POSTS =', POSTS_DIR);
-  log('SCHEDULE_MODE =', SCHEDULE_MODE, IS_LIVE ? '(LIVE)' : '(DRY-RUN)');
+  log('BODY_WRITE_MODE =', BODY_WRITE_MODE, CAN_WRITE ? '(WRITE)' : '(DRY)');
 
   if (!fs.existsSync(POSTS_DIR)) {
     warn('content/posts 폴더가 없습니다.');
@@ -96,9 +98,9 @@ function main() {
 
     const newUpdated = makeUpdatedFromQueueDate(qd);
 
-    if (!IS_LIVE) {
-      log(`[DRY-RUN] slug=${slug} updated -> ${newUpdated}`);
-      filledSlugs.push(`${slug}(dry-run)`);
+    if (!CAN_WRITE) {
+      log(`[DRY] slug=${slug} updated -> ${newUpdated}`);
+      filledSlugs.push(`${slug}(dry)`);
       continue;
     }
 
