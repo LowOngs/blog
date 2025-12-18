@@ -19,7 +19,7 @@ env:
   CANONICAL_BASE: ${{ secrets.CANONICAL_BASE }}
   CDN_BASE: ${{ secrets.CDN_BASE }}
 
-  # ✅ 단일 안전장치: 스케줄 실동작 통제
+  # ✅ 새 안전장치(스케줄 실동작 통제)
   PUBLISH_MODE: ${{ secrets.PUBLISH_MODE }}
 
 jobs:
@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Guard (schedule requires PUBLISH_MODE=enable)
+      - name: Guard (schedule requires PUBLISH_MODE=enable + auto switch=true)
         shell: bash
         env:
           EVENT_NAME: ${{ github.event_name }}
@@ -45,6 +45,17 @@ jobs:
           # schedule일 때만 강제 통제
           if [ "${PUBLISH_MODE}" != "enable" ]; then
             echo "[GUARD] blocked: PUBLISH_MODE != enable"
+            exit 0
+          fi
+
+          if [ ! -f "System_files/manifests/auto-enable.json" ]; then
+            echo "[GUARD] blocked: missing auto-enable.json"
+            exit 0
+          fi
+
+          sw=$(node -e "try{const j=require('./System_files/manifests/auto-enable.json');process.stdout.write(String(!!j.autoEnable));}catch(e){process.stdout.write('false');}")
+          if [ "$sw" != "true" ]; then
+            echo "[GUARD] blocked: autoEnable != true"
             exit 0
           fi
 
