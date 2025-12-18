@@ -14,44 +14,65 @@ concurrency:
 
 env:
   NODE_VERSION: '20'
+
+  # ✅ 새 안전장치(스케줄 변수 제거)
+  PUBLISH_MODE: disable
+  BODY_WRITE_MODE: local
+
+  # 기존 값 유지
   OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
   OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
   CANONICAL_BASE: ${{ secrets.CANONICAL_BASE }}
   CDN_BASE: ${{ secrets.CDN_BASE }}
-  SCHEDULE_MODE: ${{ secrets.SCHEDULE_MODE }}
 
 jobs:
   build-queue:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Guard (switch-only)
+      - name: Guard — allow only when auto-enable switch is ON
+        id: guard
         shell: bash
         run: |
+          set -euo pipefail
           echo "event_name=${{ github.event_name }}"
-          echo "SCHEDULE_MODE=${SCHEDULE_MODE}"
 
-          # ✅ 옹스님 원칙: 스위치 live가 아니면 수동/자동 모두 차단
-          if [ "${SCHEDULE_MODE}" != "live" ]; then
-            echo "[GUARD] blocked: SCHEDULE_MODE != live"
-            exit 0
+          allow="true"
+          reason="ok"
+
+          if [ ! -f "System_files/manifests/auto-enable.json" ]; then
+            allow="false"
+            reason="blocked: missing System_files/manifests/auto-enable.json"
+          else
+            sw=$(node -e "try{const j=require('./System_files/manifests/auto-enable.json');process.stdout.write(String(!!j.autoEnable));}catch(e){process.stdout.write('false');}")
+            if [ "$sw" != "true" ]; then
+              allow="false"
+              reason="blocked: autoEnable != true"
+            fi
           fi
 
+          echo "allow=$allow"   >> "$GITHUB_OUTPUT"
+          echo "reason=$reason" >> "$GITHUB_OUTPUT"
+          echo "[GUARD] allow=$allow / $reason"
+
       - name: Checkout
+        if: steps.guard.outputs.allow == 'true'
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Setup Node
+        if: steps.guard.outputs.allow == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Install dependencies
-        run: |
-          npm ci
+        if: steps.guard.outputs.allow == 'true'
+        run: npm ci
 
       - name: Build firstgate artifacts (no publish)
+        if: steps.guard.outputs.allow == 'true'
         run: |
           set -euo pipefail
 
@@ -63,8 +84,10 @@ jobs:
           node System_files/scripts/build/images-renew.cjs
           node System_files/scripts/build/images-build-og.cjs
 
-          # 주의: 업로드 없이 rewrite만 하면 깨질 수 있음
-          # firstgate가 "실발행"이 목적이 아니면 rewrite는 빼는 게 안전합니다.
-          # node System_files/scripts/build/rewrite-images.js
-
           node System_files/scripts/build/validate-repair.cjs
+
+      - name: Skipped note
+        if: steps.guard.outputs.allow != 'true'
+        run: |
+          echo "[SKIP] firstgate blocked."
+          echo "reason=${{ steps.guard.outputs.reason }}"
