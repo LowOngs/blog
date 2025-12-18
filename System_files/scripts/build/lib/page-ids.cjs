@@ -1,194 +1,164 @@
-// System_files/scripts/build/lib/page-ids.cjs
-// page id ledger (no_live / live)
+'use strict';
+
+/**
+ * System_files/scripts/build/lib/page-ids.cjs
+ *
+ * 역할:
+ * - slug → pageId 매핑을 "ledger"로 관리
+ * - active와 local을 분리
+ *
+ * 파일:
+ * - manifests/page-ids.json        (active, 실발행/실번호)
+ * - manifests/page-ids.local.json  (local, 로컬 테스트 전용 번호)
+ * - manifests/pageid-journal.jsonl (WAL)
+ *
+ * 규칙:
+ * - BODY_WRITE_MODE=local: local ledger를 사용 (PUBLISH_MODE와 무관하게 +1 허용)
+ * - BODY_WRITE_MODE=active: active ledger 사용. 단, PUBLISH_MODE=enable일 때만 발급 허용
+ * - PUBLISH_MODE=disable은 "일시정지": 카운터/이력 보존, 리셋 금지, 발급 금지(=active만)
+ */
 
 const fs = require('fs');
 const path = require('path');
 
-function pad6(n) {
-  return String(n).padStart(6, '0');
+const ROOT = path.resolve(__dirname, '..', '..', '..'); // System_files
+const MANIFESTS_DIR = path.join(ROOT, 'manifests');
+
+const ACTIVE_LEDGER = path.join(MANIFESTS_DIR, 'page-ids.json');
+const LOCAL_LEDGER  = path.join(MANIFESTS_DIR, 'page-ids.local.json');
+const JOURNAL_FILE  = path.join(MANIFESTS_DIR, 'pageid-journal.jsonl');
+
+function ensureDir(dir) {
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 }
 
-function formatPageId(n) {
-  return `page${pad6(n)}`;
+function isValidPageId(v) {
+  return typeof v === 'string' && /^page\d{6}$/.test(v);
 }
 
-function nowISO() {
+function nowIso() {
   return new Date().toISOString();
 }
 
-function readJsonSafe(filePath, fallback) {
+function readJsonSafe(p, fallback) {
   try {
-    if (!fs.existsSync(filePath)) return fallback;
-    const raw = fs.readFileSync(filePath, 'utf8');
-    return JSON.parse(raw);
+    if (!fs.existsSync(p)) return fallback;
+    return JSON.parse(fs.readFileSync(p, 'utf8'));
   } catch {
     return fallback;
   }
 }
 
-function atomicWriteJson(filePath, obj) {
-  const dir = path.dirname(filePath);
-  fs.mkdirSync(dir, { recursive: true });
-
-  const tmp = `${filePath}.tmp`;
-  fs.writeFileSync(tmp, JSON.stringify(obj, null, 2), 'utf8');
-  fs.renameSync(tmp, filePath);
+function writeJson(p, obj) {
+  fs.writeFileSync(p, JSON.stringify(obj, null, 2) + '\n', 'utf8');
 }
 
-function normalizeMode(mode) {
-  return (mode === 'live') ? 'live' : 'no_live';
+function appendJournal(rec) {
+  try {
+    ensureDir(MANIFESTS_DIR);
+    fs.appendFileSync(JOURNAL_FILE, JSON.stringify(rec) + '\n', 'utf8');
+  } catch {
+    // journal 실패는 치명으로 보지 않음(ledger가 정답)
+  }
 }
 
-function ledgerPathForMode(root, mode) {
-  const manifestsDir = path.join(root, 'manifests');
-  const livePath = path.join(manifestsDir, 'page-ids.json');
-  const noLivePath = path.join(manifestsDir, 'page-ids.no_live.json');
-  return mode === 'live' ? livePath : noLivePath;
+function pad6(n) {
+  const s = String(n);
+  return s.length >= 6 ? s : ('0'.repeat(6 - s.length) + s);
 }
 
-function loadState(root, mode) {
-  const m = normalizeMode(mode);
-  const file = ledgerPathForMode(root, m);
+function pickMode() {
+  const BODY_WRITE_MODE = (process.env.BODY_WRITE_MODE || 'local').toLowerCase(); // local|active
+  return BODY_WRITE_MODE === 'active' ? 'active' : 'local';
+}
 
-  const state = readJsonSafe(file, null);
-  if (state && typeof state === 'object') {
-    if (!state.issued || typeof state.issued !== 'object') state.issued = {};
-    if (!Number.isInteger(state.lastIssued)) state.lastIssued = 0;
-    if (!Number.isInteger(state.lastCommitted)) state.lastCommitted = state.lastIssued;
-    if (typeof state.mode !== 'string') state.mode = m;
-    if (typeof state.updatedAt !== 'string') state.updatedAt = nowISO();
-    return { file, mode: m, state };
+function isPublishEnabled() {
+  const PUBLISH_MODE = (process.env.PUBLISH_MODE || 'disable').toLowerCase(); // enable|disable
+  return PUBLISH_MODE === 'enable';
+}
+
+function loadLedgerInfo() {
+  const mode = pickMode();
+  const ledgerFile = mode === 'active' ? ACTIVE_LEDGER : LOCAL_LEDGER;
+  return { mode, ledgerFile };
+}
+
+function loadLedger() {
+  ensureDir(MANIFESTS_DIR);
+
+  const { mode, ledgerFile } = loadLedgerInfo();
+
+  // active는 publish enable일 때만 발급 허용
+  if (mode === 'active' && !isPublishEnabled()) {
+    const err = new Error('PAUSE: PUBLISH_MODE=disable 이므로 active pageId 발급 금지');
+    err.code = 'PAUSE_ACTIVE';
+    throw err;
   }
 
-  return {
-    file,
-    mode: m,
-    state: {
-      mode: m,
-      lastIssued: 0,
-      lastCommitted: 0, // live 기준 “영구 기준점”
-      issued: {},
-      updatedAt: nowISO()
-    }
+  const base = readJsonSafe(ledgerFile, null);
+  if (base && typeof base === 'object') return { ledger: base, mode, ledgerFile };
+
+  // 최초 생성(리셋과 다름: 파일이 없을 때만 생성)
+  const init = {
+    mode,
+    next: 1,
+    map: {}, // slug -> pageId
+    updatedAt: nowIso(),
   };
+  writeJson(ledgerFile, init);
+  return { ledger: init, mode, ledgerFile };
 }
 
-function saveState(ctx) {
-  ctx.state.updatedAt = nowISO();
-  atomicWriteJson(ctx.file, ctx.state);
-}
+/**
+ * ensurePageId(slug)
+ * - 존재하면 기존 값 반환
+ * - 없으면 next로 새 pageId 할당(+1), ledger 저장, journal 기록
+ */
+function ensurePageId(slug) {
+  if (!slug || typeof slug !== 'string') throw new Error('ensurePageId: slug 필요');
 
-function loadLiveBaseline(root) {
-  const file = ledgerPathForMode(root, 'live');
-  const s = readJsonSafe(file, null);
-  const lastCommitted = s && Number.isInteger(s.lastCommitted) ? s.lastCommitted : 0;
-  return lastCommitted;
-}
+  const { ledger, mode, ledgerFile } = loadLedger();
 
-// 핵심 규칙:
-// - live: lastCommitted 기준으로 +1, 영구 저장
-// - no_live: live의 lastCommitted 보다 큰 값만 사용(겹침 금지), no_live 파일에만 저장
-function createAllocator(root, mode) {
-  const m = normalizeMode(mode);
-  const liveBaseline = loadLiveBaseline(root);
+  ledger.map = ledger.map && typeof ledger.map === 'object' ? ledger.map : {};
 
-  const ctx = loadState(root, m);
+  const existing = ledger.map[slug];
+  if (isValidPageId(existing)) return existing;
 
-  // 안전 가드: 어떤 모드든 liveBaseline 이하로는 절대 내려가지 않음
-  if (ctx.state.lastIssued < liveBaseline) ctx.state.lastIssued = liveBaseline;
-  if (ctx.state.lastCommitted < liveBaseline) ctx.state.lastCommitted = liveBaseline;
-
-  function getExisting(slug) {
-    return ctx.state.issued[slug] || null;
+  const n = Number(ledger.next || 1);
+  if (!Number.isFinite(n) || n < 1) {
+    // 절대 0 리셋 금지. 이상치면 최소 1로만 복구.
+    ledger.next = 1;
   }
 
-  function allocateNextNumber() {
-    const next = ctx.state.lastIssued + 1;
-    // liveBaseline 이하 금지
-    const safeNext = next <= liveBaseline ? (liveBaseline + 1) : next;
-    ctx.state.lastIssued = safeNext;
-    return safeNext;
-  }
+  const pageId = `page${pad6(ledger.next)}`;
+  ledger.map[slug] = pageId;
+  ledger.next += 1;
+  ledger.updatedAt = nowIso();
 
-  function assign(slug) {
-    if (!slug) throw new Error('slug is required');
+  writeJson(ledgerFile, ledger);
 
-    const exist = getExisting(slug);
-    if (exist) return exist;
+  appendJournal({
+    ts: nowIso(),
+    mode,
+    slug,
+    pageId,
+    ledger: path.basename(ledgerFile),
+  });
 
-    const n = allocateNextNumber();
-    const pid = formatPageId(n);
-    ctx.state.issued[slug] = pid;
-
-    if (m === 'live') {
-      // live에서만 영구 커밋 기준점 갱신
-      if (n > ctx.state.lastCommitted) ctx.state.lastCommitted = n;
-    }
-
-    // 두 모드 모두 파일에 기록(단, no_live는 no_live 파일에만)
-    saveState(ctx);
-    return pid;
-  }
-
-  function getStateSummary() {
-    return {
-      mode: m,
-      file: ctx.file,
-      liveBaseline,
-      lastIssued: ctx.state.lastIssued,
-      lastCommitted: ctx.state.lastCommitted,
-      issuedCount: Object.keys(ctx.state.issued || {}).length
-    };
-  }
-
-  return { assign, getExisting, getStateSummary };
-}
-
-// ────────────────────────────────────
-// 모듈 레벨 helper (validate-repair.cjs / ids.cjs 용)
-// ────────────────────────────────────
-
-// lib/page-ids.cjs 위치: System_files/scripts/build/lib
-// ROOT = System_files
-const DEFAULT_ROOT = path.resolve(__dirname, '..', '..', '..');
-
-const allocatorCache = new Map(); // key = `${root}::${mode}`
-
-function getAllocator(root = DEFAULT_ROOT, mode = process.env.PAGE_ID_MODE) {
-  const m = normalizeMode(mode);
-  const key = `${root}::${m}`;
-  if (!allocatorCache.has(key)) {
-    allocatorCache.set(key, createAllocator(root, m));
-  }
-  return allocatorCache.get(key);
-}
-
-// ✅ validate-repair.cjs가 기대하는 함수 이름
-function ensurePageId(slug, mode) {
-  const alloc = getAllocator(DEFAULT_ROOT, mode || process.env.PAGE_ID_MODE);
-  return alloc.assign(slug);
-}
-
-// (선택) 상태 확인용
-function getExisting(slug, mode) {
-  const alloc = getAllocator(DEFAULT_ROOT, mode || process.env.PAGE_ID_MODE);
-  return alloc.getExisting(slug);
-}
-
-function getStateSummary(mode) {
-  const alloc = getAllocator(DEFAULT_ROOT, mode || process.env.PAGE_ID_MODE);
-  return alloc.getStateSummary();
+  return pageId;
 }
 
 module.exports = {
-  // core
-  createAllocator,
-  formatPageId,
-  normalizeMode,
-
-  // helpers
+  ensureDir,
+  isValidPageId,
   ensurePageId,
-  getAllocator,
-  getExisting,
-  getStateSummary,
+  loadLedgerInfo,
+  // (옵션) 외부에서 경로가 필요하면
+  _paths: {
+    ROOT,
+    MANIFESTS_DIR,
+    ACTIVE_LEDGER,
+    LOCAL_LEDGER,
+    JOURNAL_FILE,
+  },
 };
