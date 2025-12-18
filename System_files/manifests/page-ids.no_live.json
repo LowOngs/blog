@@ -1,0 +1,15 @@
+{
+  "mode": "no_live",
+  "lastIssued": 7,
+  "lastCommitted": 0,
+  "issued": {
+    "app-20251207-001": "page000001",
+    "device-20251207-001": "page000002",
+    "howto-20251207-001": "page000003",
+    "smartsavings-20251207-001": "page000004",
+    "smartsavings-20251213-001": "page000005",
+    "subscription-20251207-001": "page000006",
+    "templates-20251207-001": "page000007"
+  },
+  "updatedAt": "2025-12-13T04:40:38.571Z"
+}
