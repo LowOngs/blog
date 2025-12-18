@@ -1,14 +1,10 @@
 // System_files/scripts/build/seed-scheduler.cjs
-// 시드풀 → 오늘 발행할 큐(dist/queue/today.json) 생성 + fallback 라벨 지원
-// SCHEDULE_MODE(test/live) 는 "지금 상태가 테스트인지, 실운영인지"를 알려주는 플래그로만 사용.
-// (test라도 today.json은 정상 생성되지만, 로그에 [TEST] 표시만 붙음)
+// 시드풀 → 오늘 발행할 큐(dist/queue/today.json) 생성
+// ✅ SCHEDULE_MODE 완전 제거 (이제 스케줄/발행 통제는 워크플로 + PUBLISH_MODE/BODY_WRITE_MODE로만)
+// - 이 스크립트는 "큐 생성"만 담당합니다.
 
 const fs = require('fs');
 const path = require('path');
-
-// 모드 스위치 유틸
-const { getScheduleMode } = require('./lib/mode.cjs');
-const SCHEDULE_MODE = getScheduleMode(); // 'test' 또는 'live'
 
 // ────────────────────────────────────
 // 기본 경로 설정
@@ -29,7 +25,7 @@ function getTodayInfo() {
   let weekday = now.getUTCDay();
   if (weekday === 0) weekday = 7;
 
-  // ISO 주차(대략적, 정확한 통계 필요 없으니 간단 계산)
+  // ISO 주차(대략적)
   const oneJan = new Date(Date.UTC(now.getUTCFullYear(), 0, 1));
   const diff   = (now - oneJan) / 86400000;
   const isoWeek = Math.floor((diff + oneJan.getUTCDay() + 1) / 7);
@@ -41,14 +37,6 @@ function getTodayInfo() {
 
 // ────────────────────────────────────
 // 오늘 요일에 따른 기본 발행 라벨/모드 계획
-//   - 월(1): how-to + app
-//   - 화(2): how-to
-//   - 수(3): how-to + app + templates
-//   - 목(4): how-to
-//   - 금(5): how-to + app
-//   - 토(6): smart-savings
-//   - 일(7): smart-savings
-//   (device / subscription은 추후 시드 충분해지면 추가)
 // ────────────────────────────────────
 function planForWeekday(weekday) {
   switch (weekday) {
@@ -85,7 +73,6 @@ function planForWeekday(weekday) {
         { label: 'smart-savings', mode: 'trend' },
       ];
     default:
-      // 이론상 올 일은 없지만, 방어용
       return [
         { label: 'how-to-playbooks', mode: 'trend' },
         { label: 'app-reviews',      mode: 'trend' },
@@ -94,34 +81,23 @@ function planForWeekday(weekday) {
 }
 
 // ────────────────────────────────────
-/**
- * Fallback 라벨 설정
- *   - 어떤 라벨이든 시드가 부족하면 이 순서대로 대체 시도
- *   - 본인(label)과 같으면 건너뜀
- */
+// Fallback 라벨 설정
+// ────────────────────────────────────
 const FALLBACK_LABELS = [
   'how-to-playbooks',
   'app-reviews',
 ];
-// ────────────────────────────────────
 
-// 시드 JSON 캐시: label → { trend, evergreen, trendLimit, evergreenLimit }
+// 시드 JSON 캐시
 const SEED_CACHE = new Map();
 
-// 시드 파일 로드
 function loadSeedConfig(label) {
   if (SEED_CACHE.has(label)) return SEED_CACHE.get(label);
 
   const file = path.join(SEEDDIR, `${label}.json`);
   if (!fs.existsSync(file)) {
     console.warn(`[seed-scheduler][WARN] 시드 파일 없음: ${file}`);
-    const empty = {
-      label,
-      trendLimit: 0,
-      evergreenLimit: 0,
-      trend: [],
-      evergreen: [],
-    };
+    const empty = { label, trendLimit: 0, evergreenLimit: 0, trend: [], evergreen: [] };
     SEED_CACHE.set(label, empty);
     return empty;
   }
@@ -147,7 +123,6 @@ function loadSeedConfig(label) {
   return cfg;
 }
 
-// 특정 라벨에서 후보 시드 목록 필터링
 function getCandidates(cfg, mode, usedIds, todayStr) {
   const todayISO = todayStr;
 
@@ -155,7 +130,6 @@ function getCandidates(cfg, mode, usedIds, todayStr) {
     if (!item || !item.id) return false;
     if (usedIds.has(item.id)) return false;
     if (item.expiresAt && typeof item.expiresAt === 'string') {
-      // ISO8601 문자열이면 문자열 비교로도 대략 맞음(YYYY-MM-DD…)
       if (item.expiresAt < todayISO) return false;
     }
     return true;
@@ -175,7 +149,6 @@ function getCandidates(cfg, mode, usedIds, todayStr) {
   }
 }
 
-// 후보 중 1개 선택 (priority 낮은 숫자 우선 + 동순위 랜덤)
 function pickOne(candidates, effectiveMode, usedIds) {
   if (!candidates.length) return null;
 
@@ -197,7 +170,6 @@ function pickOne(candidates, effectiveMode, usedIds) {
   return { seed: picked, mode: effectiveMode };
 }
 
-// 주 라벨에서 시드 1개 선택
 function pickSeedForLabel(label, preferredMode, usedIds, todayStr) {
   const cfg = loadSeedConfig(label);
   const { list, effectiveMode } = getCandidates(cfg, preferredMode, usedIds, todayStr);
@@ -215,19 +187,10 @@ function pickSeedForLabel(label, preferredMode, usedIds, todayStr) {
   console.log('[seed-scheduler] ROOT   =', ROOT);
   console.log('[seed-scheduler] SEED   =', SEEDDIR);
   console.log('[seed-scheduler] OUTDIR =', OUTDIR);
-  console.log('[seed-scheduler] MODE   =', SCHEDULE_MODE);
-  console.log(
-    '[seed-scheduler] DATE   =',
-    dateStr,
-    'weekday=',
-    weekday,
-    'isoWeek=',
-    isoWeek
-  );
+  console.log('[seed-scheduler] DATE   =', dateStr, 'weekday=', weekday, 'isoWeek=', isoWeek);
 
-  const plan = planForWeekday(weekday); // [{label, mode}, …]
-  const plannedLabels = plan.map((p) => p.label).join(', ');
-  console.log('[seed-scheduler] planned labels =', plannedLabels);
+  const plan = planForWeekday(weekday);
+  console.log('[seed-scheduler] planned labels =', plan.map((p) => p.label).join(', '));
 
   const usedIds = new Set();
   const items = [];
@@ -236,12 +199,10 @@ function pickSeedForLabel(label, preferredMode, usedIds, todayStr) {
     const primaryLabel  = slot.label;
     const preferredMode = slot.mode || 'trend';
 
-    // 1) 기본 라벨에서 시드 선택 시도
     let picked = pickSeedForLabel(primaryLabel, preferredMode, usedIds, dateStr);
     let finalLabel   = primaryLabel;
     let fallbackFrom = null;
 
-    // 2) 실패하면 fallback 라벨 순서대로 대체 시도
     if (!picked) {
       for (const fb of FALLBACK_LABELS) {
         if (fb === primaryLabel) continue;
@@ -256,22 +217,16 @@ function pickSeedForLabel(label, preferredMode, usedIds, todayStr) {
     }
 
     if (!picked) {
-      console.warn(
-        `[seed-scheduler][WARN] ${primaryLabel} 슬롯에서 사용 가능한 시드를 찾지 못했습니다. (fallback 포함)`
-      );
+      console.warn(`[seed-scheduler][WARN] ${primaryLabel} 슬롯에서 사용 가능한 시드를 찾지 못했습니다. (fallback 포함)`);
       continue;
     }
 
     const { seed, mode } = picked;
 
     if (fallbackFrom) {
-      console.log(
-        `[seed-scheduler][PICK] ${finalLabel} (fallback from ${fallbackFrom}) → ${mode} ${seed.id} | ${seed.title}`
-      );
+      console.log(`[seed-scheduler][PICK] ${finalLabel} (fallback from ${fallbackFrom}) → ${mode} ${seed.id} | ${seed.title}`);
     } else {
-      console.log(
-        `[seed-scheduler][PICK] ${finalLabel} → ${mode} ${seed.id} | ${seed.title}`
-      );
+      console.log(`[seed-scheduler][PICK] ${finalLabel} → ${mode} ${seed.id} | ${seed.title}`);
     }
 
     const item = {
@@ -287,19 +242,13 @@ function pickSeedForLabel(label, preferredMode, usedIds, todayStr) {
       notes: seed.notes || '',
     };
 
-    if (fallbackFrom) {
-      item.fallbackFrom = fallbackFrom;
-    }
+    if (fallbackFrom) item.fallbackFrom = fallbackFrom;
 
     items.push(item);
   }
 
   const outFile = path.join(OUTDIR, 'today.json');
-  const outJson = {
-    date: dateStr,
-    mode: SCHEDULE_MODE, // 참고용으로 기록
-    items,
-  };
+  const outJson = { date: dateStr, items };
 
   fs.writeFileSync(outFile, JSON.stringify(outJson, null, 2), 'utf8');
   console.log('[seed-scheduler] queue written →', outFile);
