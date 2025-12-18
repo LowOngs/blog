@@ -1,152 +1,119 @@
-// System_files/scripts/build/ids.cjs
-// content/posts/*.json 에 pageId가 없으면 자동 발급해 채워넣음 (no_live / live)
-// + WAL(저널) 기록: manifests/pageid-journal.jsonl
-
+#!/usr/bin/env node
 'use strict';
+
+/**
+ * System_files/scripts/build/ids.cjs
+ *
+ * 목적:
+ * - content/posts/*.json 중 pageId 없는 문서들에 pageId를 "발급(=할당)"하여 기록
+ *
+ * 핵심 규칙(옹스 룰):
+ * - PUBLISH_MODE=disable 인 경우: "일시정지(PAUSE)" → 발급(+1) 금지, 기존 이력/카운터 보존(리셋 절대 금지)
+ * - BODY_WRITE_MODE=local 인 경우: 로컬 전용 pageId 카운터로 +1 허용 (실발행과 분리)
+ * - BODY_WRITE_MODE=active 인 경우: PUBLISH_MODE=enable 일 때만 +1 허용 (disable이면 발급 자체가 0회)
+ *
+ * 출력:
+ * - manifests/page-ids.json (active)
+ * - manifests/page-ids.local.json (local)
+ * - manifests/pageid-journal.jsonl (WAL, mode 기록)
+ */
 
 const fs = require('fs');
 const path = require('path');
-const fg = require('fast-glob');
-
-const { createAllocator, normalizeMode } = require('./lib/page-ids.cjs');
-
-function log(...a) {
-  console.log('[ids]', ...a);
-}
 
 const ROOT = path.resolve(__dirname, '..', '..'); // System_files
 const POSTS_DIR = path.join(ROOT, 'content', 'posts');
-
-// WAL journal (append-only)
 const MANIFESTS_DIR = path.join(ROOT, 'manifests');
-const JOURNAL_FILE = path.join(MANIFESTS_DIR, 'pageid-journal.jsonl');
 
-function ensureDir(dir) {
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-}
+const PUBLISH_MODE = (process.env.PUBLISH_MODE || 'disable').toLowerCase(); // enable|disable
+const BODY_WRITE_MODE = (process.env.BODY_WRITE_MODE || 'local').toLowerCase(); // local|active
 
-function readJson(filePath) {
-  const raw = fs.readFileSync(filePath, 'utf8');
-  return JSON.parse(raw);
-}
+const { ensureDir, isValidPageId, ensurePageId, loadLedgerInfo } = require('./lib/page-ids.cjs');
 
-function writeJson(filePath, obj) {
-  fs.writeFileSync(filePath, JSON.stringify(obj, null, 2) + '\n', 'utf8');
-}
-
-function isValidPageId(v) {
-  return typeof v === 'string' && /^page\d{6}$/.test(v);
-}
-
-function getEffectiveMode() {
-  // ✅ DRY_RUN과 분리: PAGE_ID_MODE가 곧 정답 (미설정이면 안전하게 no_live)
-  const rawMode = (process.env.PAGE_ID_MODE || 'no_live').trim();
-  return normalizeMode(rawMode);
-}
-
-function appendJournal({ ts, mode, slug, pageId, op, file }) {
-  ensureDir(MANIFESTS_DIR);
-  const rec = {
-    ts: ts || new Date().toISOString(),
-    op: op || 'assign',
-    mode: mode || '',
-    slug: slug || '',
-    pageId: pageId || '',
-    file: file || ''
-  };
+function readJsonSafe(p, fallback) {
   try {
-    fs.appendFileSync(JOURNAL_FILE, JSON.stringify(rec) + '\n', 'utf8');
-  } catch (e) {
-    // 저널 실패는 치명적이진 않지만, 반드시 로그로 남긴다.
-    log('[WARN] journal append failed:', e.message || e);
+    if (!fs.existsSync(p)) return fallback;
+    return JSON.parse(fs.readFileSync(p, 'utf8'));
+  } catch {
+    return fallback;
   }
 }
 
-(async function main() {
+function writeJson(p, obj) {
+  fs.writeFileSync(p, JSON.stringify(obj, null, 2) + '\n', 'utf8');
+}
+
+function main() {
+  console.log('────────────────────────────────────────────');
+  console.log('[ids] ROOT          =', ROOT);
+  console.log('[ids] POSTS_DIR     =', POSTS_DIR);
+  console.log('[ids] MANIFESTS_DIR =', MANIFESTS_DIR);
+  console.log('[ids] PUBLISH_MODE  =', PUBLISH_MODE);
+  console.log('[ids] BODY_WRITE_MODE =', BODY_WRITE_MODE);
+
   ensureDir(MANIFESTS_DIR);
+
+  // ✅ PAUSE: disable이면 "발급 0회"로 즉시 종료 (리셋/수정 없음)
+  if (PUBLISH_MODE !== 'enable' && BODY_WRITE_MODE === 'active') {
+    console.log('[ids] PAUSE: PUBLISH_MODE=disable 이므로 active 발급(+1) 금지 → 종료 (이력 보존)');
+    return;
+  }
 
   if (!fs.existsSync(POSTS_DIR)) {
-    log('POSTS_DIR 없음 → 건너뜀:', POSTS_DIR);
-    process.exit(0);
+    console.log('[ids] POSTS_DIR 없음 → 종료');
+    return;
   }
 
-  const mode = getEffectiveMode();
-  const allocator = createAllocator(ROOT, mode);
+  const files = fs.readdirSync(POSTS_DIR).filter(f => f.toLowerCase().endsWith('.json')).sort();
+  console.log('[ids] 대상 JSON 수 =', files.length);
 
-  const files = fg.sync('*.json', { cwd: POSTS_DIR }).sort();
-  if (!files.length) {
-    log('대상 포스트 JSON 없음');
-    process.exit(0);
-  }
-
-  let touched = 0;
-  let kept = 0;
+  let assigned = 0;
+  let skipped = 0;
   let failed = 0;
 
-  for (const name of files) {
-    const full = path.join(POSTS_DIR, name);
+  const ledgerInfo = loadLedgerInfo(); // 어떤 ledger를 쓰는지 로깅용
+  console.log('[ids] LEDGER_FILE =', ledgerInfo.ledgerFile);
 
-    let doc;
-    try {
-      doc = readJson(full);
-    } catch (e) {
-      log('JSON 파싱 실패:', name, e.message || e);
+  for (const f of files) {
+    const p = path.join(POSTS_DIR, f);
+    const doc = readJsonSafe(p, null);
+    if (!doc || typeof doc !== 'object') {
       failed++;
+      console.error('[ids][FAIL] JSON 파싱 실패:', f);
       continue;
     }
 
-    const slug = doc.slug || name.replace(/\.json$/i, '');
-    if (!doc.slug) doc.slug = slug;
+    const slug = doc.slug || path.basename(f, '.json');
 
-    // 이미 정상 pageId가 있으면 유지(저널 기록은 optional이라 안함)
+    // 이미 있으면 스킵
     if (isValidPageId(doc.pageId)) {
-      kept++;
+      skipped++;
       continue;
     }
 
-    // ✅ 발급 (권한은 ids에만 있음)
-    let pid = '';
+    // 발급/할당
     try {
-      pid = allocator.assign(slug);
+      const pid = ensurePageId(slug);
+      if (!isValidPageId(pid)) throw new Error('ensurePageId()가 유효한 pageId를 반환하지 않음');
+
+      doc.pageId = pid;
+      writeJson(p, doc);
+      assigned++;
+
+      console.log(`[ids][OK] ${slug} → ${pid}`);
     } catch (e) {
-      log('[FAIL] allocator.assign 실패:', name, e.message || e);
       failed++;
-      continue;
-    }
-
-    doc.pageId = pid;
-
-    try {
-      writeJson(full, doc);
-      touched++;
-      log('SET', name, '→', pid);
-
-      // ✅ WAL 기록(append-only)
-      appendJournal({
-        ts: new Date().toISOString(),
-        mode,
-        slug,
-        pageId: pid,
-        op: 'assign',
-        file: name
-      });
-    } catch (e) {
-      log('[FAIL] JSON write 실패:', name, e.message || e);
-      failed++;
+      console.error(`[ids][FAIL] ${slug} →`, e.message || e);
     }
   }
 
-  const s = allocator.getStateSummary();
-  log('mode =', mode);
-  log('ledger =', s.file);
-  log('liveBaseline =', s.liveBaseline);
-  log('lastIssued =', s.lastIssued, '| lastCommitted =', s.lastCommitted);
-  log('journal =', JOURNAL_FILE);
-  log('updated posts =', touched, '| kept =', kept, '| failed =', failed);
+  console.log('────────────────────────────────────────────');
+  console.log('[ids] 요약');
+  console.log('  할당(신규) =', assigned);
+  console.log('  SKIP       =', skipped);
+  console.log('  FAIL       =', failed);
 
-  // ids는 생명: 실패가 있으면 exitCode=1로 남겨 워크플로가 재시도/중단 판단 가능
   if (failed > 0) process.exitCode = 1;
-})().catch((e) => {
-  console.error('[ids][FAIL]', e.message || e);
-  process.exit(1);
-});
+}
+
+if (require.main === module) main();
