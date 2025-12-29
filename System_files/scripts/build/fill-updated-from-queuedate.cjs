@@ -2,18 +2,20 @@
 'use strict';
 
 /**
- * fill-updated-from-queuedate.cjs  (manual tool)
+ * fill-updated-from-queuedate.cjs (manual recovery tool)
  * - content/posts/*.json에서 updated가 비어있는 항목을 채움
  * - 우선순위:
  *   1) seedMeta.queueDate (YYYY-MM-DD) -> updated: YYYY-MM-DDT00:00:00Z
  *
- * ✅ 잔재 정리:
- * - SCHEDULE_MODE 제거
- * - BODY_WRITE_MODE로 "실제 저장" 여부만 통제
+ * ✅ 제어 통일(옹스 룰)
+ * - BODY_WRITE_MODE=local  : 로컬에서만 WRITE 허용(안전)
+ * - BODY_WRITE_MODE=active : PUBLISH_MODE=enable일 때만 WRITE 허용
+ * - 그 외는 DRY(로그만)
  *
  * 실행 예:
- *   BODY_WRITE_MODE=disable node .\System_files\scripts\build\fill-updated-from-queuedate.cjs  (DRY)
- *   BODY_WRITE_MODE=enable  node .\System_files\scripts\build\fill-updated-from-queuedate.cjs  (WRITE)
+ *   BODY_WRITE_MODE=local  node .\System_files\scripts\build\fill-updated-from-queuedate.cjs  (WRITE)
+ *   BODY_WRITE_MODE=active PUBLISH_MODE=enable node .\System_files\scripts\build\fill-updated-from-queuedate.cjs (WRITE)
+ *   BODY_WRITE_MODE=active PUBLISH_MODE=disable node ... (DRY)
  */
 
 try { require('dotenv').config(); } catch (_) {}
@@ -24,9 +26,16 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..', '..'); // System_files
 const POSTS_DIR = path.join(ROOT, 'content', 'posts');
 
-// ✅ 새 안전장치: 본문/JSON 쓰기 통제
-const BODY_WRITE_MODE = (process.env.BODY_WRITE_MODE || 'disable').trim().toLowerCase();
-const CAN_WRITE = BODY_WRITE_MODE === 'enable';
+const PUBLISH_MODE = (process.env.PUBLISH_MODE || 'disable').trim().toLowerCase(); // enable|disable
+const BODY_WRITE_MODE = (process.env.BODY_WRITE_MODE || 'local').trim().toLowerCase(); // local|active
+
+function canWrite({ bodyMode, publishMode }) {
+  if (bodyMode === 'local') return true;
+  if (bodyMode === 'active') return publishMode === 'enable';
+  return false;
+}
+
+const CAN_WRITE = canWrite({ bodyMode: BODY_WRITE_MODE, publishMode: PUBLISH_MODE });
 
 function log(...a) { console.log('[fill-updated]', ...a); }
 function warn(...a) { console.warn('[fill-updated][WARN]', ...a); }
@@ -62,7 +71,9 @@ function hasUpdated(v) {
 function main() {
   log('ROOT =', ROOT);
   log('POSTS =', POSTS_DIR);
-  log('BODY_WRITE_MODE =', BODY_WRITE_MODE, CAN_WRITE ? '(WRITE)' : '(DRY)');
+  log('BODY_WRITE_MODE =', BODY_WRITE_MODE);
+  log('PUBLISH_MODE =', PUBLISH_MODE);
+  log('EFFECTIVE =', CAN_WRITE ? 'WRITE' : 'DRY');
 
   if (!fs.existsSync(POSTS_DIR)) {
     warn('content/posts 폴더가 없습니다.');
@@ -107,7 +118,9 @@ function main() {
     data.updated = newUpdated;
     data.updatedFill = {
       source: 'seedMeta.queueDate',
-      filledAt: new Date().toISOString()
+      filledAt: new Date().toISOString(),
+      mode: BODY_WRITE_MODE,
+      publishMode: PUBLISH_MODE
     };
 
     writeJsonSafe(p, data);
