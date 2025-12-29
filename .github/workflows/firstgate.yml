@@ -4,6 +4,13 @@ on:
   schedule:
     - cron: '40 23 * * *'
   workflow_dispatch:
+    inputs:
+      BODY_WRITE_MODE:
+        description: "local = 로컬번호/검증용, active = 실번호 트랙(실발행 준비)"
+        required: true
+        type: choice
+        default: "local"
+        options: ["local", "active"]
 
 permissions:
   contents: read
@@ -19,11 +26,15 @@ env:
   CANONICAL_BASE: ${{ secrets.CANONICAL_BASE }}
   CDN_BASE: ${{ secrets.CDN_BASE }}
 
-  # ✅ 새 안전장치(스케줄 실동작 통제)
+  # ✅ schedule 자동동작 통제(최종 안전장치)
   PUBLISH_MODE: ${{ secrets.PUBLISH_MODE }}
 
+  # ✅ firstgate 전용 모드 (local|active)
+  # - schedule이면 아래에서 active로 강제
+  BODY_WRITE_MODE: ${{ github.event.inputs.BODY_WRITE_MODE }}
+
 jobs:
-  build-queue:
+  build-firstgate:
     runs-on: ubuntu-latest
 
     steps:
@@ -74,16 +85,59 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Resolve effective BODY_WRITE_MODE for firstgate
+        shell: bash
+        run: |
+          set -euo pipefail
+          EVENT="${{ github.event_name }}"
+
+          # dispatch: 입력값(local|active), 기본 local
+          BWM="${BODY_WRITE_MODE:-local}"
+          if [ "$BWM" != "local" ] && [ "$BWM" != "active" ]; then
+            BWM="local"
+          fi
+
+          # schedule: firstgate는 "명함전략 실트랙"이므로 active로 강제
+          # (단, 위 Guard에서 PUBLISH_MODE=enable일 때만 schedule 통과)
+          if [ "$EVENT" = "schedule" ]; then
+            BWM="active"
+          fi
+
+          echo "BODY_WRITE_MODE=$BWM" >> $GITHUB_ENV
+          echo "Resolved:"
+          echo "  EVENT=$EVENT"
+          echo "  PUBLISH_MODE=${PUBLISH_MODE}"
+          echo "  BODY_WRITE_MODE=$BWM"
+
       - name: Build firstgate artifacts (no publish)
+        env:
+          PUBLISH_MODE:    ${{ env.PUBLISH_MODE }}
+          BODY_WRITE_MODE: ${{ env.BODY_WRITE_MODE }}
         run: |
           set -euo pipefail
 
           node System_files/scripts/build/firstgate-pick.cjs
           node System_files/scripts/build/firstgate-queue-to-post.cjs
+
+          # ✅ 본문 생성(명함전략 전용)
           node System_files/scripts/build/generate-body.cjs
 
+          # ✅ 실물 확인용 산출물
+          node System_files/scripts/build/ids.cjs
           node System_files/scripts/build/render-posts.cjs
           node System_files/scripts/build/images-renew.cjs
           node System_files/scripts/build/images-build-og.cjs
-
           node System_files/scripts/build/validate-repair.cjs
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: firstgate-outputs
+          path: |
+            System_files/logs/**
+            System_files/dist/posts/**
+            System_files/manifests/page-ids*.json
+            System_files/manifests/pageid-journal.jsonl
+          if-no-files-found: warn
+          retention-days: 7
