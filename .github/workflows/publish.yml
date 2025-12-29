@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       RUN_MODE:
-        description: "auto = 강제 live+실발행 / manual = 선택 실행"
+        description: "auto = 강제 active+실발행 / manual = 선택 실행"
         required: true
         type: choice
         default: "manual"
@@ -44,8 +44,8 @@ concurrency:
 
 jobs:
   build-and-publish:
-    # ✅ 하드 가드: schedule은 PUBLISH_MODE=enable일 때만 시작
-    # ✅ 수동은 DRY_RUN=true면 항상 허용, DRY_RUN=false면 PUBLISH_MODE=enable일 때만
+    # schedule은 PUBLISH_MODE=enable일 때만 시작
+    # 수동은 DRY_RUN=true면 항상 허용, DRY_RUN=false면 PUBLISH_MODE=enable일 때만
     if: >-
       ${{
         (github.event_name == 'schedule' && secrets.PUBLISH_MODE == 'enable')
@@ -64,9 +64,9 @@ jobs:
       TIME_ZONE:       America/Los_Angeles
       AOIA_ENABLE:     "false"
 
-      # ✅ 최종 안전장치(2개)
-      PUBLISH_MODE:    ${{ secrets.PUBLISH_MODE }}       # enable|disable
-      BODY_WRITE_MODE: ${{ secrets.BODY_WRITE_MODE }}    # live|dry (미설정이면 아래에서 dry로 보정)
+      # ✅ 최종 안전장치(2개 축)
+      PUBLISH_MODE:    ${{ secrets.PUBLISH_MODE }}        # enable|disable
+      BODY_WRITE_MODE: ${{ secrets.BODY_WRITE_MODE }}     # local|active (미설정이면 아래에서 local로 보정)
 
       # === OpenAI ===
       OPENAI_API_KEY:  ${{ secrets.OPENAI_API_KEY }}
@@ -102,10 +102,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-
           EVENT="${{ github.event_name }}"
 
-          # defaults
           RUN_MODE="manual"
           MANUAL_JOB="schedule_once"
           INPUT_DRY_RUN="true"
@@ -115,54 +113,41 @@ jobs:
             MANUAL_JOB="${{ github.event.inputs.MANUAL_JOB }}"
             INPUT_DRY_RUN="${{ github.event.inputs.DRY_RUN }}"
           else
-            # schedule은 auto + 실발행으로 고정 (단, job-level if에서 PUBLISH_MODE=enable 아니면 시작 불가)
+            # schedule은 auto로 고정
             RUN_MODE="auto"
             MANUAL_JOB="schedule_once"
             INPUT_DRY_RUN="false"
           fi
 
-          # BODY_WRITE_MODE 기본값 보정: 미설정이면 dry
-          BWM="${BODY_WRITE_MODE:-dry}"
-          if [ "$BWM" != "live" ]; then BWM="dry"; fi
+          # BODY_WRITE_MODE 보정: 미설정/오타면 local
+          BWM="${BODY_WRITE_MODE:-local}"
+          if [ "$BWM" != "active" ] && [ "$BWM" != "local" ]; then
+            BWM="local"
+          fi
 
-          # BODY_WRITE_MODE가 dry면 어떤 경우든 안전하게 DRY_RUN=true로 고정
+          # auto 모드면: active + DRY_RUN=false 전제 (단, job if에서 PUBLISH_MODE=enable일 때만 시작)
           EFFECTIVE_DRY_RUN="$INPUT_DRY_RUN"
-          if [ "$BWM" = "dry" ]; then
-            EFFECTIVE_DRY_RUN="true"
+          if [ "$RUN_MODE" = "auto" ]; then
+            BWM="active"
+            EFFECTIVE_DRY_RUN="false"
+          fi
+
+          # manual + DRY_RUN=false를 선택했더라도, 실수 방지: active로만 의미 있게
+          # (local + DRY_RUN=false 조합은 "발행은 하는데 실번호는 local"이 되어버려 혼선)
+          if [ "$EFFECTIVE_DRY_RUN" = "false" ]; then
+            BWM="active"
           fi
 
           # label_once_* 처리
           LABEL_VALUE=""
           MAX_POSTS_VALUE=""
 
-          if [ "$RUN_MODE" = "auto" ]; then
+          if [ "$MANUAL_JOB" = "schedule_once" ]; then
             LABEL_VALUE=""
             MAX_POSTS_VALUE=""
-            EFFECTIVE_DRY_RUN="false" # auto는 실발행 전제 (단, BWM=dry면 위에서 true로 덮임)
           else
-            if [ "$MANUAL_JOB" = "schedule_once" ]; then
-              LABEL_VALUE=""
-              MAX_POSTS_VALUE=""
-            else
-              LABEL_VALUE="${MANUAL_JOB#label_once_}"
-              MAX_POSTS_VALUE="1"
-            fi
-          fi
-
-          # ✅ 레거시 호환(당장 코드 안 부수기용)
-          # - ids/page-ids는 PAGE_ID_MODE를 사용하므로 BODY_WRITE_MODE 기반으로 매핑
-          if [ "$BWM" = "live" ] && [ "$EFFECTIVE_DRY_RUN" = "false" ]; then
-            PAGE_ID_MODE="live"
-          else
-            PAGE_ID_MODE="no_live"
-          fi
-
-          # - generate-body 등 일부가 SCHEDULE_MODE를 참조할 수 있어 호환값 주입
-          #   (향후 제거 가능)
-          if [ "$EFFECTIVE_DRY_RUN" = "false" ]; then
-            SCHEDULE_MODE="live"
-          else
-            SCHEDULE_MODE="test"
+            LABEL_VALUE="${MANUAL_JOB#label_once_}"
+            MAX_POSTS_VALUE="1"
           fi
 
           echo "RUN_MODE=$RUN_MODE"               >> $GITHUB_ENV
@@ -170,8 +155,6 @@ jobs:
           echo "LABEL=$LABEL_VALUE"               >> $GITHUB_ENV
           echo "MAX_POSTS=$MAX_POSTS_VALUE"       >> $GITHUB_ENV
           echo "DRY_RUN=$EFFECTIVE_DRY_RUN"       >> $GITHUB_ENV
-          echo "PAGE_ID_MODE=$PAGE_ID_MODE"       >> $GITHUB_ENV
-          echo "SCHEDULE_MODE=$SCHEDULE_MODE"     >> $GITHUB_ENV
           echo "BODY_WRITE_MODE=$BWM"             >> $GITHUB_ENV
 
           echo "Resolved:"
@@ -181,8 +164,6 @@ jobs:
           echo "  RUN_MODE=$RUN_MODE"
           echo "  MANUAL_JOB=$MANUAL_JOB"
           echo "  DRY_RUN(input)=$INPUT_DRY_RUN -> DRY_RUN(effective)=$EFFECTIVE_DRY_RUN"
-          echo "  PAGE_ID_MODE=$PAGE_ID_MODE"
-          echo "  SCHEDULE_MODE(compat)=$SCHEDULE_MODE"
           echo "  LABEL=$LABEL_VALUE"
           echo "  MAX_POSTS=$MAX_POSTS_VALUE"
 
@@ -191,7 +172,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          # 수동에서 DRY_RUN=false(실발행)면 PUBLISH_MODE=enable이어야 함 (job-level if로도 막히지만, 로그 명확화)
           if [ "${DRY_RUN}" = "false" ] && [ "${PUBLISH_MODE}" != "enable" ]; then
             echo "[GUARD] blocked: DRY_RUN=false requires PUBLISH_MODE=enable"
             exit 1
@@ -219,12 +199,13 @@ jobs:
 
       - name: Issue page IDs (retry 2)
         env:
-          PAGE_ID_MODE: ${{ env.PAGE_ID_MODE }}
+          PUBLISH_MODE:    ${{ env.PUBLISH_MODE }}
+          BODY_WRITE_MODE: ${{ env.BODY_WRITE_MODE }}
         run: |
           set -e
           tries=2
           for i in $(seq 1 $tries); do
-            echo "[ids] attempt $i/$tries (PAGE_ID_MODE=$PAGE_ID_MODE)"
+            echo "[ids] attempt $i/$tries (PUBLISH_MODE=$PUBLISH_MODE BODY_WRITE_MODE=$BODY_WRITE_MODE)"
             if node System_files/scripts/build/ids.cjs; then
               echo "[ids] OK"
               exit 0
@@ -238,8 +219,6 @@ jobs:
           exit 1
 
       - name: Generate article bodies (if body empty)
-        env:
-          SCHEDULE_MODE: ${{ env.SCHEDULE_MODE }} # compat (향후 제거 가능)
         run: node System_files/scripts/build/generate-body.cjs
 
       - name: Render posts (JSON → HTML)
