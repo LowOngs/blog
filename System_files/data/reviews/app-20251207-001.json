@@ -1,0 +1,10 @@
+{
+  "source": "Internal review dataset",
+  "updatedAt": "2025-12-01",
+  "rating": 4.2,
+  "histogram": { "5": 48, "4": 31, "3": 13, "2": 5, "1": 3 },
+  "insights": [
+    "Fast onboarding matters more than feature depth for most users.",
+    "Sync reliability is the first deal-breaker; flashy features come second."
+  ]
+}
