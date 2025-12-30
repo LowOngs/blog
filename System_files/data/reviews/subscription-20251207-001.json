@@ -1,0 +1,10 @@
+{
+  "source": "Internal review dataset",
+  "updatedAt": "2025-12-01",
+  "rating": 4.0,
+  "histogram": { "5": 40, "4": 30, "3": 18, "2": 7, "1": 5 },
+  "insights": [
+    "Worth paying when collaboration, automation, or admin control is the bottleneck.",
+    "Solo workflows often do fine on free tiers if the system is consistent."
+  ]
+}
