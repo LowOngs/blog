@@ -1,0 +1,11 @@
+{
+  "source": "Internal review dataset",
+  "updatedAt": "2025-12-01",
+  "rating": 4.4,
+  "histogram": { "5": 62, "4": 23, "3": 9, "2": 4, "1": 2 },
+  "insights": [
+    "Best value comes from 16 GB RAM + SSD; CPU class matters more than brand.",
+    "Avoid models with 8 GB soldered RAM if you multitask heavily.",
+    "Battery claims often overstate; real-world 7+ hours is a good target."
+  ]
+}
