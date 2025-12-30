@@ -5,9 +5,10 @@
  * System_files/scripts/build/render-posts.cjs
  * - content/posts/*.json → dist/posts/*.html 렌더러
  *
- * ✅ 현재 post.html(SLOT 구조) + blocks.js(렌더러) 기준 정렬 버전
- * - blocks.js: TLDR/KeyFacts/FAQ/Sources/Review + sanitizeBodyHTML
- * - content-blocks.cjs: "검사기"이므로 여기서 렌더에 사용하지 않음
+ * ✅ 정합 기준
+ * - meta.cjs(buildMeta)가 반환하는 metaTags/schemaTags/canonicalUrl/ogImage/ogAlt/updatedIso/publishedIso 사용
+ * - blocks.js 렌더러 사용(TLDR/KeyFacts/FAQ/Sources/Review + sanitizeBodyHTML)
+ * - content-blocks.cjs 는 "검사용" (여기서는 렌더에 사용하지 않음)
  */
 
 const fs = require('fs');
@@ -178,6 +179,65 @@ function injectBodyImageCssOnce(html) {
   return html;
 }
 
+/* ───────────────────── meta head 생성 (meta.cjs 반환값 기반) ───────────────────── */
+
+function buildSchemaScript(schemaTags) {
+  if (!Array.isArray(schemaTags) || schemaTags.length === 0) return '';
+  const json = JSON.stringify(schemaTags.length === 1 ? schemaTags[0] : schemaTags);
+  return `<script type="application/ld+json">${json}</script>`;
+}
+
+function buildHeadFromMeta(meta) {
+  const og = (meta && meta.metaTags && meta.metaTags.og) ? meta.metaTags.og : {};
+  const tw = (meta && meta.metaTags && meta.metaTags.twitter) ? meta.metaTags.twitter : {};
+  const tm = (meta && meta.metaTags && meta.metaTags.timeMeta) ? meta.metaTags.timeMeta : {};
+
+  const canonical = meta.canonicalUrl || og.url || '';
+  const title = og.title || '';
+  const desc = og.description || '';
+  const ogImage = og.image || meta.ogImage || '';
+  const ogAlt = og.imageAlt || meta.ogAlt || desc || title;
+
+  const lines = [];
+  if (canonical) lines.push(`<link rel="canonical" href="${escapeAttr(canonical)}">`);
+
+  // OG
+  lines.push(`<meta property="og:type" content="article">`);
+  if (canonical) lines.push(`<meta property="og:url" content="${escapeAttr(canonical)}">`);
+  if (title) lines.push(`<meta property="og:title" content="${escapeAttr(title)}">`);
+  if (desc) lines.push(`<meta property="og:description" content="${escapeAttr(desc)}">`);
+  if (ogImage) {
+    lines.push(`<meta property="og:image" content="${escapeAttr(ogImage)}">`);
+    lines.push(`<meta property="og:image:alt" content="${escapeAttr(ogAlt)}">`);
+    lines.push(`<meta property="og:image:width" content="1200">`);
+    lines.push(`<meta property="og:image:height" content="630">`);
+  }
+
+  // Twitter
+  lines.push(`<meta name="twitter:card" content="${escapeAttr(tw.card || 'summary_large_image')}">`);
+  if (tw.title || title) lines.push(`<meta name="twitter:title" content="${escapeAttr(tw.title || title)}">`);
+  if (tw.description || desc) lines.push(`<meta name="twitter:description" content="${escapeAttr(tw.description || desc)}">`);
+  if (tw.image || ogImage) {
+    lines.push(`<meta name="twitter:image" content="${escapeAttr(tw.image || ogImage)}">`);
+    lines.push(`<meta name="twitter:image:alt" content="${escapeAttr(tw.imageAlt || ogAlt)}">`);
+  }
+
+  // time
+  if (tm.publishedTime) lines.push(`<meta property="article:published_time" content="${escapeAttr(tm.publishedTime)}">`);
+  if (tm.modifiedTime) {
+    lines.push(`<meta property="article:modified_time" content="${escapeAttr(tm.modifiedTime)}">`);
+    lines.push(`<meta property="og:updated_time" content="${escapeAttr(tm.modifiedTime)}">`);
+  }
+
+  // LCP preload (OG 이미지 1장)
+  if (ogImage) lines.push(`<link rel="preload" as="image" href="${escapeAttr(ogImage)}" fetchpriority="high">`);
+
+  // schema (Article/Breadcrumb/WebSite/FAQ)
+  lines.push(buildSchemaScript(meta.schemaTags));
+
+  return lines.filter(Boolean).join('\n');
+}
+
 /* ───────────────────── pageId 확보 ───────────────────── */
 
 function ensurePageIdForPost(postJson, slug, jsonPath) {
@@ -213,12 +273,12 @@ function resolveAio(postJson) {
   };
 }
 
-/* ───────────────────── SLOT 주입 헬퍼 ───────────────────── */
+/* ───────────────────── SLOT 주입 ───────────────────── */
 
 function injectAfterSlot(html, slotMarker, insertHtml) {
   if (!insertHtml) return html;
   const idx = html.indexOf(slotMarker);
-  if (idx === -1) return html; // 슬롯이 없으면 조용히 스킵
+  if (idx === -1) return html;
   return html.slice(0, idx) + insertHtml + '\n' + html.slice(idx);
 }
 
@@ -235,30 +295,28 @@ function renderOne(template, postJson, jsonPath, bodyImgCtx) {
 
   const meta = buildMeta(postJson, { slug, pageId, siteBase, cdnBase });
 
-  // title/description/canonical
-  const title       = meta.title || postJson.title || slug;
-  const description = meta.summary || postJson.description || '';
-  const canonical   = meta.canonicalUrl || (siteBase + '/' + slug + '.html');
+  const og = meta.metaTags && meta.metaTags.og ? meta.metaTags.og : {};
+  const title       = og.title || postJson.title || slug;
+  const description = og.description || postJson.description || '';
+  const canonical   = meta.canonicalUrl;
+  const heroImage   = meta.ogImage;
+  const heroAlt     = meta.ogAlt || description || title;
 
-  // hero (post.html에 figure가 이미 있으므로 값만 채움)
-  const heroImage = meta.ogImage || '';
-  const heroAlt   = meta.ogAlt || description || title;
-
-  // updated badge (YYYY-MM-DD)
   const updatedDate = (meta.updatedIso || '').slice(0, 10) || '';
 
-  // blocks
+  // TLDR / KeyFacts
   const aio = resolveAio(postJson);
   const tldrHtml = blocks.renderTLDR(asArray(aio.tldr));
   const kfHtml   = blocks.renderKeyFacts(asArray(aio.keyfacts));
 
+  // FAQ / Sources
   const faqHtml     = blocks.renderFAQ(asArray(aio.faq));
   const sourcesHtml = blocks.renderSources(asArray(aio.sources));
 
-  // body sanitize (공통 안전망)
+  // body sanitize (공통)
   let bodyHtml = blocks.sanitizeBodyHTML(postJson.body || '');
 
-  // body image 1장 (있으면 prepend)
+  // body image 1장 prepend
   if (bodyImgCtx && bodyImgCtx.manifest) {
     const entry = pickBodyImageEntry(bodyImgCtx.manifest, slug, pageId);
     const img = normalizeBodyImage(entry);
@@ -271,10 +329,9 @@ function renderOne(template, postJson, jsonPath, bodyImgCtx) {
 
   // review blocks (있을 때만)
   const reviewData = postJson.reviewData || postJson.review || null;
-  const reviewRatingHtml  = reviewData ? blocks.renderReviewRatingBlock(reviewData) : '';
-  const reviewInsightsHtml= reviewData ? blocks.renderReviewInsightsBlock(reviewData) : '';
+  const reviewRatingHtml   = reviewData ? blocks.renderReviewRatingBlock(reviewData) : '';
+  const reviewInsightsHtml = reviewData ? blocks.renderReviewInsightsBlock(reviewData) : '';
 
-  // apply template replacements
   let html = template;
 
   html = replaceAllSafe(html, '{{title}}', escapeHtml(title));
@@ -289,29 +346,20 @@ function renderOne(template, postJson, jsonPath, bodyImgCtx) {
   html = replaceAllSafe(html, '{{keyfacts}}', kfHtml);
   html = replaceAllSafe(html, '{{body}}', bodyHtml);
 
-  if (updatedDate) {
-    html = html.replace('Updated {{updated}}', `Updated ${escapeHtml(updatedDate)}`);
-  }
+  if (updatedDate) html = html.replace('Updated {{updated}}', `Updated ${escapeHtml(updatedDate)}`);
 
-  // META 주입 (post.html의 <!--META--> 자리에)
-  if (meta.headHtml && typeof meta.headHtml === 'string') {
-    html = html.replace('<!--META-->', meta.headHtml);
-  } else if (meta.metaTag && typeof meta.metaTag === 'string') {
-    html = html.replace('<!--META-->', meta.metaTag);
-  } else if (meta.metaTags && typeof meta.metaTags === 'string') {
-    html = html.replace('<!--META-->', meta.metaTags);
-  } // meta 모듈 출력 형태가 다를 수 있어 3중 가드
+  // ✅ meta head 주입
+  const headBlock = buildHeadFromMeta(meta);
+  html = html.replace('<!--META-->', headBlock);
 
-  // FAQ/SOURCES/REVIEW 슬롯 삽입
+  // SLOT 삽입
   html = injectAfterSlot(html, '<!--SLOT:FAQ_WRAPPER-->', faqHtml);
   html = injectAfterSlot(html, '<!--SLOT:SOURCES_WRAPPER-->', sourcesHtml);
   html = injectAfterSlot(html, '<!--SLOT:REVIEW_RATING_WRAPPER-->', reviewRatingHtml);
   html = injectAfterSlot(html, '<!--SLOT:REVIEW_INSIGHTS_WRAPPER-->', reviewInsightsHtml);
 
-  // body-image css는 figure를 실제 넣었을 때만
-  if (bodyHtml.includes('class="post-body-image"')) {
-    html = injectBodyImageCssOnce(html);
-  }
+  // body-image css
+  if (bodyHtml.includes('class="post-body-image"')) html = injectBodyImageCssOnce(html);
 
   html = html.replace(
     '</head>',
