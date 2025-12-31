@@ -1,1 +1,9 @@
-
+{
+  "meta": {
+    "bucket": "app",
+    "kind": "ratings",
+    "version": 1,
+    "note": "App reviews rating snapshots (Play Store / App Store / multi)."
+  },
+  "bySlug": {}
+}
