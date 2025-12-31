@@ -9,6 +9,10 @@
  * - meta.cjs(buildMeta)가 반환하는 metaTags/schemaTags/canonicalUrl/ogImage/ogAlt/updatedIso/publishedIso 사용
  * - blocks.js 렌더러 사용(TLDR/KeyFacts/FAQ/Sources/Review + sanitizeBodyHTML)
  * - content-blocks.cjs 는 "검사용" (여기서는 렌더에 사용하지 않음)
+ *
+ * ✅ [중요] 리뷰 라벨 3종(app/device/subscription)의 “근거지(원천)”는 서로 다름
+ * - 따라서 렌더 단계에서 라벨을 보고 해당 데이터셋을 읽어온 뒤,
+ *   blocks가 기대하는 공통 포맷으로 정규화해서 주입해야 함(= resolveReviewData)
  */
 
 const fs = require('fs');
@@ -21,18 +25,17 @@ const OUTPUT_DIR    = path.join(ROOT, 'dist', 'posts');
 
 const MANIFESTS_DIR = path.join(ROOT, 'manifests');
 
-// body image manifest 후보 (있으면 1장만 prepend)
 const BODY_IMAGE_MANIFEST_CANDIDATES = [
   path.join(MANIFESTS_DIR, 'images-body-manifest.json'),
   path.join(MANIFESTS_DIR, 'body-images-manifest.json'),
 ];
 
-// meta + pageId
 const { buildMeta } = require('./lib/meta.cjs');
 const { ensurePageId, isValidPageId } = require('./lib/page-ids.cjs');
-
-// ✅ 렌더 블록(필수)
 const blocks = require('./lib/blocks.js');
+
+// ✅ [리뷰 연결 핵심] 라벨별 ratings/insights 원천을 읽고 공통 포맷으로 정규화
+const { resolveReviewData } = require('./lib/review-resolver.cjs');
 
 /* ───────────────────── 유틸 ───────────────────── */
 
@@ -179,7 +182,7 @@ function injectBodyImageCssOnce(html) {
   return html;
 }
 
-/* ───────────────────── meta head 생성 (meta.cjs 반환값 기반) ───────────────────── */
+/* ───────────────────── meta head 생성 ───────────────────── */
 
 function buildSchemaScript(schemaTags) {
   if (!Array.isArray(schemaTags) || schemaTags.length === 0) return '';
@@ -201,7 +204,6 @@ function buildHeadFromMeta(meta) {
   const lines = [];
   if (canonical) lines.push(`<link rel="canonical" href="${escapeAttr(canonical)}">`);
 
-  // OG
   lines.push(`<meta property="og:type" content="article">`);
   if (canonical) lines.push(`<meta property="og:url" content="${escapeAttr(canonical)}">`);
   if (title) lines.push(`<meta property="og:title" content="${escapeAttr(title)}">`);
@@ -213,7 +215,6 @@ function buildHeadFromMeta(meta) {
     lines.push(`<meta property="og:image:height" content="630">`);
   }
 
-  // Twitter
   lines.push(`<meta name="twitter:card" content="${escapeAttr(tw.card || 'summary_large_image')}">`);
   if (tw.title || title) lines.push(`<meta name="twitter:title" content="${escapeAttr(tw.title || title)}">`);
   if (tw.description || desc) lines.push(`<meta name="twitter:description" content="${escapeAttr(tw.description || desc)}">`);
@@ -222,17 +223,14 @@ function buildHeadFromMeta(meta) {
     lines.push(`<meta name="twitter:image:alt" content="${escapeAttr(tw.imageAlt || ogAlt)}">`);
   }
 
-  // time
   if (tm.publishedTime) lines.push(`<meta property="article:published_time" content="${escapeAttr(tm.publishedTime)}">`);
   if (tm.modifiedTime) {
     lines.push(`<meta property="article:modified_time" content="${escapeAttr(tm.modifiedTime)}">`);
     lines.push(`<meta property="og:updated_time" content="${escapeAttr(tm.modifiedTime)}">`);
   }
 
-  // LCP preload (OG 이미지 1장)
   if (ogImage) lines.push(`<link rel="preload" as="image" href="${escapeAttr(ogImage)}" fetchpriority="high">`);
 
-  // schema (Article/Breadcrumb/WebSite/FAQ)
   lines.push(buildSchemaScript(meta.schemaTags));
 
   return lines.filter(Boolean).join('\n');
@@ -261,8 +259,6 @@ function ensurePageIdForPost(postJson, slug, jsonPath) {
   return { pageId: pid, wroteJson: true, via: 'ledger' };
 }
 
-/* ───────────────────── AIO 데이터 선택 ───────────────────── */
-
 function resolveAio(postJson) {
   const aio = postJson.aio && typeof postJson.aio === 'object' ? postJson.aio : {};
   return {
@@ -272,8 +268,6 @@ function resolveAio(postJson) {
     sources: firstNonEmpty(aio.sources, postJson.sources, []),
   };
 }
-
-/* ───────────────────── SLOT 주입 ───────────────────── */
 
 function injectAfterSlot(html, slotMarker, insertHtml) {
   if (!insertHtml) return html;
@@ -304,19 +298,14 @@ function renderOne(template, postJson, jsonPath, bodyImgCtx) {
 
   const updatedDate = (meta.updatedIso || '').slice(0, 10) || '';
 
-  // TLDR / KeyFacts
   const aio = resolveAio(postJson);
   const tldrHtml = blocks.renderTLDR(asArray(aio.tldr));
   const kfHtml   = blocks.renderKeyFacts(asArray(aio.keyfacts));
-
-  // FAQ / Sources
   const faqHtml     = blocks.renderFAQ(asArray(aio.faq));
   const sourcesHtml = blocks.renderSources(asArray(aio.sources));
 
-  // body sanitize (공통)
   let bodyHtml = blocks.sanitizeBodyHTML(postJson.body || '');
 
-  // body image 1장 prepend
   if (bodyImgCtx && bodyImgCtx.manifest) {
     const entry = pickBodyImageEntry(bodyImgCtx.manifest, slug, pageId);
     const img = normalizeBodyImage(entry);
@@ -327,8 +316,12 @@ function renderOne(template, postJson, jsonPath, bodyImgCtx) {
     }
   }
 
-  // review blocks (있을 때만)
-  const reviewData = postJson.reviewData || postJson.review || null;
+  // ✅ [리뷰 연결 핵심]
+  // - post.review를 직접 믿지 않고(스키마가 제각각일 수 있음),
+  // - 라벨별 원천 데이터셋(content/reviews/{bucket}/...)을 읽어서
+  // - blocks가 기대하는 공통 포맷으로 정규화(resolveReviewData) 후 렌더링한다.
+  const reviewData = resolveReviewData({ ROOT, postJson });
+
   const reviewRatingHtml   = reviewData ? blocks.renderReviewRatingBlock(reviewData) : '';
   const reviewInsightsHtml = reviewData ? blocks.renderReviewInsightsBlock(reviewData) : '';
 
@@ -348,17 +341,14 @@ function renderOne(template, postJson, jsonPath, bodyImgCtx) {
 
   if (updatedDate) html = html.replace('Updated {{updated}}', `Updated ${escapeHtml(updatedDate)}`);
 
-  // ✅ meta head 주입
   const headBlock = buildHeadFromMeta(meta);
   html = html.replace('<!--META-->', headBlock);
 
-  // SLOT 삽입
   html = injectAfterSlot(html, '<!--SLOT:FAQ_WRAPPER-->', faqHtml);
   html = injectAfterSlot(html, '<!--SLOT:SOURCES_WRAPPER-->', sourcesHtml);
   html = injectAfterSlot(html, '<!--SLOT:REVIEW_RATING_WRAPPER-->', reviewRatingHtml);
   html = injectAfterSlot(html, '<!--SLOT:REVIEW_INSIGHTS_WRAPPER-->', reviewInsightsHtml);
 
-  // body-image css
   if (bodyHtml.includes('class="post-body-image"')) html = injectBodyImageCssOnce(html);
 
   html = html.replace(
