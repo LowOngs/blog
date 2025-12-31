@@ -1,9 +1,5 @@
 {
-  "meta": {
-    "bucket": "device",
-    "kind": "insights",
-    "version": 1,
-    "note": "Device reviews insights (pros/cons, reliability, value signals)."
-  },
+  "schemaVersion": 1,
+  "bucket": "device",
   "bySlug": {}
 }
