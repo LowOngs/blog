@@ -3,19 +3,31 @@
 /**
  * System_files/scripts/build/lib/page-ids.cjs
  *
- * 역할:
- * - slug → pageId 매핑을 "ledger"로 관리
- * - active와 local을 분리
+ * [SSOT] slug → pageId 매핑(ledger) 관리 모듈
  *
+ * ─────────────────────────────────────────────
+ * AOIA ID 정책(옹스 룰, 최신 정리)
+ *
+ * 1) BODY_WRITE_MODE=local
+ *    - 로컬 테스트/무한 렌더링용 번호.
+ *    - PUBLISH_MODE / DRY_RUN 과 무관하게 +1(발급) 허용.
+ *    - 실발행과 분리 (로컬 번호가 늘어도 실발행 +1과 무관)
+ *
+ * 2) BODY_WRITE_MODE=active
+ *    - "실발행을 허용할 수 있는 상태"를 의미하는 신호 모드.
+ *    - 하지만 실번호(=active ledger) 소모(+1)는 아래를 모두 만족할 때만 허용:
+ *        - PUBLISH_MODE=enable  (깃허브 시크릿 2중 안전장치)
+ *        - DRY_RUN != true      (no_live/테스트에서 실번호 소모 방지)
+ *
+ * 3) PUBLISH_MODE=disable
+ *    - '일시정지(PAUSE)' 개념.
+ *    - active ledger 발급 금지, 카운터/이력 보존, 리셋 금지.
+ *
+ * ─────────────────────────────────────────────
  * 파일:
- * - manifests/page-ids.json        (active, 실발행/실번호)
- * - manifests/page-ids.local.json  (local, 로컬 테스트 전용 번호)
- * - manifests/pageid-journal.jsonl (WAL)
- *
- * 규칙:
- * - BODY_WRITE_MODE=local: local ledger를 사용 (PUBLISH_MODE와 무관하게 +1 허용)
- * - BODY_WRITE_MODE=active: active ledger 사용. 단, PUBLISH_MODE=enable일 때만 발급 허용
- * - PUBLISH_MODE=disable은 "일시정지": 카운터/이력 보존, 리셋 금지, 발급 금지(=active만)
+ * - manifests/page-ids.json        (active, 실번호 ledger)
+ * - manifests/page-ids.local.json  (local, 로컬 테스트 번호 ledger)
+ * - manifests/pageid-journal.jsonl (WAL: 발급 로그, 실패해도 치명 아님)
  */
 
 const fs = require('fs');
@@ -77,6 +89,10 @@ function isPublishEnabled() {
   return PUBLISH_MODE === 'enable';
 }
 
+function isDryRun() {
+  return String(process.env.DRY_RUN || '').toLowerCase() === 'true';
+}
+
 function loadLedgerInfo() {
   const mode = pickMode();
   const ledgerFile = mode === 'active' ? ACTIVE_LEDGER : LOCAL_LEDGER;
@@ -88,11 +104,19 @@ function loadLedger() {
 
   const { mode, ledgerFile } = loadLedgerInfo();
 
-  // active는 publish enable일 때만 발급 허용
-  if (mode === 'active' && !isPublishEnabled()) {
-    const err = new Error('PAUSE: PUBLISH_MODE=disable 이므로 active pageId 발급 금지');
-    err.code = 'PAUSE_ACTIVE';
-    throw err;
+  // ✅ 실번호(active ledger) 소모 방지 가드
+  // - publish enable + dry_run=false 에서만 active 발급 허용
+  if (mode === 'active') {
+    if (!isPublishEnabled()) {
+      const err = new Error('PAUSE: PUBLISH_MODE=disable 이므로 active pageId 발급 금지');
+      err.code = 'PAUSE_ACTIVE';
+      throw err;
+    }
+    if (isDryRun()) {
+      const err = new Error('PAUSE: DRY_RUN=true 이므로 active pageId 발급 금지 (실번호 소모 방지)');
+      err.code = 'PAUSE_DRYRUN';
+      throw err;
+    }
   }
 
   const base = readJsonSafe(ledgerFile, null);
@@ -153,7 +177,6 @@ module.exports = {
   isValidPageId,
   ensurePageId,
   loadLedgerInfo,
-  // (옵션) 외부에서 경로가 필요하면
   _paths: {
     ROOT,
     MANIFESTS_DIR,
