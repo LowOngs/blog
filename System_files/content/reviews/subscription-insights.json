@@ -1,9 +1,5 @@
 {
-  "meta": {
-    "bucket": "subscription",
-    "kind": "insights",
-    "version": 1,
-    "note": "Subscription services insights (pricing, cancelation, quality)."
-  },
+  "schemaVersion": 1,
+  "bucket": "subscription",
   "bySlug": {}
 }
