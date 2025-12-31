@@ -1,9 +1,5 @@
 {
-  "meta": {
-    "bucket": "device",
-    "kind": "ratings",
-    "version": 1,
-    "note": "Device reviews rating snapshots (retailer / community / lab)."
-  },
+  "schemaVersion": 1,
+  "bucket": "device",
   "bySlug": {}
 }
