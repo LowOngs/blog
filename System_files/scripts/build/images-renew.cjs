@@ -1,6 +1,15 @@
 // System_files/scripts/build/images-renew.cjs
-// dist/posts/*.html 을 스캔해서 images-manifest.json 을
+// dist/posts/*.html 을 스캔해서 manifests/images-manifest.json 을
 // 새 스키마(version=1)로 "완전 재생성"하는 스크립트입니다.
+//
+// ─────────────────────────────────────────────
+// [중요] OG Freshness 관련 오해 방지
+// - 이 파일은 "이미지 픽셀/색상 변경"을 하지 않습니다.
+// - HTML에 이미 박혀 있는 og:image URL, og:image:alt, width/height, modified_time 등을 읽어
+//   manifest(인덱스)를 재생성합니다.
+// - AOIA에서 말하는 프레시니스 신호는 'updatedAt(메타 시간)' 및 'og:image URL/파일 신규성'에 의해
+//   상위 단계(meta/render/og 생성)에서 만들어집니다.
+// ─────────────────────────────────────────────
 
 const fs = require('fs');
 const path = require('path');
@@ -112,8 +121,8 @@ function buildRecordFromHtml(file) {
   const now = new Date().toISOString();
 
   return {
-    slug: file.slug,        // 예: app-20251207-001
-    pageId: pageId || null, // 예: page183338
+    slug: file.slug,
+    pageId: pageId || null,
     type: 'og',
     url: ogUrl,
     filename,
@@ -147,9 +156,7 @@ function main() {
     if (rec) {
       records.push(rec);
     } else {
-      log(
-        `[images-renew] 스킵: og:image 없음 → ${file.filename}`
-      );
+      log(`[images-renew] 스킵: og:image 없음 → ${file.filename}`);
     }
   }
 
