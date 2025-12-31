@@ -1,12 +1,32 @@
 #!/usr/bin/env node
 'use strict';
 
+/**
+ * System_files/scripts/build/images-manifest.cjs
+ *
+ * 역할:
+ * - dist/posts/*.html 을 스캔하여 "이미지 인덱스(manifest)"를 생성/갱신
+ *
+ * ─────────────────────────────────────────────
+ * [SSOT 규칙]
+ * - images-manifest.json은 dist가 아니라 System_files/manifests/ 아래에 둡니다.
+ *   이유: dist는 빌드 산출물이고, manifest는 파이프라인 전반이 공유하는 인덱스(SSOT 성격)라서
+ *        validate/업로드/로그 등 다른 단계에서도 안정적으로 참조해야 합니다.
+ *
+ * [Freshness 신호]
+ * - updatedAt은 article:modified_time 또는 og:updated_time(HTML 메타)로 기록합니다.
+ * - 이 파일은 픽셀을 바꾸지 않고, "메타 시간/경로"를 구조화해서 신호를 제공합니다.
+ * ─────────────────────────────────────────────
+ */
+
 const fs = require("fs");
 const path = require("path");
 
 const ROOT = path.resolve(__dirname, "..", ".."); // System_files 기준
 const DIST_POSTS_DIR = path.join(ROOT, "dist", "posts");
-const MANIFEST_DIR = path.join(ROOT, "dist", "manifests");
+
+// ✅ SSOT: manifests 아래로 통일
+const MANIFEST_DIR = path.join(ROOT, "manifests");
 const MANIFEST_FILE = path.join(MANIFEST_DIR, "images-manifest.json");
 
 // 도메인 베이스: .env / GitHub Secrets 기준 (render-posts / validate-repair 와 일치)
@@ -131,7 +151,7 @@ function extractEntryFromHtml(html, filename) {
     hero: {
       path: thumbnailPath,
     },
-    etag: null, // R2 업로드 시 채워도 되고, 당장은 null로 둬도 됨
+    etag: null,
     updatedAt: modifiedTime || null,
   };
 }
