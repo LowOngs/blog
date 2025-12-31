@@ -1,1 +1,9 @@
-
+{
+  "meta": {
+    "bucket": "subscription",
+    "kind": "ratings",
+    "version": 1,
+    "note": "Subscription services rating snapshots (app store / review sites / internal)."
+  },
+  "bySlug": {}
+}
