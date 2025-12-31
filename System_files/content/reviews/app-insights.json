@@ -1,9 +1,5 @@
 {
-  "meta": {
-    "bucket": "app",
-    "kind": "insights",
-    "version": 1,
-    "note": "App reviews insights (what users mention most)."
-  },
+  "schemaVersion": 1,
+  "bucket": "app",
   "bySlug": {}
 }
