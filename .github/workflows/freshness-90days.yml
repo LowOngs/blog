@@ -8,7 +8,7 @@ on:
         required: false
         default: "true"
   schedule:
-    - cron: "35 2 * * 1" # KST 11:35, 매주 월요일(UTC 02:35)
+    - cron: "35 2 * * 1" # KST 11:35, 매주 월요일(UTC 기준)
 
 permissions:
   contents: write
@@ -30,7 +30,6 @@ jobs:
       GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
 
       PUBLISH_MODE: ${{ secrets.PUBLISH_MODE }}
-
       DRY_RUN_INPUT: ${{ github.event.inputs.DRY_RUN || 'true' }}
 
     steps:
@@ -42,49 +41,37 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "24"
+          node-version: "20"
 
-      - name: Install
+      # ✅ 의존성은 루트에서 설치
+      - name: Install (root)
         run: npm ci
 
       - name: Export runtime env
         run: |
           echo "DRY_RUN=${DRY_RUN_INPUT}" >> $GITHUB_ENV
-          # 90일 갱신은 “기존 글 수정” 성격 → 안전하게 local 고정
           echo "BODY_WRITE_MODE=local" >> $GITHUB_ENV
 
-      # (A) 90일 due 리스트 산출(대상 식별/리포트)
-      - name: Build due list (dist/reviews)
-        run: npm run reviews:due
+      - name: Run 90days freshness (ratings/insights)
+        run: |
+          # package.json에 옹스님이 추가한 라인 이름 그대로 사용
+          npm run reviews:90days
 
-      # (B) (선택이지만 권장) next → baseline 병합
-      # - 실제 운영에서는 ratings-next.json이 갱신되어 들어온 뒤 병합해야 함
-      - name: Merge ratings-next into ratings (3 buckets)
-        run: npm run posts:review:update
-
-      # (C) ratings/insights → posts reviewData 주입
       - name: Inject reviewData to posts (resolver)
-        run: npm run posts:review:resolve
+        run: node ./System_files/scripts/build/review-resolver.cjs
 
-      # (D) Render / Normalize / Review meta / Validate / QA
       - name: Render posts
-        run: npm run posts:render
-
-      - name: Normalize body
-        run: npm run posts:normalize
-
-      - name: Review meta blocks build
-        run: npm run posts:review:meta
+        run: node ./System_files/scripts/build/render-posts.cjs
 
       - name: Validate & repair
-        run: npm run posts:validate
+        run: node ./System_files/scripts/build/validate-repair.cjs
 
       - name: Preflight QA
-        run: npm run posts:qa
+        run: node ./System_files/scripts/build/qa-check.cjs
 
-      - name: Publish to Blogger (skip when DRY_RUN=true or PUBLISH_MODE!=enable)
-        if: env.DRY_RUN != 'true' && env.PUBLISH_MODE == 'enable'
-        run: npm run publish:blogger
+      - name: Publish to Blogger (skip when DRY_RUN=true)
+        if: env.DRY_RUN != 'true'
+        run: node ./System_files/scripts/publish/blogger.cjs
 
       - name: Commit freshness updates
         run: |
