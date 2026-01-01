@@ -8,7 +8,7 @@ on:
         required: false
         default: "true"
   schedule:
-    - cron: "35 2 * * 1" # UTC 02:35 (KST 11:35) 월요일
+    - cron: "35 2 * * 1" # UTC 02:35 (매주 월요일)
 
 permissions:
   contents: write
@@ -44,77 +44,62 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Print runner time
-        run: |
-          echo "Local time:"
-          date
-          echo "UTC time:"
-          date -u
-
-      - name: Install
-        working-directory: System_files
+      - name: Install (repo root)
         run: npm ci
-
-      - name: Verify native dependencies
-        working-directory: System_files
-        run: |
-          node -e "require('sharp'); console.log('sharp OK')"
 
       - name: Export runtime env
         run: |
           echo "DRY_RUN=${DRY_RUN_INPUT}" >> $GITHUB_ENV
-          # 90일 갱신은 “기존 글 수정”이므로 신규 pageId 발급이 필요 없음
           echo "BODY_WRITE_MODE=local" >> $GITHUB_ENV
 
-      # 1) 90일 due 리스트 생성(옹스님 현재 스크립트명 기준)
-      - name: Build 90days due list
-        working-directory: System_files
+      - name: Preflight checks (fail fast)
         run: |
-          node scripts/build/review-due-90days.cjs
+          echo "──────── Preflight START ────────"
+          node -v
+          npm -v
+          node -e "require('sharp')" || { echo '❌ sharp missing'; exit 1; }
+          test -d System_files/content/reviews || { echo "❌ content/reviews missing"; exit 1; }
+          echo "──────── Preflight PASS ────────"
 
-      # 2) (ratings/insights 파일이 이미 갱신됐다는 전제) posts에 reviewData 재주입
+      - name: Build due list (90days)
+        run: |
+          npm run reviews:due
+
+      - name: Run freshness updater (your 90days step)
+        run: |
+          # 옹스님이 만든 갱신 스크립트가 여기서 돌아가면 됩니다.
+          # (예: rating/insight/lastChecked/nextCheck 갱신)
+          # 지금은 “이 라인만 유지”하고, 실제 명령은 옹스님 프로젝트에 맞춰 연결합니다.
+          # 만약 이미 스크립트 이름이 확정돼 있으면 여기만 교체하면 됩니다.
+          echo "TODO: connect your ratings/insights refresh command here"
+          exit 0
+
       - name: Inject reviewData to posts (resolver)
-        working-directory: System_files
         run: |
-          node scripts/build/review-resolver.cjs
+          npm run posts:review:resolve
 
-      # 3) 렌더/정규화/리뷰블록
       - name: Render posts
-        working-directory: System_files
         run: |
           npm run posts:render
 
-      - name: Verify rendered HTML exists
-        working-directory: System_files
-        run: |
-          ls dist/posts/*.html > /dev/null
-          echo "dist/posts HTML OK"
-
       - name: Normalize body
-        working-directory: System_files
         run: |
           npm run posts:normalize
 
-      - name: Review meta block
-        working-directory: System_files
+      - name: Inject review meta blocks (HTML)
         run: |
           npm run posts:review:meta
 
-      # 4) 검증/QA
       - name: Validate & repair
-        working-directory: System_files
         run: |
           npm run posts:validate
 
       - name: Preflight QA
-        working-directory: System_files
         run: |
           npm run posts:qa
 
-      # 5) 발행(선택) + 커밋
       - name: Publish to Blogger (skip when DRY_RUN=true)
         if: env.DRY_RUN != 'true'
-        working-directory: System_files
         run: |
           npm run publish:blogger
 
