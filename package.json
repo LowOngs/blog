@@ -14,7 +14,8 @@
 
     "review:ratings:update": "node ./System_files/scripts/build/update-review-ratings.cjs",
     "posts:review:update": "node ./System_files/scripts/build/review-diff-update.cjs",
-
+    "reviews:due": "node scripts/build/review-due-90days.cjs",
+    
     "slug:next": "node ./System_files/scripts/build/slug-builder.cjs",
     "posts:body:generate": "node ./System_files/scripts/build/generate-body.cjs",
 
