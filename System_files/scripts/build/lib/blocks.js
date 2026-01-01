@@ -1,6 +1,6 @@
 // scripts/build/lib/blocks.js
 // HTML block render helpers (TLDR / KeyFacts / FAQ / Sources / Review blocks)
-// + body sanitization to prevent <main> nesting / duplicate sections
+// - render-posts.cjs가 post.reviewData(SSOT) 를 그대로 넘기므로, 여기서 구조를 확정 렌더합니다.
 
 function escapeHtml(s = '') {
   return String(s)
@@ -49,7 +49,6 @@ ${items.join('\n')}
 function renderSources(sources = []) {
   if (!Array.isArray(sources) || sources.length === 0) return '';
   const items = sources.map(src => {
-    // allow either {label,url} or plain string url
     if (typeof src === 'string') {
       const u = src.trim();
       if (!u) return '';
@@ -71,12 +70,12 @@ function renderSources(sources = []) {
 </section>`;
 }
 
-// ===== Review blocks =====
+/* ---------------- Review blocks ---------------- */
 
 function normalizeHistogram(hist = {}) {
-  // Expect keys "1".."5" counts or percents; sanitize to ints
-  const out = { 5:0, 4:0, 3:0, 2:0, 1:0 };
-  for (const k of [5,4,3,2,1]) {
+  // Expect keys "1".."5" counts; sanitize to ints
+  const out = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+  for (const k of [5, 4, 3, 2, 1]) {
     const v = hist?.[String(k)] ?? hist?.[k];
     const n = Number.isFinite(Number(v)) ? Math.max(0, Math.floor(Number(v))) : 0;
     out[k] = n;
@@ -86,8 +85,8 @@ function normalizeHistogram(hist = {}) {
 
 function renderHistogram(hist = {}) {
   const h = normalizeHistogram(hist);
-  const total = Object.values(h).reduce((a,b)=>a+b,0) || 1;
-  const rows = [5,4,3,2,1].map(star => {
+  const total = Object.values(h).reduce((a, b) => a + b, 0) || 1;
+  const rows = [5, 4, 3, 2, 1].map(star => {
     const v = h[star];
     const pct = Math.round((v / total) * 100);
     return `<div class="review-histogram-row">
@@ -99,98 +98,62 @@ function renderHistogram(hist = {}) {
   return `<div class="review-histogram">${rows}</div>`;
 }
 
-function pickRatingModel(reviewData) {
-  // ✅ 표준: reviewData.rating = { overall, votes, scale, lastChecked, nextCheck, platform, source, storeId }
-  // ✅ 하위호환: reviewData.rating = number (overall)
-  if (!reviewData) return null;
+function pickReviewRating(reviewData) {
+  // ✅ render-posts가 넘기는 구조: reviewData.rating.overall / votes / lastChecked / nextCheck
+  const r = reviewData?.rating && typeof reviewData.rating === 'object' ? reviewData.rating : null;
+  if (!r) return null;
 
-  const r = reviewData.rating;
+  const overall = Number(r.overall);
+  if (!Number.isFinite(overall)) return null;
 
-  if (r && typeof r === 'object') {
-    const overall = Number(r.overall);
-    if (!Number.isFinite(overall)) return null;
-    return {
-      overall,
-      votes: Number(r.votes || 0) || 0,
-      scale: Number(r.scale || 5) || 5,
-      lastChecked: r.lastChecked ? String(r.lastChecked) : '',
-      nextCheck: r.nextCheck ? String(r.nextCheck) : '',
-      platform: r.platform ? String(r.platform) : '',
-      source: r.source ? String(r.source) : '',
-      storeId: r.storeId ?? null
-    };
-  }
-
-  // legacy
-  const overallLegacy = Number(r);
-  if (Number.isFinite(overallLegacy)) {
-    return {
-      overall: overallLegacy,
-      votes: Number(reviewData.votes || 0) || 0,
-      scale: 5,
-      lastChecked: reviewData.updatedAt ? String(reviewData.updatedAt) : '',
-      nextCheck: '',
-      platform: reviewData.platform ? String(reviewData.platform) : '',
-      source: reviewData.source ? String(reviewData.source) : '',
-      storeId: reviewData.storeId ?? null
-    };
-  }
-
-  return null;
-}
-
-function isOverdue(nextCheckIso) {
-  if (!nextCheckIso) return false;
-  const n = Date.parse(nextCheckIso);
-  if (!Number.isFinite(n)) return false;
-  return Date.now() > n;
+  return {
+    overall,
+    votes: Number(r.votes || 0) || 0,
+    scale: Number(r.scale || 5) || 5,
+    lastChecked: String(r.lastChecked || ''),
+    nextCheck: String(r.nextCheck || ''),
+    platform: String(r.platform || ''),
+    source: String(r.source || reviewData?.source || ''),
+    storeId: r.storeId ?? null,
+  };
 }
 
 function renderReviewRatingBlock(reviewData) {
-  if (!reviewData) return '';
-
-  const rating = pickRatingModel(reviewData);
+  const rating = pickReviewRating(reviewData);
   if (!rating) return '';
 
-  const safeRating = rating.overall.toFixed(1);
-  const votesText = rating.votes ? `${rating.votes.toLocaleString()} votes` : '';
-  const lastChecked = rating.lastChecked || '';
+  const safeRating = Number.isFinite(rating.overall) ? rating.overall.toFixed(1) : 'N/A';
+  const updatedAt = rating.lastChecked || '';
   const nextCheck = rating.nextCheck || '';
-  const overdue = isOverdue(nextCheck);
+  const platform = rating.platform || (reviewData?.bucket || '');
+  const source = rating.source || 'review dataset';
 
-  const sourceText = escapeHtml(rating.source || 'internal');
-  const platformText = escapeHtml(rating.platform || 'multi');
-
-  const histogramHtml = reviewData.histogram ? renderHistogram(reviewData.histogram) : '';
-
-  const freshnessLine = [
-    lastChecked ? `Checked: ${escapeHtml(lastChecked)}` : '',
-    nextCheck ? `Next: ${escapeHtml(nextCheck)}` : ''
-  ].filter(Boolean).join(' · ');
-
-  const statusBadge = overdue
-    ? `<span class="review-badge review-badge--warn">Needs refresh</span>`
-    : `<span class="review-badge review-badge--ok">Fresh</span>`;
+  const histogramHtml = reviewData?.histogram ? renderHistogram(reviewData.histogram) : '';
 
   return `<section id="review-rating-block" class="review-block">
-  <div class="review-block__title">Rating snapshot ${statusBadge}</div>
-
+  <div class="review-block__title">Rating snapshot</div>
   <div class="review-block__meta">
-    Rating: <strong>${escapeHtml(safeRating)}</strong> / ${escapeHtml(String(rating.scale))}
-    ${votesText ? ` · ${escapeHtml(votesText)}` : ''}
-    · Platform: ${platformText}
-    · Source: ${sourceText}
+    Rating: <strong>${escapeHtml(safeRating)}</strong>
+    · Votes: ${escapeHtml(String(rating.votes))}
+    · Updated: ${escapeHtml(updatedAt || 'N/A')}
+    · Next check: ${escapeHtml(nextCheck || 'N/A')}
+    · Platform: ${escapeHtml(platform)}
+    · Source: ${escapeHtml(source)}
   </div>
 
-  ${freshnessLine ? `<div class="review-block__meta">${freshnessLine}</div>` : ''}
+  <table class="review-rating-table" aria-label="Rating summary">
+    <tbody>
+      <tr><th>Overall</th><td>${escapeHtml(safeRating)} / ${escapeHtml(String(rating.scale))}</td></tr>
+      <tr><th>Signal</th><td>${updatedAt ? 'Version-tagged snapshot' : 'No dataset'}</td></tr>
+    </tbody>
+  </table>
 
   ${histogramHtml}
 </section>`;
 }
 
 function renderReviewInsightsBlock(reviewData) {
-  if (!reviewData) return '';
-  const insights = Array.isArray(reviewData.insights) ? reviewData.insights : [];
+  const insights = Array.isArray(reviewData?.insights) ? reviewData.insights : [];
   const safe = insights.map(x => String(x || '').trim()).filter(Boolean).slice(0, 12);
 
   const list = safe.length
@@ -199,16 +162,15 @@ function renderReviewInsightsBlock(reviewData) {
 
   return `<section id="review-insights-block" class="review-block">
   <div class="review-block__title">User insights snapshot</div>
-  <div class="review-block__meta">Short, practical signals at a glance.</div>
+  <div class="review-block__meta">Short, practical signals you can trust at a glance.</div>
   ${list}
 </section>`;
 }
 
-// ===== Body sanitization (공통 문제 해결 핵심) =====
+/* ---------------- Body sanitization ---------------- */
 
 function stripOuterMain(html = '') {
   let s = String(html || '');
-  // remove any <main ...> wrappers to avoid nesting
   s = s.replace(/<\s*main[^>]*>/gi, '');
   s = s.replace(/<\s*\/\s*main\s*>/gi, '');
   return s;
