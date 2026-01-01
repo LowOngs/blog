@@ -1,4 +1,18 @@
 {
   "bySlug": {
+    "subscription-20251207-001": {
+      "lastChecked": "2026-01-01",
+      "status": "ok",
+      "store": "trustpilot",
+      "ratingCurrent": 4.2,
+      "ratingPrevious": 4.2,
+      "ratingDiff": 0,
+      "votesCurrent": 2100,
+      "votesPrevious": 2100,
+      "votesDiff": 0,
+      "histogram": { "1": 5, "2": 7, "3": 13, "4": 25, "5": 50 },
+      "source": "manual",
+      "storeId": null
+    }
   }
 }
