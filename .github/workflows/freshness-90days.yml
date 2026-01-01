@@ -8,7 +8,7 @@ on:
         required: false
         default: "true"
   schedule:
-    - cron: "35 2 * * 1" # KST 11:35, 매주 월요일(UTC 기준)
+    - cron: "35 2 * * 1" # UTC 02:35 (KST 11:35) 월요일
 
 permissions:
   contents: write
@@ -30,6 +30,7 @@ jobs:
       GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
 
       PUBLISH_MODE: ${{ secrets.PUBLISH_MODE }}
+
       DRY_RUN_INPUT: ${{ github.event.inputs.DRY_RUN || 'true' }}
 
     steps:
@@ -43,35 +44,79 @@ jobs:
         with:
           node-version: "20"
 
-      # ✅ 의존성은 루트에서 설치
-      - name: Install (root)
+      - name: Print runner time
+        run: |
+          echo "Local time:"
+          date
+          echo "UTC time:"
+          date -u
+
+      - name: Install
+        working-directory: System_files
         run: npm ci
+
+      - name: Verify native dependencies
+        working-directory: System_files
+        run: |
+          node -e "require('sharp'); console.log('sharp OK')"
 
       - name: Export runtime env
         run: |
           echo "DRY_RUN=${DRY_RUN_INPUT}" >> $GITHUB_ENV
+          # 90일 갱신은 “기존 글 수정”이므로 신규 pageId 발급이 필요 없음
           echo "BODY_WRITE_MODE=local" >> $GITHUB_ENV
 
-      - name: Run 90days freshness (ratings/insights)
+      # 1) 90일 due 리스트 생성(옹스님 현재 스크립트명 기준)
+      - name: Build 90days due list
+        working-directory: System_files
         run: |
-          # package.json에 옹스님이 추가한 라인 이름 그대로 사용
-          npm run reviews:90days
+          node scripts/build/review-due-90days.cjs
 
+      # 2) (ratings/insights 파일이 이미 갱신됐다는 전제) posts에 reviewData 재주입
       - name: Inject reviewData to posts (resolver)
-        run: node ./System_files/scripts/build/review-resolver.cjs
+        working-directory: System_files
+        run: |
+          node scripts/build/review-resolver.cjs
 
+      # 3) 렌더/정규화/리뷰블록
       - name: Render posts
-        run: node ./System_files/scripts/build/render-posts.cjs
+        working-directory: System_files
+        run: |
+          npm run posts:render
 
+      - name: Verify rendered HTML exists
+        working-directory: System_files
+        run: |
+          ls dist/posts/*.html > /dev/null
+          echo "dist/posts HTML OK"
+
+      - name: Normalize body
+        working-directory: System_files
+        run: |
+          npm run posts:normalize
+
+      - name: Review meta block
+        working-directory: System_files
+        run: |
+          npm run posts:review:meta
+
+      # 4) 검증/QA
       - name: Validate & repair
-        run: node ./System_files/scripts/build/validate-repair.cjs
+        working-directory: System_files
+        run: |
+          npm run posts:validate
 
       - name: Preflight QA
-        run: node ./System_files/scripts/build/qa-check.cjs
+        working-directory: System_files
+        run: |
+          npm run posts:qa
 
+      # 5) 발행(선택) + 커밋
       - name: Publish to Blogger (skip when DRY_RUN=true)
         if: env.DRY_RUN != 'true'
-        run: node ./System_files/scripts/publish/blogger.cjs
+        working-directory: System_files
+        run: |
+          npm run publish:blogger
 
       - name: Commit freshness updates
         run: |
