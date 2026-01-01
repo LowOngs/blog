@@ -3,7 +3,7 @@ name: publish
 on:
   workflow_dispatch:
     inputs:
-      RUN_MODE:
+      RUN_MODE: 
         description: "auto/manual"
         required: true
         default: "manual"
