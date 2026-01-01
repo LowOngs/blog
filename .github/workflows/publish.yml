@@ -29,7 +29,7 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     env:
-      # 공통: site/cdn
+      # site/cdn
       CANONICAL_BASE: ${{ secrets.CANONICAL_BASE }}
       CDN_BASE: ${{ secrets.CDN_BASE }}
 
@@ -46,11 +46,11 @@ jobs:
       R2_BUCKET: ${{ secrets.R2_BUCKET }}
       R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
 
-      # publish control (2중 가드용)
+      # publish control (2중 가드)
       SCHEDULE_MODE: ${{ secrets.SCHEDULE_MODE }} # live/test
       PUBLISH_MODE: ${{ secrets.PUBLISH_MODE }}   # enable/disable
 
-      # inputs (없으면 default)
+      # inputs
       RUN_MODE: ${{ github.event.inputs.RUN_MODE || 'auto' }}
       MANUAL_JOB: ${{ github.event.inputs.MANUAL_JOB || 'schedule_once' }}
       DRY_RUN_INPUT: ${{ github.event.inputs.DRY_RUN || 'false' }}
@@ -64,10 +64,9 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24"
 
       - name: Install
-        working-directory: System_files
         run: npm ci
 
       - name: Decide modes
@@ -76,14 +75,9 @@ jobs:
           echo "RUN_MODE=${RUN_MODE}"
           echo "MANUAL_JOB=${MANUAL_JOB}"
           echo "DRY_RUN_INPUT=${DRY_RUN_INPUT}"
-          # ─────────────────────────────────────────
-          # 분기 규칙(핵심):
-          # 1) schedule 트리거는 SCHEDULE_MODE=live 일 때만 동작
-          # 2) auto는 무조건 live (DRY_RUN 무시)
-          # 3) manual은 DRY_RUN=true면 no_live, false면 live
-          # ─────────────────────────────────────────
           EVENT_NAME="${{ github.event_name }}"
 
+          # 1) schedule 트리거는 SCHEDULE_MODE=live 일 때만 동작
           if [ "$EVENT_NAME" = "schedule" ]; then
             if [ "${SCHEDULE_MODE}" != "live" ]; then
               echo "SKIP_SCHEDULE=true" >> $GITHUB_OUTPUT
@@ -97,18 +91,20 @@ jobs:
 
           echo "SKIP_SCHEDULE=false" >> $GITHUB_OUTPUT
 
+          # 2) auto는 무조건 live (DRY_RUN 무시)
           if [ "${RUN_MODE}" = "auto" ]; then
             echo "FINAL_DRY_RUN=false" >> $GITHUB_OUTPUT
             echo "FINAL_RUN_MODE=auto" >> $GITHUB_OUTPUT
-          else
-            # manual
-            if [ "${DRY_RUN_INPUT}" = "true" ]; then
-              echo "FINAL_DRY_RUN=true" >> $GITHUB_OUTPUT
-            else
-              echo "FINAL_DRY_RUN=false" >> $GITHUB_OUTPUT
-            fi
-            echo "FINAL_RUN_MODE=manual" >> $GITHUB_OUTPUT
+            exit 0
           fi
+
+          # 3) manual은 DRY_RUN=true면 no_live, false면 live
+          if [ "${DRY_RUN_INPUT}" = "true" ]; then
+            echo "FINAL_DRY_RUN=true" >> $GITHUB_OUTPUT
+          else
+            echo "FINAL_DRY_RUN=false" >> $GITHUB_OUTPUT
+          fi
+          echo "FINAL_RUN_MODE=manual" >> $GITHUB_OUTPUT
 
       - name: Stop (schedule disabled)
         if: steps.modes.outputs.SKIP_SCHEDULE == 'true'
@@ -119,58 +115,86 @@ jobs:
       - name: Export runtime env
         run: |
           echo "DRY_RUN=${{ steps.modes.outputs.FINAL_DRY_RUN }}" >> $GITHUB_ENV
-          # page-ids.cjs active 발급 가드가 PUBLISH_MODE+DRY_RUN에 걸려있으므로 여기서 일관되게 세팅
+
+          # DRY_RUN이면 발행/active write를 막는 방향으로 통일
           if [ "${{ steps.modes.outputs.FINAL_DRY_RUN }}" = "true" ]; then
             echo "BODY_WRITE_MODE=local" >> $GITHUB_ENV
           else
             echo "BODY_WRITE_MODE=active" >> $GITHUB_ENV
           fi
 
+      # ─────────────────────────────────────────
+      # 1) 콘텐츠 생성 파이프라인(스케줄러 → posts json)
+      # ─────────────────────────────────────────
       - name: Build queue (scheduler)
-        working-directory: System_files
-        run: |
-          # 여기서 MANUAL_JOB 분기를 “실제 동작”으로 쓰려면,
-          # seed-scheduler.cjs가 옵션/환경변수를 지원해야 합니다.
-          # 현재는 단일 실행(기본 동작)으로 유지합니다.
-          node scripts/build/seed-scheduler.cjs
+        run: node ./System_files/scripts/build/seed-scheduler.cjs
 
+      - name: Queue → Posts JSON
+        run: node ./System_files/scripts/build/queue-to-posts.cjs
+
+      - name: PageId issue
+        run: node ./System_files/scripts/build/ids.cjs
+
+      - name: Generate body
+        run: npm run posts:body:generate
+
+      # ─────────────────────────────────────────
+      # 2) 리뷰 파이프라인(merge → resolve → meta)
+      # ─────────────────────────────────────────
+      - name: Review ratings merge (next → baseline)
+        run: npm run posts:review:update
+
+      - name: Review data resolve (inject to posts)
+        run: npm run posts:review:resolve
+
+      - name: Review meta blocks build
+        run: npm run posts:review:meta
+
+      # ─────────────────────────────────────────
+      # 3) 렌더/정규화
+      # ─────────────────────────────────────────
+      - name: Render posts
+        run: npm run posts:render
+
+      - name: Normalize body
+        run: npm run posts:normalize
+
+      # ─────────────────────────────────────────
+      # 4) 이미지(OG 생성 → 업로드 → rewrite)
+      # ─────────────────────────────────────────
       - name: Build OG images
-        working-directory: System_files
         run: |
-          node scripts/build/images-renew.cjs
-          node scripts/build/images-build-og.cjs
+          npm run images:renew
+          npm run images:build:og
 
       - name: Upload images to R2
-        working-directory: System_files
-        run: |
-          npm run images:upload
+        run: npm run images:upload
 
       - name: Rewrite image URLs in posts JSON
-        working-directory: System_files
-        run: |
-          npm run images:rewrite
+        run: npm run images:rewrite
 
-      - name: Render posts
-        working-directory: System_files
-        run: |
-          node scripts/build/render-posts.cjs
-
+      # ─────────────────────────────────────────
+      # 5) 검증/QA + 90일 due 산출물 생성
+      # ─────────────────────────────────────────
       - name: Validate & repair
-        working-directory: System_files
-        run: |
-          node scripts/build/validate-repair.cjs
+        run: npm run posts:validate
 
       - name: Preflight QA
-        working-directory: System_files
-        run: |
-          npm run qa:check
+        run: npm run posts:qa
 
-      - name: Publish to Blogger (skip when DRY_RUN=true)
-        if: env.DRY_RUN != 'true'
-        working-directory: System_files
-        run: |
-          node scripts/build/blogger.cjs
+      - name: Build 90days due list (dist/reviews)
+        run: npm run reviews:due
 
+      # ─────────────────────────────────────────
+      # 6) Blogger publish
+      # ─────────────────────────────────────────
+      - name: Publish to Blogger (skip when DRY_RUN=true or PUBLISH_MODE!=enable)
+        if: env.DRY_RUN != 'true' && env.PUBLISH_MODE == 'enable'
+        run: npm run publish:blogger
+
+      # ─────────────────────────────────────────
+      # 7) Commit artifacts
+      # ─────────────────────────────────────────
       - name: Commit generated artifacts
         run: |
           git config user.name "github-actions"
