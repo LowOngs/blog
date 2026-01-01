@@ -8,7 +8,7 @@ on:
         required: false
         default: "true"
   schedule:
-    - cron: "35 2 * * 1" # KST 11:35, 매주 월요일(UTC 기준)
+    - cron: "35 2 * * 1" # KST 11:35, 매주 월요일(UTC 02:35)
 
 permissions:
   contents: write
@@ -42,51 +42,49 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24"
 
       - name: Install
-        working-directory: System_files
         run: npm ci
 
       - name: Export runtime env
         run: |
           echo "DRY_RUN=${DRY_RUN_INPUT}" >> $GITHUB_ENV
-          # 90일 갱신은 “기존 글 수정”이므로 pageId 신규 발급이 필요 없습니다.
-          # 안전하게 local로 두어도 되고(추천), active여도 pageId를 새로 안 만들면 영향 없습니다.
+          # 90일 갱신은 “기존 글 수정” 성격 → 안전하게 local 고정
           echo "BODY_WRITE_MODE=local" >> $GITHUB_ENV
 
-      - name: Run 90days freshness (ratings/insights)
-        working-directory: System_files
-        run: |
-          # 옹스님이 만든 스크립트 이름 기준으로 실행만 맞추면 됩니다.
-          # 예) npm run reviews:90days  (package.json에 추가한 그 라인)
-          npm run reviews:90days
+      # (A) 90일 due 리스트 산출(대상 식별/리포트)
+      - name: Build due list (dist/reviews)
+        run: npm run reviews:due
 
+      # (B) (선택이지만 권장) next → baseline 병합
+      # - 실제 운영에서는 ratings-next.json이 갱신되어 들어온 뒤 병합해야 함
+      - name: Merge ratings-next into ratings (3 buckets)
+        run: npm run posts:review:update
+
+      # (C) ratings/insights → posts reviewData 주입
       - name: Inject reviewData to posts (resolver)
-        working-directory: System_files
-        run: |
-          node scripts/build/review-resolver.cjs
+        run: npm run posts:review:resolve
 
+      # (D) Render / Normalize / Review meta / Validate / QA
       - name: Render posts
-        working-directory: System_files
-        run: |
-          node scripts/build/render-posts.cjs
+        run: npm run posts:render
+
+      - name: Normalize body
+        run: npm run posts:normalize
+
+      - name: Review meta blocks build
+        run: npm run posts:review:meta
 
       - name: Validate & repair
-        working-directory: System_files
-        run: |
-          node scripts/build/validate-repair.cjs
+        run: npm run posts:validate
 
       - name: Preflight QA
-        working-directory: System_files
-        run: |
-          npm run qa:check
+        run: npm run posts:qa
 
-      - name: Publish to Blogger (skip when DRY_RUN=true)
-        if: env.DRY_RUN != 'true'
-        working-directory: System_files
-        run: |
-          node scripts/build/blogger.cjs
+      - name: Publish to Blogger (skip when DRY_RUN=true or PUBLISH_MODE!=enable)
+        if: env.DRY_RUN != 'true' && env.PUBLISH_MODE == 'enable'
+        run: npm run publish:blogger
 
       - name: Commit freshness updates
         run: |
