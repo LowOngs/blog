@@ -1,3 +1,5 @@
 {
-  "byslug": {}
+  "schemaVersion": 1,
+  "bucket": "device",
+  "bySlug": {}
 }
