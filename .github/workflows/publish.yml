@@ -16,7 +16,7 @@ on:
         required: false
         default: "true"
   schedule:
-    - cron: "15 2 * * *" # UTC 02:15
+    - cron: "15 2 * * *" # KST 11:15 (UTC 02:15)
 
 permissions:
   contents: write
@@ -29,28 +29,23 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     env:
-      # site/cdn
       CANONICAL_BASE: ${{ secrets.CANONICAL_BASE }}
       CDN_BASE: ${{ secrets.CDN_BASE }}
 
-      # Blogger OAuth
       BLOGGER_BLOG_ID: ${{ secrets.BLOGGER_BLOG_ID }}
       GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
       GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
       GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
 
-      # R2
       R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
       R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
       R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
       R2_BUCKET: ${{ secrets.R2_BUCKET }}
       R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
 
-      # publish control
       SCHEDULE_MODE: ${{ secrets.SCHEDULE_MODE }} # live/test
       PUBLISH_MODE: ${{ secrets.PUBLISH_MODE }}   # enable/disable
 
-      # inputs
       RUN_MODE: ${{ github.event.inputs.RUN_MODE || 'auto' }}
       MANUAL_JOB: ${{ github.event.inputs.MANUAL_JOB || 'schedule_once' }}
       DRY_RUN_INPUT: ${{ github.event.inputs.DRY_RUN || 'false' }}
@@ -75,6 +70,7 @@ jobs:
           echo "RUN_MODE=${RUN_MODE}"
           echo "MANUAL_JOB=${MANUAL_JOB}"
           echo "DRY_RUN_INPUT=${DRY_RUN_INPUT}"
+
           EVENT_NAME="${{ github.event_name }}"
 
           if [ "$EVENT_NAME" = "schedule" ]; then
@@ -105,7 +101,7 @@ jobs:
       - name: Stop (schedule disabled)
         if: steps.modes.outputs.SKIP_SCHEDULE == 'true'
         run: |
-          echo "Schedule disabled (SCHEDULE_MODE != live)."
+          echo "Schedule is disabled (SCHEDULE_MODE != live). Exit."
           exit 0
 
       - name: Export runtime env
@@ -117,85 +113,73 @@ jobs:
             echo "BODY_WRITE_MODE=active" >> $GITHUB_ENV
           fi
 
-      - name: Preflight checks (fail fast)
+      - name: Sanity check (required scripts exist)
         run: |
-          echo "──────── Preflight START ────────"
-          node -v
-          npm -v
+          test -f System_files/scripts/build/render-posts.cjs
+          test -f System_files/scripts/build/images-renew.cjs
+          test -f System_files/scripts/build/images-build-og.cjs
+          test -f System_files/scripts/build/validate-repair.cjs
+          test -f System_files/scripts/build/qa-check.cjs
+          test -f System_files/scripts/publish/blogger.cjs
 
-          echo "[sharp]"
-          node -e "require('sharp')" || { echo '❌ sharp missing'; exit 1; }
-
-          echo "[dirs]"
-          test -d System_files || { echo "❌ System_files missing"; exit 1; }
-          test -d System_files/content || { echo "❌ content missing"; exit 1; }
-
-          echo "──────── Preflight PASS ────────"
-
-      # ─────────────── 큐/포스트 생성 ───────────────
-      - name: Build queue (scheduler → posts)
+      - name: Build queue (scheduler)
+        working-directory: System_files
         run: |
-          npm run posts:queue
+          node scripts/build/seed-scheduler.cjs
+          node scripts/build/queue-to-posts.cjs
+          node scripts/build/ids.cjs
+          node scripts/build/generate-body.cjs
 
-      - name: Issue pageIds
+      - name: Inject reviewData (SSOT)
+        working-directory: System_files
         run: |
-          npm run posts:ids
+          node scripts/build/review-resolver.cjs
 
-      - name: Generate body
+      - name: Render posts (1st)
+        working-directory: System_files
         run: |
-          npm run posts:body:generate
+          node scripts/build/render-posts.cjs
+          node scripts/build/normalize-body.cjs
+          node scripts/build/review-meta-block.cjs
 
-      # ─────────────── 리뷰 주입(SSOT) ───────────────
-      - name: Inject reviewData (resolver)
+      - name: Build OG images (needs dist/posts)
+        working-directory: System_files
         run: |
-          npm run posts:review:resolve
+          node scripts/build/images-renew.cjs
+          node scripts/build/images-build-og.cjs
 
-      # ─────────────── 이미지(본문) 업로드/치환 ───────────────
-      - name: Upload images to R2 (body assets)
+      - name: Upload images to R2
+        working-directory: System_files
         run: |
           npm run images:upload
 
       - name: Rewrite image URLs in posts JSON
+        working-directory: System_files
         run: |
           npm run images:rewrite
 
-      # ─────────────── 렌더(HTML) ───────────────
-      - name: Render posts
+      - name: Render posts (2nd, after rewrite)
+        working-directory: System_files
         run: |
-          npm run posts:render
+          node scripts/build/render-posts.cjs
+          node scripts/build/normalize-body.cjs
+          node scripts/build/review-meta-block.cjs
 
-      - name: Normalize body
-        run: |
-          npm run posts:normalize
-
-      - name: Inject review meta blocks (HTML)
-        run: |
-          npm run posts:review:meta
-
-      # ─────────────── OG 생성은 dist/posts 필요 ───────────────
-      - name: Build OG images (needs dist/posts)
-        run: |
-          npm run images:renew
-          npm run images:build:og
-
-      - name: Upload images to R2 (include OG)
-        run: |
-          npm run images:upload
-
-      # ─────────────── 검증/QA ───────────────
       - name: Validate & repair
+        working-directory: System_files
         run: |
-          npm run posts:validate
+          node scripts/build/validate-repair.cjs
 
       - name: Preflight QA
+        working-directory: System_files
         run: |
           npm run posts:qa
 
-      # ─────────────── 발행 ───────────────
       - name: Publish to Blogger (skip when DRY_RUN=true)
         if: env.DRY_RUN != 'true'
+        working-directory: System_files
         run: |
-          npm run publish:blogger
+          node scripts/publish/blogger.cjs
 
       - name: Commit generated artifacts
         run: |
