@@ -3,25 +3,26 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "images:upload": "node ./System_files/scripts/build/r2-upload.js",
-    "images:rewrite": "node ./System_files/scripts/build/rewrite-images.js",
+    "slug:next": "node ./System_files/scripts/build/slug-builder.cjs",
 
+    "review:ratings:update": "node ./System_files/scripts/build/update-review-ratings.cjs",
+    "reviews:due": "node ./System_files/scripts/build/review-due-90days.cjs",
+    "posts:review:update": "node ./System_files/scripts/build/review-diff-update.cjs",
+    "posts:review:resolve": "node ./System_files/scripts/build/review-resolver.cjs",
+    "posts:review:meta": "node ./System_files/scripts/build/review-meta-block.cjs",
+
+    "posts:body:generate": "node ./System_files/scripts/build/generate-body.cjs",
     "posts:render": "node ./System_files/scripts/build/render-posts.cjs",
     "posts:normalize": "node ./System_files/scripts/build/normalize-body.cjs",
-    "posts:review:meta": "node ./System_files/scripts/build/review-meta-block.cjs",
     "posts:validate": "node ./System_files/scripts/build/validate-repair.cjs",
     "posts:qa": "node ./System_files/scripts/build/qa-check.cjs",
 
-    "review:ratings:update": "node ./System_files/scripts/build/update-review-ratings.cjs",
-    "posts:review:update": "node ./System_files/scripts/build/review-diff-update.cjs",
-    "reviews:due": "node scripts/build/review-due-90days.cjs",
-    
-    "slug:next": "node ./System_files/scripts/build/slug-builder.cjs",
-    "posts:body:generate": "node ./System_files/scripts/build/generate-body.cjs",
-
     "images:renew": "node ./System_files/scripts/build/images-renew.cjs",
     "images:build:og": "node ./System_files/scripts/build/images-build-og.cjs",
+    "images:upload": "node ./System_files/scripts/build/r2-upload.js",
+    "images:rewrite": "node ./System_files/scripts/build/rewrite-images.js",
     "posts:images-manifest": "node ./System_files/scripts/build/images-manifest.cjs",
+
     "posts:markdown": "node ./System_files/scripts/build/markdown-list.cjs",
 
     "publish:blogger": "node ./System_files/scripts/publish/blogger.cjs",
