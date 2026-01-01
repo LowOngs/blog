@@ -16,7 +16,7 @@ on:
         required: false
         default: "true"
   schedule:
-    - cron: "15 2 * * *" # KST 11:15 (UTC 02:15)
+    - cron: "15 2 * * *" # UTC 02:15 (KST 11:15)
 
 permissions:
   contents: write
@@ -29,7 +29,7 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     env:
-      # 공통: site/cdn
+      # site/cdn
       CANONICAL_BASE: ${{ secrets.CANONICAL_BASE }}
       CDN_BASE: ${{ secrets.CDN_BASE }}
 
@@ -46,7 +46,7 @@ jobs:
       R2_BUCKET: ${{ secrets.R2_BUCKET }}
       R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
 
-      # publish control (2중 가드용)
+      # publish control
       SCHEDULE_MODE: ${{ secrets.SCHEDULE_MODE }} # live/test
       PUBLISH_MODE: ${{ secrets.PUBLISH_MODE }}   # enable/disable
 
@@ -66,9 +66,21 @@ jobs:
         with:
           node-version: "20"
 
-      # ✅ 중요: 의존성 설치는 "레포 루트(package.json 있는 곳)"에서 해야 sharp가 설치됩니다.
-      - name: Install (root)
+      - name: Print runner time
+        run: |
+          echo "Local time:"
+          date
+          echo "UTC time:"
+          date -u
+
+      - name: Install
+        working-directory: System_files
         run: npm ci
+
+      - name: Verify native dependencies
+        working-directory: System_files
+        run: |
+          node -e "require('sharp'); console.log('sharp OK')"
 
       - name: Decide modes
         id: modes
@@ -76,14 +88,10 @@ jobs:
           echo "RUN_MODE=${RUN_MODE}"
           echo "MANUAL_JOB=${MANUAL_JOB}"
           echo "DRY_RUN_INPUT=${DRY_RUN_INPUT}"
-          # ─────────────────────────────────────────
-          # 분기 규칙(핵심):
-          # 1) schedule 트리거는 SCHEDULE_MODE=live 일 때만 동작
-          # 2) auto는 무조건 live (DRY_RUN 무시)
-          # 3) manual은 DRY_RUN=true면 no_live, false면 live
-          # ─────────────────────────────────────────
+
           EVENT_NAME="${{ github.event_name }}"
 
+          # schedule 트리거는 SCHEDULE_MODE=live 일 때만 동작
           if [ "$EVENT_NAME" = "schedule" ]; then
             if [ "${SCHEDULE_MODE}" != "live" ]; then
               echo "SKIP_SCHEDULE=true" >> $GITHUB_OUTPUT
@@ -97,6 +105,7 @@ jobs:
 
           echo "SKIP_SCHEDULE=false" >> $GITHUB_OUTPUT
 
+          # workflow_dispatch
           if [ "${RUN_MODE}" = "auto" ]; then
             echo "FINAL_DRY_RUN=false" >> $GITHUB_OUTPUT
             echo "FINAL_RUN_MODE=auto" >> $GITHUB_OUTPUT
@@ -124,55 +133,111 @@ jobs:
             echo "BODY_WRITE_MODE=active" >> $GITHUB_ENV
           fi
 
-      # ─────────────────────────────────────────
-      # ✅ 순서 고정: "렌더 → (dist/posts 생김) → images-renew/build-og"
-      # ─────────────────────────────────────────
-
+      # ─────────────────────
+      # 1) 큐/포스트 생성
+      # ─────────────────────
       - name: Build queue (scheduler)
-        run: node ./System_files/scripts/build/seed-scheduler.cjs
+        working-directory: System_files
+        run: |
+          node scripts/build/seed-scheduler.cjs
 
-      - name: Queue -> Posts
-        run: node ./System_files/scripts/build/queue-to-posts.cjs
+      - name: Queue -> posts
+        working-directory: System_files
+        run: |
+          node scripts/build/queue-to-posts.cjs
 
       - name: Page IDs
-        run: node ./System_files/scripts/build/ids.cjs
+        working-directory: System_files
+        run: |
+          node scripts/build/ids.cjs
 
       - name: Generate body
-        run: node ./System_files/scripts/build/generate-body.cjs
+        working-directory: System_files
+        run: |
+          node scripts/build/generate-body.cjs
 
+      # ─────────────────────
+      # 2) 리뷰 데이터 주입(SSOT)
+      # ─────────────────────
       - name: Inject reviewData (resolver)
-        run: node ./System_files/scripts/build/review-resolver.cjs
+        working-directory: System_files
+        run: |
+          node scripts/build/review-resolver.cjs
 
-      - name: Render posts (creates dist/posts/*.html)
-        run: node ./System_files/scripts/build/render-posts.cjs
+      # ─────────────────────
+      # 3) 렌더/정규화/리뷰블록
+      # ─────────────────────
+      - name: Render posts
+        working-directory: System_files
+        run: |
+          npm run posts:render
+
+      - name: Verify rendered HTML exists
+        working-directory: System_files
+        run: |
+          ls dist/posts/*.html > /dev/null
+          echo "dist/posts HTML OK"
 
       - name: Normalize body
-        run: node ./System_files/scripts/build/normalize-body.cjs
-
-      - name: Build review meta blocks
-        run: node ./System_files/scripts/build/review-meta-block.cjs
-
-      # ✅ 이제 dist/posts가 있으므로 OG 파이프라인 실행 가능
-      - name: Build OG images (renew + build)
+        working-directory: System_files
         run: |
-          node ./System_files/scripts/build/images-renew.cjs
-          node ./System_files/scripts/build/images-build-og.cjs
+          npm run posts:normalize
+
+      - name: Review meta block
+        working-directory: System_files
+        run: |
+          npm run posts:review:meta
+
+      # ─────────────────────
+      # 4) 이미지(OG 포함) + 업로드 + rewrite
+      # ─────────────────────
+      - name: Renew images manifest (from dist/posts)
+        working-directory: System_files
+        run: |
+          npm run images:renew
+
+      - name: Verify images-manifest
+        working-directory: System_files
+        run: |
+          test -f manifests/images-manifest.json
+          echo "images-manifest OK"
+
+      - name: Build OG images
+        working-directory: System_files
+        run: |
+          npm run images:build:og
 
       - name: Upload images to R2
-        run: npm run images:upload
+        working-directory: System_files
+        run: |
+          npm run images:upload
 
       - name: Rewrite image URLs in posts JSON
-        run: npm run images:rewrite
+        working-directory: System_files
+        run: |
+          npm run images:rewrite
 
+      # ─────────────────────
+      # 5) 검증/QA
+      # ─────────────────────
       - name: Validate & repair
-        run: node ./System_files/scripts/build/validate-repair.cjs
+        working-directory: System_files
+        run: |
+          npm run posts:validate
 
       - name: Preflight QA
-        run: node ./System_files/scripts/build/qa-check.cjs
+        working-directory: System_files
+        run: |
+          npm run posts:qa
 
+      # ─────────────────────
+      # 6) 발행 + 커밋
+      # ─────────────────────
       - name: Publish to Blogger (skip when DRY_RUN=true)
         if: env.DRY_RUN != 'true'
-        run: node ./System_files/scripts/publish/blogger.cjs
+        working-directory: System_files
+        run: |
+          npm run publish:blogger
 
       - name: Commit generated artifacts
         run: |
