@@ -1,4 +1,18 @@
 {
   "bySlug": {
+    "app-20251207-001": {
+      "lastChecked": "2026-01-01",
+      "status": "ok",
+      "store": "multi",
+      "ratingCurrent": 4.6,
+      "ratingPrevious": 4.5,
+      "ratingDiff": 0.1,
+      "votesCurrent": 12000,
+      "votesPrevious": 11000,
+      "votesDiff": 1000,
+      "histogram": { "1": 2, "2": 2, "3": 6, "4": 18, "5": 72 },
+      "source": "manual",
+      "storeId": null
+    }
   }
 }
