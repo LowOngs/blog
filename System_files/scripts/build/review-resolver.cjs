@@ -4,36 +4,12 @@
 /**
  * System_files/scripts/build/review-resolver.cjs
  *
- * 목적
- * - 리뷰 라벨 3종(app/device/subscription)에 대해
- *   content/reviews/{bucket}-ratings.json + {bucket}-insights.json 을 읽어
- *   content/posts/*.json 에 post.reviewData 로 주입한다. (SSOT)
+ * - 라벨(리뷰 3종) 기준으로 bucket(app/device/subscription) 선택
+ * - content/reviews/{bucket}-ratings.json + {bucket}-insights.json 을 읽어서
+ *   content/posts/*.json 에 post.reviewData 로 주입한다.
  *
- * 전제(옹스님 현재 구조)
- * - content/reviews/
- *   - app-ratings.json
- *   - device-ratings.json
- *   - subscription-ratings.json
- *   - app-insights.json
- *   - device-insights.json
- *   - subscription-insights.json
- *
- * 데이터 키(권장 표준)
- * - ratings: { bySlug: { [slug]: { lastChecked:'YYYY-MM-DD', ratingCurrent:number, votesCurrent:number, histogram:{1..5}, store?, source?, storeId? } } }
- * - insights:{ bySlug: { [slug]: { insights:[...strings], lastChecked?:'YYYY-MM-DD', source? } } }
- *
- * 출력
- * - post.reviewData = {
- *     bucket: 'app'|'device'|'subscription',
- *     source: '...',
- *     rating: { overall, votes, scale, lastChecked, nextCheck, platform, source, storeId },
- *     histogram: {1..5} | null,
- *     insights: [ ... ]
- *   }
- *
- * 안전장치
- * - rating/insights 둘 다 완전 빈 경우: 기존 reviewData를 건드리지 않음(빈 주입 금지)
- * - undefined 필드는 제거하여 JSON 안정성 유지
+ * ✅ render-posts.cjs 는 post.reviewData || post.review 를 읽으므로
+ *   렌더 연결은 여기서 끝(SSOT).
  */
 
 const fs = require('fs');
@@ -46,10 +22,9 @@ const REVIEWS_DIR = path.join(ROOT, 'content', 'reviews');
 function readJsonSafe(p, fallback) {
   try {
     if (!fs.existsSync(p)) return fallback;
-    const raw = fs.readFileSync(p, 'utf8');
-    const s = (raw || '').trim();
-    if (!s) return fallback;
-    return JSON.parse(s);
+    const raw = fs.readFileSync(p, 'utf8').trim();
+    if (!raw) return fallback;
+    return JSON.parse(raw);
   } catch {
     return fallback;
   }
@@ -77,8 +52,7 @@ function labelToBucket(label) {
 }
 
 function parseKstDate(dateStr) {
-  // 'YYYY-MM-DD' → Date(+09:00)
-  return new Date(`${dateStr}T00:00:00+09:00`);
+  return new Date(dateStr + 'T00:00:00+09:00');
 }
 
 function formatDate(d) {
@@ -90,35 +64,20 @@ function formatDate(d) {
 
 function addDays(dateStr, days) {
   const d = parseKstDate(dateStr);
-  if (!Number.isFinite(d.getTime())) return '';
   d.setDate(d.getDate() + days);
   return formatDate(d);
 }
 
 function toKstIso(dateStr) {
-  // 'YYYY-MM-DD' → 'YYYY-MM-DDT00:00:00+09:00'
-  return dateStr ? `${dateStr}T00:00:00+09:00` : '';
+  return `${dateStr}T00:00:00+09:00`;
 }
 
-function ratingsPath(bucket) {
-  // 지금은 content/reviews/{bucket}-ratings.json 고정
+function findRatingsPath(bucket) {
   return path.join(REVIEWS_DIR, `${bucket}-ratings.json`);
 }
 
-function insightsPath(bucket) {
+function findInsightsPath(bucket) {
   return path.join(REVIEWS_DIR, `${bucket}-insights.json`);
-}
-
-function normalizeHistogram(hist) {
-  if (!hist || typeof hist !== 'object') return null;
-  const out = {};
-  for (const k of ['1', '2', '3', '4', '5']) {
-    if (hist[k] === undefined && hist[Number(k)] === undefined) continue;
-    const v = hist[k] !== undefined ? hist[k] : hist[Number(k)];
-    const n = Number.isFinite(Number(v)) ? Math.max(0, Math.floor(Number(v))) : 0;
-    out[k] = n;
-  }
-  return Object.keys(out).length ? out : null;
 }
 
 function normalizeRatingRecord(rec) {
@@ -137,13 +96,13 @@ function normalizeRatingRecord(rec) {
       overall: ratingCurrent,
       votes: Number(rec.votesCurrent || 0) || 0,
       scale: 5,
-      lastChecked: toKstIso(lastChecked),
-      nextCheck: toKstIso(nextCheck),
-      platform: rec.store || rec.platform || 'multi',
+      lastChecked: lastChecked ? toKstIso(lastChecked) : '',
+      nextCheck: nextCheck ? toKstIso(nextCheck) : '',
+      platform: rec.store || rec.platform || '',
       source: rec.source || '',
-      storeId: rec.storeId ?? null
+      storeId: rec.storeId || null
     },
-    histogram: normalizeHistogram(rec.histogram)
+    histogram: rec.histogram || null
   };
 }
 
@@ -153,20 +112,11 @@ function normalizeInsightsRecord(rec) {
   return list.map(x => String(x || '').trim()).filter(Boolean).slice(0, 12);
 }
 
-function dropUndefined(obj) {
-  if (!obj || typeof obj !== 'object') return obj;
-  for (const k of Object.keys(obj)) {
-    if (obj[k] === undefined) delete obj[k];
-  }
-  return obj;
-}
-
 function main() {
   console.log('────────────────────────────────────────────');
   console.log('[review-resolver] ROOT      =', ROOT);
   console.log('[review-resolver] POSTS_DIR =', POSTS_DIR);
   console.log('[review-resolver] REVIEWS   =', REVIEWS_DIR);
-  console.log('────────────────────────────────────────────');
 
   if (!fs.existsSync(POSTS_DIR)) {
     console.log('[review-resolver] posts dir 없음 → 종료');
@@ -185,39 +135,42 @@ function main() {
 
     const label = firstLabel(post);
     const bucket = labelToBucket(label);
-    if (!bucket) continue; // 리뷰 라벨 3종만
+    if (!bucket) continue;
 
     matched++;
 
     const slug = post.slug || path.basename(f, '.json');
+    const ratingsPath = findRatingsPath(bucket);
+    const insightsPath = findInsightsPath(bucket);
 
-    const rDb = readJsonSafe(ratingsPath(bucket), { bySlug: {} });
-    const iDb = readJsonSafe(insightsPath(bucket), { bySlug: {} });
+    const ratingsDb = readJsonSafe(ratingsPath, { bySlug: {} });
+    const insightsDb = readJsonSafe(insightsPath, { bySlug: {} });
 
-    const rRec = rDb?.bySlug?.[slug] || null;
-    const iRec = iDb?.bySlug?.[slug] || null;
+    const rRec = ratingsDb?.bySlug?.[slug] || null;
+    const iRec = insightsDb?.bySlug?.[slug] || null;
 
     const ratingNorm = normalizeRatingRecord(rRec);
     const insightsNorm = normalizeInsightsRecord(iRec);
 
-    // 둘 다 완전 빈 경우: 기존 reviewData 건드리지 않음
+    // 아무 데이터도 없으면 기존 reviewData를 건드리지 않음(빈 주입 금지)
     if (!ratingNorm && insightsNorm.length === 0) continue;
 
     const next = {
       bucket,
-      // 우선순위: ratings.source → insights.source → 기존 reviewData.source → ''
-      source: (rRec && rRec.source) || (iRec && iRec.source) || (post.reviewData && post.reviewData.source) || '',
+      source: rRec?.source || '',
       rating: ratingNorm ? ratingNorm.rating : undefined,
       histogram: ratingNorm ? ratingNorm.histogram : undefined,
       insights: insightsNorm
     };
 
-    dropUndefined(next);
+    Object.keys(next).forEach(k => {
+      if (next[k] === undefined) delete next[k];
+    });
 
-    const prevStr = JSON.stringify(post.reviewData || {});
-    const nextStr = JSON.stringify(next);
+    const prev = JSON.stringify(post.reviewData || {});
+    const now = JSON.stringify(next);
 
-    if (prevStr !== nextStr) {
+    if (prev !== now) {
       post.reviewData = next;
       writeJsonPretty(p, post);
       touched++;
