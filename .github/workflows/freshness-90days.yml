@@ -1,0 +1,98 @@
+name: freshness-90days
+
+on:
+  workflow_dispatch:
+    inputs:
+      DRY_RUN:
+        description: "true/false (true면 커밋만, 발행은 안 함)"
+        required: false
+        default: "true"
+  schedule:
+    - cron: "35 2 * * 1" # KST 11:35, 매주 월요일(UTC 기준)
+
+permissions:
+  contents: write
+
+concurrency:
+  group: freshness-90days-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    env:
+      CANONICAL_BASE: ${{ secrets.CANONICAL_BASE }}
+      CDN_BASE: ${{ secrets.CDN_BASE }}
+
+      BLOGGER_BLOG_ID: ${{ secrets.BLOGGER_BLOG_ID }}
+      GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+      GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
+
+      PUBLISH_MODE: ${{ secrets.PUBLISH_MODE }}
+
+      DRY_RUN_INPUT: ${{ github.event.inputs.DRY_RUN || 'true' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install
+        working-directory: System_files
+        run: npm ci
+
+      - name: Export runtime env
+        run: |
+          echo "DRY_RUN=${DRY_RUN_INPUT}" >> $GITHUB_ENV
+          # 90일 갱신은 “기존 글 수정”이므로 pageId 신규 발급이 필요 없습니다.
+          # 안전하게 local로 두어도 되고(추천), active여도 pageId를 새로 안 만들면 영향 없습니다.
+          echo "BODY_WRITE_MODE=local" >> $GITHUB_ENV
+
+      - name: Run 90days freshness (ratings/insights)
+        working-directory: System_files
+        run: |
+          # 옹스님이 만든 스크립트 이름 기준으로 실행만 맞추면 됩니다.
+          # 예) npm run reviews:90days  (package.json에 추가한 그 라인)
+          npm run reviews:90days
+
+      - name: Inject reviewData to posts (resolver)
+        working-directory: System_files
+        run: |
+          node scripts/build/review-resolver.cjs
+
+      - name: Render posts
+        working-directory: System_files
+        run: |
+          node scripts/build/render-posts.cjs
+
+      - name: Validate & repair
+        working-directory: System_files
+        run: |
+          node scripts/build/validate-repair.cjs
+
+      - name: Preflight QA
+        working-directory: System_files
+        run: |
+          npm run qa:check
+
+      - name: Publish to Blogger (skip when DRY_RUN=true)
+        if: env.DRY_RUN != 'true'
+        working-directory: System_files
+        run: |
+          node scripts/build/blogger.cjs
+
+      - name: Commit freshness updates
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet && echo "No changes" && exit 0
+          git commit -m "chore: 90days freshness refresh"
+          git push
