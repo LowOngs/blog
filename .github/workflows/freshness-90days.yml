@@ -8,7 +8,7 @@ on:
         required: false
         default: "true"
   schedule:
-    - cron: "35 2 * * 1" # UTC 02:35 (매주 월요일)
+    - cron: "35 2 * * 1" # KST 11:35, 매주 월요일(UTC 02:35)
 
 permissions:
   contents: write
@@ -52,56 +52,43 @@ jobs:
           echo "DRY_RUN=${DRY_RUN_INPUT}" >> $GITHUB_ENV
           echo "BODY_WRITE_MODE=local" >> $GITHUB_ENV
 
-      - name: Preflight checks (fail fast)
+      - name: Sanity check (required scripts exist)
         run: |
-          echo "──────── Preflight START ────────"
-          node -v
-          npm -v
-          node -e "require('sharp')" || { echo '❌ sharp missing'; exit 1; }
-          test -d System_files/content/reviews || { echo "❌ content/reviews missing"; exit 1; }
-          echo "──────── Preflight PASS ────────"
+          test -f System_files/scripts/build/review-due-90days.cjs
+          test -f System_files/scripts/build/review-next-from-due.cjs
+          test -f System_files/scripts/build/review-diff-update.cjs
+          test -f System_files/scripts/build/review-resolver.cjs
+          test -f System_files/scripts/build/render-posts.cjs
+          test -f System_files/scripts/build/validate-repair.cjs
+          test -f System_files/scripts/build/qa-check.cjs
+          test -f System_files/scripts/publish/blogger.cjs
 
-      - name: Build due list (90days)
+      - name: Run 90days chain (due -> next -> diff -> inject)
         run: |
-          npm run reviews:due
-
-      - name: Run freshness updater (your 90days step)
-        run: |
-          # 옹스님이 만든 갱신 스크립트가 여기서 돌아가면 됩니다.
-          # (예: rating/insight/lastChecked/nextCheck 갱신)
-          # 지금은 “이 라인만 유지”하고, 실제 명령은 옹스님 프로젝트에 맞춰 연결합니다.
-          # 만약 이미 스크립트 이름이 확정돼 있으면 여기만 교체하면 됩니다.
-          echo "TODO: connect your ratings/insights refresh command here"
-          exit 0
-
-      - name: Inject reviewData to posts (resolver)
-        run: |
-          npm run posts:review:resolve
+          npm run reviews:freshness
 
       - name: Render posts
+        working-directory: System_files
         run: |
-          npm run posts:render
-
-      - name: Normalize body
-        run: |
-          npm run posts:normalize
-
-      - name: Inject review meta blocks (HTML)
-        run: |
-          npm run posts:review:meta
+          node scripts/build/render-posts.cjs
+          node scripts/build/normalize-body.cjs
+          node scripts/build/review-meta-block.cjs
 
       - name: Validate & repair
+        working-directory: System_files
         run: |
-          npm run posts:validate
+          node scripts/build/validate-repair.cjs
 
       - name: Preflight QA
+        working-directory: System_files
         run: |
           npm run posts:qa
 
       - name: Publish to Blogger (skip when DRY_RUN=true)
         if: env.DRY_RUN != 'true'
+        working-directory: System_files
         run: |
-          npm run publish:blogger
+          node scripts/publish/blogger.cjs
 
       - name: Commit freshness updates
         run: |
