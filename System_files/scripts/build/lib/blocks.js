@@ -49,6 +49,7 @@ ${items.join('\n')}
 function renderSources(sources = []) {
   if (!Array.isArray(sources) || sources.length === 0) return '';
   const items = sources.map(src => {
+    // allow either {label,url} or plain string url
     if (typeof src === 'string') {
       const u = src.trim();
       if (!u) return '';
@@ -73,7 +74,7 @@ function renderSources(sources = []) {
 // ===== Review blocks =====
 
 function normalizeHistogram(hist = {}) {
-  // keys "1".."5" counts or percents; sanitize to ints
+  // Expect keys "1".."5" counts or percents; sanitize to ints
   const out = { 5:0, 4:0, 3:0, 2:0, 1:0 };
   for (const k of [5,4,3,2,1]) {
     const v = hist?.[String(k)] ?? hist?.[k];
@@ -98,118 +99,99 @@ function renderHistogram(hist = {}) {
   return `<div class="review-histogram">${rows}</div>`;
 }
 
-/**
- * REVIEW DATA NORMALIZE
- * - render-posts.cjs 에서 reviewData로 넘어오는 형태가 여러 가지일 수 있어
- *   여기서 1개 형태로 통일해서 렌더를 안정화합니다.
- */
-function normalizeReviewData(input) {
-  if (!input || typeof input !== 'object') return null;
+function pickRatingModel(reviewData) {
+  // ✅ 표준: reviewData.rating = { overall, votes, scale, lastChecked, nextCheck, platform, source, storeId }
+  // ✅ 하위호환: reviewData.rating = number (overall)
+  if (!reviewData) return null;
 
-  // 1) 이미 dataset 형태(= review-solver 주입)
-  //    { bucket, rating: {overall,votes,scale,lastChecked,nextCheck,...}, histogram, insights[] }
-  if (input.rating && typeof input.rating === 'object' && typeof input.rating.overall === 'number') {
+  const r = reviewData.rating;
+
+  if (r && typeof r === 'object') {
+    const overall = Number(r.overall);
+    if (!Number.isFinite(overall)) return null;
     return {
-      bucket: input.bucket || '',
-      rating: input.rating,
-      histogram: input.histogram || null,
-      insights: Array.isArray(input.insights) ? input.insights : [],
-      source: input.source || input.rating.source || '',
+      overall,
+      votes: Number(r.votes || 0) || 0,
+      scale: Number(r.scale || 5) || 5,
+      lastChecked: r.lastChecked ? String(r.lastChecked) : '',
+      nextCheck: r.nextCheck ? String(r.nextCheck) : '',
+      platform: r.platform ? String(r.platform) : '',
+      source: r.source ? String(r.source) : '',
+      storeId: r.storeId ?? null
     };
   }
 
-  // 2) post.review.rating 형태(기존)
-  if (input.rating && typeof input.rating === 'object') {
-    const r = input.rating;
-    const overall = Number(r.overall);
-    if (Number.isFinite(overall)) {
-      return {
-        bucket: input.bucket || '',
-        rating: {
-          overall,
-          votes: Number(r.votes || 0) || 0,
-          scale: Number(r.scale || 5) || 5,
-          lastChecked: r.lastUpdated || r.lastChecked || '',
-          nextCheck: r.nextCheck || '',
-          platform: r.platform || '',
-          source: r.source || '',
-          storeId: r.storeId || null
-        },
-        histogram: input.histogram || null,
-        insights: Array.isArray(input.insights) ? input.insights : [],
-        source: r.source || ''
-      };
-    }
-  }
-
-  // 3) dataset raw 한 덩어리(예: bySlug[slug] 그대로 들어온 경우)
-  //    { ratingCurrent, votesCurrent, histogram, insights, lastChecked, nextCheck, ... }
-  if (typeof input.ratingCurrent === 'number') {
+  // legacy
+  const overallLegacy = Number(r);
+  if (Number.isFinite(overallLegacy)) {
     return {
-      bucket: input.bucket || '',
-      rating: {
-        overall: Number(input.ratingCurrent),
-        votes: Number(input.votesCurrent || 0) || 0,
-        scale: 5,
-        lastChecked: input.lastChecked || '',
-        nextCheck: input.nextCheck || '',
-        platform: input.store || input.platform || '',
-        source: input.source || '',
-        storeId: input.storeId || null
-      },
-      histogram: input.histogram || null,
-      insights: Array.isArray(input.insights) ? input.insights : [],
-      source: input.source || ''
+      overall: overallLegacy,
+      votes: Number(reviewData.votes || 0) || 0,
+      scale: 5,
+      lastChecked: reviewData.updatedAt ? String(reviewData.updatedAt) : '',
+      nextCheck: '',
+      platform: reviewData.platform ? String(reviewData.platform) : '',
+      source: reviewData.source ? String(reviewData.source) : '',
+      storeId: reviewData.storeId ?? null
     };
   }
 
   return null;
 }
 
-function renderReviewRatingBlock(reviewDataRaw) {
-  const rd = normalizeReviewData(reviewDataRaw);
-  if (!rd) return '';
+function isOverdue(nextCheckIso) {
+  if (!nextCheckIso) return false;
+  const n = Date.parse(nextCheckIso);
+  if (!Number.isFinite(n)) return false;
+  return Date.now() > n;
+}
 
-  const rating = rd.rating;
-  const overall = Number(rating.overall);
-  const votes = Number(rating.votes || 0) || 0;
-  const scale = Number(rating.scale || 5) || 5;
+function renderReviewRatingBlock(reviewData) {
+  if (!reviewData) return '';
 
-  const updatedAt = rating.lastChecked || '';
+  const rating = pickRatingModel(reviewData);
+  if (!rating) return '';
+
+  const safeRating = rating.overall.toFixed(1);
+  const votesText = rating.votes ? `${rating.votes.toLocaleString()} votes` : '';
+  const lastChecked = rating.lastChecked || '';
   const nextCheck = rating.nextCheck || '';
-  const source = rd.source || rating.source || 'review dataset';
+  const overdue = isOverdue(nextCheck);
 
-  const safeOverall = Number.isFinite(overall) ? overall.toFixed(1) : 'N/A';
-  const histogramHtml = rd.histogram ? renderHistogram(rd.histogram) : '';
+  const sourceText = escapeHtml(rating.source || 'internal');
+  const platformText = escapeHtml(rating.platform || 'multi');
+
+  const histogramHtml = reviewData.histogram ? renderHistogram(reviewData.histogram) : '';
+
+  const freshnessLine = [
+    lastChecked ? `Checked: ${escapeHtml(lastChecked)}` : '',
+    nextCheck ? `Next: ${escapeHtml(nextCheck)}` : ''
+  ].filter(Boolean).join(' · ');
+
+  const statusBadge = overdue
+    ? `<span class="review-badge review-badge--warn">Needs refresh</span>`
+    : `<span class="review-badge review-badge--ok">Fresh</span>`;
 
   return `<section id="review-rating-block" class="review-block">
-  <div class="review-block__title">Rating snapshot</div>
+  <div class="review-block__title">Rating snapshot ${statusBadge}</div>
+
   <div class="review-block__meta">
-    Rating: <strong>${escapeHtml(safeOverall)}</strong> / ${escapeHtml(String(scale))}
-    · Votes: ${escapeHtml(String(votes))}
-    · Updated: ${escapeHtml(updatedAt || 'N/A')}
-    ${nextCheck ? `· Next: ${escapeHtml(nextCheck)}` : ''}
-    · Source: ${escapeHtml(source)}
+    Rating: <strong>${escapeHtml(safeRating)}</strong> / ${escapeHtml(String(rating.scale))}
+    ${votesText ? ` · ${escapeHtml(votesText)}` : ''}
+    · Platform: ${platformText}
+    · Source: ${sourceText}
   </div>
 
-  <table class="review-rating-table" aria-label="Rating summary">
-    <tbody>
-      <tr><th>Overall</th><td>${escapeHtml(safeOverall)} / ${escapeHtml(String(scale))}</td></tr>
-      <tr><th>Votes</th><td>${escapeHtml(String(votes))}</td></tr>
-      <tr><th>Freshness</th><td>${updatedAt ? '90-day refresh model' : 'No snapshot'}</td></tr>
-    </tbody>
-  </table>
+  ${freshnessLine ? `<div class="review-block__meta">${freshnessLine}</div>` : ''}
 
   ${histogramHtml}
 </section>`;
 }
 
-function renderReviewInsightsBlock(reviewDataRaw) {
-  const rd = normalizeReviewData(reviewDataRaw);
-  if (!rd) return '';
-
-  const insights = Array.isArray(rd.insights) ? rd.insights : [];
-  const safe = insights.map(x => String(x || '').trim()).filter(Boolean).slice(0, 8);
+function renderReviewInsightsBlock(reviewData) {
+  if (!reviewData) return '';
+  const insights = Array.isArray(reviewData.insights) ? reviewData.insights : [];
+  const safe = insights.map(x => String(x || '').trim()).filter(Boolean).slice(0, 12);
 
   const list = safe.length
     ? `<ul class="review-insights-list">\n${safe.map(x => `  <li>${escapeHtml(x)}</li>`).join('\n')}\n</ul>`
@@ -217,7 +199,7 @@ function renderReviewInsightsBlock(reviewDataRaw) {
 
   return `<section id="review-insights-block" class="review-block">
   <div class="review-block__title">User insights snapshot</div>
-  <div class="review-block__meta">Short, practical signals you can trust at a glance.</div>
+  <div class="review-block__meta">Short, practical signals at a glance.</div>
   ${list}
 </section>`;
 }
@@ -226,6 +208,7 @@ function renderReviewInsightsBlock(reviewDataRaw) {
 
 function stripOuterMain(html = '') {
   let s = String(html || '');
+  // remove any <main ...> wrappers to avoid nesting
   s = s.replace(/<\s*main[^>]*>/gi, '');
   s = s.replace(/<\s*\/\s*main\s*>/gi, '');
   return s;
