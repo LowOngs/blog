@@ -32,7 +32,11 @@
       background:#fff;
     }
 
-    /* page badge */
+    /* ─────────────────────────────────────────────
+      Page badge (pageId)
+      - render-posts.cjs fills {{pageId}} and {{canonical}}
+      - id="pageId" / data-page-id MUST stay (pipeline rules)
+    ───────────────────────────────────────────── */
     .page-badge{
       display:inline-block;
       font-size:12px;
@@ -44,7 +48,7 @@
       margin:0 0 10px;
     }
 
-    /* Updated badge */
+    /* Updated badge (must keep structure) */
     .updated-badge{
       display:inline-block;
       background:var(--c-badge-bg);
@@ -76,7 +80,7 @@
     }
     .tldr ul,.keyfacts ul{ margin:0; padding-left:18px; }
 
-    /* Collapsible */
+    /* Collapsible (Key Facts / FAQ container style) */
     details.collapsible{
       border:1px solid var(--c-border);
       border-radius:var(--radius);
@@ -94,7 +98,11 @@
     details.collapsible[open] > summary{border-bottom:1px solid var(--c-border)}
     details.collapsible .panel{padding:12px 14px; background:var(--c-bg)}
 
-    /* ===== 핵심: 본문 타이포 강제 통일 ===== */
+    /* ─────────────────────────────────────────────
+      ✅ 본문 타이포 강제 통일
+      - 모든 라벨에서 h2/h3/h4 스타일을 동일하게 유지
+      - generate-body.cjs / LLM이 만든 h2/h3가 그대로 안정적으로 보이게 하는 목적
+    ───────────────────────────────────────────── */
     main{
       margin-top:16px;
       max-width:980px;
@@ -208,6 +216,28 @@
       text-align:right;
       color:var(--c-muted);
     }
+
+    /* ─────────────────────────────────────────────
+      ✅ Ad slots (MID + BOTTOM) — 위치 확정
+      - MID: Key Facts 끝난 직후(본문 시작 전)
+      - BOTTOM: FAQ와 Sources 사이(또는 Sources 위)
+      - 실제 애드센스 스크립트는 슬롯 div 내부에 "직접" 삽입
+      - 이 파일은 "자리 확정"이 목적이므로, 계정별 코드는 넣지 않음
+    ───────────────────────────────────────────── */
+    .ad-slot{
+      border:1px dashed var(--c-border);
+      border-radius:var(--radius);
+      background:#fff;
+      margin:14px 0;
+      padding:12px 14px;
+      color:var(--c-muted);
+      font-size:13px;
+    }
+    .ad-slot__label{
+      font-size:12px;
+      margin:0 0 6px;
+      opacity:.85;
+    }
   </style>
 </head>
 <body>
@@ -241,6 +271,19 @@
     </div>
   </details>
 
+  <!-- ─────────────────────────────────────────────
+    ✅ Ad Slot (MID) — 본문 시작 직전
+    - 히어로/OG(LCP)와 멀리 떨어져 충돌 위험 낮음
+    - TL;DR 박스 내부가 아니라 레이아웃 안정
+    - 렌더러가 필요 시 이 슬롯에 애드센스 코드를 "삽입"해도 되고,
+      당장은 블로그 편집기/스킨에서 수동 삽입해도 됨.
+  ───────────────────────────────────────────── -->
+  <div class="ad-slot" id="ad-mid" aria-label="Ad slot (mid)">
+    <div class="ad-slot__label">Ad (mid)</div>
+    <!-- SLOT:ADS_MID -->
+    <!-- 여기에 애드센스 코드(계정별) 삽입 -->
+  </div>
+
   <main>
     <!-- 본문 -->
     <section id="review-base-block">
@@ -254,6 +297,17 @@
 
   <!-- FAQ -->
   <!--SLOT:FAQ_WRAPPER-->
+
+  <!-- ─────────────────────────────────────────────
+    ✅ Ad Slot (BOTTOM) — FAQ 이후 / Sources 이전
+    - 글을 다 읽은 후라 UX 충돌이 적음
+    - Sources 링크 클릭을 방해하지 않게 "Sources 바로 위"에 배치
+  ───────────────────────────────────────────── -->
+  <div class="ad-slot" id="ad-bottom" aria-label="Ad slot (bottom)">
+    <div class="ad-slot__label">Ad (bottom)</div>
+    <!-- SLOT:ADS_BOTTOM -->
+    <!-- 여기에 애드센스 코드(계정별) 삽입 -->
+  </div>
 
   <!-- Sources -->
   <!--SLOT:SOURCES_WRAPPER-->
