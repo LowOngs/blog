@@ -115,9 +115,20 @@ jobs:
 
       - name: Sanity check (required scripts exist)
         run: |
+          test -f System_files/scripts/build/seed-scheduler.cjs
+          test -f System_files/scripts/build/queue-to-posts.cjs
+          test -f System_files/scripts/build/ids.cjs
+          test -f System_files/scripts/build/generate-body.cjs
+
+          test -f System_files/scripts/build/review-resolver.cjs
           test -f System_files/scripts/build/render-posts.cjs
+          test -f System_files/scripts/build/normalize-body.cjs
+          test -f System_files/scripts/build/review-meta-block.cjs
+
+          test -f System_files/scripts/build/validate-body-images.cjs
           test -f System_files/scripts/build/images-renew.cjs
           test -f System_files/scripts/build/images-build-og.cjs
+
           test -f System_files/scripts/build/validate-repair.cjs
           test -f System_files/scripts/build/qa-check.cjs
           test -f System_files/scripts/publish/blogger.cjs
@@ -134,6 +145,13 @@ jobs:
         working-directory: System_files
         run: |
           node scripts/build/review-resolver.cjs
+
+      # ✅ 추가: 본문 이미지 매니페스트 검증(초반에 실패시키는게 핵심)
+      # - 깨진 manifest / 정책 위반 / URL 도메인 위반 등을 여기서 즉시 감지
+      - name: Validate body images manifest
+        working-directory: System_files
+        run: |
+          node scripts/build/validate-body-images.cjs
 
       - name: Render posts (1st)
         working-directory: System_files
