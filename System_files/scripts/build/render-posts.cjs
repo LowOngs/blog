@@ -36,7 +36,7 @@ const BODY_IMAGE_MANIFEST_PATH = path.join(MANIFESTS_DIR, 'images-body-manifest.
 
 const { buildMeta } = require('./lib/meta.cjs');
 const { ensurePageId, isValidPageId } = require('./lib/page-ids.cjs');
-const blocks = require('./lib/blocks.js');
+const blocks = require('./lib/blocks.cjs');
 
 // ✅ 리뷰 데이터 정규화(라벨별 SSOT 연동)
 const { resolveReviewData } = require('./lib/review-resolver.cjs');
