@@ -39,7 +39,7 @@ const { ensurePageId, isValidPageId } = require('./lib/page-ids.cjs');
 const blocks = require('./lib/blocks.cjs');
 
 // ✅ 리뷰 데이터 정규화(라벨별 SSOT 연동)
-const { resolveReviewData } = require('./lib/review-resolver.cjs');
+const { resolveReviewData } = require('./review-resolver.cjs');
 
 /* ───────────────────── 파일/JSON 유틸 ───────────────────── */
 
