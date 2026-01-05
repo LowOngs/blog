@@ -3,35 +3,25 @@
 
 /**
  * System_files/scripts/build/review-resolver.cjs
+ * - render-posts.cjs에서 호출하는 "resolveReviewData"를 제공하는 모듈
  *
- * - 라벨(리뷰 3종) 기준으로 bucket(app/device/subscription) 선택
- * - content/reviews/{bucket}-ratings.json + {bucket}-insights.json 을 읽어서
- *   content/posts/*.json 에 post.reviewData 로 주입한다.
- *
- * ✅ render-posts.cjs 는 post.reviewData || post.review 를 읽으므로
- *   렌더 연결은 여기서 끝(SSOT).
+ * ✅ 정책
+ * - 리뷰 SSOT(단일 소스) 우선: content/reviews/review-ratings.json
+ * - 없으면 postJson.review / postJson.reviews (있을 때만) fallback
+ * - 리뷰 라벨이 아니면 null 반환(리뷰 블록 미출력)
  */
 
 const fs = require('fs');
 const path = require('path');
 
-const ROOT = path.resolve(__dirname, '../..'); // System_files
-const POSTS_DIR = path.join(ROOT, 'content', 'posts');
-const REVIEWS_DIR = path.join(ROOT, 'content', 'reviews');
-
-function readJsonSafe(p, fallback) {
+function readJsonSafe(p) {
   try {
-    if (!fs.existsSync(p)) return fallback;
-    const raw = fs.readFileSync(p, 'utf8').trim();
-    if (!raw) return fallback;
-    return JSON.parse(raw);
+    if (!p) return null;
+    if (!fs.existsSync(p)) return null;
+    return JSON.parse(fs.readFileSync(p, 'utf8'));
   } catch {
-    return fallback;
+    return null;
   }
-}
-
-function writeJsonPretty(p, obj) {
-  fs.writeFileSync(p, JSON.stringify(obj, null, 2) + '\n', 'utf8');
 }
 
 function asArray(v) {
@@ -39,147 +29,116 @@ function asArray(v) {
   return Array.isArray(v) ? v : [v];
 }
 
-function firstLabel(post) {
-  const labels = asArray(post.labels);
-  return labels[0] || '';
+function toNumberOrNull(v) {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
 }
 
-function labelToBucket(label) {
-  if (label === 'app-reviews') return 'app';
-  if (label === 'device-reviews') return 'device';
-  if (label === 'subscription-services') return 'subscription';
-  return '';
-}
+function normalizeReview(obj) {
+  if (!obj || typeof obj !== 'object') return null;
 
-function parseKstDate(dateStr) {
-  return new Date(dateStr + 'T00:00:00+09:00');
-}
+  // 허용 필드(필요 최소)
+  const rating = toNumberOrNull(obj.rating ?? obj.score ?? obj.stars);
+  const scale = toNumberOrNull(obj.scale ?? obj.outOf ?? 5) ?? 5;
 
-function formatDate(d) {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
-}
+  const summary = (obj.summary || obj.oneLine || obj.verdict || '').toString().trim();
+  const pros = asArray(obj.pros).map(String).map(s => s.trim()).filter(Boolean);
+  const cons = asArray(obj.cons).map(String).map(s => s.trim()).filter(Boolean);
 
-function addDays(dateStr, days) {
-  const d = parseKstDate(dateStr);
-  d.setDate(d.getDate() + days);
-  return formatDate(d);
-}
+  // insights: 문자열 배열로만 통일
+  const insights = asArray(obj.insights).flatMap((x) => {
+    if (!x) return [];
+    if (typeof x === 'string') return [x.trim()];
+    if (typeof x === 'object') {
+      // { text } 또는 { note } 같은 흔한 형태를 흡수
+      const t = (x.text || x.note || x.value || '').toString().trim();
+      return t ? [t] : [];
+    }
+    return [];
+  }).filter(Boolean).slice(0, 12);
 
-function toKstIso(dateStr) {
-  return `${dateStr}T00:00:00+09:00`;
-}
+  // sources: URL 배열 또는 {name,url} 배열이 섞여도 URL만 추출
+  const sources = asArray(obj.sources).flatMap((x) => {
+    if (!x) return [];
+    if (typeof x === 'string') return [x.trim()];
+    if (typeof x === 'object') {
+      const u = (x.url || x.href || '').toString().trim();
+      return u ? [u] : [];
+    }
+    return [];
+  }).filter(Boolean).slice(0, 20);
 
-function findRatingsPath(bucket) {
-  return path.join(REVIEWS_DIR, `${bucket}-ratings.json`);
-}
-
-function findInsightsPath(bucket) {
-  return path.join(REVIEWS_DIR, `${bucket}-insights.json`);
-}
-
-function normalizeRatingRecord(rec) {
-  if (!rec || typeof rec !== 'object') return null;
-
-  const lastChecked = typeof rec.lastChecked === 'string' ? rec.lastChecked : '';
-  const nextCheck = typeof rec.nextCheck === 'string'
-    ? rec.nextCheck
-    : (lastChecked ? addDays(lastChecked, 90) : '');
-
-  const ratingCurrent = Number(rec.ratingCurrent);
-  if (!Number.isFinite(ratingCurrent)) return null;
+  // rating이 아예 없고, summary/insights/pros/cons도 없으면 "없음" 취급
+  if (rating === null && !summary && pros.length === 0 && cons.length === 0 && insights.length === 0) {
+    return null;
+  }
 
   return {
-    rating: {
-      overall: ratingCurrent,
-      votes: Number(rec.votesCurrent || 0) || 0,
-      scale: 5,
-      lastChecked: lastChecked ? toKstIso(lastChecked) : '',
-      nextCheck: nextCheck ? toKstIso(nextCheck) : '',
-      platform: rec.store || rec.platform || '',
-      source: rec.source || '',
-      storeId: rec.storeId || null
-    },
-    histogram: rec.histogram || null
+    rating,     // number|null
+    scale,      // number (default 5)
+    summary,    // string
+    pros,       // string[]
+    cons,       // string[]
+    insights,   // string[]
+    sources,    // string[]
   };
 }
 
-function normalizeInsightsRecord(rec) {
-  if (!rec || typeof rec !== 'object') return [];
-  const list = Array.isArray(rec.insights) ? rec.insights : [];
-  return list.map(x => String(x || '').trim()).filter(Boolean).slice(0, 12);
+function isReviewLabel(label) {
+  const v = String(label || '').trim().toLowerCase();
+  return v === 'app-reviews' || v === 'device-reviews' || v === 'subscription-services';
 }
 
-function main() {
-  console.log('────────────────────────────────────────────');
-  console.log('[review-resolver] ROOT      =', ROOT);
-  console.log('[review-resolver] POSTS_DIR =', POSTS_DIR);
-  console.log('[review-resolver] REVIEWS   =', REVIEWS_DIR);
+/**
+ * ✅ render-posts.cjs에서 호출하는 함수
+ * @param {object} ctx
+ * @param {string} ctx.ROOT - System_files 절대 경로
+ * @param {object} ctx.postJson - content/posts/*.json 파싱 객체
+ * @returns {object|null} normalized review object
+ */
+function resolveReviewData({ ROOT, postJson }) {
+  try {
+    if (!postJson || typeof postJson !== 'object') return null;
 
-  if (!fs.existsSync(POSTS_DIR)) {
-    console.log('[review-resolver] posts dir 없음 → 종료');
-    process.exit(0);
-  }
+    const label = (postJson.label || postJson.mainLabel || (postJson.labels && postJson.labels[0]) || '').toString();
+    if (!isReviewLabel(label)) return null;
 
-  const files = fs.readdirSync(POSTS_DIR).filter(f => f.endsWith('.json')).sort();
-
-  let matched = 0;
-  let touched = 0;
-
-  for (const f of files) {
-    const p = path.join(POSTS_DIR, f);
-    const post = readJsonSafe(p, null);
-    if (!post || typeof post !== 'object') continue;
-
-    const label = firstLabel(post);
-    const bucket = labelToBucket(label);
-    if (!bucket) continue;
-
-    matched++;
-
-    const slug = post.slug || path.basename(f, '.json');
-    const ratingsPath = findRatingsPath(bucket);
-    const insightsPath = findInsightsPath(bucket);
-
-    const ratingsDb = readJsonSafe(ratingsPath, { bySlug: {} });
-    const insightsDb = readJsonSafe(insightsPath, { bySlug: {} });
-
-    const rRec = ratingsDb?.bySlug?.[slug] || null;
-    const iRec = insightsDb?.bySlug?.[slug] || null;
-
-    const ratingNorm = normalizeRatingRecord(rRec);
-    const insightsNorm = normalizeInsightsRecord(iRec);
-
-    // 아무 데이터도 없으면 기존 reviewData를 건드리지 않음(빈 주입 금지)
-    if (!ratingNorm && insightsNorm.length === 0) continue;
-
-    const next = {
-      bucket,
-      source: rRec?.source || '',
-      rating: ratingNorm ? ratingNorm.rating : undefined,
-      histogram: ratingNorm ? ratingNorm.histogram : undefined,
-      insights: insightsNorm
-    };
-
-    Object.keys(next).forEach(k => {
-      if (next[k] === undefined) delete next[k];
-    });
-
-    const prev = JSON.stringify(post.reviewData || {});
-    const now = JSON.stringify(next);
-
-    if (prev !== now) {
-      post.reviewData = next;
-      writeJsonPretty(p, post);
-      touched++;
-      console.log('[review-resolver] UPDATE:', slug, 'bucket=', bucket);
+    const slug = (postJson.slug || '').toString().trim();
+    if (!slug) {
+      // slug 없으면 fallback review만 시도
+      const fallback = normalizeReview(postJson.review || postJson.reviews || null);
+      return fallback;
     }
-  }
 
-  console.log('────────────────────────────────────────────');
-  console.log('[review-resolver] 대상(리뷰라벨) =', matched, '| 갱신 =', touched);
+    // 1) SSOT 파일: content/reviews/review-ratings.json
+    const ssotPath = path.join(ROOT, 'content', 'reviews', 'review-ratings.json');
+    const ssot = readJsonSafe(ssotPath);
+
+    // 기대 형태:
+    //  - { bySlug: { [slug]: {...} } }  또는
+    //  - { [slug]: {...} }
+    let found = null;
+    if (ssot && typeof ssot === 'object') {
+      if (ssot.bySlug && typeof ssot.bySlug === 'object' && ssot.bySlug[slug]) found = ssot.bySlug[slug];
+      else if (ssot[slug]) found = ssot[slug];
+    }
+
+    const normalized = normalizeReview(found);
+    if (normalized) return normalized;
+
+    // 2) fallback: postJson에 리뷰가 직접 들어있는 경우
+    return normalizeReview(postJson.review || postJson.reviews || null);
+  } catch {
+    return null;
+  }
 }
 
-if (require.main === module) main();
+module.exports = { resolveReviewData };
+
+/* ───────────────────── 단독 실행(디버그용) ───────────────────── */
+if (require.main === module) {
+  const ROOT = path.resolve(__dirname, '..', '..'); // System_files
+  console.log('[review-resolver] ROOT =', ROOT);
+  const p = path.join(ROOT, 'content', 'reviews', 'review-ratings.json');
+  console.log('[review-resolver] SSOT =', p, fs.existsSync(p) ? '(found)' : '(missing)');
+}
