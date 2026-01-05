@@ -11,6 +11,8 @@
 //  - 실행 시 dist/images/og/*.jpg 를 전부 삭제 후 재생성(누적 방지)
 //  - pageId는 "없을 때만" 발급(이미 있으면 재발급 금지)
 
+require('./lib/env.cjs'); // ✅ .env 로드(필수)
+
 const fs = require('fs');
 const path = require('path');
 const sharp = require('sharp');
