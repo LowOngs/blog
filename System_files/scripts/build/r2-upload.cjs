@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 'use strict';
 
+require('./lib/env.cjs'); // ✅ .env 로드(필수)
+
 /**
  * System_files/scripts/build/r2-upload.js
  * - dist/images/og/* + dist/images/body/* 를 Cloudflare R2로 업로드
