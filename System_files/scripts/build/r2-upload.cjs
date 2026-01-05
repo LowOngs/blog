@@ -1,26 +1,10 @@
-#!/usr/bin/env node
-'use strict';
+// System_files/scripts/build/r2-upload.cjs
+// 역할:
+//  - dist/images/og, dist/images/body 폴더의 이미지를 Cloudflare R2에 업로드
+//  - 업로드 경로는 "images/og/*", "images/body/*" 로 고정 (루트 drift 방지)
+//  - DRY_RUN=true면 업로드 대신 로그만 출력
 
-require('./lib/env.cjs'); // ✅ .env 로드(필수)
-
-/**
- * System_files/scripts/build/r2-upload.js
- * - dist/images/og/* + dist/images/body/* 를 Cloudflare R2로 업로드
- * - R2 object key:
- *    og/<filename>
- *    body/<filename>
- *
- * 필수 ENV:
- *  - R2_ACCOUNT_ID
- *  - R2_ACCESS_KEY_ID
- *  - R2_SECRET_ACCESS_KEY
- *  - R2_BUCKET_PUBLIC   (또는 R2_BUCKET)
- *
- * 선택 ENV:
- *  - DRY_RUN=true            업로드 없이 로그만
- *  - R2_PREFIX=              기본 '' (예: 'images'로 두면 images/og/... 형태)
- *  - CACHE_CONTROL=          기본 'public, max-age=31536000, immutable'
- */
+require('./lib/env.cjs');
 
 const fs = require('fs');
 const path = require('path');
@@ -31,177 +15,177 @@ try {
   ({ S3Client, PutObjectCommand } = require('@aws-sdk/client-s3'));
 } catch (e) {
   console.error('[r2-upload] @aws-sdk/client-s3 가 필요합니다.');
-  console.error('  npm i @aws-sdk/client-s3');
+  console.error('  repo root에서: npm i @aws-sdk/client-s3');
   process.exit(1);
 }
 
-const ROOT = path.resolve(__dirname, '..', '..'); // System_files
+// ✅ ROOT = System_files
+const ROOT = path.resolve(__dirname, '..', '..'); // .../System_files
+
+// ✅ dist/images/* 기준
 const DIST_IMAGES = path.join(ROOT, 'dist', 'images');
 const OG_DIR = path.join(DIST_IMAGES, 'og');
 const BODY_DIR = path.join(DIST_IMAGES, 'body');
 
-const {
-  R2_ACCOUNT_ID,
-  R2_ACCESS_KEY_ID,
-  R2_SECRET_ACCESS_KEY,
-  R2_BUCKET_PUBLIC,
-  R2_BUCKET,
-  R2_PREFIX,
-  DRY_RUN,
-  CACHE_CONTROL,
-} = process.env;
+// ✅ env
+const R2_ACCOUNT_ID = process.env.R2_ACCOUNT_ID;
+const R2_ACCESS_KEY_ID = process.env.R2_ACCESS_KEY_ID;
+const R2_SECRET_ACCESS_KEY = process.env.R2_SECRET_ACCESS_KEY;
 
-const BUCKET = R2_BUCKET_PUBLIC || R2_BUCKET;
+// 버킷 키 이름이 혼재할 수 있어 둘 다 지원
+const R2_BUCKET =
+  process.env.R2_BUCKET_PUBLIC ||
+  process.env.R2_BUCKET ||
+  process.env.R2_BUCKET_NAME;
 
-function die(msg) {
-  console.error('[r2-upload][FATAL]', msg);
+const R2_ENDPOINT =
+  process.env.R2_ENDPOINT ||
+  (R2_ACCOUNT_ID
+    ? `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`
+    : '');
+
+const DRY_RUN = String(process.env.DRY_RUN || 'false').toLowerCase() === 'true';
+
+// ✅ “원래대로” 고정: 항상 images 하위로 업로드
+// (R2_PREFIX가 비거나 다른 값이어도 업로드 경로는 images/*로 간다)
+const FIXED_PREFIX = 'images';
+
+// 옵션: Cache-Control
+const CACHE_CONTROL =
+  process.env.CACHE_CONTROL || 'public, max-age=31536000, immutable';
+
+function fatal(msg) {
+  console.error(`[r2-upload][FATAL] ${msg}`);
   process.exit(1);
 }
 
-if (!R2_ACCOUNT_ID) die('R2_ACCOUNT_ID 가 없습니다.');
-if (!R2_ACCESS_KEY_ID) die('R2_ACCESS_KEY_ID 가 없습니다.');
-if (!R2_SECRET_ACCESS_KEY) die('R2_SECRET_ACCESS_KEY 가 없습니다.');
-if (!BUCKET) die('R2_BUCKET_PUBLIC (또는 R2_BUCKET) 가 없습니다.');
-
-const isDryRun = String(DRY_RUN || '').toLowerCase() === 'true';
-const prefix = (R2_PREFIX || '').replace(/^\/+|\/+$/g, ''); // 'images' 같은 prefix를 허용
-const cacheControl = CACHE_CONTROL || 'public, max-age=31536000, immutable';
-
-const endpoint = `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`;
-
-const s3 = new S3Client({
-  region: 'auto',
-  endpoint,
-  credentials: {
-    accessKeyId: R2_ACCESS_KEY_ID,
-    secretAccessKey: R2_SECRET_ACCESS_KEY,
-  },
-});
-
-function existsDir(p) {
-  try {
-    return fs.existsSync(p) && fs.statSync(p).isDirectory();
-  } catch {
-    return false;
-  }
+function sha12(buf) {
+  return crypto.createHash('sha256').update(buf).digest('hex').slice(0, 12);
 }
 
-function listFilesFlat(dir) {
-  if (!existsDir(dir)) return [];
-  return fs.readdirSync(dir)
-    .map((name) => path.join(dir, name))
-    .filter((p) => {
-      try {
-        return fs.statSync(p).isFile();
-      } catch {
-        return false;
-      }
-    });
+function listJpgFiles(dir) {
+  if (!fs.existsSync(dir)) return [];
+  return fs
+    .readdirSync(dir)
+    .filter((f) => f.toLowerCase().endsWith('.jpg') || f.toLowerCase().endsWith('.jpeg') || f.toLowerCase().endsWith('.webp') || f.toLowerCase().endsWith('.png'))
+    .sort();
 }
 
-function contentTypeByExt(filePath) {
-  const ext = path.extname(filePath).toLowerCase();
+async function putObject(client, bucket, key, body, contentType) {
+  await client.send(
+    new PutObjectCommand({
+      Bucket: bucket,
+      Key: key,
+      Body: body,
+      ContentType: contentType,
+      CacheControl: CACHE_CONTROL,
+    })
+  );
+}
+
+function contentTypeByExt(filename) {
+  const ext = path.extname(filename).toLowerCase();
   if (ext === '.jpg' || ext === '.jpeg') return 'image/jpeg';
   if (ext === '.png') return 'image/png';
   if (ext === '.webp') return 'image/webp';
-  if (ext === '.avif') return 'image/avif';
-  if (ext === '.gif') return 'image/gif';
-  if (ext === '.svg') return 'image/svg+xml';
   return 'application/octet-stream';
 }
 
-function makeKey(group, filename) {
-  // group: 'og' | 'body'
-  const base = `${group}/${filename}`.replace(/\\/g, '/');
-  return prefix ? `${prefix}/${base}` : base;
-}
+async function main() {
+  if (!R2_ACCOUNT_ID) fatal('R2_ACCOUNT_ID 가 없습니다.');
+  if (!R2_ACCESS_KEY_ID) fatal('R2_ACCESS_KEY_ID 가 없습니다.');
+  if (!R2_SECRET_ACCESS_KEY) fatal('R2_SECRET_ACCESS_KEY 가 없습니다.');
+  if (!R2_BUCKET) fatal('R2_BUCKET (또는 R2_BUCKET_PUBLIC) 가 없습니다.');
+  if (!R2_ENDPOINT) fatal('R2_ENDPOINT 를 만들 수 없습니다.');
 
-function sha256File(filePath) {
-  const h = crypto.createHash('sha256');
-  h.update(fs.readFileSync(filePath));
-  return h.digest('hex');
-}
-
-async function uploadOne({ filePath, group }) {
-  const filename = path.basename(filePath);
-  const key = makeKey(group, filename);
-  const body = fs.readFileSync(filePath);
-  const ct = contentTypeByExt(filePath);
-
-  // 업로드 전 해시(로깅/디버그용, R2 ETag와 1:1 일치 보장은 아님)
-  const hash = sha256File(filePath).slice(0, 12);
-
-  if (isDryRun) {
-    console.log(`[r2-upload][DRY] ${group}  ${filename}  ->  s3://${BUCKET}/${key}  (${ct}, sha=${hash})`);
-    return { key, hash, skipped: true };
-  }
-
-  const cmd = new PutObjectCommand({
-    Bucket: BUCKET,
-    Key: key,
-    Body: body,
-    ContentType: ct,
-    CacheControl: cacheControl,
-  });
-
-  // 재시도(최대 3회, 간단 백오프)
-  let lastErr = null;
-  for (let attempt = 1; attempt <= 3; attempt++) {
-    try {
-      await s3.send(cmd);
-      console.log(`[r2-upload] OK  ${group}  ${filename}  ->  ${key}  (sha=${hash})`);
-      return { key, hash, skipped: false };
-    } catch (e) {
-      lastErr = e;
-      const waitMs = 250 * attempt * attempt;
-      console.warn(`[r2-upload] RETRY ${attempt}/3  ${filename}  (${waitMs}ms)  err=${e && e.message ? e.message : e}`);
-      await new Promise((r) => setTimeout(r, waitMs));
-    }
-  }
-
-  throw lastErr || new Error('upload failed');
-}
-
-async function run() {
   console.log('────────────────────────────────────────────');
-  console.log('[r2-upload] endpoint =', endpoint);
-  console.log('[r2-upload] bucket   =', BUCKET);
-  console.log('[r2-upload] prefix   =', prefix || '(none)');
-  console.log('[r2-upload] dry_run  =', isDryRun);
+  console.log('[r2-upload] endpoint =', R2_ENDPOINT);
+  console.log('[r2-upload] bucket   =', R2_BUCKET);
+  console.log('[r2-upload] prefix   =', FIXED_PREFIX);
+  console.log('[r2-upload] dry_run  =', DRY_RUN);
   console.log('[r2-upload] og_dir   =', OG_DIR);
   console.log('[r2-upload] body_dir =', BODY_DIR);
+  console.log('────────────────────────────────────────────');
 
-  const ogFiles = listFilesFlat(OG_DIR);
-  const bodyFiles = listFilesFlat(BODY_DIR);
+  const client = new S3Client({
+    region: 'auto',
+    endpoint: R2_ENDPOINT,
+    credentials: {
+      accessKeyId: R2_ACCESS_KEY_ID,
+      secretAccessKey: R2_SECRET_ACCESS_KEY,
+    },
+  });
 
-  const tasks = [];
-  for (const f of ogFiles) tasks.push({ filePath: f, group: 'og' });
-  for (const f of bodyFiles) tasks.push({ filePath: f, group: 'body' });
+  const ogFiles = listJpgFiles(OG_DIR);
+  const bodyFiles = listJpgFiles(BODY_DIR);
 
-  if (!tasks.length) {
-    console.log('[r2-upload] 업로드 대상이 없습니다. (dist/images/og 또는 dist/images/body 비어있음)');
-    return;
-  }
+  let ok = 0;
+  let fail = 0;
 
-  let ok = 0, fail = 0;
+  // ✅ OG 업로드: images/og/*
+  for (const name of ogFiles) {
+    const filePath = path.join(OG_DIR, name);
+    const buf = fs.readFileSync(filePath);
+    const sha = sha12(buf);
+    const key = `${FIXED_PREFIX}/og/${name}`;
+    const ct = contentTypeByExt(name);
 
-  // 과도한 동시 업로드로 실패하는 경우가 있어서 "순차"가 제일 안전합니다.
-  for (const t of tasks) {
+    if (DRY_RUN) {
+      console.log(
+        `[r2-upload][DRY] og  ${name}  ->  s3://${R2_BUCKET}/${key}  (${ct}, sha=${sha})`
+      );
+      ok++;
+      continue;
+    }
+
     try {
-      await uploadOne(t);
+      await putObject(client, R2_BUCKET, key, buf, ct);
+      console.log(`[r2-upload] OK  og  ${name}  ->  ${key}  (sha=${sha})`);
       ok++;
     } catch (e) {
+      console.error(`[r2-upload] FAIL og  ${name}  ->  ${key}`);
+      console.error(e && e.message ? e.message : e);
       fail++;
-      console.error(`[r2-upload][FAIL] ${t.group} ${path.basename(t.filePath)} ->`, e && e.message ? e.message : e);
+    }
+  }
+
+  // ✅ BODY 업로드: images/body/*
+  for (const name of bodyFiles) {
+    const filePath = path.join(BODY_DIR, name);
+    const buf = fs.readFileSync(filePath);
+    const sha = sha12(buf);
+    const key = `${FIXED_PREFIX}/body/${name}`;
+    const ct = contentTypeByExt(name);
+
+    if (DRY_RUN) {
+      console.log(
+        `[r2-upload][DRY] body ${name}  ->  s3://${R2_BUCKET}/${key}  (${ct}, sha=${sha})`
+      );
+      ok++;
+      continue;
+    }
+
+    try {
+      await putObject(client, R2_BUCKET, key, buf, ct);
+      console.log(`[r2-upload] OK  body ${name}  ->  ${key}  (sha=${sha})`);
+      ok++;
+    } catch (e) {
+      console.error(`[r2-upload] FAIL body ${name}  ->  ${key}`);
+      console.error(e && e.message ? e.message : e);
+      fail++;
     }
   }
 
   console.log('────────────────────────────────────────────');
-  console.log(`[r2-upload] done: ok=${ok}, fail=${fail}, total=${tasks.length}`);
-  if (fail > 0) process.exit(1);
+  console.log(`[r2-upload] done: ok=${ok}, fail=${fail}, total=${ok + fail}`);
+  console.log('────────────────────────────────────────────');
+  process.exit(fail > 0 ? 1 : 0);
 }
 
-run().catch((e) => {
-  console.error('[r2-upload][FATAL]', e && e.message ? e.message : e);
+main().catch((e) => {
+  console.error('────────────────────────────────────────────');
+  console.error('[r2-upload] FATAL ERROR');
+  console.error(e && e.stack ? e.stack : e);
+  console.error('────────────────────────────────────────────');
   process.exit(1);
 });
