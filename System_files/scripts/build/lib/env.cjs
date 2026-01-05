@@ -1,53 +1,63 @@
-// System_files/scripts/build/lib/env.cjs
-// 목적:
-//  - 프로젝트 루트(.env)를 명시적으로 로드
-//  - 실행 위치(CWD)에 상관없이 process.env 보장
-//  - CJS(require) 기반 스크립트 전용
-
 'use strict';
+
+/**
+ * System_files/scripts/build/lib/env.cjs
+ * - .env 로드(1회) + 공통 경로/기본 ENV 정규화
+ * - CJS(require) 전용 (render-posts.cjs / r2-upload.cjs / images-build-og.cjs에서 require로 사용)
+ */
 
 const fs = require('fs');
 const path = require('path');
-const dotenv = require('dotenv');
 
-// env.cjs 위치:
-//   System_files/scripts/build/lib/env.cjs
-// 프로젝트 루트:
-//   C:\google-blog
-const PROJECT_ROOT = path.resolve(__dirname, '..', '..', '..', '..');
+let dotenv;
+try {
+  dotenv = require('dotenv');
+} catch (e) {
+  console.error('[env] dotenv가 필요합니다.  npm i dotenv');
+  process.exit(1);
+}
 
-// 후보 .env 경로 (우선순위)
-const ENV_CANDIDATES = [
-  path.join(PROJECT_ROOT, '.env'),          // C:\google-blog\.env  ← 정석
-  path.join(PROJECT_ROOT, 'System_files', '.env'),
+// System_files 루트: .../scripts/build/lib → ROOT는 ../../..
+const ROOT = path.resolve(__dirname, '..', '..', '..');
+
+// 1순위: System_files/.env, 2순위: 상위 폴더/.env, 마지막: dotenv 기본 동작
+const envCandidates = [
+  path.join(ROOT, '.env'),
+  path.resolve(ROOT, '..', '.env'),
 ];
 
-// 실제 로드
-let loadedPath = null;
-for (const p of ENV_CANDIDATES) {
-  if (fs.existsSync(p)) {
+let loaded = false;
+for (const p of envCandidates) {
+  if (!loaded && fs.existsSync(p)) {
     dotenv.config({ path: p });
-    loadedPath = p;
-    break;
+    loaded = true;
   }
 }
+if (!loaded) dotenv.config();
 
-// fallback (OS env만 사용)
-if (!loadedPath) {
-  dotenv.config();
-}
+// SITE/CDN 기본값 정규화
+const rawSiteBase =
+  process.env.SITE_BASE ||
+  process.env.CANONICAL_BASE ||
+  'https://ongsblog.com';
 
-// 로그는 한 번만 (중복 require 대비)
-if (!global.__ONGS_ENV_LOADED__) {
-  global.__ONGS_ENV_LOADED__ = true;
+const SITE_BASE = String(rawSiteBase).replace(/\/+$/, '');
 
-  console.log('[env] loaded =', loadedPath || '(process.env only)');
-  console.log('[env] SITE_BASE =', process.env.SITE_BASE || process.env.CANONICAL_BASE || '(default)');
-  console.log('[env] CDN_BASE  =', process.env.CDN_BASE || '(default)');
-}
+const rawCdnBase = String(process.env.CDN_BASE || `${SITE_BASE}/images`).replace(/\/+$/, '');
 
-// export는 최소한만 (필요 시 사용)
-module.exports = {
-  PROJECT_ROOT,
-  ENV_PATH: loadedPath,
+const PATHS = {
+  ROOT,
+  POSTS_DIR: path.join(ROOT, process.env.POSTS_DIR || 'content/posts'),
+  TEMPLATE_PATH: path.join(ROOT, 'templates/post.html'),
+  OUTPUT_DIR: path.join(ROOT, 'dist/posts'),
 };
+
+const ENV = {
+  SITE_BASE,
+  CDN_BASE: rawCdnBase,
+  SITE_NAME: process.env.SITE_NAME || 'Ongs Blog',
+  ARTICLE_AUTHOR: process.env.ARTICLE_AUTHOR || 'Ongs',
+  PUBLISHER_NAME: process.env.PUBLISHER_NAME || 'Ongs Blog',
+};
+
+module.exports = { ROOT, PATHS, ENV };
