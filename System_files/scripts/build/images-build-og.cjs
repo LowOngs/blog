@@ -1,48 +1,76 @@
-// System_files/scripts/build/images-build-og.cjs
-// 역할:
-//  - manifests/images-manifest.json 을 읽어서
-//  - (중요) entry.pageId 가 있는 항목만 처리(새로 발급 금지)
-//  - assets/images/og/base-1200x630.jpg 기반으로
-//  - dist/images/og/{pageId}_{slug}_1200x630.jpg 생성
-//  - manifest 내 url/filename/lastSeenAt 업데이트
-//
-// 옵션:
-//  - CLEAN_OG_OUT=true|false (기본 true)
-//    true면 dist/images/og 안의 base 제외 jpg를 정리 후 재생성 (불필요 백업 누적 방지)
-//  - OG_JITTER=false|true (기본 false)
-//    true면 아주 미세한 brightness 변형(랜덤). 재현성 필요하면 false 유지 권장.
+#!/usr/bin/env node
+'use strict';
+
+/**
+ * System_files/scripts/build/images-build-og.cjs
+ *
+ * ✅ 역할(정리본)
+ * - manifests/images-manifest.json 을 읽어서
+ * - 각 entry의 (slug + pageId)가 있는 것만 대상으로
+ * - assets/images/og/base-1200x630.jpg 를 기반으로
+ * - dist/images/og/{pageId}_{slug}_1200x630.jpg 생성
+ * - entry.filename/url/lastBuiltAt 등을 갱신
+ *
+ * ✅ 핵심 정책
+ * - 여기서 ensurePageId() 호출 금지 (pageId 발급은 ids.cjs / render 단계에서만)
+ * - OG 산출물은 dist/images/og 로만 생성 (assets에는 base만 유지)
+ * - 파일 누적 방지: assets의 생성 잔재 삭제 + dist에서 manifest에 없는 파일 삭제
+ * - 변형(옵션)은 랜덤 금지, slug 기반 결정론적(deterministic)만 허용
+ */
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const sharp = require('sharp');
 
 // ✅ ROOT를 항상 System_files 기준으로 고정
 const ROOT = path.resolve(__dirname, '..', '..'); // System_files
+
 const MANIFEST_PATH = path.join(ROOT, 'manifests', 'images-manifest.json');
 
-// ✅ base는 assets에 고정 보관
-const OG_ASSETS_DIR = path.join(ROOT, 'assets', 'images', 'og');
-const BASE_FILENAME = 'base-1200x630.jpg';
+// base 이미지(원본) 위치는 assets에 고정
+const ASSETS_OG_DIR = path.join(ROOT, 'assets', 'images', 'og');
+const BASE_IMAGE_PATH = path.join(ASSETS_OG_DIR, 'base-1200x630.jpg');
 
-// ✅ 산출물은 dist/images/og 로 고정 (r2-upload가 읽는 위치와 일치)
+// 산출물은 dist에 고정 (r2-upload도 이 경로를 업로드 대상으로 사용)
 const DIST_IMAGES_DIR = path.join(ROOT, 'dist', 'images');
-const OG_OUT_DIR = path.join(DIST_IMAGES_DIR, 'og');
+const DIST_OG_DIR = path.join(DIST_IMAGES_DIR, 'og');
 
 // 환경변수에서 CDN_BASE를 받되, 없으면 기본값 사용
 const CDN_BASE = (process.env.CDN_BASE || 'https://ongsblog.com/images').replace(/\/+$/, '');
 
-// 기본 정책
-const CLEAN_OG_OUT = String(process.env.CLEAN_OG_OUT || 'true').toLowerCase() === 'true';
-const OG_JITTER = String(process.env.OG_JITTER || 'false').toLowerCase() === 'true';
+// 변형 스위치 (기본: on). 원치 않으면 OG_DETERMINISTIC_JITTER=false
+const ENABLE_JITTER = String(process.env.OG_DETERMINISTIC_JITTER || 'true').toLowerCase() === 'true';
+
+// 파일 매칭(생성물)
+const OG_FILE_RE = /^page\d{6}_.+_1200x630\.jpg$/i;
+
+function die(msg) {
+  console.error('[images-build-og][FATAL]', msg);
+  process.exit(1);
+}
+
+function ensureDir(p) {
+  fs.mkdirSync(p, { recursive: true });
+}
+
+function readJson(p) {
+  return JSON.parse(fs.readFileSync(p, 'utf8'));
+}
+
+function writeJson(p, obj) {
+  ensureDir(path.dirname(p));
+  fs.writeFileSync(p, JSON.stringify(obj, null, 2) + '\n', 'utf8');
+}
 
 function loadManifest() {
   try {
-    const raw = fs.readFileSync(MANIFEST_PATH, 'utf8');
-    const data = JSON.parse(raw);
+    const data = readJson(MANIFEST_PATH);
+    if (!data || typeof data !== 'object') throw new Error('manifest invalid');
     if (!Array.isArray(data.images)) data.images = [];
     if (typeof data.version !== 'number') data.version = 1;
     return data;
-  } catch (e) {
+  } catch {
     return { version: 1, updatedAt: new Date().toISOString(), images: [] };
   }
 }
@@ -50,134 +78,166 @@ function loadManifest() {
 function saveManifest(manifest) {
   manifest.version = 1;
   manifest.updatedAt = new Date().toISOString();
-  fs.mkdirSync(path.dirname(MANIFEST_PATH), { recursive: true });
-  fs.writeFileSync(MANIFEST_PATH, JSON.stringify(manifest, null, 2), 'utf8');
+  writeJson(MANIFEST_PATH, manifest);
 }
 
-function getBaseImagePath() {
-  const basePath = path.join(OG_ASSETS_DIR, BASE_FILENAME);
-  if (!fs.existsSync(basePath)) {
-    throw new Error(`base OG image not found: ${basePath}`);
+function deterministicBrightnessFromSlug(slug) {
+  // slug → sha256 → 0..255
+  const h = crypto.createHash('sha256').update(String(slug || '')).digest();
+  const b = h[0]; // 0..255
+
+  // 0.995 ~ 1.005 범위(아주 미세), 결정론적
+  const min = 0.995;
+  const max = 1.005;
+  const t = b / 255;
+  return min + (max - min) * t;
+}
+
+function safeUnlink(filePath) {
+  try { fs.unlinkSync(filePath); return true; } catch { return false; }
+}
+
+function cleanupAssetsGeneratedFilesKeepBase() {
+  // assets/images/og 에 남아있는 생성 잔재를 삭제 (base-1200x630.jpg만 유지)
+  if (!fs.existsSync(ASSETS_OG_DIR)) return { deleted: 0 };
+
+  const files = fs.readdirSync(ASSETS_OG_DIR);
+  let deleted = 0;
+
+  for (const name of files) {
+    if (name === 'base-1200x630.jpg') continue;
+    if (!OG_FILE_RE.test(name)) continue;
+
+    const fp = path.join(ASSETS_OG_DIR, name);
+    if (safeUnlink(fp)) deleted++;
   }
-  return basePath;
+
+  return { deleted };
 }
 
-function ensureDir(p) {
-  fs.mkdirSync(p, { recursive: true });
-}
+function cleanupDistUnknownFiles(expectedSet) {
+  // dist/images/og 에서 manifest에 없는 생성물을 삭제
+  if (!fs.existsSync(DIST_OG_DIR)) return { deleted: 0, kept: 0 };
 
-function cleanOgOutDir() {
-  // base는 assets에 있으므로 dist/images/og 에 base는 없음.
-  // 여기서는 dist/images/og 내 jpg/webp만 정리(원하면 확장 가능)
-  if (!fs.existsSync(OG_OUT_DIR)) return;
-  const files = fs.readdirSync(OG_OUT_DIR);
-  for (const f of files) {
-    const full = path.join(OG_OUT_DIR, f);
-    if (!fs.statSync(full).isFile()) continue;
-    if (/\.(jpe?g|webp|png)$/i.test(f)) {
-      fs.unlinkSync(full);
-    }
+  const files = fs.readdirSync(DIST_OG_DIR);
+  let deleted = 0;
+  let kept = 0;
+
+  for (const name of files) {
+    if (!OG_FILE_RE.test(name)) continue;
+    if (expectedSet.has(name)) { kept++; continue; }
+
+    const fp = path.join(DIST_OG_DIR, name);
+    if (safeUnlink(fp)) deleted++;
   }
+
+  return { deleted, kept };
 }
 
-async function buildOgImage(entry, basePath) {
+async function buildOne(entry) {
   const slug = entry.slug;
-  if (!slug) throw new Error('manifest entry missing slug');
-
-  // ✅ pageId 신규 발급 금지: 없으면 스킵(=images-renew가 SSOT로 채워야 함)
   const pageId = entry.pageId;
-  if (!pageId) {
-    return { skipped: true, reason: 'missing pageId (SSOT required)', slug };
-  }
 
-  const w = entry.width || 1200;
-  const h = entry.height || 630;
+  if (!slug) return { status: 'skip', reason: 'missing slug' };
+  if (!pageId || !/^page\d{6}$/.test(pageId)) return { status: 'skip', reason: 'missing/invalid pageId' };
 
+  const w = 1200;
+  const h = 630;
   const filename = `${pageId}_${slug}_${w}x${h}.jpg`;
-  const outPath = path.join(OG_OUT_DIR, filename);
+  const outPath = path.join(DIST_OG_DIR, filename);
 
-  // 선택 옵션: 미세 jitter (원하면 true)
-  const brightnessJitter = OG_JITTER ? (0.99 + Math.random() * 0.02) : 1.0;
+  let pipeline = sharp(BASE_IMAGE_PATH).resize(w, h, { fit: 'cover' });
 
-  let pipeline = sharp(basePath).resize(w, h, { fit: 'cover' });
-  if (brightnessJitter !== 1.0) {
-    pipeline = pipeline.modulate({ brightness: brightnessJitter });
+  if (ENABLE_JITTER) {
+    const brightness = deterministicBrightnessFromSlug(slug);
+    pipeline = pipeline.modulate({ brightness });
   }
 
   await pipeline.jpeg({ quality: 82, chromaSubsampling: '4:2:0' }).toFile(outPath);
 
-  // manifest 엔트리 업데이트
+  // manifest 갱신
   entry.filename = filename;
   entry.url = `${CDN_BASE}/og/${filename}`;
   entry.width = w;
   entry.height = h;
-  entry.lastSeenAt = new Date().toISOString();
+  entry.lastBuiltAt = new Date().toISOString();
 
-  if (!('etag' in entry)) entry.etag = null;
-  if (!('hash' in entry)) entry.hash = null;
-
-  return { skipped: false, pageId, filename, outPath, slug };
+  return { status: 'ok', filename };
 }
 
 async function main() {
   console.log('────────────────────────────────────────────');
-  console.log('[images-build-og] start');
-  console.log('[images-build-og] ROOT        =', ROOT);
-  console.log('[images-build-og] MANIFEST    =', MANIFEST_PATH);
-  console.log('[images-build-og] OG_ASSETS   =', OG_ASSETS_DIR);
-  console.log('[images-build-og] OG_OUT_DIR  =', OG_OUT_DIR);
-  console.log('[images-build-og] CDN_BASE    =', CDN_BASE);
-  console.log('[images-build-og] CLEAN_OG_OUT=', CLEAN_OG_OUT);
-  console.log('[images-build-og] OG_JITTER   =', OG_JITTER);
+  console.log('[images-build-og] 시작');
+  console.log('[images-build-og] ROOT            =', ROOT);
+  console.log('[images-build-og] MANIFEST         =', MANIFEST_PATH);
+  console.log('[images-build-og] ASSETS_OG_DIR    =', ASSETS_OG_DIR);
+  console.log('[images-build-og] BASE_IMAGE_PATH  =', BASE_IMAGE_PATH);
+  console.log('[images-build-og] DIST_OG_DIR      =', DIST_OG_DIR);
+  console.log('[images-build-og] CDN_BASE         =', CDN_BASE);
+  console.log('[images-build-og] JITTER           =', ENABLE_JITTER);
   console.log('────────────────────────────────────────────');
 
-  const basePath = getBaseImagePath();
-  console.log('[images-build-og] base image  =', basePath);
+  if (!fs.existsSync(BASE_IMAGE_PATH)) die(`base OG image not found: ${BASE_IMAGE_PATH}`);
+
+  ensureDir(DIST_OG_DIR);
+
+  // ✅ 1) assets에 쌓인 “생성 잔재” 정리 (base만 남김)
+  const assetsCleanup = cleanupAssetsGeneratedFilesKeepBase();
+  if (assetsCleanup.deleted > 0) {
+    console.log(`[images-build-og] assets cleanup: deleted=${assetsCleanup.deleted}`);
+  }
 
   const manifest = loadManifest();
   const images = manifest.images || [];
-  console.log('[images-build-og] manifest images =', images.length);
 
-  ensureDir(OG_OUT_DIR);
-
-  if (CLEAN_OG_OUT) {
-    cleanOgOutDir();
-    console.log('[images-build-og] cleaned dist og outputs');
+  // ✅ 2) 이번 라운드에서 기대되는 파일 목록(= manifest 기준)
+  const expected = new Set();
+  for (const e of images) {
+    if (!e || !e.slug || !e.pageId) continue;
+    if (!/^page\d{6}$/.test(e.pageId)) continue;
+    expected.add(`${e.pageId}_${e.slug}_1200x630.jpg`);
   }
 
-  let created = 0;
-  let skipped = 0;
-  let failed = 0;
+  // ✅ 3) dist/images/og 에서 manifest에 없는 파일 제거
+  const distCleanup = cleanupDistUnknownFiles(expected);
+  if (distCleanup.deleted > 0) {
+    console.log(`[images-build-og] dist cleanup: deleted=${distCleanup.deleted}, kept=${distCleanup.kept}`);
+  }
+
+  console.log('[images-build-og] manifest 내 엔트리 수 =', images.length);
+  console.log('────────────────────────────────────────────');
+
+  let ok = 0, skip = 0, fail = 0;
 
   for (const entry of images) {
     try {
-      const r = await buildOgImage(entry, basePath);
-      if (r.skipped) {
-        console.log(`[images-build-og] - skip: slug=${r.slug} (${r.reason})`);
-        skipped += 1;
-        continue;
+      const r = await buildOne(entry);
+      if (r.status === 'ok') {
+        ok++;
+        console.log(`[images-build-og] ✓ 생성: slug=${entry.slug} -> ${r.filename} (pageId=${entry.pageId})`);
+      } else {
+        skip++;
+        // 조용히 넘기되, 원인 로그는 남김
+        console.log(`[images-build-og] - skip: slug=${entry.slug || '(none)'} reason=${r.reason}`);
       }
-      console.log(`[images-build-og] ✓ build: slug=${r.slug} -> ${r.filename} (pageId=${r.pageId})`);
-      created += 1;
-    } catch (err) {
-      console.error(`[images-build-og] ✗ fail: slug=${entry.slug || '(no-slug)'}: ${err.message}`);
-      failed += 1;
+    } catch (e) {
+      fail++;
+      console.error(`[images-build-og] ✗ 실패: slug=${entry && entry.slug ? entry.slug : '(none)'}`, e && e.message ? e.message : e);
     }
   }
 
   saveManifest(manifest);
 
   console.log('────────────────────────────────────────────');
-  console.log(`[images-build-og] done: created=${created}, skipped=${skipped}, failed=${failed}, total=${images.length}`);
+  console.log(`[images-build-og] 완료: ok=${ok}, skip=${skip}, fail=${fail}, total=${images.length}`);
   console.log('────────────────────────────────────────────');
 
-  // 실패가 있으면 CI에서 감지되도록 exit code (원하면 완화 가능)
-  if (failed > 0) process.exit(1);
+  if (fail > 0) process.exit(1);
 }
 
 main().catch((err) => {
   console.error('────────────────────────────────────────────');
-  console.error('[images-build-og] FATAL');
+  console.error('[images-build-og] FATAL ERROR');
   console.error(err);
   console.error('────────────────────────────────────────────');
   process.exit(1);
