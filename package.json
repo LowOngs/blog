@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "images:upload": "node ./System_files/scripts/build/r2-upload.js",
+    "images:upload": "node ./System_files/scripts/build/r2-upload.cjs",
     "images:rewrite": "node ./System_files/scripts/build/rewrite-images.js",
 
     "posts:render": "node ./System_files/scripts/build/render-posts.cjs",
