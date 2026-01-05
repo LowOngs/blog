@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 'use strict';
 
+require('./lib/env.cjs'); // ✅ .env 로드(필수)
+
 /**
  * System_files/scripts/build/render-posts.cjs
  * - content/posts/*.json → dist/posts/*.html 렌더러
