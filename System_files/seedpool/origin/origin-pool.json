@@ -1,1 +1,43 @@
-
+{
+  "meta": {
+    "version": 1,
+    "updatedAt": "2026-01-06T00:00:00.000Z",
+    "note": "Origin Pool SSOT (non-rotating). Each seed is intended for real publishing (firstgate strategy)."
+  },
+  "items": [
+    {
+      "seedId": "origin-0001",
+      "title": "How Ongs Blog Verifies Updates (90-day refresh + version tags)",
+      "slug": "origin-verify-updates",
+      "labelHint": "how-to-playbooks",
+      "intent": "trust",
+      "tldrHints": [
+        "We update guides on a fixed cadence and keep change visibility.",
+        "Every post is version-tagged and source-linked."
+      ],
+      "trustClaims": [
+        "90-day refresh policy for eligible posts",
+        "Source-linked key facts and change visibility"
+      ],
+      "proofLinks": [
+        "https://ongsblog.com/ai/authority.json"
+      ]
+    },
+    {
+      "seedId": "origin-0002",
+      "title": "What This Site Is (and Isn’t): No hype, just tested steps",
+      "slug": "origin-what-this-site-is",
+      "labelHint": "templates-checklists",
+      "intent": "about",
+      "tldrHints": [
+        "This blog is built for repeatable, verifiable outcomes.",
+        "No hidden redirects; all links are transparent."
+      ],
+      "trustClaims": [
+        "Transparent linking (no cloaking)",
+        "Repeatable checklists + preflight QA"
+      ],
+      "proofLinks": []
+    }
+  ]
+}
