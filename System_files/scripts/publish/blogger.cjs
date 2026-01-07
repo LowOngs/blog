@@ -11,6 +11,9 @@ require('dotenv').config({
 const fs = require('fs');
 const fg = require('fast-glob');
 
+// ✅ Seed Ledger (Minimal v1)
+const { upsert: upsertSeedLedger } = require(path.join(__dirname, '..', 'build', 'lib', 'seed-ledger.cjs'));
+
 // ────────────────────────────────────
 //  라벨 매핑: 내부 코드 → 사람이 보는 Blogger 라벨
 // ────────────────────────────────────
@@ -132,19 +135,26 @@ function extractBody(html) {
   return m ? m[1] : html;
 }
 
+function extractPageId(html) {
+  // 우선순위: data-page-id="page000123" → id badge text
+  let m = html.match(/data-page-id\s*=\s*"?(page\d{6})"?/i);
+  if (m && m[1]) return m[1];
+  m = html.match(/id\s*=\s*"pageId"[^>]*>\s*(page\d{6})\s*</i);
+  if (m && m[1]) return m[1];
+  return '';
+}
+
 // 파일명 → 내부 라벨 코드(app-reviews 등)
 function inferLabelCodeFromFilename(name) {
   const base = name.replace(/\.html$/i, '').toLowerCase();
 
   // ✅ firstgate-how-to-playbooks-... 형태 지원
-  // base = firstgate-how-to-playbooks-ht-fg-001-2025-12-12
   if (base.startsWith('firstgate-')) {
-    const rest = base.slice('firstgate-'.length); // how-to-playbooks-...
+    const rest = base.slice('firstgate-'.length);
     const m = rest.match(/^(app-reviews|device-reviews|subscription-services|how-to-playbooks|smart-savings|templates-checklists)\b/);
     if (m && m[1]) return m[1];
   }
 
-  // 기존: prefix 기반(app-..., howto-..., smart-...)
   const prefix = base.split(/[-_]/)[0];
   return PREFIX_TO_CODE[prefix] || null;
 }
@@ -226,6 +236,7 @@ async function createPost(token, { title, content, labels }) {
     }
 
     const p = path.join(OUTDIR, name);
+    const slug = name.replace(/\.html$/i, '');
 
     const labelCode = inferLabelCodeFromFilename(name);
     const humanLabel = labelCode && CODE_TO_LABEL[labelCode] ? CODE_TO_LABEL[labelCode] : null;
@@ -239,11 +250,29 @@ async function createPost(token, { title, content, labels }) {
       const html = fs.readFileSync(p, 'utf8');
       const title = extractTitle(html);
       const body  = extractBody(html);
+      const pageId = extractPageId(html);
 
       const bloggerLabels = humanLabel ? [humanLabel] : [];
 
       if (DRY_RUN) {
         log(`[DRY_RUN] ${name} → title="${title}" labels=[${bloggerLabels.join(', ')}] (실제 발행 안 함)`);
+
+        // ✅ Seed Ledger: dry-run 기록
+        try {
+          upsertSeedLedger({
+            stage: 'publish',
+            status: 'dryrun',
+            slug,
+            pageId,
+            label: labelCode || '',
+            source: slug.startsWith('firstgate-') ? 'firstgate' : '',
+            dryRun: true,
+            notes: 'DRY_RUN=true (no publish)',
+          });
+        } catch (e) {
+          warn('seed-ledger upsert fail:', e.message || e);
+        }
+
         ok++;
         used++;
         continue;
@@ -256,14 +285,68 @@ async function createPost(token, { title, content, labels }) {
 
       if (result && result.id) {
         log(`POST OK ${name} → id=${result.id} url=${result.url || ''} labels=[${bloggerLabels.join(', ')}]`);
+
+        // ✅ Seed Ledger: published 기록
+        try {
+          upsertSeedLedger({
+            stage: 'publish',
+            status: 'published',
+            slug,
+            pageId,
+            label: labelCode || '',
+            source: slug.startsWith('firstgate-') ? 'firstgate' : '',
+            dryRun: false,
+            postId: String(result.id || ''),
+            url: String(result.url || ''),
+          });
+        } catch (e) {
+          warn('seed-ledger upsert fail:', e.message || e);
+        }
+
         ok++;
       } else {
         warn(`POST NG ${name}`);
+
+        // ✅ Seed Ledger: failed 기록(결과 id 없음)
+        try {
+          upsertSeedLedger({
+            stage: 'publish',
+            status: 'failed',
+            slug,
+            pageId,
+            label: labelCode || '',
+            source: slug.startsWith('firstgate-') ? 'firstgate' : '',
+            dryRun: false,
+            notes: 'POST result missing id',
+          });
+        } catch (e) {
+          warn('seed-ledger upsert fail:', e.message || e);
+        }
+
         bad++;
       }
       used++;
     } catch (e) {
       warn(`POST FAIL ${name} →`, e.message || e);
+
+      // ✅ Seed Ledger: failed 기록(예외)
+      try {
+        const html = fs.existsSync(p) ? fs.readFileSync(p, 'utf8') : '';
+        const pageId = html ? extractPageId(html) : '';
+        upsertSeedLedger({
+          stage: 'publish',
+          status: 'failed',
+          slug: name.replace(/\.html$/i, ''),
+          pageId,
+          label: inferLabelCodeFromFilename(name) || '',
+          source: name.toLowerCase().startsWith('firstgate-') ? 'firstgate' : '',
+          dryRun: false,
+          notes: String(e && (e.message || e)) || 'unknown error',
+        });
+      } catch (ee) {
+        warn('seed-ledger upsert fail:', ee.message || ee);
+      }
+
       bad++;
       used++;
     }
