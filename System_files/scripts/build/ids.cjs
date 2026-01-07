@@ -14,17 +14,8 @@ require('./lib/env.cjs'); // ✅ .env 로드(필수)
  * - publishable 목록은 dist/queue/today.json 기반(SSOT).
  * - today.json에 없으면 active 발급은 0회(즉시 종료) → 번호 폭주 방지.
  *
- * AOIA ID 정책(옹스 룰)
- * - BODY_WRITE_MODE=local:
- *   로컬 테스트용 번호 발급 허용(실발행과 무관)
- *
- * - BODY_WRITE_MODE=active:
- *   실발행 후보만 발급(=today publishable)
- *   단, lib/page-ids.cjs 내부 가드:
- *     PUBLISH_MODE=enable AND DRY_RUN!=true 일 때만 active ledger +1 허용
- *
- * - PUBLISH_MODE=disable:
- *   active 발급 0회, 이력/카운터 보존
+ * ✅ Seed Ledger(Min v1):
+ * - pageId 발급/할당 시 logs/seed-ledger.jsonl 에 assigned 상태로 upsert 기록
  */
 
 const fs = require('fs');
@@ -45,6 +36,8 @@ const {
   ensurePageId,
   loadLedgerInfo
 } = require('./lib/page-ids.cjs');
+
+const { upsert: upsertSeedLedger } = require('./lib/seed-ledger.cjs');
 
 /* ───────────────────── utils ───────────────────── */
 
@@ -67,14 +60,7 @@ function asArray(v) {
 }
 
 /**
- * today.json에서 publishable slug 집합을 최대한 "유연하게" 뽑습니다.
- * - 기대 포맷이 조금 달라도 안전하게 추출되도록 방어
- *
- * 허용 케이스 예:
- * 1) ["slug-a","slug-b"]
- * 2) { items:[{slug:"a"},{slug:"b"}] }
- * 3) { posts:[{slug:"a"}] }
- * 4) { queue:[{slug:"a"}] }
+ * today.json에서 publishable slug 집합을 "유연하게" 뽑습니다.
  */
 function loadPublishableSlugsFromToday() {
   const raw = readJsonSafe(DIST_QUEUE_TODAY, null);
@@ -109,12 +95,20 @@ function loadPublishableSlugsFromToday() {
 
 /**
  * ids.cjs 실행 대상(발급 후보) 결정
- * - local: 전체 posts/*.json (기존 정책 유지)
+ * - local: 전체 posts/*.json
  * - active: today publishable에 포함된 slug만
  */
 function isTargetDoc(slug, publishableSet) {
-  if (BODY_WRITE_MODE !== 'active') return true; // local은 전체 허용
+  if (BODY_WRITE_MODE !== 'active') return true;
   return publishableSet.has(slug);
+}
+
+function inferSeedMeta(doc) {
+  const sm = (doc && doc.seedMeta && typeof doc.seedMeta === 'object') ? doc.seedMeta : {};
+  const source = sm.source || (doc.isFirstGate ? 'firstgate' : '') || '';
+  const seedId = sm.seedId || doc.seedId || sm.id || '';
+  const label = doc.label || sm.label || '';
+  return { source, seedId, label };
 }
 
 /* ───────────────────── main ───────────────────── */
@@ -160,13 +154,14 @@ function main() {
   const files = fs.readdirSync(POSTS_DIR).filter(f => f.toLowerCase().endsWith('.json')).sort();
   console.log('[ids] 전체 JSON 수 =', files.length);
 
-  const ledgerInfo = loadLedgerInfo(); // 어떤 ledger를 쓰는지 로깅용
+  const ledgerInfo = loadLedgerInfo();
   console.log('[ids] LEDGER_FILE =', ledgerInfo.ledgerFile);
 
   let assigned = 0;
   let skipped = 0;
   let filteredOut = 0;
   let failed = 0;
+  let ledgerLogged = 0;
 
   for (const f of files) {
     const p = path.join(POSTS_DIR, f);
@@ -196,14 +191,32 @@ function main() {
       continue;
     }
 
-    // 발급/할당
     try {
-      const pid = ensurePageId(slug); // ✅ 최종 통제는 lib/page-ids.cjs
+      const pid = ensurePageId(slug);
       if (!isValidPageId(pid)) throw new Error('ensurePageId()가 유효한 pageId를 반환하지 않음');
 
       doc.pageId = pid;
       writeJson(p, doc);
       assigned++;
+
+      // ✅ Seed Ledger 기록(최소버전)
+      try {
+        const sm = inferSeedMeta(doc);
+        upsertSeedLedger({
+          stage: 'ids',
+          status: 'assigned',
+          slug,
+          pageId: pid,
+          label: sm.label,
+          seedId: sm.seedId,
+          source: sm.source,
+          dryRun: String(DRY_RUN) === 'true',
+        });
+        ledgerLogged++;
+      } catch (e) {
+        // ledger 실패는 build 자체를 깨지지 않게(최소버전: 관측 실패는 경고만)
+        console.error('[ids][WARN] seed-ledger upsert fail:', e.message || e);
+      }
 
       console.log(`[ids][OK] ${slug} → ${pid}`);
     } catch (e) {
@@ -218,6 +231,7 @@ function main() {
   console.log('  SKIP(기존존재)  =', skipped);
   console.log('  FILTERED(비대상)=', filteredOut);
   console.log('  FAIL            =', failed);
+  console.log('  LEDGER_LOGGED   =', ledgerLogged);
 
   if (failed > 0) process.exitCode = 1;
 }
