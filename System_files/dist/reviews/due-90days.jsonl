@@ -1,0 +1,3 @@
+{"type":"due90","bucket":"app","slug":"app-20251207-001","class":"overdue","nextCheck":"2025-04-01","lastChecked":"2025-01-01","ratingCurrent":4.6,"votesCurrent":12000,"platform":"multi","source":"manual","ts":"2026-01-01T13:39:57.236Z"}
+{"type":"due90","bucket":"device","slug":"device-20251207-001","class":"ok","nextCheck":"2026-04-01","lastChecked":"2026-01-01","ratingCurrent":4.4,"votesCurrent":5600,"platform":"amazon","source":"manual","ts":"2026-01-01T13:39:57.244Z"}
+{"type":"due90","bucket":"subscription","slug":"subscription-20251207-001","class":"ok","nextCheck":"2026-04-01","lastChecked":"2026-01-01","ratingCurrent":4.2,"votesCurrent":2100,"platform":"trustpilot","source":"manual","ts":"2026-01-01T13:39:57.249Z"}
