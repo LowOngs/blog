@@ -1,0 +1,29 @@
+{
+  "date": "2026-01-05",
+  "items": [
+    {
+      "date": "2026-01-05",
+      "label": "how-to-playbooks",
+      "mode": "trend",
+      "id": "howto-trend-003",
+      "title": "Connecting Cloudflare to Blogger for free HTTPS and faster loading",
+      "angle": "Explain how to put Cloudflare in front of a Blogger site safely.",
+      "audience": "Blog owners wanting HTTPS and basic CDN without moving platforms",
+      "intent": "how-to",
+      "priority": 1,
+      "notes": "Keep it beginner-friendly: step-by-step screenshots + common DNS mistakes."
+    },
+    {
+      "date": "2026-01-05",
+      "label": "app-reviews",
+      "mode": "trend",
+      "id": "app-trend-001",
+      "title": "5 must-have productivity apps in 2025",
+      "angle": "Compare a small set of cross-platform productivity apps for work, study, and side projects.",
+      "audience": "Users juggling work, study, and side projects",
+      "intent": "review",
+      "priority": 1,
+      "notes": "Focus on features / pricing / platforms rather than deep feature-by-feature benchmarks."
+    }
+  ]
+}
