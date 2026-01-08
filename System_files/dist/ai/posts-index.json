@@ -1,0 +1,57 @@
+[
+  {
+    "slug": "app-20251121-001",
+    "pageId": "page900954",
+    "url": "https://ongsblog.com/app-20251121-001.html",
+    "labels": [
+      "app-reviews"
+    ],
+    "title": "5 must-have productivity apps in 2025",
+    "description": "A focused comparison of essential productivity apps that help you manage work, study, and side projects on any device.",
+    "updated": "2025-11-21T00:00:00+09:00"
+  },
+  {
+    "slug": "app-20251205-001",
+    "pageId": "page900957",
+    "url": "https://ongsblog.com/app-20251205-001.html",
+    "labels": [
+      "app-reviews"
+    ],
+    "title": "5 must-have productivity apps in 2025",
+    "description": "Compare a small set of cross-platform productivity apps for work, study, and side projects.",
+    "updated": "2025-12-05T00:00:00+09:00"
+  },
+  {
+    "slug": "howto-20251121-001",
+    "pageId": "page901194",
+    "url": "https://ongsblog.com/howto-20251121-001.html",
+    "labels": [
+      "how-to-playbooks"
+    ],
+    "title": "Safely migrating blog images to Cloudflare R2 without breaking links",
+    "description": "A step-by-step migration guide that moves blog images to Cloudflare R2 without breaking existing posts or image URLs.",
+    "updated": "2025-11-21T00:00:00+09:00"
+  },
+  {
+    "slug": "howto-20251205-001",
+    "pageId": "page901197",
+    "url": "https://ongsblog.com/howto-20251205-001.html",
+    "labels": [
+      "how-to-playbooks"
+    ],
+    "title": "Safely migrating blog images to Cloudflare R2 without breaking links",
+    "description": "Stage-by-stage migration plan that avoids 404s while switching image origins.",
+    "updated": "2025-12-05T00:00:00+09:00"
+  },
+  {
+    "slug": "smart-20251123-001",
+    "pageId": "page901186",
+    "url": "https://ongsblog.com/smart-20251123-001.html",
+    "labels": [
+      "smart-savings"
+    ],
+    "title": "Cutting cloud storage costs with a hybrid S3 + R2 setup",
+    "description": "Keep hot data on S3 and cold backups on R2 to control egress and storage costs.",
+    "updated": "2025-11-23T00:00:00+09:00"
+  }
+]
