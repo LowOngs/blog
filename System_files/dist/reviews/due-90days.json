@@ -1,0 +1,109 @@
+{
+  "generatedAt": "2026-01-01T13:39:57.234Z",
+  "today": "2026-01-01",
+  "dueSoonDays": 7,
+  "summary": {
+    "total": 3,
+    "overdue": 1,
+    "dueSoon": 0,
+    "ok": 2,
+    "unknown": 0
+  },
+  "buckets": {
+    "app": {
+      "overdue": [
+        {
+          "bucket": "app",
+          "slug": "app-20251207-001",
+          "status": "ok",
+          "lastChecked": "2025-01-01",
+          "nextCheck": "2025-04-01",
+          "ratingCurrent": 4.6,
+          "votesCurrent": 12000,
+          "platform": "multi",
+          "source": "manual"
+        }
+      ],
+      "dueSoon": [],
+      "ok": [],
+      "unknown": []
+    },
+    "device": {
+      "overdue": [],
+      "dueSoon": [],
+      "ok": [
+        {
+          "bucket": "device",
+          "slug": "device-20251207-001",
+          "status": "ok",
+          "lastChecked": "2026-01-01",
+          "nextCheck": "2026-04-01",
+          "ratingCurrent": 4.4,
+          "votesCurrent": 5600,
+          "platform": "amazon",
+          "source": "manual"
+        }
+      ],
+      "unknown": []
+    },
+    "subscription": {
+      "overdue": [],
+      "dueSoon": [],
+      "ok": [
+        {
+          "bucket": "subscription",
+          "slug": "subscription-20251207-001",
+          "status": "ok",
+          "lastChecked": "2026-01-01",
+          "nextCheck": "2026-04-01",
+          "ratingCurrent": 4.2,
+          "votesCurrent": 2100,
+          "platform": "trustpilot",
+          "source": "manual"
+        }
+      ],
+      "unknown": []
+    }
+  },
+  "flat": {
+    "overdue": [
+      {
+        "bucket": "app",
+        "slug": "app-20251207-001",
+        "status": "ok",
+        "lastChecked": "2025-01-01",
+        "nextCheck": "2025-04-01",
+        "ratingCurrent": 4.6,
+        "votesCurrent": 12000,
+        "platform": "multi",
+        "source": "manual"
+      }
+    ],
+    "dueSoon": [],
+    "ok": [
+      {
+        "bucket": "device",
+        "slug": "device-20251207-001",
+        "status": "ok",
+        "lastChecked": "2026-01-01",
+        "nextCheck": "2026-04-01",
+        "ratingCurrent": 4.4,
+        "votesCurrent": 5600,
+        "platform": "amazon",
+        "source": "manual"
+      },
+      {
+        "bucket": "subscription",
+        "slug": "subscription-20251207-001",
+        "status": "ok",
+        "lastChecked": "2026-01-01",
+        "nextCheck": "2026-04-01",
+        "ratingCurrent": 4.2,
+        "votesCurrent": 2100,
+        "platform": "trustpilot",
+        "source": "manual"
+      }
+    ],
+    "unknown": []
+  }
+}
