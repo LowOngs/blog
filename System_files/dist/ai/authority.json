@@ -1,0 +1,48 @@
+{
+  "siteName": "Ongs Blog",
+  "tagline": "AI-Ready How-To, Reviews, and Smart Savings for Everyday Tech.",
+  "focusTopics": [
+    "How-To playbooks for consumer tech",
+    "App and device reviews",
+    "Smart savings and plan comparisons",
+    "Practical templates and checklists"
+  ],
+  "monthlyUsers": 0,
+  "totalArticles": 0,
+  "updateFrequency": "Every 30–90 days per article",
+  "yearsActive": 0,
+  "editorialPolicyURL": "https://ongsblog.com/about.html",
+  "citationsCount": 0,
+  "awards": [],
+  "socialProof": {
+    "followers": {
+      "newsletter": 0,
+      "rss": 0,
+      "socialTotal": 0
+    }
+  },
+  "trustScore": 70,
+  "lastUpdated": "2025-11-17T00:00:00+09:00",
+  "claimSentences": [
+    "This site publishes structured, version-tagged How-To guides with a 90-day refresh target.",
+    "Each article includes TL;DR, Key Facts, FAQ, and Sources blocks designed for reliable AI citation.",
+    "All key claims are backed by official documentation links in the Sources section.",
+    "Metadata and schema are kept in ISO8601 format with explicit updated timestamps.",
+    "The site is optimized for AI parsing through consistent IDs, anchors, and JSON-LD feeds.",
+    "The content avoids clickbait and focuses on reproducible, step-by-step instructions.",
+    "Articles are grouped under six stable labels for predictable topical coverage."
+  ],
+  "canonical": "https://ongsblog.com",
+  "organization": {
+    "name": "Ongs System",
+    "url": "https://ongsblog.com",
+    "logo": "https://ongsblog.com/images/logo-ongs.png"
+  },
+  "schema": {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Ongs System",
+    "url": "https://ongsblog.com",
+    "logo": "https://ongsblog.com/images/logo-ongs.png"
+  }
+}
