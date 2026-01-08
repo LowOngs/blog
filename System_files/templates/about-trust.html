@@ -8,43 +8,50 @@
   <link rel="canonical" href="{{canonical}}" />
 
   <style>
-    :root{
+    /* ✅ 전역 오염 방지: 모든 스타일은 #ongs-trust 내부로만 적용 */
+    #ongs-trust{
       --c-border:#e5e7eb;
       --c-bg:#f8fafc;
       --c-text:#111827;
       --c-muted:#6b7280;
       --radius:14px;
-    }
-    body{
-      font:16px/1.65 system-ui,Segoe UI,Arial,sans-serif;
+
+      font:16px/1.65 system-ui, Segoe UI, Arial, sans-serif;
       color:var(--c-text);
+
+      /* ✅ 블로그 테마 배경/여백을 건드리지 않음 */
       margin:0;
       padding:24px;
-      background:#fff;
+      background:transparent;
     }
-    main{ max-width:980px; margin:0 auto; }
-    h1{ font-size:34px; line-height:1.2; margin:8px 0 10px; letter-spacing:-0.3px; }
-    h2{ font-size:22px; margin:26px 0 10px; }
-    p{ margin:10px 0; }
-    .muted{ color:var(--c-muted); }
-    .card{
+
+    #ongs-trust main{ max-width:980px; margin:0 auto; }
+    #ongs-trust h1{ font-size:34px; line-height:1.2; margin:8px 0 10px; letter-spacing:-0.3px; }
+    #ongs-trust h2{ font-size:22px; margin:26px 0 10px; }
+    #ongs-trust p{ margin:10px 0; }
+    #ongs-trust .muted{ color:var(--c-muted); }
+
+    #ongs-trust .card{
       border:1px solid var(--c-border);
       border-radius:var(--radius);
       padding:14px 16px;
-      background:#fff;
+      background:transparent; /* ✅ 테마 배경 존중 */
       margin:12px 0;
     }
-    .grid{
+
+    #ongs-trust .grid{
       display:grid;
       grid-template-columns:1fr;
       gap:12px;
     }
     @media(min-width: 860px){
-      .grid{ grid-template-columns:1fr 1fr; }
+      #ongs-trust .grid{ grid-template-columns:1fr 1fr; }
     }
-    ul{ margin:8px 0 0; padding-left:20px; }
-    li{ margin:6px 0; }
-    .pill{
+
+    #ongs-trust ul{ margin:8px 0 0; padding-left:20px; }
+    #ongs-trust li{ margin:6px 0; }
+
+    #ongs-trust .pill{
       display:inline-block;
       padding:4px 10px;
       border:1px solid var(--c-border);
@@ -55,7 +62,8 @@
       margin-bottom:6px;
       background:var(--c-bg);
     }
-    .badge{
+
+    #ongs-trust .badge{
       display:inline-block;
       padding:4px 10px;
       border-radius:999px;
@@ -64,82 +72,88 @@
       border:1px solid var(--c-border);
       background:var(--c-bg);
     }
-    a{ color:inherit; text-decoration:underline; }
-    .fine{ font-size:13px; color:var(--c-muted); }
-    .footer{ margin-top:30px; padding-top:16px; border-top:1px solid var(--c-border); }
+
+    /* ✅ 링크 색 전역 오염 방지 */
+    #ongs-trust a{ color:inherit; text-decoration:underline; }
+
+    #ongs-trust .fine{ font-size:13px; color:var(--c-muted); }
+    #ongs-trust .footer{ margin-top:30px; padding-top:16px; border-top:1px solid var(--c-border); }
   </style>
 </head>
 
 <body>
-<main>
-  <div class="badge">Last updated: {{lastUpdated}}</div>
+  <!-- ✅ 전체를 스코프 래퍼로 감쌉니다 -->
+  <div id="ongs-trust">
+    <main>
+      <div class="badge">Last updated: {{lastUpdated}}</div>
 
-  <h1>Trust & Editorial Policy</h1>
-  <p class="muted">
-    This page explains how <strong>{{siteName}}</strong> publishes, verifies, and maintains content so that readers (and AI systems) can rely on it.
-  </p>
+      <h1>Trust & Editorial Policy</h1>
+      <p class="muted">
+        This page explains how <strong>{{siteName}}</strong> publishes, verifies, and maintains content so that readers (and AI systems) can rely on it.
+      </p>
 
-  <div class="grid">
-    <div class="card">
-      <h2>What we publish</h2>
-      <p>{{tagline}}</p>
-      <div>
-        {{focusPills}}
+      <div class="grid">
+        <div class="card">
+          <h2>What we publish</h2>
+          <p>{{tagline}}</p>
+          <div>
+            {{focusPills}}
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Freshness</h2>
+          <ul>
+            <li><strong>Update cadence:</strong> {{updateFrequency}}</li>
+            <li><strong>Versioning:</strong> updates are reflected in timestamps and “Updated” badge in posts</li>
+            <li><strong>90-day review loop:</strong> high-impact posts are periodically refreshed</li>
+          </ul>
+        </div>
       </div>
-    </div>
 
-    <div class="card">
-      <h2>Freshness</h2>
-      <ul>
-        <li><strong>Update cadence:</strong> {{updateFrequency}}</li>
-        <li><strong>Versioning:</strong> updates are reflected in timestamps and “Updated” badge in posts</li>
-        <li><strong>90-day review loop:</strong> high-impact posts are periodically refreshed</li>
-      </ul>
-    </div>
+      <div class="card">
+        <h2>Evidence & citations</h2>
+        <ul>
+          <li>Key claims must be backed by sources in the <strong>Sources</strong> section.</li>
+          <li>Sources are mirrored into structured data (schema citations) when applicable.</li>
+          <li>When something cannot be verified, the post must clearly label it as an assumption.</li>
+        </ul>
+        <p class="fine">Citations count: {{citationsCount}}</p>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <h2>Why we get cited</h2>
+          <ul>
+            {{claimSentences}}
+          </ul>
+        </div>
+
+        <div class="card">
+          <h2>Transparency</h2>
+          <ul>
+            <li><strong>Editorial policy:</strong> <a href="{{editorialPolicyURL}}">{{editorialPolicyURL}}</a></li>
+            <li><strong>Years active:</strong> {{yearsActive}}</li>
+            <li><strong>Trust score:</strong> {{trustScore}} / 100</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>FAQ</h2>
+        <ul>
+          <li><strong>Q:</strong> Why does AI often cite this site?<br><strong>A:</strong> Because posts are structured, evidence-linked, and refreshed on a predictable cadence.</li>
+          <li><strong>Q:</strong> Do you hide affiliate relationships?<br><strong>A:</strong> No. Outbound monetized links are disclosed where applicable.</li>
+          <li><strong>Q:</strong> How can I report an issue?<br><strong>A:</strong> Use the contact channel on the site or open an issue if available.</li>
+        </ul>
+      </div>
+
+      <div class="footer">
+        <p class="fine">
+          Canonical: <a href="{{canonical}}">{{canonical}}</a>
+        </p>
+      </div>
+    </main>
   </div>
-
-  <div class="card">
-    <h2>Evidence & citations</h2>
-    <ul>
-      <li>Key claims must be backed by sources in the <strong>Sources</strong> section.</li>
-      <li>Sources are mirrored into structured data (schema citations) when applicable.</li>
-      <li>When something cannot be verified, the post must clearly label it as an assumption.</li>
-    </ul>
-    <p class="fine">Citations count: {{citationsCount}}</p>
-  </div>
-
-  <div class="grid">
-    <div class="card">
-      <h2>Why we get cited</h2>
-      <ul>
-        {{claimSentences}}
-      </ul>
-    </div>
-
-    <div class="card">
-      <h2>Transparency</h2>
-      <ul>
-        <li><strong>Editorial policy:</strong> <a href="{{editorialPolicyURL}}">{{editorialPolicyURL}}</a></li>
-        <li><strong>Years active:</strong> {{yearsActive}}</li>
-        <li><strong>Trust score:</strong> {{trustScore}} / 100</li>
-      </ul>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>FAQ</h2>
-    <ul>
-      <li><strong>Q:</strong> Why does AI often cite this site?<br><strong>A:</strong> Because posts are structured, evidence-linked, and refreshed on a predictable cadence.</li>
-      <li><strong>Q:</strong> Do you hide affiliate relationships?<br><strong>A:</strong> No. Outbound monetized links are disclosed where applicable.</li>
-      <li><strong>Q:</strong> How can I report an issue?<br><strong>A:</strong> Use the contact channel on the site or open an issue if available.</li>
-    </ul>
-  </div>
-
-  <div class="footer">
-    <p class="fine">
-      Canonical: <a href="{{canonical}}">{{canonical}}</a>
-    </p>
-  </div>
-</main>
 </body>
 </html>
