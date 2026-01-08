@@ -34,6 +34,8 @@
 
     "publish:blogger": "node ./System_files/scripts/publish/blogger.cjs",
 
+    "pages:trust": "node ./System_files/scripts/build/build-trust-page.cjs",
+
     "build": "npm run posts:body-images:validate && npm run posts:render && npm run posts:normalize && npm run posts:review:meta && npm run posts:validate",
 
     "posts:local:full": "npm run posts:body-images:validate && npm run posts:render && npm run posts:normalize && npm run posts:review:meta && npm run images:renew && npm run images:build:og && npm run images:upload && npm run posts:validate && npm run posts:qa",
