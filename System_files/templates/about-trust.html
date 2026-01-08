@@ -8,50 +8,47 @@
   <link rel="canonical" href="{{canonical}}" />
 
   <style>
-    /* ✅ 전역 오염 방지: 모든 스타일은 #ongs-trust 내부로만 적용 */
-    #ongs-trust{
+    /* ✅ IMPORTANT: Blogger 본문 CSS는 전역에 퍼질 수 있으니,
+       반드시 Trust 컨테이너(.trust-wrap) 아래로만 스코프를 제한합니다. */
+
+    .trust-wrap{
       --c-border:#e5e7eb;
       --c-bg:#f8fafc;
       --c-text:#111827;
       --c-muted:#6b7280;
       --radius:14px;
 
-      font:16px/1.65 system-ui, Segoe UI, Arial, sans-serif;
+      font:16px/1.65 system-ui,Segoe UI,Arial,sans-serif;
       color:var(--c-text);
-
-      /* ✅ 블로그 테마 배경/여백을 건드리지 않음 */
-      margin:0;
-      padding:24px;
-      background:transparent;
     }
 
-    #ongs-trust main{ max-width:980px; margin:0 auto; }
-    #ongs-trust h1{ font-size:34px; line-height:1.2; margin:8px 0 10px; letter-spacing:-0.3px; }
-    #ongs-trust h2{ font-size:22px; margin:26px 0 10px; }
-    #ongs-trust p{ margin:10px 0; }
-    #ongs-trust .muted{ color:var(--c-muted); }
+    .trust-wrap .trust-main{ max-width:980px; margin:0 auto; padding:24px 16px; }
+    .trust-wrap h1{ font-size:34px; line-height:1.2; margin:8px 0 10px; letter-spacing:-0.3px; }
+    .trust-wrap h2{ font-size:22px; margin:26px 0 10px; }
+    .trust-wrap p{ margin:10px 0; }
+    .trust-wrap .muted{ color:var(--c-muted); }
 
-    #ongs-trust .card{
+    .trust-wrap .card{
       border:1px solid var(--c-border);
       border-radius:var(--radius);
       padding:14px 16px;
-      background:transparent; /* ✅ 테마 배경 존중 */
+      background:#fff;
       margin:12px 0;
     }
 
-    #ongs-trust .grid{
+    .trust-wrap .grid{
       display:grid;
       grid-template-columns:1fr;
       gap:12px;
     }
     @media(min-width: 860px){
-      #ongs-trust .grid{ grid-template-columns:1fr 1fr; }
+      .trust-wrap .grid{ grid-template-columns:1fr 1fr; }
     }
 
-    #ongs-trust ul{ margin:8px 0 0; padding-left:20px; }
-    #ongs-trust li{ margin:6px 0; }
+    .trust-wrap ul{ margin:8px 0 0; padding-left:20px; }
+    .trust-wrap li{ margin:6px 0; }
 
-    #ongs-trust .pill{
+    .trust-wrap .pill{
       display:inline-block;
       padding:4px 10px;
       border:1px solid var(--c-border);
@@ -63,7 +60,7 @@
       background:var(--c-bg);
     }
 
-    #ongs-trust .badge{
+    .trust-wrap .badge{
       display:inline-block;
       padding:4px 10px;
       border-radius:999px;
@@ -73,18 +70,16 @@
       background:var(--c-bg);
     }
 
-    /* ✅ 링크 색 전역 오염 방지 */
-    #ongs-trust a{ color:inherit; text-decoration:underline; }
-
-    #ongs-trust .fine{ font-size:13px; color:var(--c-muted); }
-    #ongs-trust .footer{ margin-top:30px; padding-top:16px; border-top:1px solid var(--c-border); }
+    .trust-wrap a{ color:inherit; text-decoration:underline; }
+    .trust-wrap .fine{ font-size:13px; color:var(--c-muted); }
+    .trust-wrap .footer{ margin-top:30px; padding-top:16px; border-top:1px solid var(--c-border); }
   </style>
 </head>
 
 <body>
-  <!-- ✅ 전체를 스코프 래퍼로 감쌉니다 -->
-  <div id="ongs-trust">
-    <main>
+  <!-- ✅ 컨테이너로 스코프 고정 -->
+  <div class="trust-wrap">
+    <main class="trust-main">
       <div class="badge">Last updated: {{lastUpdated}}</div>
 
       <h1>Trust & Editorial Policy</h1>
