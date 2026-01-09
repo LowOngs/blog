@@ -59,7 +59,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24"
 
       - name: Install (repo root)
         run: npm ci
@@ -133,6 +133,13 @@ jobs:
           test -f System_files/scripts/build/qa-check.cjs
           test -f System_files/scripts/publish/blogger.cjs
 
+          # ✅ AOIA meta/feed/tools
+          test -f System_files/scripts/build/ai-meta.js
+          test -f System_files/scripts/build/build-feed.cjs
+          test -f System_files/scripts/build/validate-feed.cjs
+          test -f System_files/scripts/build/copy-tools.cjs
+          test -f System_files/scripts/build/build-trust-page.cjs
+
       - name: Build queue (scheduler)
         working-directory: System_files
         run: |
@@ -146,8 +153,6 @@ jobs:
         run: |
           node scripts/build/review-resolver.cjs
 
-      # ✅ 추가: 본문 이미지 매니페스트 검증(초반에 실패시키는게 핵심)
-      # - 깨진 manifest / 정책 위반 / URL 도메인 위반 등을 여기서 즉시 감지
       - name: Validate body images manifest
         working-directory: System_files
         run: |
@@ -192,6 +197,32 @@ jobs:
         working-directory: System_files
         run: |
           npm run posts:qa
+
+      # ✅ AOIA: authority/feed/tools는 "검증 통과 후" 생성 (신호 레이어를 최신으로)
+      - name: Build AI meta (authority, etc.)
+        working-directory: System_files
+        run: |
+          node scripts/build/ai-meta.js
+
+      - name: Build AI feed
+        working-directory: System_files
+        run: |
+          node scripts/build/build-feed.cjs
+
+      - name: Validate AI feed
+        working-directory: System_files
+        run: |
+          node scripts/build/validate-feed.cjs
+
+      - name: Build tools (edit-request)
+        working-directory: System_files
+        run: |
+          node scripts/build/copy-tools.cjs
+
+      - name: Build Trust page
+        working-directory: System_files
+        run: |
+          node scripts/build/build-trust-page.cjs
 
       - name: Publish to Blogger (skip when DRY_RUN=true)
         if: env.DRY_RUN != 'true'
