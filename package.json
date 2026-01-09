@@ -18,7 +18,6 @@
     "reviews:next": "node ./System_files/scripts/build/review-next-from-due.cjs",
     "reviews:diff": "node ./System_files/scripts/build/review-diff-update.cjs",
     "reviews:inject": "node ./System_files/scripts/build/review-resolver.cjs",
-
     "reviews:freshness": "npm run reviews:due && npm run reviews:next && npm run reviews:diff && npm run reviews:inject",
 
     "review:ratings:update": "node ./System_files/scripts/build/update-review-ratings.cjs",
@@ -32,17 +31,22 @@
     "posts:images-manifest": "node ./System_files/scripts/build/images-manifest.cjs",
     "posts:markdown": "node ./System_files/scripts/build/markdown-list.cjs",
 
+    "feed:build": "node ./System_files/scripts/build/build-feed.cjs",
+    "feed:validate": "node ./System_files/scripts/build/validate-feed.cjs",
+
+    "tools:copy": "node ./System_files/scripts/build/copy-tools.cjs",
+
     "publish:blogger": "node ./System_files/scripts/publish/blogger.cjs",
 
     "pages:trust": "node ./System_files/scripts/build/build-trust-page.cjs",
 
     "build": "npm run posts:body-images:validate && npm run posts:render && npm run posts:normalize && npm run posts:review:meta && npm run posts:validate",
 
-    "posts:local:full": "npm run posts:body-images:validate && npm run posts:render && npm run posts:normalize && npm run posts:review:meta && npm run images:renew && npm run images:build:og && npm run images:upload && npm run posts:validate && npm run posts:qa",
+    "posts:local:full": "npm run posts:body-images:validate && npm run posts:render && npm run posts:normalize && npm run posts:review:meta && npm run images:renew && npm run images:build:og && npm run images:upload && npm run images:rewrite && npm run posts:render && npm run posts:normalize && npm run posts:review:meta && npm run posts:validate && npm run posts:qa && npm run feed:build && npm run feed:validate && npm run tools:copy",
 
     "deploy": "npm run images:upload && npm run images:rewrite && npm run build",
 
-    "local:dryrun": "node ./System_files/scripts/build/seed-scheduler.cjs && node ./System_files/scripts/build/queue-to-posts.cjs && node ./System_files/scripts/build/ids.cjs && node ./System_files/scripts/build/generate-body.cjs && npm run posts:body-images:validate && npm run posts:render && npm run posts:normalize && npm run posts:review:meta && npm run images:renew && npm run images:build:og && npm run posts:validate"
+    "local:dryrun": "node ./System_files/scripts/build/seed-scheduler.cjs && node ./System_files/scripts/build/queue-to-posts.cjs && node ./System_files/scripts/build/ids.cjs && node ./System_files/scripts/build/generate-body.cjs && node ./System_files/scripts/build/review-resolver.cjs && npm run posts:body-images:validate && npm run posts:render && npm run posts:normalize && npm run posts:review:meta && npm run images:renew && npm run images:build:og && npm run images:upload && npm run images:rewrite && npm run posts:render && npm run posts:normalize && npm run posts:review:meta && npm run posts:validate && npm run posts:qa && npm run feed:build && npm run feed:validate && npm run tools:copy && npm run publish:blogger"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.654.0",
