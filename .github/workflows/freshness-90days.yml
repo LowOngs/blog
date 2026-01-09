@@ -29,8 +29,13 @@ jobs:
       GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
       GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
 
-      PUBLISH_MODE: ${{ secrets.PUBLISH_MODE }}
+      R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_BUCKET: ${{ secrets.R2_BUCKET }}
+      R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
 
+      PUBLISH_MODE: ${{ secrets.PUBLISH_MODE }}
       DRY_RUN_INPUT: ${{ github.event.inputs.DRY_RUN || 'true' }}
 
     steps:
@@ -42,7 +47,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24"
 
       - name: Install (repo root)
         run: npm ci
@@ -50,7 +55,6 @@ jobs:
       - name: Export runtime env
         run: |
           echo "DRY_RUN=${DRY_RUN_INPUT}" >> $GITHUB_ENV
-          # freshness는 기본이 "검증/갱신 후 커밋"이라 local로 고정 (발행은 DRY_RUN로만 제어)
           echo "BODY_WRITE_MODE=local" >> $GITHUB_ENV
 
       - name: Sanity check (required scripts exist)
@@ -70,11 +74,21 @@ jobs:
           test -f System_files/scripts/build/qa-check.cjs
           test -f System_files/scripts/publish/blogger.cjs
 
+          # ✅ OG 재생성/업로드 포함
+          test -f System_files/scripts/build/images-renew.cjs
+          test -f System_files/scripts/build/images-build-og.cjs
+
+          # ✅ AOIA meta/feed/tools
+          test -f System_files/scripts/build/ai-meta.js
+          test -f System_files/scripts/build/build-feed.cjs
+          test -f System_files/scripts/build/validate-feed.cjs
+          test -f System_files/scripts/build/copy-tools.cjs
+          test -f System_files/scripts/build/build-trust-page.cjs
+
       - name: Run 90days chain (due -> next -> diff -> inject)
         run: |
           npm run reviews:freshness
 
-      # ✅ 추가: 본문 이미지 매니페스트 검증(렌더 전에 바로 터뜨림)
       - name: Validate body images manifest
         working-directory: System_files
         run: |
@@ -87,6 +101,17 @@ jobs:
           node scripts/build/normalize-body.cjs
           node scripts/build/review-meta-block.cjs
 
+      - name: Build OG images (after render)
+        working-directory: System_files
+        run: |
+          node scripts/build/images-renew.cjs
+          node scripts/build/images-build-og.cjs
+
+      - name: Upload images to R2
+        working-directory: System_files
+        run: |
+          npm run images:upload
+
       - name: Validate & repair
         working-directory: System_files
         run: |
@@ -96,6 +121,32 @@ jobs:
         working-directory: System_files
         run: |
           npm run posts:qa
+
+      # ✅ AOIA: authority/feed/tools 갱신
+      - name: Build AI meta (authority, etc.)
+        working-directory: System_files
+        run: |
+          node scripts/build/ai-meta.js
+
+      - name: Build AI feed
+        working-directory: System_files
+        run: |
+          node scripts/build/build-feed.cjs
+
+      - name: Validate AI feed
+        working-directory: System_files
+        run: |
+          node scripts/build/validate-feed.cjs
+
+      - name: Build tools (edit-request)
+        working-directory: System_files
+        run: |
+          node scripts/build/copy-tools.cjs
+
+      - name: Build Trust page
+        working-directory: System_files
+        run: |
+          node scripts/build/build-trust-page.cjs
 
       - name: Publish to Blogger (skip when DRY_RUN=true)
         if: env.DRY_RUN != 'true'
