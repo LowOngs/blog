@@ -2,43 +2,61 @@ name: firstgate-daily
 
 on:
   schedule:
-    - cron: '40 23 * * *'
+    # KST 08:40 = UTC 23:40 (전날)
+    - cron: "40 23 * * *"
   workflow_dispatch:
     inputs:
       BODY_WRITE_MODE:
-        description: "local = 로컬번호/검증용, active = 실번호 트랙(실발행 준비)"
+        description: "local=로컬 검증(대량), active=실운영(오늘 publishable만 발급)"
         required: true
         type: choice
         default: "local"
         options: ["local", "active"]
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
-  group: ongsblog-publish
+  group: firstgate-daily-${{ github.ref }}
   cancel-in-progress: false
 
 env:
-  NODE_VERSION: '20'
-  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-  OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
+  NODE_VERSION: "20"
+
+  # 기본 환경
   CANONICAL_BASE: ${{ secrets.CANONICAL_BASE }}
   CDN_BASE: ${{ secrets.CDN_BASE }}
 
-  # ✅ schedule 자동동작 통제(최종 안전장치)
+  # OpenAI (본문 생성)
+  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+  OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
+
+  # Blogger (실발행)
+  BLOGGER_BLOG_ID: ${{ secrets.BLOGGER_BLOG_ID }}
+  GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+  GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+  GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
+
+  # R2 (이미지 업로드)
+  R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+  R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+  R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+  R2_BUCKET: ${{ secrets.R2_BUCKET }}
+  R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+
+  # ✅ 최종 통제 (핵심)
+  # - enable일 때만 schedule이 “실운영(업로드+발행)”으로 동작
   PUBLISH_MODE: ${{ secrets.PUBLISH_MODE }}
 
-  # ✅ firstgate 전용 모드 (local|active)
-  # - schedule이면 아래에서 active로 강제
-  BODY_WRITE_MODE: ${{ github.event.inputs.BODY_WRITE_MODE }}
+  # dispatch 입력(기본 local)
+  BODY_WRITE_MODE_INPUT: ${{ github.event.inputs.BODY_WRITE_MODE }}
 
 jobs:
-  build-firstgate:
+  firstgate:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Guard (schedule requires PUBLISH_MODE=enable + auto switch=true)
+      - name: Guard (schedule requires PUBLISH_MODE=enable + auto-enable.json)
         shell: bash
         env:
           EVENT_NAME: ${{ github.event_name }}
@@ -60,7 +78,7 @@ jobs:
           fi
 
           if [ ! -f "System_files/manifests/auto-enable.json" ]; then
-            echo "[GUARD] blocked: missing auto-enable.json"
+            echo "[GUARD] blocked: missing System_files/manifests/auto-enable.json"
             exit 0
           fi
 
@@ -82,62 +100,244 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Install dependencies
+      - name: Install (repo root)
         run: npm ci
 
-      - name: Resolve effective BODY_WRITE_MODE for firstgate
+      - name: Resolve effective modes (BODY_WRITE_MODE + DRY_RUN)
         shell: bash
         run: |
           set -euo pipefail
           EVENT="${{ github.event_name }}"
 
-          # dispatch: 입력값(local|active), 기본 local
-          BWM="${BODY_WRITE_MODE:-local}"
-          if [ "$BWM" != "local" ] && [ "$BWM" != "active" ]; then
-            BWM="local"
-          fi
-
-          # schedule: firstgate는 "명함전략 실트랙"이므로 active로 강제
-          # (단, 위 Guard에서 PUBLISH_MODE=enable일 때만 schedule 통과)
+          # BODY_WRITE_MODE:
+          # - schedule: firstgate는 “명함전략 실트랙” 기준이므로 active 강제
+          # - dispatch: 입력값 사용(기본 local)
+          BWM="local"
           if [ "$EVENT" = "schedule" ]; then
             BWM="active"
+          else
+            INP="${BODY_WRITE_MODE_INPUT:-local}"
+            if [ "$INP" = "active" ] || [ "$INP" = "local" ]; then
+              BWM="$INP"
+            fi
+          fi
+
+          # DRY_RUN:
+          # - schedule + PUBLISH_MODE=enable일 때만 false (실제 업로드/발행)
+          # - 그 외는 true (외부 호출 금지)
+          DR="true"
+          if [ "$EVENT" = "schedule" ] && [ "${PUBLISH_MODE}" = "enable" ]; then
+            DR="false"
           fi
 
           echo "BODY_WRITE_MODE=$BWM" >> $GITHUB_ENV
+          echo "DRY_RUN=$DR" >> $GITHUB_ENV
+
           echo "Resolved:"
           echo "  EVENT=$EVENT"
           echo "  PUBLISH_MODE=${PUBLISH_MODE}"
           echo "  BODY_WRITE_MODE=$BWM"
+          echo "  DRY_RUN=$DR"
 
-      - name: Build firstgate artifacts (no publish)
-        env:
-          PUBLISH_MODE:    ${{ env.PUBLISH_MODE }}
-          BODY_WRITE_MODE: ${{ env.BODY_WRITE_MODE }}
+      - name: Sanity check (required scripts exist)
+        shell: bash
         run: |
           set -euo pipefail
+          test -f System_files/scripts/build/firstgate-pick.cjs
+          test -f System_files/scripts/build/firstgate-queue-to-post.cjs
 
-          node System_files/scripts/build/firstgate-pick.cjs
-          node System_files/scripts/build/firstgate-queue-to-post.cjs
+          test -f System_files/scripts/build/ids.cjs
+          test -f System_files/scripts/build/generate-body.cjs
 
-          # ✅ 본문 생성(명함전략 전용)
-          node System_files/scripts/build/generate-body.cjs
+          test -f System_files/scripts/build/review-resolver.cjs
+          test -f System_files/scripts/build/validate-body-images.cjs
 
-          # ✅ 실물 확인용 산출물
-          node System_files/scripts/build/ids.cjs
-          node System_files/scripts/build/render-posts.cjs
-          node System_files/scripts/build/images-renew.cjs
-          node System_files/scripts/build/images-build-og.cjs
-          node System_files/scripts/build/validate-repair.cjs
+          test -f System_files/scripts/build/render-posts.cjs
+          test -f System_files/scripts/build/normalize-body.cjs
+          test -f System_files/scripts/build/review-meta-block.cjs
 
-      - name: Upload artifacts
+          test -f System_files/scripts/build/images-renew.cjs
+          test -f System_files/scripts/build/images-build-og.cjs
+          test -f System_files/scripts/build/r2-upload.cjs
+          test -f System_files/scripts/build/rewrite-images.js
+
+          test -f System_files/scripts/build/inject-sources-from-ssot.cjs
+          test -f System_files/scripts/build/validate-repair.cjs
+          test -f System_files/scripts/build/qa-check.cjs
+
+          test -f System_files/scripts/build/build-feed.cjs
+          test -f System_files/scripts/build/validate-feed.cjs
+          test -f System_files/scripts/build/copy-tools.cjs
+          test -f System_files/scripts/build/build-trust-page.cjs
+
+          test -f System_files/scripts/publish/blogger.cjs
+
+      - name: Build firstgate queue -> posts JSON
+        working-directory: System_files
+        env:
+          PUBLISH_MODE: ${{ env.PUBLISH_MODE }}
+          BODY_WRITE_MODE: ${{ env.BODY_WRITE_MODE }}
+          DRY_RUN: ${{ env.DRY_RUN }}
+        run: |
+          set -euo pipefail
+          node scripts/build/firstgate-pick.cjs
+          node scripts/build/firstgate-queue-to-post.cjs
+
+      - name: Assign pageId (ids)
+        working-directory: System_files
+        env:
+          PUBLISH_MODE: ${{ env.PUBLISH_MODE }}
+          BODY_WRITE_MODE: ${{ env.BODY_WRITE_MODE }}
+          DRY_RUN: ${{ env.DRY_RUN }}
+        run: |
+          set -euo pipefail
+          node scripts/build/ids.cjs
+
+      - name: Generate body
+        working-directory: System_files
+        env:
+          PUBLISH_MODE: ${{ env.PUBLISH_MODE }}
+          BODY_WRITE_MODE: ${{ env.BODY_WRITE_MODE }}
+          DRY_RUN: ${{ env.DRY_RUN }}
+        run: |
+          set -euo pipefail
+          node scripts/build/generate-body.cjs
+
+      - name: Inject reviewData (SSOT)
+        working-directory: System_files
+        env:
+          DRY_RUN: ${{ env.DRY_RUN }}
+        run: |
+          set -euo pipefail
+          node scripts/build/review-resolver.cjs
+
+      - name: Validate body images manifest (fail fast)
+        working-directory: System_files
+        env:
+          DRY_RUN: ${{ env.DRY_RUN }}
+        run: |
+          set -euo pipefail
+          node scripts/build/validate-body-images.cjs
+
+      - name: Render posts (1st)
+        working-directory: System_files
+        env:
+          DRY_RUN: ${{ env.DRY_RUN }}
+        run: |
+          set -euo pipefail
+          node scripts/build/render-posts.cjs
+          node scripts/build/normalize-body.cjs
+          node scripts/build/review-meta-block.cjs
+
+      - name: Build OG images (needs dist/posts)
+        working-directory: System_files
+        env:
+          DRY_RUN: ${{ env.DRY_RUN }}
+        run: |
+          set -euo pipefail
+          node scripts/build/images-renew.cjs
+          node scripts/build/images-build-og.cjs
+
+      - name: Upload images to R2 (DRY_RUN safe)
+        working-directory: System_files
+        env:
+          DRY_RUN: ${{ env.DRY_RUN }}
+        run: |
+          set -euo pipefail
+          node scripts/build/r2-upload.cjs
+
+      - name: Rewrite image URLs in posts JSON (after upload)
+        working-directory: System_files
+        env:
+          DRY_RUN: ${{ env.DRY_RUN }}
+        run: |
+          set -euo pipefail
+          node scripts/build/rewrite-images.js
+
+      - name: Render posts (2nd, after rewrite)
+        working-directory: System_files
+        env:
+          DRY_RUN: ${{ env.DRY_RUN }}
+        run: |
+          set -euo pipefail
+          node scripts/build/render-posts.cjs
+          node scripts/build/normalize-body.cjs
+          node scripts/build/review-meta-block.cjs
+
+      - name: Inject Sources from SSOT into dist/posts (live rule uses DRY_RUN)
+        working-directory: System_files
+        env:
+          DRY_RUN: ${{ env.DRY_RUN }}
+        run: |
+          set -euo pipefail
+          node scripts/build/inject-sources-from-ssot.cjs
+
+      - name: Validate & repair
+        working-directory: System_files
+        env:
+          DRY_RUN: ${{ env.DRY_RUN }}
+        run: |
+          set -euo pipefail
+          node scripts/build/validate-repair.cjs
+
+      - name: Preflight QA
+        working-directory: System_files
+        env:
+          DRY_RUN: ${{ env.DRY_RUN }}
+        run: |
+          set -euo pipefail
+          node scripts/build/qa-check.cjs
+
+      - name: Build AI feed + validate
+        working-directory: System_files
+        env:
+          DRY_RUN: ${{ env.DRY_RUN }}
+        run: |
+          set -euo pipefail
+          node scripts/build/build-feed.cjs
+          node scripts/build/validate-feed.cjs
+
+      - name: Build tools + trust page
+        working-directory: System_files
+        env:
+          DRY_RUN: ${{ env.DRY_RUN }}
+        run: |
+          set -euo pipefail
+          node scripts/build/copy-tools.cjs
+          node scripts/build/build-trust-page.cjs
+
+      - name: Publish to Blogger (skip when DRY_RUN=true)
+        if: env.DRY_RUN != 'true'
+        working-directory: System_files
+        env:
+          DRY_RUN: ${{ env.DRY_RUN }}
+          # firstgate는 1부만 발행되도록 안전장치 (blogger.cjs 지원 시)
+          MAX_POSTS: "1"
+          # LABEL은 비워서 “자동모드” (firstgate는 카테고리 무관)
+          LABEL: ""
+        run: |
+          set -euo pipefail
+          node scripts/publish/blogger.cjs
+
+      - name: Commit generated artifacts (logs/manifests/dist)
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet && echo "No changes" && exit 0
+          git commit -m "build: firstgate daily pipeline output"
+          git push
+
+      - name: Upload artifacts (debug)
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: firstgate-outputs
           path: |
             System_files/logs/**
-            System_files/dist/posts/**
-            System_files/manifests/page-ids*.json
-            System_files/manifests/pageid-journal.jsonl
+            System_files/dist/**
+            System_files/manifests/**
           if-no-files-found: warn
           retention-days: 7
