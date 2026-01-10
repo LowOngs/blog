@@ -11,7 +11,7 @@ require('./lib/env.cjs'); // ✅ .env 로드(필수)
  *
  * ✅ 구조 고정(핵심):
  * - BODY_WRITE_MODE=active 일 때는 "publishable(=today queue)" slug만 발급한다.
- * - publishable 목록은 dist/queue/today.json 기반(SSOT).
+ * - 아래 publishable 목록은 dist/queue/today.json 기반(SSOT).
  * - today.json에 없으면 active 발급은 0회(즉시 종료) → 번호 폭주 방지.
  *
  * ✅ Seed Ledger(Min v1):
@@ -28,7 +28,14 @@ const MANIFESTS_DIR = path.join(ROOT, 'manifests');
 
 const PUBLISH_MODE = (process.env.PUBLISH_MODE || 'disable').toLowerCase(); // enable|disable
 const BODY_WRITE_MODE = (process.env.BODY_WRITE_MODE || 'local').toLowerCase(); // local|active
-const DRY_RUN = String(process.env.DRY_RUN || '').toLowerCase(); // true|false (로깅용)
+
+// ✅ DRY_RUN 단일 파서(규칙: false/0만 live, 그 외 전부 dry-run)
+function parseDryRun(v) {
+  const s = String(v ?? '').trim().toLowerCase();
+  return !(s === 'false' || s === '0');
+}
+const DRY_RUN_RAW = process.env.DRY_RUN;
+const DRY_RUN = parseDryRun(DRY_RUN_RAW);
 
 const {
   ensureDir,
@@ -121,7 +128,8 @@ function main() {
   console.log('[ids] TODAY_QUEUE     =', DIST_QUEUE_TODAY);
   console.log('[ids] PUBLISH_MODE    =', PUBLISH_MODE);
   console.log('[ids] BODY_WRITE_MODE =', BODY_WRITE_MODE);
-  console.log('[ids] DRY_RUN         =', DRY_RUN || '(empty)');
+  console.log('[ids] DRY_RUN(raw)    =', (DRY_RUN_RAW === undefined ? '(undefined)' : JSON.stringify(String(DRY_RUN_RAW))));
+  console.log('[ids] DRY_RUN(parsed) =', DRY_RUN);
 
   ensureDir(MANIFESTS_DIR);
 
@@ -210,11 +218,10 @@ function main() {
           label: sm.label,
           seedId: sm.seedId,
           source: sm.source,
-          dryRun: String(DRY_RUN) === 'true',
+          dryRun: DRY_RUN,
         });
         ledgerLogged++;
       } catch (e) {
-        // ledger 실패는 build 자체를 깨지지 않게(최소버전: 관측 실패는 경고만)
         console.error('[ids][WARN] seed-ledger upsert fail:', e.message || e);
       }
 
