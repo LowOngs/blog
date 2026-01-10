@@ -1,16 +1,12 @@
 #!/usr/bin/env node
+'use strict';
 
-/**
- * 리뷰 전용 메타 블록/히스토그램 인젝터
- * - 입력: content/reviews/review-ratings.json
- * - 출력: dist/posts/*.html 의
- *   - <section id="review-rating-block"> … </section>
- *   - <section id="review-insights-block"> … </section>
- *   내용을 최신 값으로 교체
- */
+/** review-meta-block: dist/posts의 review-rating/insights 섹션을 review-ratings SSOT로 교체 */
 
 const fs = require('fs');
 const path = require('path');
+
+require('./lib/env.cjs');
 
 const ROOT = path.resolve(__dirname, '../..');
 const DIST_DIR = path.join(ROOT, 'dist', 'posts');
@@ -22,9 +18,7 @@ function log(msg) {
 }
 
 function loadRatings() {
-  if (!fs.existsSync(RATINGS_PATH)) {
-    return { bySlug: {} };
-  }
+  if (!fs.existsSync(RATINGS_PATH)) return { bySlug: {} };
   const raw = fs.readFileSync(RATINGS_PATH, 'utf8');
   try {
     const json = JSON.parse(raw);
@@ -69,7 +63,6 @@ function buildHistogramHtml(histogram) {
     const raw = Number(histogram[String(star)] ?? 0);
     if (!Number.isFinite(raw)) continue;
 
-    // 0~100 퍼센트로 클램프
     const pct = Math.max(0, Math.min(100, raw));
     const pctText = (pct % 1 === 0)
       ? String(pct)
@@ -83,7 +76,7 @@ function buildHistogramHtml(histogram) {
         `    <div class="review-histogram-bar" style="width: ${pct}%;"></div>`,
         '  </div>',
         `  <div class="review-histogram-value">${pctText}%</div>`,
-        '</div>'
+        '</div>',
       ].join('\n')
     );
   }
@@ -94,11 +87,11 @@ function buildHistogramHtml(histogram) {
     '',
     '  <div class="review-histogram" aria-label="Rating distribution">',
     rows.map(r => '    ' + r).join('\n').replace(/\n/g, '\n    '),
-    '  </div>'
+    '  </div>',
   ].join('\n');
 }
 
-function buildRatingBlock(slug, data) {
+function buildRatingBlock(data) {
   const lastChecked = formatLastChecked(data.lastChecked);
   const status = data.status || 'n/a';
   const store = data.store || 'multi';
@@ -148,26 +141,25 @@ function buildRatingBlock(slug, data) {
     '      </tbody>',
     '    </table>',
     histogramHtml,
-    '  </section>'
+    '  </section>',
   ].join('\n');
 }
 
-function buildInsightsBlock(slug, data) {
+function buildInsightsBlock(data) {
   const insights = Array.isArray(data.insights) ? data.insights : [];
 
   if (!insights.length) {
-    // 빈 섹션 유지 (레이아웃 유지용)
     return [
       '  <section id="review-insights-block" class="review-block">',
-      '  ',
-      '  </section>'
+      '    <!-- no insights -->',
+      '  </section>',
     ].join('\n');
   }
 
   const items = insights
-    .map(text => text && String(text).trim())
+    .map(t => (t ? String(t).trim() : ''))
     .filter(Boolean)
-    .map(text => `      <li>${text}</li>`)
+    .map(t => `      <li>${t}</li>`)
     .join('\n');
 
   return [
@@ -175,7 +167,7 @@ function buildInsightsBlock(slug, data) {
     '    <ul class="review-insights-list">',
     items,
     '    </ul>',
-    '  </section>'
+    '  </section>',
   ].join('\n');
 }
 
@@ -185,8 +177,7 @@ function replaceSection(html, sectionId, newBlockHtml) {
     'i'
   );
   if (!pattern.test(html)) return { html, changed: false };
-  const replaced = html.replace(pattern, newBlockHtml);
-  return { html: replaced, changed: true };
+  return { html: html.replace(pattern, newBlockHtml), changed: true };
 }
 
 function main() {
@@ -194,48 +185,44 @@ function main() {
   log('[review-meta] 시작');
   log(`[review-meta] ROOT = ${ROOT}`);
   log(`[review-meta] DIST = ${DIST_DIR}`);
+  log(`[review-meta] SSOT = ${RATINGS_PATH}`);
 
   const ratings = loadRatings();
   const bySlug = ratings.bySlug || {};
 
   if (!fs.existsSync(DIST_DIR)) {
-    log('[review-meta] dist/posts 디렉터리가 없습니다. 작업을 종료합니다.');
+    log('[review-meta] dist/posts 디렉터리가 없습니다. 종료합니다.');
     return;
   }
 
-  const files = fs.readdirSync(DIST_DIR)
-    .filter(f => f.endsWith('.html'));
-
-  log(`[review-meta] posts index 로드 완료: ${files.length} 개 (HTML, slug 매핑)`);
+  const files = fs.readdirSync(DIST_DIR).filter(f => f.endsWith('.html'));
+  log(`[review-meta] posts 로드: ${files.length} 개`);
 
   let updatedCount = 0;
   let ratingMissing = 0;
-  let htmlMissing = 0; // 현재 구조에서는 항상 0일 가능성이 높음
   let slotMissing = 0;
 
   for (const file of files) {
     const slug = path.basename(file, '.html');
     const ratingData = bySlug[slug];
-
     const fullPath = path.join(DIST_DIR, file);
-    let html = fs.readFileSync(fullPath, 'utf8');
 
     if (!ratingData) {
-      // 이 포스트에 대한 rating 데이터 없음
       ratingMissing += 1;
       continue;
     }
 
+    let html = fs.readFileSync(fullPath, 'utf8');
+
     const hasRatingSlot = html.includes('id="review-rating-block"');
     const hasInsightsSlot = html.includes('id="review-insights-block"');
-
     if (!hasRatingSlot || !hasInsightsSlot) {
       slotMissing += 1;
       continue;
     }
 
-    const ratingBlockHtml = buildRatingBlock(slug, ratingData);
-    const insightsBlockHtml = buildInsightsBlock(slug, ratingData);
+    const ratingBlockHtml = buildRatingBlock(ratingData);
+    const insightsBlockHtml = buildInsightsBlock(ratingData);
 
     let changed = false;
 
@@ -254,7 +241,7 @@ function main() {
   }
 
   log('────────────────────────────────────────────');
-  log(`[review-meta] 처리 완료: 업데이트=${updatedCount}, rating없음=${ratingMissing}, html없음=${htmlMissing}, 슬롯없음=${slotMissing}`);
+  log(`[review-meta] 처리 완료: 업데이트=${updatedCount}, rating없음=${ratingMissing}, 슬롯없음=${slotMissing}`);
   log('────────────────────────────────────────────');
 }
 
