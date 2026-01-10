@@ -13,6 +13,32 @@ require('dotenv').config({
   path: path.resolve(__dirname, '../../../.env'),
 });
 
+/**
+ * AOIA FLOW MAP REFERENCE
+ * --------------------------------------------------
+ * Flow Map: System_files/docs/aoia-flow-map.md
+ *
+ * Role:
+ *   - Blogger 최종 발행 단계(외부 API 호출) 단일 책임
+ *
+ * Position:
+ *   - Input: dist/posts/*.html + dist/queue/today.json(publishable)
+ *   - Process: today.json 스코프 필터링 → 라벨 추론 → Blogger API 발행(백오프/템포)
+ *   - Output: logs/publish-*.log, logs/publish-summary-*.log, seed-ledger publish 업서트
+ *
+ * Upstream:
+ *   - render-posts.cjs / validate-repair.cjs / qa-check.cjs
+ *
+ * Downstream:
+ *   - (외부) Blogger 게시 완료 + seed-ledger 상태 확정
+ *
+ * Failure Impact:
+ *   - 실발행 사고 / 중복 발행 / 429 폭주 / seed-ledger 상태 불일치
+ *
+ * Notes:
+ *   - 수정 시 flow-map과 함께 “스코프(today.json) + 게이트(PUBLISH_MODE) + 템포(슬립/백오프)”를 동시 점검
+ */
+
 const fs = require('fs');
 const fg = require('fast-glob');
 
