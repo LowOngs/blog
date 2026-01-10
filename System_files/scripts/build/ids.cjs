@@ -4,14 +4,13 @@
 require('./lib/env.cjs'); // ✅ .env 로드(필수)
 
 /**
- * System_files/scripts/build/ids.cjs
- *
+ * ids.cjs — DRY_RUN 파싱 규칙 통일 반영
  * 목적:
  * - content/posts/*.json 중 pageId 없는 문서들에 pageId를 "발급(=할당)"하여 기록
  *
  * ✅ 구조 고정(핵심):
  * - BODY_WRITE_MODE=active 일 때는 "publishable(=today queue)" slug만 발급한다.
- * - 아래 publishable 목록은 dist/queue/today.json 기반(SSOT).
+ * - publishable 목록은 dist/queue/today.json 기반(SSOT).
  * - today.json에 없으면 active 발급은 0회(즉시 종료) → 번호 폭주 방지.
  *
  * ✅ Seed Ledger(Min v1):
@@ -29,13 +28,15 @@ const MANIFESTS_DIR = path.join(ROOT, 'manifests');
 const PUBLISH_MODE = (process.env.PUBLISH_MODE || 'disable').toLowerCase(); // enable|disable
 const BODY_WRITE_MODE = (process.env.BODY_WRITE_MODE || 'local').toLowerCase(); // local|active
 
-// ✅ DRY_RUN 단일 파서(규칙: false/0만 live, 그 외 전부 dry-run)
-function parseDryRun(v) {
-  const s = String(v ?? '').trim().toLowerCase();
-  return !(s === 'false' || s === '0');
+// DRY_RUN 통일 규칙:
+// - 기본은 안전(dry-run)
+// - 오직 false/0 만 live 취급
+function parseDryRunEnv(v) {
+  const s = String(v ?? '').toLowerCase().trim();
+  const isLive = (s === 'false' || s === '0');
+  return !isLive;
 }
-const DRY_RUN_RAW = process.env.DRY_RUN;
-const DRY_RUN = parseDryRun(DRY_RUN_RAW);
+const DRY_RUN = parseDryRunEnv(process.env.DRY_RUN);
 
 const {
   ensureDir,
@@ -128,8 +129,7 @@ function main() {
   console.log('[ids] TODAY_QUEUE     =', DIST_QUEUE_TODAY);
   console.log('[ids] PUBLISH_MODE    =', PUBLISH_MODE);
   console.log('[ids] BODY_WRITE_MODE =', BODY_WRITE_MODE);
-  console.log('[ids] DRY_RUN(raw)    =', (DRY_RUN_RAW === undefined ? '(undefined)' : JSON.stringify(String(DRY_RUN_RAW))));
-  console.log('[ids] DRY_RUN(parsed) =', DRY_RUN);
+  console.log('[ids] DRY_RUN         =', DRY_RUN); // ✅ bool 고정 출력
 
   ensureDir(MANIFESTS_DIR);
 
@@ -218,7 +218,7 @@ function main() {
           label: sm.label,
           seedId: sm.seedId,
           source: sm.source,
-          dryRun: DRY_RUN,
+          dryRun: DRY_RUN, // ✅ bool 그대로
         });
         ledgerLogged++;
       } catch (e) {
