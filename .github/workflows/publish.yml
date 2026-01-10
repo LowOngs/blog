@@ -48,7 +48,7 @@ jobs:
 
       RUN_MODE: ${{ github.event.inputs.RUN_MODE || 'auto' }}
       MANUAL_JOB: ${{ github.event.inputs.MANUAL_JOB || 'schedule_once' }}
-      DRY_RUN_INPUT: ${{ github.event.inputs.DRY_RUN || 'false' }}
+      DRY_RUN_INPUT: ${{ github.event.inputs.DRY_RUN || '' }}
 
     steps:
       - name: Checkout
@@ -66,10 +66,21 @@ jobs:
 
       - name: Decide modes
         id: modes
+        shell: bash
         run: |
           echo "RUN_MODE=${RUN_MODE}"
           echo "MANUAL_JOB=${MANUAL_JOB}"
           echo "DRY_RUN_INPUT=${DRY_RUN_INPUT}"
+
+          # DRY_RUN 파서 규칙: false/0만 live, 그 외 전부 dry-run
+          parse_dry_run () {
+            v="$(echo "${1:-}" | tr '[:upper:]' '[:lower:]' | xargs)"
+            if [ "$v" = "false" ] || [ "$v" = "0" ]; then
+              echo "false"
+            else
+              echo "true"
+            fi
+          }
 
           EVENT_NAME="${{ github.event_name }}"
 
@@ -90,11 +101,7 @@ jobs:
             echo "FINAL_DRY_RUN=false" >> $GITHUB_OUTPUT
             echo "FINAL_RUN_MODE=auto" >> $GITHUB_OUTPUT
           else
-            if [ "${DRY_RUN_INPUT}" = "true" ]; then
-              echo "FINAL_DRY_RUN=true" >> $GITHUB_OUTPUT
-            else
-              echo "FINAL_DRY_RUN=false" >> $GITHUB_OUTPUT
-            fi
+            echo "FINAL_DRY_RUN=$(parse_dry_run "${DRY_RUN_INPUT}")" >> $GITHUB_OUTPUT
             echo "FINAL_RUN_MODE=manual" >> $GITHUB_OUTPUT
           fi
 
@@ -105,8 +112,10 @@ jobs:
           exit 0
 
       - name: Export runtime env
+        shell: bash
         run: |
           echo "DRY_RUN=${{ steps.modes.outputs.FINAL_DRY_RUN }}" >> $GITHUB_ENV
+
           if [ "${{ steps.modes.outputs.FINAL_DRY_RUN }}" = "true" ]; then
             echo "BODY_WRITE_MODE=local" >> $GITHUB_ENV
           else
@@ -133,7 +142,6 @@ jobs:
           test -f System_files/scripts/build/qa-check.cjs
           test -f System_files/scripts/publish/blogger.cjs
 
-          # ✅ AOIA meta/feed/tools
           test -f System_files/scripts/build/ai-meta.js
           test -f System_files/scripts/build/build-feed.cjs
           test -f System_files/scripts/build/validate-feed.cjs
@@ -198,7 +206,6 @@ jobs:
         run: |
           npm run posts:qa
 
-      # ✅ AOIA: authority/feed/tools는 "검증 통과 후" 생성 (신호 레이어를 최신으로)
       - name: Build AI meta (authority, etc.)
         working-directory: System_files
         run: |
@@ -224,8 +231,8 @@ jobs:
         run: |
           node scripts/build/build-trust-page.cjs
 
-      - name: Publish to Blogger (skip when DRY_RUN=true)
-        if: env.DRY_RUN != 'true'
+      - name: Publish to Blogger (blocked by DRY_RUN + PUBLISH_MODE)
+        if: env.DRY_RUN != 'true' && env.PUBLISH_MODE == 'enable'
         working-directory: System_files
         run: |
           node scripts/publish/blogger.cjs
