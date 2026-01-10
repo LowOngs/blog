@@ -4,14 +4,18 @@
 /**
  * System_files/scripts/publish/blogger.cjs
  * publish scope를 today.json(SSOT)로 고정 + 백오프/슬립/재시도 조건 정교화
+ * ✅ 게이트 단일화: canPublish = (DRY_RUN=false) AND (PUBLISH_MODE=enable)
  */
 
 const path = require('path');
+const fs = require('fs');
+const fg = require('fast-glob');
 
-// ✅ 로컬/CI 공통: .env 로드(필수)
-require('dotenv').config({
-  path: path.resolve(__dirname, '../../../.env'),
-});
+// ✅ 로컬/CI 공통: 단일 env 로더 (ROOT/ENV 정합성 고정)
+const { parseDryRun } = require(path.join(__dirname, '..', 'build', 'lib', 'env.cjs'));
+
+// Seed Ledger (Minimal v1)
+const { upsert: upsertSeedLedger } = require(path.join(__dirname, '..', 'build', 'lib', 'seed-ledger.cjs'));
 
 /**
  * AOIA FLOW MAP REFERENCE
@@ -26,24 +30,9 @@ require('dotenv').config({
  *   - Process: today.json 스코프 필터링 → 라벨 추론 → Blogger API 발행(백오프/템포)
  *   - Output: logs/publish-*.log, logs/publish-summary-*.log, seed-ledger publish 업서트
  *
- * Upstream:
- *   - render-posts.cjs / validate-repair.cjs / qa-check.cjs
- *
- * Downstream:
- *   - (외부) Blogger 게시 완료 + seed-ledger 상태 확정
- *
- * Failure Impact:
- *   - 실발행 사고 / 중복 발행 / 429 폭주 / seed-ledger 상태 불일치
- *
  * Notes:
- *   - 수정 시 flow-map과 함께 “스코프(today.json) + 게이트(PUBLISH_MODE) + 템포(슬립/백오프)”를 동시 점검
+ *   - 수정 시 flow-map과 함께 “스코프(today.json) + 게이트(canPublish) + 템포(슬립/백오프)”를 동시 점검
  */
-
-const fs = require('fs');
-const fg = require('fast-glob');
-
-// Seed Ledger (Minimal v1)
-const { upsert: upsertSeedLedger } = require(path.join(__dirname, '..', 'build', 'lib', 'seed-ledger.cjs'));
 
 // ────────────────────────────────────
 //  라벨 매핑: 내부 코드 → Blogger 라벨
@@ -75,8 +64,8 @@ const PREFIX_TO_CODE = {
 // ────────────────────────────────────
 //  경로·로그 설정
 // ────────────────────────────────────
-const ROOT      = path.resolve(__dirname, '..', '..');        // System_files
-const OUTDIR    = path.join(ROOT, 'dist', 'posts');
+const ROOT       = path.resolve(__dirname, '..', '..');        // System_files
+const OUTDIR     = path.join(ROOT, 'dist', 'posts');
 const TODAY_JSON = path.join(ROOT, 'dist', 'queue', 'today.json');
 
 const LOGDIR = path.join(ROOT, 'logs');
@@ -108,7 +97,7 @@ if (!BLOG_ID || !CLIENT_ID || !CLIENT_SECRET || !REFRESH_TOKEN) {
   fail('환경변수 누락(BLOGGER_BLOG_ID / GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET / GOOGLE_REFRESH_TOKEN)');
 }
 
-// 최종 게이트
+// 최종 게이트(명시 enable일 때만 “가능 후보”)
 const PUBLISH_MODE = String(process.env.PUBLISH_MODE || 'disable').toLowerCase(); // enable|disable
 
 // 스코프: 기본 today, 수동으로만 all 허용
@@ -124,12 +113,13 @@ const MAX_POSTS_NUM = MAX_POSTS_RAW && !Number.isNaN(Number(MAX_POSTS_RAW))
   : 0; // 0 = 제한 없음
 
 // DRY_RUN 단일 파서(규칙: false/0만 live, 그 외 전부 dry-run)
-function parseDryRun(v) {
-  const s = String(v ?? '').trim().toLowerCase();
-  return !(s === 'false' || s === '0');
-}
 const DRY_RUN_RAW = process.env.DRY_RUN;
 const DRY_RUN = parseDryRun(DRY_RUN_RAW);
+
+// ✅ 단일 규칙(필수): 발행 가능 조건
+// - DRY_RUN=true  → 절대 외부 API 호출 0%
+// - DRY_RUN=false AND PUBLISH_MODE=enable → 발행 가능
+const canPublish = (!DRY_RUN) && (PUBLISH_MODE === 'enable');
 
 // 발행 템포(슬립)
 const POST_SLEEP_MS = Number(process.env.POST_SLEEP_MS || '1200'); // 기본 1.2s
@@ -205,10 +195,8 @@ async function backoff(fn, opts = {}) {
 }
 
 function isRetryableHttpStatus(status) {
-  // 429/5xx는 기본 retry
   if (status === 429) return true;
   if (status >= 500) return true;
-  // 408(요청 타임아웃)도 retry 가치 있음
   if (status === 408) return true;
   return false;
 }
@@ -344,7 +332,6 @@ function shouldRetryPublishError(e) {
   return isRetryableHttpStatus(st);
 }
 
-// 401/403은 “토큰 재발급 후 1회 재시도” 가치 있음(권한 자체 문제면 계속 실패)
 async function publishWithTokenRefresh(tokenHolder, payload, labelForLog) {
   try {
     return await backoff(
@@ -364,7 +351,6 @@ async function publishWithTokenRefresh(tokenHolder, payload, labelForLog) {
       warn(`${labelForLog} got ${st} → refresh token and retry once`);
       tokenHolder.token = await backoff(getAccessToken, { label: 'token(refresh)' });
 
-      // refresh 후에는 1회만 “짧게” 다시 시도(반복 루프 방지)
       return await backoff(
         () => createPost(tokenHolder.token, payload),
         {
@@ -395,12 +381,18 @@ async function publishWithTokenRefresh(tokenHolder, payload, labelForLog) {
   log('[blogger] CONFIG MAX_BACKOFF_MS=', MAX_BACKOFF_MS);
   log('[blogger] DRY_RUN(raw)         =', (DRY_RUN_RAW === undefined ? '(undefined)' : JSON.stringify(String(DRY_RUN_RAW))));
   log('[blogger] DRY_RUN(parsed)      =', DRY_RUN);
+  log('[blogger] canPublish           =', canPublish);
 
-  // ✅ 최종 게이트: enable 아니면 “API 호출 자체 금지”
-  if (PUBLISH_MODE !== 'enable') {
-    log('[blogger] STOP: PUBLISH_MODE!=enable (publish blocked)');
-    append(SUMMARY_LOG, `[${new Date().toISOString()}] STOP publish blocked (PUBLISH_MODE!=enable)`);
-    return;
+  // ✅ DRY_RUN이면 항상 “외부 API 호출 0%”
+  // ✅ DRY_RUN=false인데 PUBLISH_MODE!=enable이면 발행 차단
+  if (!canPublish) {
+    if (DRY_RUN) {
+      log('[blogger] DRY_RUN 모드 — Blogger API 호출 없이 로그/seed-ledger(dryrun)만 남깁니다.');
+    } else {
+      log('[blogger] STOP: PUBLISH_MODE!=enable (publish blocked)');
+      append(SUMMARY_LOG, `[${new Date().toISOString()}] STOP publish blocked (PUBLISH_MODE!=enable)`);
+      return;
+    }
   }
 
   if (!fs.existsSync(OUTDIR)) {
@@ -443,18 +435,16 @@ async function publishWithTokenRefresh(tokenHolder, payload, labelForLog) {
     return;
   }
 
-  // DRY_RUN이면 토큰 발급/POST 없음
+  // ✅ canPublish=true일 때만 토큰 발급/POST 수행
   const tokenHolder = { token: null };
-  if (!DRY_RUN) {
+  if (canPublish) {
     tokenHolder.token = await backoff(getAccessToken, {
       label: 'token',
       shouldRetry: (e) => {
         const st = e && typeof e.httpStatus === 'number' ? e.httpStatus : 0;
-        return isRetryableHttpStatus(st) || st === 400; // 간헐적 토큰 문제 완충(과하게 넓히지 않음)
+        return isRetryableHttpStatus(st) || st === 400;
       }
     });
-  } else {
-    log('[blogger] DRY_RUN 모드 — Blogger API 호출 없이 로그만 남깁니다.');
   }
 
   let ok = 0;
@@ -486,8 +476,9 @@ async function publishWithTokenRefresh(tokenHolder, payload, labelForLog) {
 
       const bloggerLabels = humanLabel ? [humanLabel] : [];
 
-      if (DRY_RUN) {
-        log(`[DRY_RUN] ${name} → title="${title}" labels=[${bloggerLabels.join(', ')}]`);
+      // ✅ DRY_RUN 또는 PUBLISH_MODE 차단 시: “출력은 하되 외부 API 호출은 0%”
+      if (!canPublish) {
+        log(`[NO_PUBLISH] ${name} → title="${title}" labels=[${bloggerLabels.join(', ')}]`);
         try {
           upsertSeedLedger({
             stage: 'publish',
@@ -497,7 +488,7 @@ async function publishWithTokenRefresh(tokenHolder, payload, labelForLog) {
             label: labelCode || '',
             source: slug.startsWith('firstgate-') ? 'firstgate' : '',
             dryRun: true,
-            notes: 'DRY_RUN=true (no publish)',
+            notes: DRY_RUN ? 'DRY_RUN=true (no publish)' : 'PUBLISH_MODE!=enable (no publish)',
           });
         } catch (e) {
           warn('seed-ledger upsert fail:', e.message || e);
@@ -505,7 +496,6 @@ async function publishWithTokenRefresh(tokenHolder, payload, labelForLog) {
         ok++;
         used++;
 
-        // ✅ 템포 유지(드라이런이라도 로그 폭주 방지)
         if (POST_SLEEP_MS > 0) await sleep(jitter(POST_SLEEP_MS, 0.1));
         continue;
       }
@@ -555,7 +545,6 @@ async function publishWithTokenRefresh(tokenHolder, payload, labelForLog) {
 
       used++;
 
-      // ✅ 기본 슬립(429/오탐 방지)
       if (POST_SLEEP_MS > 0) await sleep(jitter(POST_SLEEP_MS, 0.1));
     } catch (e) {
       warn(`POST FAIL ${name} →`, e.message || e);
@@ -578,7 +567,6 @@ async function publishWithTokenRefresh(tokenHolder, payload, labelForLog) {
       bad++;
       used++;
 
-      // ✅ 실패 후에도 템포 유지(연쇄 429 방지)
       if (POST_SLEEP_MS > 0) await sleep(jitter(POST_SLEEP_MS, 0.2));
     }
   }
@@ -586,7 +574,7 @@ async function publishWithTokenRefresh(tokenHolder, payload, labelForLog) {
   const summaryLine =
     `[${new Date().toISOString()}] publish result ok=${ok} bad=${bad} used=${used}` +
     ` PUBLISH_SCOPE=${PUBLISH_SCOPE} LABEL_FILTER="${LABEL_FILTER}" MAX_POSTS=${MAX_POSTS_NUM || 0}` +
-    ` DRY_RUN=${DRY_RUN}`;
+    ` DRY_RUN=${DRY_RUN} canPublish=${canPublish}`;
   append(SUMMARY_LOG, summaryLine);
   log('요약 로그 기록 →', SUMMARY_LOG);
   log(`✨ publish 완료: 성공 ${ok} / 실패 ${bad} | 로그: ${DETAIL_LOG}`);
