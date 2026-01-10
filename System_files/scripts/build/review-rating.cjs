@@ -1,214 +1,160 @@
 #!/usr/bin/env node
-/**
- * review-rating.cjs
- *
- * - content/reviews/app-ratings.json 에서 앱별 별점 스냅샷을 읽어온 뒤
- *   content/posts/*.json 의 review.rating 블록을 자동 갱신합니다.
- * - 3개월(90일) 주기로 점검해야 할 날짜(nextCheck)도 함께 계산합니다.
- * - review-meta-block.cjs 가 이 rating 정보를 읽어서 테이블을 그립니다.
- */
+'use strict';
+
+/** review-rating: app-ratings 스냅샷 → review-ratings(SSOT) bySlug 갱신(기존 insights/histogram 보존) */
+
+require('./lib/env.cjs');
 
 const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.resolve(__dirname, '../..');
-const POSTS_DIR = path.join(ROOT, 'content', 'posts');
-const RATINGS_PATH = path.join(ROOT, 'content', 'reviews', 'app-ratings.json');
+const SRC_PATH = path.join(ROOT, 'content', 'reviews', 'app-ratings.json');
+const OUT_PATH = path.join(ROOT, 'content', 'reviews', 'review-ratings.json');
 
-function log(...args) {
-  console.log('[review-rating]', ...args);
+function log(...a) {
+  console.log('[review-rating]', ...a);
 }
 
-function loadJsonSafe(filePath, fallback) {
+function readJsonSafe(p, fallback) {
   try {
-    const raw = fs.readFileSync(filePath, 'utf8');
-    return JSON.parse(raw);
-  } catch (e) {
+    if (!fs.existsSync(p)) return fallback;
+    return JSON.parse(fs.readFileSync(p, 'utf8'));
+  } catch {
     return fallback;
   }
 }
 
-function saveJsonPretty(filePath, data) {
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2) + '\n', 'utf8');
+function writeJsonPretty(p, obj) {
+  const dir = path.dirname(p);
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(p, JSON.stringify(obj, null, 2) + '\n', 'utf8');
 }
 
-function ensureDir(dir) {
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
+function toIso(v) {
+  return v ? String(v) : new Date().toISOString();
 }
 
-/**
- * YYYY-MM-DD 형태 문자열을 Date로 변환(+09:00 기준)
- */
-function parseKstDate(dateStr) {
-  // dateStr: '2025-11-21'
-  return new Date(dateStr + 'T00:00:00+09:00');
-}
-
-/**
- * Date → YYYY-MM-DD
- */
-function formatDate(d) {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
+function parseDateMs(yyyyMMdd) {
+  // yyyy-mm-dd
+  const t = Date.parse(`${yyyyMMdd}T00:00:00Z`);
+  return Number.isNaN(t) ? 0 : t;
 }
 
 /**
- * YYYY-MM-DD + days → YYYY-MM-DD
+ * latest 기준 90일 전 근처(previous) 스냅샷 선택
+ * - targetMs = latestMs - 90days
+ * - targetMs 이하 중 가장 가까운 스냅샷
  */
-function addDays(dateStr, days) {
-  const d = parseKstDate(dateStr);
-  d.setDate(d.getDate() + days);
-  return formatDate(d);
-}
+function pickPreviousSnapshot(snaps, latestMs) {
+  const targetMs = latestMs - 90 * 86400000;
 
-/**
- * YYYY-MM-DD → YYYY-MM-DDT00:00:00+09:00
- */
-function toKstIso(dateStr) {
-  return `${dateStr}T00:00:00+09:00`;
-}
+  const candidates = snaps
+    .map(s => ({ s, ms: parseDateMs(s.date) }))
+    .filter(x => x.ms > 0 && x.ms <= targetMs);
 
-/**
- * 오늘 날짜(로컬) YYYY-MM-DD
- */
-function todayLocal() {
-  const d = new Date();
-  return formatDate(d);
+  if (!candidates.length) return null;
+
+  candidates.sort((a, b) => Math.abs(targetMs - a.ms) - Math.abs(targetMs - b.ms));
+  return candidates[0].s;
 }
 
 function main() {
-  console.log('────────────────────────────────────────────');
-  log('ROOT      =', ROOT);
-  log('POSTS_DIR =', POSTS_DIR);
-  log('RATINGS   =', RATINGS_PATH);
+  log('────────────────────────────────────────────');
+  log('SRC =', SRC_PATH);
+  log('OUT =', OUT_PATH);
 
-  // 1) ratings 저장소 확인
-  if (!fs.existsSync(RATINGS_PATH)) {
-    log('WARN: app-ratings.json 이 없어 아무 작업도 하지 않습니다.');
-    log('TIP : content/reviews/app-ratings.json 파일을 만든 뒤 다시 실행하세요.');
-    console.log('────────────────────────────────────────────');
+  const src = readJsonSafe(SRC_PATH, []);
+  if (!Array.isArray(src) || src.length === 0) {
+    log('WARN: app-ratings.json 비어있음 → 종료');
     return;
   }
 
-  ensureDir(POSTS_DIR);
+  const base = readJsonSafe(OUT_PATH, { bySlug: {} });
+  const bySlug = (base && typeof base.bySlug === 'object' && base.bySlug) ? base.bySlug : {};
 
-  // 2) posts/*.json 스캔해서 slug → 파일 경로 매핑
-  const slugToFile = new Map();
-  const postFiles = fs
-    .readdirSync(POSTS_DIR)
-    .filter((f) => f.endsWith('.json'));
+  let updated = 0;
+  let skipped = 0;
 
-  for (const file of postFiles) {
-    const full = path.join(POSTS_DIR, file);
-    const data = loadJsonSafe(full, null);
-    if (!data || !data.slug) continue;
-    slugToFile.set(data.slug, full);
-  }
-
-  log('posts 스캔 완료: slug 매핑 수 =', slugToFile.size);
-
-  // 3) ratings 데이터 로드
-  const ratings = loadJsonSafe(RATINGS_PATH, []);
-  if (!Array.isArray(ratings) || ratings.length === 0) {
-    log('WARN: app-ratings.json 에 유효한 데이터가 없습니다.');
-    console.log('────────────────────────────────────────────');
-    return;
-  }
-
-  const today = todayLocal();
-  let candidateCount = 0;
-  let updatedCount = 0;
-  let overdueCount = 0;
-  let missingPostCount = 0;
-
-  for (const item of ratings) {
+  for (const item of src) {
     if (!item || !item.slug) continue;
 
-    const slug = item.slug;
+    const slug = String(item.slug).trim();
     const snapshots = Array.isArray(item.snapshots) ? item.snapshots : [];
 
-    // 스냅샷 데이터 없으면 스킵
-    const validSnapshots = snapshots.filter(
-      (s) =>
+    const valid = snapshots
+      .filter(s =>
         s &&
         typeof s.date === 'string' &&
         s.date.length === 10 &&
         typeof s.rating === 'number' &&
         typeof s.votes === 'number'
-    );
-    if (validSnapshots.length === 0) {
-      log('WARN: 유효한 스냅샷이 없어 스킵 → slug =', slug);
+      )
+      .sort((a, b) => (a.date > b.date ? 1 : -1));
+
+    if (!valid.length) {
+      skipped++;
       continue;
     }
 
-    candidateCount++;
+    const latest = valid[valid.length - 1];
+    const latestMs = parseDateMs(latest.date);
+    const prev = pickPreviousSnapshot(valid, latestMs);
 
-    const postFile = slugToFile.get(slug);
-    if (!postFile) {
-      log('WARN: posts 디렉토리에 해당 slug JSON이 없어 스킵 → slug =', slug);
-      missingPostCount++;
-      continue;
-    }
+    const prevRating = prev ? Number(prev.rating) : null;
+    const prevVotes = prev ? Number(prev.votes) : null;
 
-    const post = loadJsonSafe(postFile, null);
-    if (!post) {
-      log('WARN: JSON 파싱 실패 →', postFile);
-      continue;
-    }
+    const curRating = Number(latest.rating);
+    const curVotes = Number(latest.votes);
 
-    // 최신 스냅샷 선택 (date가 가장 큰 것)
-    const latest = validSnapshots.reduce((acc, cur) =>
-      cur.date > acc.date ? cur : acc
-    );
-    const lastDate = latest.date; // YYYY-MM-DD
-    const nextCheckDate = addDays(lastDate, 90); // 90일 후
+    const ratingDiff = (prevRating === null) ? null : (curRating - prevRating);
+    const votesDiff = (prevVotes === null) ? null : (curVotes - prevVotes);
 
-    if (!post.review) post.review = {};
+    const existed = bySlug[slug] && typeof bySlug[slug] === 'object' ? bySlug[slug] : {};
 
-    const prevRating = JSON.stringify(post.review.rating || {});
+    // ✅ 기존 histogram/insights 보존
+    const next = {
+      ...existed,
+      lastChecked: toIso(latest.date),
+      status: item.status || existed.status || 'ok',
+      store: item.store || existed.store || item.platform || 'multi',
 
-    post.review.rating = {
-      overall: Number(latest.rating),
-      votes: latest.votes,
-      scale: typeof latest.scale === 'number' ? latest.scale : 5,
-      lastUpdated: toKstIso(lastDate),
-      nextCheck: toKstIso(nextCheckDate),
-      platform: item.platform || 'global',
-      source: item.source || 'manual',
-      storeId: item.storeId || null
+      ratingCurrent: curRating,
+      votesCurrent: curVotes,
+
+      ratingPrevious: prevRating,
+      votesPrevious: prevVotes,
+
+      ratingDiff,
+      votesDiff,
+
+      // histogram/insights는 기존 값 유지(없으면 그대로 없음)
+      histogram: existed.histogram || null,
+      insights: Array.isArray(existed.insights) ? existed.insights : [],
+      source: item.source || existed.source || 'manual',
     };
 
-    const newRating = JSON.stringify(post.review.rating);
+    const before = JSON.stringify(existed);
+    const after = JSON.stringify(next);
 
-    if (newRating !== prevRating) {
-      saveJsonPretty(postFile, post);
-      updatedCount++;
-      log('UPDATE:', slug, '→ rating', latest.rating, '(', latest.votes, 'votes )');
-    }
-
-    // 3개월 점검 기한 초과 여부
-    if (today > nextCheckDate) {
-      overdueCount++;
-      log(
-        'OVERDUE:',
-        slug,
-        `→ last=${lastDate}, nextCheck=${nextCheckDate} (today=${today})`
-      );
+    if (before !== after) {
+      bySlug[slug] = next;
+      updated++;
     }
   }
 
-  console.log('────────────────────────────────────────────');
-  log(
-    '완료:',
-    '후보=', candidateCount,
-    '| 갱신=', updatedCount,
-    '| 오버듀=', overdueCount,
-    '| 매핑실패(slug 없음)=', missingPostCount
-  );
+  const out = {
+    meta: {
+      updatedAt: new Date().toISOString(),
+      source: 'review-rating.cjs',
+    },
+    bySlug,
+  };
+
+  writeJsonPretty(OUT_PATH, out);
+
+  log('────────────────────────────────────────────');
+  log(`DONE: updated=${updated}, skipped(no snapshots)=${skipped}, total=${src.length}`);
 }
 
 main();
