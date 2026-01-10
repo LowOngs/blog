@@ -4,11 +4,12 @@
 // System_files/scripts/build/r2-upload.cjs
 // DRY_RUN 파서 통일 + dist/images → R2 업로드(og/body)
 
-require('./lib/env.cjs');
-
-const fs = require('fs');
 const path = require('path');
+const fs = require('fs');
 const crypto = require('crypto');
+
+// ✅ 단일 env 로더 + DRY_RUN 파서 재사용
+const { parseDryRun } = require(path.join(__dirname, 'lib', 'env.cjs'));
 
 let S3Client, PutObjectCommand;
 try {
@@ -41,10 +42,6 @@ const R2_ENDPOINT =
   (R2_ACCOUNT_ID ? `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com` : '');
 
 // DRY_RUN 단일 파서(규칙: false/0만 live, 그 외 전부 dry-run)
-function parseDryRun(v) {
-  const s = String(v ?? '').trim().toLowerCase();
-  return !(s === 'false' || s === '0');
-}
 const DRY_RUN_RAW = process.env.DRY_RUN;
 const DRY_RUN = parseDryRun(DRY_RUN_RAW);
 
@@ -103,13 +100,13 @@ async function main() {
   if (!R2_ENDPOINT) fatal('R2_ENDPOINT 를 만들 수 없습니다.');
 
   console.log('────────────────────────────────────────────');
-  console.log('[r2-upload] endpoint      =', R2_ENDPOINT);
-  console.log('[r2-upload] bucket        =', R2_BUCKET);
-  console.log('[r2-upload] prefix        =', FIXED_PREFIX);
-  console.log('[r2-upload] dry_run(raw)  =', (DRY_RUN_RAW === undefined ? '(undefined)' : JSON.stringify(String(DRY_RUN_RAW))));
+  console.log('[r2-upload] endpoint       =', R2_ENDPOINT);
+  console.log('[r2-upload] bucket         =', R2_BUCKET);
+  console.log('[r2-upload] prefix         =', FIXED_PREFIX);
+  console.log('[r2-upload] dry_run(raw)   =', (DRY_RUN_RAW === undefined ? '(undefined)' : JSON.stringify(String(DRY_RUN_RAW))));
   console.log('[r2-upload] dry_run(parsed)=', DRY_RUN);
-  console.log('[r2-upload] og_dir        =', OG_DIR);
-  console.log('[r2-upload] body_dir      =', BODY_DIR);
+  console.log('[r2-upload] og_dir         =', OG_DIR);
+  console.log('[r2-upload] body_dir       =', BODY_DIR);
   console.log('────────────────────────────────────────────');
 
   const client = new S3Client({
