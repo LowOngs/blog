@@ -3,30 +3,7 @@
 
 require('./lib/env.cjs'); // ✅ .env 로드(필수)
 
-/**
- * System_files/scripts/build/render-posts.cjs
- * - content/posts/*.json → dist/posts/*.html 렌더러
- *
- * ✅ 핵심 정합 기준
- * - meta.cjs(buildMeta)가 반환하는 metaTags/schemaTags/canonicalUrl/ogImage/ogAlt/updatedIso/publishedIso 사용
- * - blocks.js 렌더러 사용(TLDR/KeyFacts/FAQ/Sources/Review + sanitizeBodyHTML)
- * - content-blocks.cjs 는 "검사용" (여기서는 렌더에 사용하지 않음)
- *
- * ✅ 본문 이미지(Body Image) SSOT 규칙 (중요)
- * - 본문 이미지 매니페스트는 "딱 1개 파일"로 고정합니다.
- *   => System_files/manifests/images-body-manifest.json
- * - JSON 구조: { meta:{...}, items:{ [slug]: { url, alt, width, height, safe, ... } } }
- * - 삽입 정책: 1포스트 1장 / 도메인 allow / safe=true 권장 / 없으면 skip
- *
- * ✅ [리뷰 연결 핵심]
- * - 리뷰 라벨 3종(app/device/subscription)의 ratings/insights 원천이 서로 다르므로
- *   resolveReviewData에서 라벨별 데이터셋을 읽고 공통 포맷으로 정규화해서 blocks에 전달합니다.
- *
- * ✅ [pageId 정책(옹스 룰)]
- * - render 단계에서 ensurePageId(slug) 직접 호출 "금지"
- * - pageId 누락이면 ids.cjs를 1회 재실행하여 "발급/기록"은 ids.cjs에 맡기고
- *   render는 재로딩해서 붙이기만 한다.
- */
+/** render-posts: content/posts → dist/posts 렌더 (pageId 직접 발급 금지, 리뷰는 resolver로 연결) */
 
 const fs = require('fs');
 const path = require('path');
@@ -38,36 +15,23 @@ const TEMPLATE_PATH = path.join(ROOT, 'templates', 'post.html');
 const OUTPUT_DIR    = path.join(ROOT, 'dist', 'posts');
 
 const MANIFESTS_DIR = path.join(ROOT, 'manifests');
-
-// ✅ 본문 이미지 매니페스트(SSOT) 파일명/경로 "단일 고정"
 const BODY_IMAGE_MANIFEST_PATH = path.join(MANIFESTS_DIR, 'images-body-manifest.json');
 
 const { buildMeta } = require('./lib/meta.cjs');
-// ❌ ensurePageId는 render에서 직접 호출 금지
 const { isValidPageId } = require('./lib/page-ids.cjs');
 const blocks = require('./lib/blocks.cjs');
-
-// ✅ 리뷰 데이터 정규화(라벨별 SSOT 연동)
 const { resolveReviewData } = require('./review-resolver.cjs');
 
-/* ───────────────────── 파일/JSON 유틸 ───────────────────── */
+/* ───────────────────── file/json ───────────────────── */
 
-/** 디렉터리 없으면 생성 */
 function ensureDir(dir) {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 }
 
-/** JSON 읽기(에러는 throw) */
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, 'utf8'));
 }
 
-/** JSON 쓰기(예쁘게) */
-function writeJson(filePath, obj) {
-  fs.writeFileSync(filePath, JSON.stringify(obj, null, 2) + '\n', 'utf8');
-}
-
-/** HTML escape */
 function escapeHtml(str) {
   return String(str || '')
     .replace(/&/g, '&amp;')
@@ -77,12 +41,10 @@ function escapeHtml(str) {
     .replace(/'/g, '&#39;');
 }
 
-/** HTML attr escape(줄바꿈 제거 포함) */
 function escapeAttr(str) {
   return escapeHtml(str).replace(/\n/g, ' ');
 }
 
-/** 값들 중 첫 유효값 */
 function firstNonEmpty(...vals) {
   for (const v of vals) {
     if (v === null || v === undefined) continue;
@@ -92,18 +54,15 @@ function firstNonEmpty(...vals) {
   return '';
 }
 
-/** 배열 normalize */
 function asArray(v) {
   if (!v) return [];
   return Array.isArray(v) ? v : [v];
 }
 
-/** split/join 기반 안전 replace */
 function replaceAllSafe(html, needle, value) {
   return html.split(needle).join(value);
 }
 
-/** JSON 파일 존재하면 읽기, 아니면 null */
 function tryReadJsonFile(p) {
   try {
     if (!fs.existsSync(p)) return null;
@@ -113,10 +72,10 @@ function tryReadJsonFile(p) {
   }
 }
 
-/* ───────────────────── ids.cjs 재실행(딱 1회) ───────────────────── */
+/* ───────────────────── ids rerun ───────────────────── */
 
 function runIdsOnce() {
-  const idsPath = path.join(__dirname, 'ids.cjs'); // scripts/build/ids.cjs
+  const idsPath = path.join(__dirname, 'ids.cjs');
   const r = spawnSync(process.execPath, [idsPath], {
     cwd: ROOT,
     stdio: 'inherit',
@@ -125,7 +84,7 @@ function runIdsOnce() {
   return r.status === 0;
 }
 
-/* ───────────────────── 본문 이미지(Body Image) 로직 ───────────────────── */
+/* ───────────────────── body image ───────────────────── */
 
 function loadBodyImageManifestOnce() {
   const obj = tryReadJsonFile(BODY_IMAGE_MANIFEST_PATH);
@@ -149,12 +108,9 @@ function parseAllowedDomainsFromEnv(siteBase, cdnBase) {
 
 function isAllowedImageUrl(url, allowedDomains) {
   if (!url || typeof url !== 'string') return false;
-
   let u;
   try { u = new URL(url); } catch { return false; }
-
   if (u.protocol !== 'https:') return false;
-
   const host = u.hostname;
   return allowedDomains.some(d => d === host || host.endsWith('.' + d));
 }
@@ -163,10 +119,8 @@ function pickBodyImageEntry(manifestObj, slug, pageId) {
   if (!manifestObj || typeof manifestObj !== 'object') return null;
   const items = manifestObj.items;
   if (!items || typeof items !== 'object') return null;
-
   if (slug && items[slug]) return items[slug];
   if (pageId && items[pageId]) return items[pageId];
-
   return null;
 }
 
@@ -184,7 +138,6 @@ function normalizeBodyImage(entry) {
     const h = Number(entry.h || entry.height || 0) || 0;
     const caption = entry.caption || entry.credit || '';
     const safe = (entry.safe === undefined) ? true : !!entry.safe;
-
     return { url, alt, w, h, caption, safe };
   }
 
@@ -230,7 +183,7 @@ function injectBodyImageCssOnce(html) {
   return html;
 }
 
-/* ───────────────────── meta head 생성 ───────────────────── */
+/* ───────────────────── meta head ───────────────────── */
 
 function buildSchemaScript(schemaTags) {
   if (!Array.isArray(schemaTags) || schemaTags.length === 0) return '';
@@ -286,13 +239,8 @@ function buildHeadFromMeta(meta) {
   return lines.filter(Boolean).join('\n');
 }
 
-/* ───────────────────── pageId 확보(수정됨) ───────────────────── */
+/* ───────────────────── pageId policy ───────────────────── */
 
-/**
- * ✅ render 단계에서 직접 발급 금지
- * - postJson에 pageId가 있으면 사용
- * - 없으면 ids.cjs 1회 재실행 → JSON 재로딩 → 그래도 없으면 FAIL
- */
 function ensurePageIdForPost(postJson, slug, jsonPath, idsCtx) {
   const existing = firstNonEmpty(
     postJson.pageId,
@@ -303,16 +251,13 @@ function ensurePageIdForPost(postJson, slug, jsonPath, idsCtx) {
 
   if (isValidPageId(existing)) return { pageId: existing, wroteJson: false, via: 'json' };
 
-  // ids.cjs는 render의 책임이 아니라 "발급/기록" 담당이지만,
-  // render는 누락 시 "ids 재동작"만 요청할 수 있음(옹스 룰).
   if (!idsCtx.reran) {
-    console.log(`[render-posts] pageId 누락 감지(slug=${slug}) → ids.cjs 1회 재실행(발급/기록은 ids 담당)`);
+    console.log(`[render-posts] pageId 누락(slug=${slug}) → ids.cjs 1회 재실행`);
     const ok = runIdsOnce();
     idsCtx.reran = true;
-    if (!ok) throw new Error('ids.cjs 실행 실패(재발급 시도 불가)');
+    if (!ok) throw new Error('ids.cjs 실행 실패');
   }
 
-  // 재로딩해서 pageId가 생겼는지 확인
   const fresh = readJson(jsonPath);
   const pid = firstNonEmpty(
     fresh.pageId,
@@ -322,10 +267,9 @@ function ensurePageIdForPost(postJson, slug, jsonPath, idsCtx) {
   );
 
   if (!isValidPageId(pid)) {
-    throw new Error('pageId 누락: ids 재실행 후에도 pageId가 생성되지 않음(today publishable 대상이 아닐 가능성)');
+    throw new Error('pageId 누락: ids 재실행 후에도 생성되지 않음(today publishable 대상이 아닐 가능성)');
   }
 
-  // render는 JSON에 write하지 않음(발급/기록은 ids.cjs 책임)
   return { pageId: pid, wroteJson: false, via: 'ids.cjs' };
 }
 
@@ -346,12 +290,11 @@ function injectAfterSlot(html, slotMarker, insertHtml) {
   return html.slice(0, idx) + insertHtml + '\n' + html.slice(idx);
 }
 
-/* ───────────────────── 렌더 1개 ───────────────────── */
+/* ───────────────────── render one ───────────────────── */
 
 function renderOne(template, postJson, jsonPath, bodyImgCtx, idsCtx) {
   const slug = postJson.slug || path.basename(jsonPath, '.json');
 
-  // ✅ pageId 확보(직접 발급 금지, ids 재실행만)
   const pidRes = ensurePageIdForPost(postJson, slug, jsonPath, idsCtx);
   const pageId = pidRes.pageId;
 
@@ -383,18 +326,15 @@ function renderOne(template, postJson, jsonPath, bodyImgCtx, idsCtx) {
 
     if (img && img.url) {
       if (img.safe === false) {
-        // 스킵
+        // skip
       } else if (isAllowedImageUrl(img.url, bodyImgCtx.allowedDomains)) {
         const fallbackAlt = title ? `${title} related image` : `${slug} related image`;
-        const fig = buildBodyImageFigure(img, fallbackAlt);
-
-        bodyHtml = fig + '\n' + bodyHtml;
+        bodyHtml = buildBodyImageFigure(img, fallbackAlt) + '\n' + bodyHtml;
       }
     }
   }
 
   const reviewData = resolveReviewData({ ROOT, postJson });
-
   const reviewRatingHtml   = reviewData ? blocks.renderReviewRatingBlock(reviewData) : '';
   const reviewInsightsHtml = reviewData ? blocks.renderReviewInsightsBlock(reviewData) : '';
 
@@ -414,17 +354,14 @@ function renderOne(template, postJson, jsonPath, bodyImgCtx, idsCtx) {
 
   if (updatedDate) html = html.replace('Updated {{updated}}', `Updated ${escapeHtml(updatedDate)}`);
 
-  const headBlock = buildHeadFromMeta(meta);
-  html = html.replace('<!--META-->', headBlock);
+  html = html.replace('<!--META-->', buildHeadFromMeta(meta));
 
   html = injectAfterSlot(html, '<!--SLOT:FAQ_WRAPPER-->', faqHtml);
   html = injectAfterSlot(html, '<!--SLOT:SOURCES_WRAPPER-->', sourcesHtml);
   html = injectAfterSlot(html, '<!--SLOT:REVIEW_RATING_WRAPPER-->', reviewRatingHtml);
   html = injectAfterSlot(html, '<!--SLOT:REVIEW_INSIGHTS_WRAPPER-->', reviewInsightsHtml);
 
-  if (bodyHtml.includes('class="post-body-image"')) {
-    html = injectBodyImageCssOnce(html);
-  }
+  if (bodyHtml.includes('class="post-body-image"')) html = injectBodyImageCssOnce(html);
 
   html = html.replace(
     '</head>',
@@ -442,8 +379,6 @@ function main() {
   console.log('[render-posts] POSTS_DIR =', POSTS_DIR);
   console.log('[render-posts] TEMPLATE  =', TEMPLATE_PATH);
   console.log('[render-posts] OUTPUT    =', OUTPUT_DIR);
-  console.log('[render-posts] BODY_WRITE_MODE =', (process.env.BODY_WRITE_MODE || 'local'));
-  console.log('[render-posts] PUBLISH_MODE    =', (process.env.PUBLISH_MODE || 'disable'));
   console.log('────────────────────────────────────────────');
 
   ensureDir(OUTPUT_DIR);
@@ -473,7 +408,6 @@ function main() {
 
   console.log('[render-posts] BODY_IMAGE_MANIFEST =', bodyImgCtx.manifestSource);
   console.log('[render-posts] BODY_IMAGE_MANIFEST_LOADED =', bodyImgCtx.manifestLoaded);
-  console.log('[render-posts] BODY_IMAGE_ALLOW_DOMAINS =', allowedDomains.join(', ') || '(none)');
 
   const template = fs.readFileSync(TEMPLATE_PATH, 'utf8');
 
@@ -482,14 +416,12 @@ function main() {
 
   let ok = 0;
   let fail = 0;
-
-  // ✅ ids 재실행은 전체 렌더 동안 최대 1회
   const idsCtx = { reran: false };
 
   for (const file of files) {
     const fullPath = path.join(POSTS_DIR, file);
-    let json;
 
+    let json;
     try { json = readJson(fullPath); }
     catch (e) {
       console.error('[render-posts] JSON 파싱 실패:', file, e.message);
