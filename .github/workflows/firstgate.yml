@@ -65,6 +65,9 @@ jobs:
           echo "event_name=$EVENT_NAME"
           echo "PUBLISH_MODE=${PUBLISH_MODE}"
 
+          # 기본값: 파이프라인 실행
+          echo "SKIP_PIPELINE=false" >> $GITHUB_ENV
+
           # workflow_dispatch는 항상 허용(빌드/검증 목적)
           if [ "$EVENT_NAME" != "schedule" ]; then
             echo "[GUARD] workflow_dispatch -> allowed"
@@ -74,36 +77,44 @@ jobs:
           # schedule일 때만 강제 통제
           if [ "${PUBLISH_MODE}" != "enable" ]; then
             echo "[GUARD] blocked: PUBLISH_MODE != enable"
+            echo "SKIP_PIPELINE=true" >> $GITHUB_ENV
             exit 0
           fi
 
           if [ ! -f "System_files/manifests/auto-enable.json" ]; then
             echo "[GUARD] blocked: missing System_files/manifests/auto-enable.json"
+            echo "SKIP_PIPELINE=true" >> $GITHUB_ENV
             exit 0
           fi
 
           sw=$(node -e "try{const j=require('./System_files/manifests/auto-enable.json');process.stdout.write(String(!!j.autoEnable));}catch(e){process.stdout.write('false');}")
           if [ "$sw" != "true" ]; then
             echo "[GUARD] blocked: autoEnable != true"
+            echo "SKIP_PIPELINE=true" >> $GITHUB_ENV
             exit 0
           fi
 
           echo "[GUARD] schedule allowed"
+          echo "SKIP_PIPELINE=false" >> $GITHUB_ENV
 
       - name: Checkout
+        if: env.SKIP_PIPELINE != 'true'
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Setup Node
+        if: env.SKIP_PIPELINE != 'true'
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Install (repo root)
+        if: env.SKIP_PIPELINE != 'true'
         run: npm ci
 
       - name: Resolve effective modes (BODY_WRITE_MODE + DRY_RUN)
+        if: env.SKIP_PIPELINE != 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -140,6 +151,7 @@ jobs:
           echo "  DRY_RUN=$DR"
 
       - name: Sanity check (required scripts exist)
+        if: env.SKIP_PIPELINE != 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -173,6 +185,7 @@ jobs:
           test -f System_files/scripts/publish/blogger.cjs
 
       - name: Build firstgate queue -> posts JSON
+        if: env.SKIP_PIPELINE != 'true'
         working-directory: System_files
         env:
           PUBLISH_MODE: ${{ env.PUBLISH_MODE }}
@@ -184,6 +197,7 @@ jobs:
           node scripts/build/firstgate-queue-to-post.cjs
 
       - name: Assign pageId (ids)
+        if: env.SKIP_PIPELINE != 'true'
         working-directory: System_files
         env:
           PUBLISH_MODE: ${{ env.PUBLISH_MODE }}
@@ -194,6 +208,7 @@ jobs:
           node scripts/build/ids.cjs
 
       - name: Generate body
+        if: env.SKIP_PIPELINE != 'true'
         working-directory: System_files
         env:
           PUBLISH_MODE: ${{ env.PUBLISH_MODE }}
@@ -204,6 +219,7 @@ jobs:
           node scripts/build/generate-body.cjs
 
       - name: Inject reviewData (SSOT)
+        if: env.SKIP_PIPELINE != 'true'
         working-directory: System_files
         env:
           DRY_RUN: ${{ env.DRY_RUN }}
@@ -212,6 +228,7 @@ jobs:
           node scripts/build/review-resolver.cjs
 
       - name: Validate body images manifest (fail fast)
+        if: env.SKIP_PIPELINE != 'true'
         working-directory: System_files
         env:
           DRY_RUN: ${{ env.DRY_RUN }}
@@ -220,6 +237,7 @@ jobs:
           node scripts/build/validate-body-images.cjs
 
       - name: Render posts (1st)
+        if: env.SKIP_PIPELINE != 'true'
         working-directory: System_files
         env:
           DRY_RUN: ${{ env.DRY_RUN }}
@@ -230,6 +248,7 @@ jobs:
           node scripts/build/review-meta-block.cjs
 
       - name: Build OG images (needs dist/posts)
+        if: env.SKIP_PIPELINE != 'true'
         working-directory: System_files
         env:
           DRY_RUN: ${{ env.DRY_RUN }}
@@ -239,6 +258,7 @@ jobs:
           node scripts/build/images-build-og.cjs
 
       - name: Upload images to R2 (DRY_RUN safe)
+        if: env.SKIP_PIPELINE != 'true'
         working-directory: System_files
         env:
           DRY_RUN: ${{ env.DRY_RUN }}
@@ -247,6 +267,7 @@ jobs:
           node scripts/build/r2-upload.cjs
 
       - name: Rewrite image URLs in posts JSON (after upload)
+        if: env.SKIP_PIPELINE != 'true'
         working-directory: System_files
         env:
           DRY_RUN: ${{ env.DRY_RUN }}
@@ -255,6 +276,7 @@ jobs:
           node scripts/build/rewrite-images.js
 
       - name: Render posts (2nd, after rewrite)
+        if: env.SKIP_PIPELINE != 'true'
         working-directory: System_files
         env:
           DRY_RUN: ${{ env.DRY_RUN }}
@@ -265,6 +287,7 @@ jobs:
           node scripts/build/review-meta-block.cjs
 
       - name: Inject Sources from SSOT into dist/posts (live rule uses DRY_RUN)
+        if: env.SKIP_PIPELINE != 'true'
         working-directory: System_files
         env:
           DRY_RUN: ${{ env.DRY_RUN }}
@@ -273,6 +296,7 @@ jobs:
           node scripts/build/inject-sources-from-ssot.cjs
 
       - name: Validate & repair
+        if: env.SKIP_PIPELINE != 'true'
         working-directory: System_files
         env:
           DRY_RUN: ${{ env.DRY_RUN }}
@@ -281,6 +305,7 @@ jobs:
           node scripts/build/validate-repair.cjs
 
       - name: Preflight QA
+        if: env.SKIP_PIPELINE != 'true'
         working-directory: System_files
         env:
           DRY_RUN: ${{ env.DRY_RUN }}
@@ -289,6 +314,7 @@ jobs:
           node scripts/build/qa-check.cjs
 
       - name: Build AI feed + validate
+        if: env.SKIP_PIPELINE != 'true'
         working-directory: System_files
         env:
           DRY_RUN: ${{ env.DRY_RUN }}
@@ -298,6 +324,7 @@ jobs:
           node scripts/build/validate-feed.cjs
 
       - name: Build tools + trust page
+        if: env.SKIP_PIPELINE != 'true'
         working-directory: System_files
         env:
           DRY_RUN: ${{ env.DRY_RUN }}
@@ -307,7 +334,7 @@ jobs:
           node scripts/build/build-trust-page.cjs
 
       - name: Publish to Blogger (skip when DRY_RUN=true)
-        if: env.DRY_RUN != 'true'
+        if: env.SKIP_PIPELINE != 'true' && env.DRY_RUN != 'true'
         working-directory: System_files
         env:
           DRY_RUN: ${{ env.DRY_RUN }}
@@ -320,6 +347,7 @@ jobs:
           node scripts/publish/blogger.cjs
 
       - name: Commit generated artifacts (logs/manifests/dist)
+        if: env.SKIP_PIPELINE != 'true'
         shell: bash
         run: |
           set -euo pipefail
