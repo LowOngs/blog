@@ -1,4 +1,7 @@
 // System_files/scripts/build/firstgate-queue-to-post.cjs
+// firstgate queue(dist/queue/firstgate.json) → content/posts/*.json 생성(labels 정규화)
+
+require('./lib/env.cjs');
 
 const fs = require('fs');
 const path = require('path');
@@ -7,6 +10,21 @@ const ROOT = path.resolve(__dirname, '../..');
 const DIST_QUEUE_DIR = path.join(ROOT, 'dist', 'queue');
 const DIST_QUEUE_FILE = path.join(DIST_QUEUE_DIR, 'firstgate.json');
 const CONTENT_POSTS_DIR = path.join(ROOT, 'content', 'posts');
+
+/** firstgate에서 허용되는 라벨(6개) */
+const ALLOWED_LABELS = new Set([
+  'app-reviews',
+  'device-reviews',
+  'subscription-services',
+  'how-to-playbooks',
+  'smart-savings',
+  'templates-checklists',
+]);
+
+function fatal(msg) {
+  console.error('[firstgate-queue-to-post][FATAL]', msg);
+  process.exit(1);
+}
 
 function fileExists(p) {
   try {
@@ -25,9 +43,7 @@ function loadJson(p) {
 
 function saveJson(p, data) {
   const dir = path.dirname(p);
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(p, JSON.stringify(data, null, 2), 'utf8');
 }
 
@@ -55,6 +71,13 @@ function buildSlug(label, seedId, date) {
   return slugify(base);
 }
 
+function assertAllowedLabel(label, context) {
+  const v = String(label || '').trim();
+  if (!v) fatal(`label missing (${context})`);
+  if (!ALLOWED_LABELS.has(v)) fatal(`label not allowed: "${v}" (${context})`);
+  return v;
+}
+
 function buildBodyPrompt(label, seed) {
   const title = seed.title || '';
   const angle = seed.angle || '';
@@ -80,27 +103,30 @@ function buildBodyPrompt(label, seed) {
     .join('\n');
 }
 
+function normalizeQueueLabel(queue) {
+  // 우선순위: queue.label → queue.seed.label
+  const seed = queue.seed || {};
+  const label = queue.label || seed.label || '';
+  return assertAllowedLabel(label, 'queue file label');
+}
+
 function main() {
   console.log('[firstgate-queue-to-post] Start');
 
   const queue = loadJson(DIST_QUEUE_FILE);
   if (!queue) {
-    console.log(
-      `[firstgate-queue-to-post] Queue file not found: ${DIST_QUEUE_FILE}. Nothing to do.`
-    );
+    console.log(`[firstgate-queue-to-post] Queue not found: ${DIST_QUEUE_FILE}. Nothing to do.`);
     return;
   }
 
   if (queue.source !== 'firstgate') {
-    console.log(
-      `[firstgate-queue-to-post] Queue source is not "firstgate" (source=${queue.source}). Nothing to do.`
-    );
+    console.log(`[firstgate-queue-to-post] source is not "firstgate" (source=${queue.source}). Nothing to do.`);
     return;
   }
 
-  const label = queue.label;
+  const label = normalizeQueueLabel(queue);
   const seed = queue.seed || {};
-  const seedId = queue.seedId || seed.id || 'fg-unknown';
+  const seedId = String(queue.seedId || seed.id || 'fg-unknown').trim();
   const queueDate = queue.date || getTodayUtcDate();
   const nowIso = nowUtcIso();
 
@@ -109,46 +135,50 @@ function main() {
   const targetPath = path.join(CONTENT_POSTS_DIR, filename);
 
   if (fileExists(targetPath)) {
-    console.log(
-      `[firstgate-queue-to-post] Target file already exists, skipping: ${targetPath}`
-    );
+    console.log(`[firstgate-queue-to-post] Target already exists, skipping: ${targetPath}`);
     return;
   }
 
+  // ✅ posts SSOT: labels만 사용(단일 label 필드 금지)
   const post = {
     slug,
-    label,
     labels: [label],
+
     title: seed.title || '(Untitled)',
     tldr: '',
     body: '',
     bodyPrompt: buildBodyPrompt(label, seed),
+
     intent: seed.intent || '',
     faq: [],
     sources: [],
+
     isFirstGate: true,
+
     seedMeta: {
       source: 'firstgate',
-      label,
       seedId,
       warehouseKey: `${label}::${seedId}`,
       pickedAt: queue.pickedAt || null,
       queueDate,
-      priority:
-        typeof seed.priority === 'number' ? seed.priority : null,
+
+      // 라벨은 메타로만 유지(표시/추적용)
+      label,
+
+      priority: typeof seed.priority === 'number' ? seed.priority : null,
       angle: seed.angle || null,
       audience: seed.audience || null,
       notes: seed.notes || null,
     },
+
     createdAt: nowIso,
     updatedAt: nowIso,
   };
 
   saveJson(targetPath, post);
 
-  console.log(
-    `[firstgate-queue-to-post] Created post JSON: ${targetPath}`
-  );
+  console.log(`[firstgate-queue-to-post] Created post JSON: ${targetPath}`);
+  console.log(`[firstgate-queue-to-post] labels=[${label}]`);
   console.log('[firstgate-queue-to-post] Done');
 }
 
@@ -156,10 +186,7 @@ if (require.main === module) {
   try {
     main();
   } catch (err) {
-    console.error(
-      '[firstgate-queue-to-post] ERROR:',
-      err && err.message
-    );
+    console.error('[firstgate-queue-to-post] ERROR:', err && err.message ? err.message : err);
     process.exit(1);
   }
 }
