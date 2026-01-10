@@ -1,10 +1,35 @@
-// System_files/scripts/build/firstgate-pick.cjs
-// First-Gate Daily Picker: warehouse/first-gate(read-only) → dist/queue/firstgate.json 생성
+#!/usr/bin/env node
+'use strict';
 
+/**
+ * System_files/scripts/build/firstgate-pick.cjs
+ * First-Gate Daily Picker: warehouse/first-gate(read-only) → dist/queue/firstgate.json 생성
+ */
+
+// ✅ 로컬/CI 공통: .env 로드(필수)
 require('./lib/env.cjs');
 
 const fs = require('fs');
 const path = require('path');
+
+/**
+ * AOIA FLOW MAP REFERENCE
+ * --------------------------------------------------
+ * Flow Map: System_files/docs/aoia-flow-map.md
+ *
+ * Role:
+ *   - first-gate 창고(읽기 전용)에서 "미사용 시드 1개"를 고르고
+ *     dist/queue/firstgate.json(오늘의 1건 큐)로 기록
+ *
+ * Output:
+ *   - dist/queue/firstgate.json
+ *   - manifests/firstgate-usage.json (사용 기록)
+ *
+ * Invariants:
+ *   - 라벨은 6개 중 1개만 허용
+ *   - warehouse 파일은 절대 수정하지 않음(read-only)
+ *   - seed에 label이 없으면 큐에 기록하기 쉽게 메모리에서만 주입
+ */
 
 /** 프로젝트 ROOT: System_files 기준 */
 const ROOT = path.resolve(__dirname, '../..');
@@ -99,7 +124,9 @@ function inferLabelFromFilename(filename) {
 function assertAllowedLabel(label, context) {
   const v = String(label || '').trim();
   if (!v) fatal(`label missing (${context})`);
-  if (!ALLOWED_LABELS.has(v)) fatal(`label not allowed: "${v}" (${context})`);
+  if (!ALLOWED_LABELS.has(v)) {
+    fatal(`label not allowed: "${v}" (${context})`);
+  }
   return v;
 }
 
@@ -134,7 +161,7 @@ function loadAllFirstGateSeeds() {
       const createdAt = seed.createdAt || null;
       const priority = typeof seed.priority === 'number' ? seed.priority : 999;
 
-      // seed에 label이 없으면, 큐에서 쓰기 쉽게 주입(창고 파일은 수정하지 않음)
+      // seed에 label이 없으면, 큐에서 쓰기 쉽게 주입(warehouse 파일은 수정하지 않음)
       const seedWithLabel = seed.label ? seed : { ...seed, label };
 
       allSeeds.push({
