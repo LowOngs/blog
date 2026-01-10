@@ -1,12 +1,14 @@
 #!/usr/bin/env node
+'use strict';
+
 /**
- * blogger.cjs — publish scope를 today.json(SSOT)로 고정
- * - 기본: dist/queue/today.json의 publishable slug만 발행
- * - 옵션: PUBLISH_SCOPE=all 일 때만 dist/posts/*.html 전체 발행(수동용)
+ * System_files/scripts/publish/blogger.cjs
+ * publish scope를 today.json(SSOT)로 고정 + 백오프/슬립/재시도 조건 정교화
  */
+
 const path = require('path');
 
-// 루트(.env) 강제 로드: C:\google-blog\.env 기준
+// ✅ 로컬/CI 공통: .env 로드(필수)
 require('dotenv').config({
   path: path.resolve(__dirname, '../../../.env'),
 });
@@ -47,20 +49,18 @@ const PREFIX_TO_CODE = {
 // ────────────────────────────────────
 //  경로·로그 설정
 // ────────────────────────────────────
-const ROOT   = path.resolve(__dirname, '..', '..');        // System_files
-const OUTDIR = path.join(ROOT, 'dist', 'posts');
+const ROOT      = path.resolve(__dirname, '..', '..');        // System_files
+const OUTDIR    = path.join(ROOT, 'dist', 'posts');
 const TODAY_JSON = path.join(ROOT, 'dist', 'queue', 'today.json');
 
 const LOGDIR = path.join(ROOT, 'logs');
 fs.mkdirSync(LOGDIR, { recursive: true });
 
 function nowKstDate() {
-  // 로그 파일명용(UTC 기준 0시 넘어가는 문제 완화)
   const d = new Date();
   const k = new Date(d.getTime() + 9 * 60 * 60 * 1000);
   return k.toISOString().slice(0, 10);
 }
-
 const todayISODate = nowKstDate();
 const DETAIL_LOG   = path.join(LOGDIR, `publish-blogger-${todayISODate}.log`);
 const SUMMARY_LOG  = path.join(LOGDIR, `publish-summary-${todayISODate}.log`);
@@ -105,44 +105,86 @@ function parseDryRun(v) {
 const DRY_RUN_RAW = process.env.DRY_RUN;
 const DRY_RUN = parseDryRun(DRY_RUN_RAW);
 
+// 발행 템포(슬립)
+const POST_SLEEP_MS = Number(process.env.POST_SLEEP_MS || '1200'); // 기본 1.2s
+const MAX_BACKOFF_MS = Number(process.env.MAX_BACKOFF_MS || '30000'); // 백오프 상한(기본 30s)
+const RETRY_TRIES = Number(process.env.RETRY_TRIES || '6'); // 재시도 횟수(기본 6)
+
 // ────────────────────────────────────
 //  유틸
 // ────────────────────────────────────
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
-async function backoff(fn, { tries = 5, baseMs = 1000, label = 'task' } = {}) {
+function jitter(ms, ratio = 0.2) {
+  const j = ms * ratio;
+  const min = ms - j;
+  const max = ms + j;
+  return Math.max(0, Math.floor(min + Math.random() * (max - min)));
+}
+
+function parseRetryAfterMs(headers) {
+  try {
+    const v = headers && (headers.get ? headers.get('retry-after') : null);
+    if (!v) return 0;
+    const s = String(v).trim();
+    if (!s) return 0;
+
+    // seconds
+    const sec = Number(s);
+    if (!Number.isNaN(sec) && sec >= 0) return Math.floor(sec * 1000);
+
+    // HTTP-date
+    const t = Date.parse(s);
+    if (!Number.isNaN(t)) {
+      const diff = t - Date.now();
+      return diff > 0 ? diff : 0;
+    }
+  } catch {}
+  return 0;
+}
+
+async function backoff(fn, opts = {}) {
+  const {
+    tries = RETRY_TRIES,
+    baseMs = 1000,
+    label = 'task',
+    maxMs = MAX_BACKOFF_MS,
+    shouldRetry = () => true,
+    onRetry = null,
+  } = opts;
+
   let last;
   for (let i = 0; i < tries; i++) {
     try {
       return await fn();
     } catch (e) {
       last = e;
-      warn(`${label} attempt ${i + 1}/${tries} →`, e.message || e);
-      if (i < tries - 1) await sleep(baseMs * Math.pow(2, i));
+
+      const retryable = shouldRetry(e);
+      warn(`${label} attempt ${i + 1}/${tries} →`, e && e.message ? e.message : String(e));
+
+      if (!retryable || i === tries - 1) break;
+
+      let waitMs = Math.min(maxMs, baseMs * Math.pow(2, i));
+      if (e && typeof e.retryAfterMs === 'number' && e.retryAfterMs > 0) {
+        waitMs = Math.min(maxMs, e.retryAfterMs);
+      }
+      waitMs = jitter(waitMs);
+
+      if (typeof onRetry === 'function') onRetry(e, i + 1, waitMs);
+      await sleep(waitMs);
     }
   }
   throw last;
 }
 
-async function getAccessToken() {
-  const res = await fetch('https://oauth2.googleapis.com/token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({
-      client_id:     CLIENT_ID,
-      client_secret: CLIENT_SECRET,
-      refresh_token: REFRESH_TOKEN,
-      grant_type:    'refresh_token'
-    })
-  });
-  const text = await res.text();
-  if (!res.ok) throw new Error(`token ${res.status} ${text}`);
-
-  let json;
-  try { json = JSON.parse(text); } catch { throw new Error('token parse error'); }
-  if (!json.access_token) throw new Error('no access_token');
-  log('[blogger] token ok, expires_in=', json.expires_in);
-  return json.access_token;
+function isRetryableHttpStatus(status) {
+  // 429/5xx는 기본 retry
+  if (status === 429) return true;
+  if (status >= 500) return true;
+  // 408(요청 타임아웃)도 retry 가치 있음
+  if (status === 408) return true;
+  return false;
 }
 
 function extractTitle(html) {
@@ -216,6 +258,36 @@ function loadPublishableSlugs() {
   return { loaded: true, slugs: out };
 }
 
+// ────────────────────────────────────
+//  Blogger API
+// ────────────────────────────────────
+async function getAccessToken() {
+  const res = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      client_id:     CLIENT_ID,
+      client_secret: CLIENT_SECRET,
+      refresh_token: REFRESH_TOKEN,
+      grant_type:    'refresh_token'
+    })
+  });
+
+  const text = await res.text();
+  if (!res.ok) {
+    const err = new Error(`token ${res.status} ${text}`);
+    err.httpStatus = res.status;
+    err.retryAfterMs = parseRetryAfterMs(res.headers);
+    throw err;
+  }
+
+  let json;
+  try { json = JSON.parse(text); } catch { throw new Error('token parse error'); }
+  if (!json.access_token) throw new Error('no access_token');
+  log('[blogger] token ok, expires_in=', json.expires_in);
+  return json.access_token;
+}
+
 async function createPost(token, { title, content, labels }) {
   const url = `https://www.googleapis.com/blogger/v3/blogs/${encodeURIComponent(BLOG_ID)}/posts/?isDraft=false`;
   const body = { kind: 'blogger#post', blog: { id: BLOG_ID }, title, content };
@@ -223,19 +295,62 @@ async function createPost(token, { title, content, labels }) {
 
   const res = await fetch(url, {
     method: 'POST',
-    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
     body: JSON.stringify(body)
   });
 
   const t = await res.text();
-  if (res.status === 401 || res.status === 403 || res.status === 429 || res.status >= 500) {
-    throw new Error(`POST ${res.status} ${t}`);
-  }
   if (!res.ok) {
-    warn('fatal', res.status, t);
-    return null;
+    const err = new Error(`POST ${res.status} ${t}`);
+    err.httpStatus = res.status;
+    err.retryAfterMs = parseRetryAfterMs(res.headers);
+    throw err;
   }
+
   try { return JSON.parse(t); } catch { throw new Error('response parse error'); }
+}
+
+function shouldRetryPublishError(e) {
+  const st = e && typeof e.httpStatus === 'number' ? e.httpStatus : 0;
+  return isRetryableHttpStatus(st);
+}
+
+// 401/403은 “토큰 재발급 후 1회 재시도” 가치 있음(권한 자체 문제면 계속 실패)
+async function publishWithTokenRefresh(tokenHolder, payload, labelForLog) {
+  try {
+    return await backoff(
+      () => createPost(tokenHolder.token, payload),
+      {
+        label: labelForLog,
+        shouldRetry: shouldRetryPublishError,
+        onRetry: (e, attempt, waitMs) => {
+          const st = e && e.httpStatus ? e.httpStatus : '';
+          warn(`${labelForLog} retry scheduled: status=${st} wait=${waitMs}ms`);
+        }
+      }
+    );
+  } catch (e) {
+    const st = e && typeof e.httpStatus === 'number' ? e.httpStatus : 0;
+    if (st === 401 || st === 403) {
+      warn(`${labelForLog} got ${st} → refresh token and retry once`);
+      tokenHolder.token = await backoff(getAccessToken, { label: 'token(refresh)' });
+
+      // refresh 후에는 1회만 “짧게” 다시 시도(반복 루프 방지)
+      return await backoff(
+        () => createPost(tokenHolder.token, payload),
+        {
+          tries: 2,
+          baseMs: 1000,
+          label: `${labelForLog}:afterRefresh`,
+          shouldRetry: shouldRetryPublishError
+        }
+      );
+    }
+    throw e;
+  }
 }
 
 // ────────────────────────────────────
@@ -243,14 +358,17 @@ async function createPost(token, { title, content, labels }) {
 // ────────────────────────────────────
 (async function main() {
   log('────────────────────────────────────────────');
-  log('[blogger] OUTDIR            =', OUTDIR);
-  log('[blogger] TODAY_JSON        =', TODAY_JSON);
+  log('[blogger] OUTDIR               =', OUTDIR);
+  log('[blogger] TODAY_JSON           =', TODAY_JSON);
   log('[blogger] CONFIG PUBLISH_MODE  =', PUBLISH_MODE);
   log('[blogger] CONFIG PUBLISH_SCOPE =', PUBLISH_SCOPE);
   log('[blogger] CONFIG LABEL_FILTER  =', LABEL_FILTER || '(none)');
   log('[blogger] CONFIG MAX_POSTS     =', MAX_POSTS_NUM || '(none)');
-  log('[blogger] DRY_RUN(raw)      =', (DRY_RUN_RAW === undefined ? '(undefined)' : JSON.stringify(String(DRY_RUN_RAW))));
-  log('[blogger] DRY_RUN(parsed)   =', DRY_RUN);
+  log('[blogger] CONFIG POST_SLEEP_MS =', POST_SLEEP_MS);
+  log('[blogger] CONFIG RETRY_TRIES   =', RETRY_TRIES);
+  log('[blogger] CONFIG MAX_BACKOFF_MS=', MAX_BACKOFF_MS);
+  log('[blogger] DRY_RUN(raw)         =', (DRY_RUN_RAW === undefined ? '(undefined)' : JSON.stringify(String(DRY_RUN_RAW))));
+  log('[blogger] DRY_RUN(parsed)      =', DRY_RUN);
 
   // ✅ 최종 게이트: enable 아니면 “API 호출 자체 금지”
   if (PUBLISH_MODE !== 'enable') {
@@ -300,9 +418,15 @@ async function createPost(token, { title, content, labels }) {
   }
 
   // DRY_RUN이면 토큰 발급/POST 없음
-  let token = null;
+  const tokenHolder = { token: null };
   if (!DRY_RUN) {
-    token = await backoff(getAccessToken, { label: 'token' });
+    tokenHolder.token = await backoff(getAccessToken, {
+      label: 'token',
+      shouldRetry: (e) => {
+        const st = e && typeof e.httpStatus === 'number' ? e.httpStatus : 0;
+        return isRetryableHttpStatus(st) || st === 400; // 간헐적 토큰 문제 완충(과하게 넓히지 않음)
+      }
+    });
   } else {
     log('[blogger] DRY_RUN 모드 — Blogger API 호출 없이 로그만 남깁니다.');
   }
@@ -354,12 +478,16 @@ async function createPost(token, { title, content, labels }) {
         }
         ok++;
         used++;
+
+        // ✅ 템포 유지(드라이런이라도 로그 폭주 방지)
+        if (POST_SLEEP_MS > 0) await sleep(jitter(POST_SLEEP_MS, 0.1));
         continue;
       }
 
-      const result = await backoff(
-        () => createPost(token, { title, content: body, labels: bloggerLabels }),
-        { label: `publish:${name}` }
+      const result = await publishWithTokenRefresh(
+        tokenHolder,
+        { title, content: body, labels: bloggerLabels },
+        `publish:${name}`
       );
 
       if (result && result.id) {
@@ -400,6 +528,9 @@ async function createPost(token, { title, content, labels }) {
       }
 
       used++;
+
+      // ✅ 기본 슬립(429/오탐 방지)
+      if (POST_SLEEP_MS > 0) await sleep(jitter(POST_SLEEP_MS, 0.1));
     } catch (e) {
       warn(`POST FAIL ${name} →`, e.message || e);
       try {
@@ -420,6 +551,9 @@ async function createPost(token, { title, content, labels }) {
       }
       bad++;
       used++;
+
+      // ✅ 실패 후에도 템포 유지(연쇄 429 방지)
+      if (POST_SLEEP_MS > 0) await sleep(jitter(POST_SLEEP_MS, 0.2));
     }
   }
 
