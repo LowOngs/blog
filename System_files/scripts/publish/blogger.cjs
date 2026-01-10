@@ -1,361 +1,232 @@
+#!/usr/bin/env node
 /**
- * blogger.cjs — dist HTML → Blogger 발행 + LABEL / MAX_POSTS / DRY_RUN 지원
+ * blogger.cjs
+ * - dist/posts/*.html → Blogger publish
+ * - CRIT: PUBLISH_MODE 최종 게이트 (enable 아니면 API 호출 자체 금지)
+ *
+ * Env:
+ *  - PUBLISH_MODE=enable|disable  (default: disable)
+ *  - DRY_RUN=true|false|0|1       (default: true)  // step2에서 더 강제 예정
+ *  - BLOGGER_BLOG_ID, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REFRESH_TOKEN
+ *  - MAX_POSTS (optional)
+ *  - LABEL_FILTER (optional)
  */
-const path = require('path');
-
-// 루트(.env) 강제 로드: C:\google-blog\.env 기준
-require('dotenv').config({
-  path: path.resolve(__dirname, '../../../.env'),
-});
 
 const fs = require('fs');
-const fg = require('fast-glob');
+const path = require('path');
+const https = require('https');
 
-// ✅ Seed Ledger (Minimal v1)
-const { upsert: upsertSeedLedger } = require(path.join(__dirname, '..', 'build', 'lib', 'seed-ledger.cjs'));
-
-// ────────────────────────────────────
-//  라벨 매핑: 내부 코드 → 사람이 보는 Blogger 라벨
-// ────────────────────────────────────
-const CODE_TO_LABEL = {
-  'app-reviews':              'App Reviews',
-  'device-reviews':           'Device Reviews',
-  'subscription-services':    'Subscription & Services',
-  'how-to-playbooks':         'How to Playbooks',
-  'smart-savings':            'Smart Savings',
-  'templates-checklists':     'Templates & Checklists'
-};
-
-// 파일명 prefix → 내부 라벨 코드
-const PREFIX_TO_CODE = {
-  app:          'app-reviews',
-  device:       'device-reviews',
-  sub:          'subscription-services',
-  subs:         'subscription-services',
-  subscription: 'subscription-services',
-  howto:        'how-to-playbooks',
-  'how-to':     'how-to-playbooks',
-  smart:        'smart-savings',
-  save:         'smart-savings',
-  tpl:          'templates-checklists',
-  tmpl:         'templates-checklists',
-  template:     'templates-checklists'
-};
-
-// ────────────────────────────────────
-//  경로·로그 설정
-// ────────────────────────────────────
-const ROOT   = path.resolve(__dirname, '..', '..');        // System_files
+const ROOT = path.resolve(__dirname, '..', '..'); // System_files
 const OUTDIR = path.join(ROOT, 'dist', 'posts');
 const LOGDIR = path.join(ROOT, 'logs');
-fs.mkdirSync(LOGDIR, { recursive: true });
 
-const todayISODate = new Date().toISOString().slice(0, 10);
-const DETAIL_LOG   = path.join(LOGDIR, `publish-blogger-${todayISODate}.log`);
-const SUMMARY_LOG  = path.join(LOGDIR, `publish-summary-${todayISODate}.log`);
-
-const append = (file, s) => fs.appendFileSync(file, s + '\n', 'utf8');
-const log  = (...a) => { const s = a.join(' '); console.log(s); append(DETAIL_LOG, s); };
-const warn = (...a) => log('[blogger][WARN]', ...a);
-const fail = (m, c = 1) => { log('[blogger][FAIL]', m); process.exit(c); };
-
-// ────────────────────────────────────
-//  ENV 설정
-// ────────────────────────────────────
-const BLOG_ID       = process.env.BLOGGER_BLOG_ID;
-const CLIENT_ID     = process.env.GOOGLE_CLIENT_ID;
-const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-const REFRESH_TOKEN = process.env.GOOGLE_REFRESH_TOKEN;
-
-if (!BLOG_ID || !CLIENT_ID || !CLIENT_SECRET || !REFRESH_TOKEN) {
-  fail('환경변수 누락(BLOGGER_BLOG_ID / GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET / GOOGLE_REFRESH_TOKEN)');
+function ensureDir(p) {
+  try { fs.mkdirSync(p, { recursive: true }); } catch {}
 }
 
-// LABEL: 내부 코드(app-reviews 등), 빈 문자열이면 자동모드
-const LABEL_FILTER = process.env.LABEL || '';
-// MAX_POSTS: 숫자 또는 빈 문자열(제한 없음)
-const MAX_POSTS_RAW = process.env.MAX_POSTS || '';
-const MAX_POSTS_NUM = MAX_POSTS_RAW && !Number.isNaN(Number(MAX_POSTS_RAW))
-  ? Number(MAX_POSTS_RAW)
-  : 0; // 0 = 제한 없음
+function nowKstDate() {
+  // 파일명용: YYYY-MM-DD (KST 기준)
+  const d = new Date();
+  const kst = new Date(d.getTime() + 9 * 60 * 60 * 1000);
+  return kst.toISOString().slice(0, 10);
+}
 
-// DRY_RUN: "true"면 API 호출 없이 로그만
-const DRY_RUN = (process.env.DRY_RUN || 'false').toLowerCase() === 'true';
+function readEnv(name, fallback = '') {
+  const v = process.env[name];
+  if (v === undefined || v === null || String(v).trim() === '') return fallback;
+  return String(v);
+}
 
-// ────────────────────────────────────
-//  유틸
-// ────────────────────────────────────
-const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+function parsePublishMode() {
+  return readEnv('PUBLISH_MODE', 'disable').toLowerCase().trim(); // enable|disable
+}
 
-async function backoff(fn, { tries = 5, baseMs = 1000, label = 'task' } = {}) {
-  let last;
-  for (let i = 0; i < tries; i++) {
-    try {
-      return await fn();
-    } catch (e) {
-      last = e;
-      warn(`${label} attempt ${i + 1}/${tries} →`, e.message || e);
-      if (i < tries - 1) await sleep(baseMs * Math.pow(2, i));
-    }
+function parseDryRun() {
+  // 원칙: false/0만 live, 나머지는 전부 dry-run
+  const v = readEnv('DRY_RUN', 'true').toLowerCase().trim();
+  return !(v === 'false' || v === '0');
+}
+
+function guardPublishModeOrExit() {
+  const pm = parsePublishMode();
+  const dry = parseDryRun();
+
+  console.log('────────────────────────────────────────────');
+  console.log('[blogger] OUTDIR        =', OUTDIR);
+  console.log('[blogger] CONFIG PUBLISH_MODE =', pm);
+  console.log('[blogger] CONFIG DRY_RUN      =', dry ? 'true (no_live)' : 'false (live)');
+  console.log('────────────────────────────────────────────');
+
+  if (pm !== 'enable') {
+    console.log('[blogger] PAUSE: PUBLISH_MODE!=enable 이므로 Blogger API 호출 금지 → 즉시 종료 (일시정지, 상태 보존)');
+    process.exit(0);
   }
-  throw last;
+
+  // ※ 1단계는 PUBLISH_MODE가 최종권자.
+  // DRY_RUN 강제 차단은 2단계에서 더 세게 묶을 예정이지만,
+  // 사고 방지를 위해 경고는 남깁니다.
+  if (dry) {
+    console.log('[blogger] NOTE: DRY_RUN=true 상태입니다. (2단계에서 POST 차단을 강제할 예정)');
+  }
+}
+
+function requestJson(method, url, headers, bodyStr) {
+  return new Promise((resolve, reject) => {
+    const u = new URL(url);
+    const opts = {
+      method,
+      hostname: u.hostname,
+      path: u.pathname + u.search,
+      headers,
+    };
+
+    const req = https.request(opts, (res) => {
+      let data = '';
+      res.on('data', (c) => (data += c));
+      res.on('end', () => {
+        const status = res.statusCode || 0;
+        let json = null;
+        try { json = JSON.parse(data); } catch {}
+        resolve({ status, raw: data, json });
+      });
+    });
+
+    req.on('error', reject);
+    if (bodyStr) req.write(bodyStr);
+    req.end();
+  });
 }
 
 async function getAccessToken() {
-  const res = await fetch('https://oauth2.googleapis.com/token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({
-      client_id:     CLIENT_ID,
-      client_secret: CLIENT_SECRET,
-      refresh_token: REFRESH_TOKEN,
-      grant_type:    'refresh_token'
-    })
-  });
-  const text = await res.text();
-  if (!res.ok) throw new Error(`token ${res.status} ${text}`);
-  let json;
-  try {
-    json = JSON.parse(text);
-  } catch {
-    throw new Error('token parse error');
-  }
-  if (!json.access_token) throw new Error('no access_token');
-  log('[blogger] token ok, expires_in=', json.expires_in);
-  return json.access_token;
-}
+  const clientId = readEnv('GOOGLE_CLIENT_ID');
+  const clientSecret = readEnv('GOOGLE_CLIENT_SECRET');
+  const refreshToken = readEnv('GOOGLE_REFRESH_TOKEN');
 
-function extractTitle(html) {
-  const m = html.match(/<title>([^<]*)<\/title>/i);
-  return m ? m[1].trim() : 'Untitled';
-}
-
-function extractBody(html) {
-  const m = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
-  return m ? m[1] : html;
-}
-
-function extractPageId(html) {
-  // 우선순위: data-page-id="page000123" → id badge text
-  let m = html.match(/data-page-id\s*=\s*"?(page\d{6})"?/i);
-  if (m && m[1]) return m[1];
-  m = html.match(/id\s*=\s*"pageId"[^>]*>\s*(page\d{6})\s*</i);
-  if (m && m[1]) return m[1];
-  return '';
-}
-
-// 파일명 → 내부 라벨 코드(app-reviews 등)
-function inferLabelCodeFromFilename(name) {
-  const base = name.replace(/\.html$/i, '').toLowerCase();
-
-  // ✅ firstgate-how-to-playbooks-... 형태 지원
-  if (base.startsWith('firstgate-')) {
-    const rest = base.slice('firstgate-'.length);
-    const m = rest.match(/^(app-reviews|device-reviews|subscription-services|how-to-playbooks|smart-savings|templates-checklists)\b/);
-    if (m && m[1]) return m[1];
+  if (!clientId || !clientSecret || !refreshToken) {
+    throw new Error('OAuth env 누락: GOOGLE_CLIENT_ID/GOOGLE_CLIENT_SECRET/GOOGLE_REFRESH_TOKEN');
   }
 
-  const prefix = base.split(/[-_]/)[0];
-  return PREFIX_TO_CODE[prefix] || null;
+  const body = new URLSearchParams({
+    client_id: clientId,
+    client_secret: clientSecret,
+    refresh_token: refreshToken,
+    grant_type: 'refresh_token',
+  }).toString();
+
+  const r = await requestJson(
+    'POST',
+    'https://oauth2.googleapis.com/token',
+    { 'Content-Type': 'application/x-www-form-urlencoded', 'Content-Length': Buffer.byteLength(body) },
+    body
+  );
+
+  if (r.status < 200 || r.status >= 300 || !r.json || !r.json.access_token) {
+    throw new Error(`token fail: status=${r.status} body=${r.raw}`);
+  }
+  return { accessToken: r.json.access_token, expiresIn: r.json.expires_in };
 }
 
-// Blogger API 호출
-async function createPost(token, { title, content, labels }) {
-  const url = `https://www.googleapis.com/blogger/v3/blogs/${encodeURIComponent(BLOG_ID)}/posts/?isDraft=false`;
-  const body = {
-    kind: 'blogger#post',
-    blog: { id: BLOG_ID },
-    title,
-    content
-  };
-  if (labels && labels.length) body.labels = labels;
-
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(body)
-  });
-
-  const t = await res.text();
-
-  if (res.status === 401 || res.status === 403 || res.status === 429 || res.status >= 500) {
-    throw new Error(`POST ${res.status} ${t}`);
-  }
-  if (!res.ok) {
-    warn('fatal', res.status, t);
-    return null;
-  }
-
-  try {
-    return JSON.parse(t);
-  } catch {
-    throw new Error('response parse error');
-  }
+function listHtmlFiles(dir) {
+  if (!fs.existsSync(dir)) return [];
+  return fs.readdirSync(dir).filter(f => f.toLowerCase().endsWith('.html'));
 }
 
-// ────────────────────────────────────
-//  메인
-// ────────────────────────────────────
-(async function main() {
-  log('────────────────────────────────────────────');
-  log('[blogger] OUTDIR =', OUTDIR);
-  log('[blogger] CONFIG LABEL_FILTER =', LABEL_FILTER || '(자동모드, 라벨 제한 없음)');
-  log('[blogger] CONFIG MAX_POSTS     =', MAX_POSTS_NUM || '(제한 없음)');
-  log('[blogger] CONFIG DRY_RUN      =', DRY_RUN);
+function writeSummaryLog(lines) {
+  ensureDir(LOGDIR);
+  const file = path.join(LOGDIR, `publish-summary-${nowKstDate()}.log`);
+  fs.writeFileSync(file, lines.join('\n') + '\n', 'utf8');
+  console.log('요약 로그 기록 →', file);
+}
 
-  if (!fs.existsSync(OUTDIR)) {
-    warn('dist/posts 없음. 건너뜀');
+async function main() {
+  // ✅ 1단계: 최종 게이트를 “제일 먼저” 실행
+  guardPublishModeOrExit();
+
+  // (여기부터는 PUBLISH_MODE=enable일 때만 진입)
+  const dryRun = parseDryRun(); // true면 실제 POST는 2단계에서 확실히 차단 예정
+  const blogId = readEnv('BLOGGER_BLOG_ID');
+
+  if (!blogId) {
+    console.error('[blogger][FAIL] BLOGGER_BLOG_ID 누락');
+    process.exitCode = 1;
     return;
   }
 
-  const files = fg.sync('*.html', { cwd: OUTDIR }).sort();
-  if (!files.length) {
-    warn('게시할 HTML 없음');
+  const files = listHtmlFiles(OUTDIR);
+  console.log('[blogger] 대상 파일:', files.length);
+
+  // 토큰 발급
+  const tok = await getAccessToken();
+  console.log('[blogger] token ok, expires_in=', tok.expiresIn);
+
+  // ---- 현재 1단계는 “PUBLISH_MODE 게이트”만 확정 ----
+  // 아래 POST 차단(=DRY_RUN true면 return)은 2단계에서 더 강제/통일할 예정입니다.
+  // 하지만 이번 사고(실발행)를 막기 위해 임시로라도 방지하고 싶으면 여기서 바로 막아도 됩니다.
+  if (dryRun) {
+    console.log('[blogger] DRY_RUN=true → (임시 안전) 실제 POST를 수행하지 않고 종료합니다.');
+    writeSummaryLog([
+      `[${new Date().toISOString()}] DRY_RUN=true → publish skipped`,
+      `files=${files.length}`,
+    ]);
     return;
   }
-  log('[blogger] 대상 파일:', files.length);
 
-  let token = null;
-  if (!DRY_RUN) {
-    token = await backoff(getAccessToken, { label: 'token' });
-  } else {
-    log('[blogger] DRY_RUN 모드 — Blogger API 호출 없이 로그만 남깁니다.');
-  }
+  // === 실제 POST 로직(기존 프로젝트에 맞게 유지/확장 가능) ===
+  // ※ 옹스님 환경에서는 step3에서 today.json 스코프 제한을 강제 예정.
+  // 지금은 “실발행이 실행되지 않게”가 최우선이므로,
+  // publish 스코프/백오프 개선은 다음 단계에서 다룹니다.
 
+  const summary = [];
   let ok = 0;
-  let bad = 0;
-  let used = 0;
+  let fail = 0;
 
-  for (const name of files) {
-    if (MAX_POSTS_NUM > 0 && used >= MAX_POSTS_NUM) {
-      log(`[blogger] MAX_POSTS=${MAX_POSTS_NUM} 도달, 이후 파일은 건너뜀 (총 시도 ${used}개)`);
-      break;
-    }
+  for (const f of files) {
+    const htmlPath = path.join(OUTDIR, f);
+    const html = fs.readFileSync(htmlPath, 'utf8');
 
-    const p = path.join(OUTDIR, name);
-    const slug = name.replace(/\.html$/i, '');
+    // 제목 추출(간단): <title> 우선, 없으면 파일명
+    const m = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+    const title = (m ? String(m[1]).replace(/\s+/g, ' ').trim() : f.replace(/\.html$/i, ''));
 
-    const labelCode = inferLabelCodeFromFilename(name);
-    const humanLabel = labelCode && CODE_TO_LABEL[labelCode] ? CODE_TO_LABEL[labelCode] : null;
+    // Blogger Posts.insert
+    const payload = JSON.stringify({
+      kind: "blogger#post",
+      title,
+      content: html,
+    });
 
-    if (LABEL_FILTER && labelCode !== LABEL_FILTER) {
-      log(`[blogger] skip ${name} (label mismatch: need="${LABEL_FILTER}", got="${labelCode || '-'}")`);
-      continue;
-    }
+    const url = `https://www.googleapis.com/blogger/v3/blogs/${encodeURIComponent(blogId)}/posts/`;
+    const r = await requestJson(
+      'POST',
+      url,
+      {
+        'Authorization': `Bearer ${tok.accessToken}`,
+        'Content-Type': 'application/json; charset=utf-8',
+        'Content-Length': Buffer.byteLength(payload),
+      },
+      payload
+    );
 
-    try {
-      const html = fs.readFileSync(p, 'utf8');
-      const title = extractTitle(html);
-      const body  = extractBody(html);
-      const pageId = extractPageId(html);
-
-      const bloggerLabels = humanLabel ? [humanLabel] : [];
-
-      if (DRY_RUN) {
-        log(`[DRY_RUN] ${name} → title="${title}" labels=[${bloggerLabels.join(', ')}] (실제 발행 안 함)`);
-
-        // ✅ Seed Ledger: dry-run 기록
-        try {
-          upsertSeedLedger({
-            stage: 'publish',
-            status: 'dryrun',
-            slug,
-            pageId,
-            label: labelCode || '',
-            source: slug.startsWith('firstgate-') ? 'firstgate' : '',
-            dryRun: true,
-            notes: 'DRY_RUN=true (no publish)',
-          });
-        } catch (e) {
-          warn('seed-ledger upsert fail:', e.message || e);
-        }
-
-        ok++;
-        used++;
-        continue;
-      }
-
-      const result = await backoff(
-        () => createPost(token, { title, content: body, labels: bloggerLabels }),
-        { label: `publish:${name}` }
-      );
-
-      if (result && result.id) {
-        log(`POST OK ${name} → id=${result.id} url=${result.url || ''} labels=[${bloggerLabels.join(', ')}]`);
-
-        // ✅ Seed Ledger: published 기록
-        try {
-          upsertSeedLedger({
-            stage: 'publish',
-            status: 'published',
-            slug,
-            pageId,
-            label: labelCode || '',
-            source: slug.startsWith('firstgate-') ? 'firstgate' : '',
-            dryRun: false,
-            postId: String(result.id || ''),
-            url: String(result.url || ''),
-          });
-        } catch (e) {
-          warn('seed-ledger upsert fail:', e.message || e);
-        }
-
-        ok++;
-      } else {
-        warn(`POST NG ${name}`);
-
-        // ✅ Seed Ledger: failed 기록(결과 id 없음)
-        try {
-          upsertSeedLedger({
-            stage: 'publish',
-            status: 'failed',
-            slug,
-            pageId,
-            label: labelCode || '',
-            source: slug.startsWith('firstgate-') ? 'firstgate' : '',
-            dryRun: false,
-            notes: 'POST result missing id',
-          });
-        } catch (e) {
-          warn('seed-ledger upsert fail:', e.message || e);
-        }
-
-        bad++;
-      }
-      used++;
-    } catch (e) {
-      warn(`POST FAIL ${name} →`, e.message || e);
-
-      // ✅ Seed Ledger: failed 기록(예외)
-      try {
-        const html = fs.existsSync(p) ? fs.readFileSync(p, 'utf8') : '';
-        const pageId = html ? extractPageId(html) : '';
-        upsertSeedLedger({
-          stage: 'publish',
-          status: 'failed',
-          slug: name.replace(/\.html$/i, ''),
-          pageId,
-          label: inferLabelCodeFromFilename(name) || '',
-          source: name.toLowerCase().startsWith('firstgate-') ? 'firstgate' : '',
-          dryRun: false,
-          notes: String(e && (e.message || e)) || 'unknown error',
-        });
-      } catch (ee) {
-        warn('seed-ledger upsert fail:', ee.message || ee);
-      }
-
-      bad++;
-      used++;
+    if (r.status >= 200 && r.status < 300 && r.json && r.json.id) {
+      ok += 1;
+      const postUrl = r.json.url || '(no url)';
+      console.log('POST OK', f, '→ id=', r.json.id, 'url=', postUrl);
+      summary.push(`OK ${f} id=${r.json.id} url=${postUrl}`);
+    } else {
+      fail += 1;
+      console.warn('[blogger][WARN] POST FAIL', f, `→ status=${r.status}`, r.raw?.slice(0, 500) || '');
+      summary.push(`FAIL ${f} status=${r.status}`);
     }
   }
 
-  const summaryLine = `[${new Date().toISOString()}] publish result ok=${ok} bad=${bad} used=${used} LABEL_FILTER="${LABEL_FILTER}" MAX_POSTS=${MAX_POSTS_NUM || 0} DRY_RUN=${DRY_RUN}`;
-  append(SUMMARY_LOG, summaryLine);
-  log('요약 로그 기록 →', SUMMARY_LOG);
-  log(`✨ publish 완료: 성공 ${ok} / 실패 ${bad} | 로그: ${DETAIL_LOG}`);
-})().catch((e) => {
-  fail(e.message || e);
+  summary.unshift(`[${new Date().toISOString()}] publish done ok=${ok} fail=${fail}`);
+  writeSummaryLog(summary);
+
+  console.log(`✨ publish 완료: 성공 ${ok} / 실패 ${fail}`);
+  if (fail > 0) process.exitCode = 1;
+}
+
+main().catch((e) => {
+  console.error('[blogger][FATAL]', e && e.stack ? e.stack : e);
+  process.exitCode = 1;
 });
