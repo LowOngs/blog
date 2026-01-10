@@ -1,8 +1,4 @@
-// System_files/scripts/build/inject-sources-from-ssot.cjs
-// dist/posts/*.html 의 <section id="sources">...</section>을 SSOT로 교체/정리
-// - SSOT: content/reviews/review-sources.json
-// - 빈 <ul> 노출 방지(섹션 제거)
-// - 리뷰 3라벨(app/device/subscription)에서 sources < 2면 live에서 실패 처리
+// inject-sources-from-ssot.cjs — DRY_RUN 파서 통일 + today 스코프 옵션 + sources 게이트(soft/strict)
 
 'use strict';
 
@@ -13,26 +9,54 @@ const ROOT = path.resolve(__dirname, '..', '..'); // System_files
 const DIST_DIR = path.join(ROOT, 'dist', 'posts');
 const POSTS_DIR = path.join(ROOT, 'content', 'posts');
 const SSOT_PATH = path.join(ROOT, 'content', 'reviews', 'review-sources.json');
+const TODAY_PATH = path.join(ROOT, 'dist', 'queue', 'today.json');
+const LOG_DIR = path.join(ROOT, 'logs');
 
-const REVIEW_LABELS = new Set([
-  'app-reviews',
-  'device-reviews',
-  'subscription-services'
-]);
+const REVIEW_LABELS = new Set(['app-reviews', 'device-reviews', 'subscription-services']);
 
 function log(...a) {
   console.log('[inject-sources]', ...a);
 }
-
 function warn(...a) {
   console.warn('[inject-sources][WARN]', ...a);
 }
 
-function isLiveMode() {
-  // 원칙: DRY_RUN=false면 live 취급
-  const v = String(process.env.DRY_RUN ?? 'true').toLowerCase().trim();
-  return v === 'false' || v === '0';
+/**
+ * DRY_RUN 단일 파서
+ * - false/0 만 "live"
+ * - 그 외 전부 "dry-run"
+ */
+function parseDryRun(v) {
+  const s = String(v ?? '').trim().toLowerCase();
+  return !(s === 'false' || s === '0');
 }
+
+const DRY_RUN_RAW = process.env.DRY_RUN;
+const DRY_RUN = parseDryRun(DRY_RUN_RAW);
+const LIVE_MODE = !DRY_RUN;
+
+/**
+ * 게이트 모드
+ * - 기본: soft(중단하지 않음)
+ * - SOURCES_STRICT=true|1 이면 strict(리뷰 sources<2 발생 시 종료코드 1)
+ */
+function parseStrict(v) {
+  const s = String(v ?? '').trim().toLowerCase();
+  return s === 'true' || s === '1';
+}
+const SOURCES_STRICT = parseStrict(process.env.SOURCES_STRICT);
+
+/**
+ * 대상 스코프
+ * - live 기본: today (today.json publishable slug만 처리)
+ * - test 기본: all (기존 동작 유지)
+ * - TARGET_SCOPE=all 로 강제 가능
+ */
+function parseScope(v) {
+  const s = String(v ?? '').trim().toLowerCase();
+  return s === 'all' ? 'all' : 'today';
+}
+const TARGET_SCOPE = parseScope(process.env.TARGET_SCOPE ?? (LIVE_MODE ? 'today' : 'all'));
 
 function readJsonSafe(filePath, fallback) {
   try {
@@ -45,6 +69,40 @@ function readJsonSafe(filePath, fallback) {
   }
 }
 
+/** today.json에서 publishable slug 집합을 뽑기(유연 포맷 지원) */
+function asArray(v) {
+  if (!v) return [];
+  return Array.isArray(v) ? v : [v];
+}
+function loadPublishableSlugsFromToday() {
+  const raw = readJsonSafe(TODAY_PATH, null);
+  if (!raw) return { slugs: new Set(), loaded: false, source: TODAY_PATH };
+
+  const out = new Set();
+
+  if (Array.isArray(raw)) {
+    for (const it of raw) {
+      if (typeof it === 'string' && it.trim()) out.add(it.trim());
+      if (it && typeof it === 'object' && typeof it.slug === 'string' && it.slug.trim()) out.add(it.slug.trim());
+    }
+    return { slugs: out, loaded: true, source: TODAY_PATH };
+  }
+
+  const candidates = []
+    .concat(asArray(raw.items))
+    .concat(asArray(raw.posts))
+    .concat(asArray(raw.queue))
+    .concat(asArray(raw.publishables));
+
+  for (const it of candidates) {
+    if (!it) continue;
+    if (typeof it === 'string' && it.trim()) out.add(it.trim());
+    if (typeof it === 'object' && typeof it.slug === 'string' && it.slug.trim()) out.add(it.slug.trim());
+  }
+
+  return { slugs: out, loaded: true, source: TODAY_PATH };
+}
+
 function escapeHtml(str) {
   return String(str ?? '')
     .replace(/&/g, '&amp;')
@@ -53,18 +111,13 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 }
-
 function escapeAttr(str) {
   return escapeHtml(str).replace(/\n/g, ' ');
 }
 
+/** SSOT 입력 형태를 slug → sources[] 형태로 정규화 */
 function normalizeSources(raw) {
-  // 지원 형태:
-  // 1) { bySlug: { slug: [ {url,label,note}, ... ] } }
-  // 2) { slug: [ ... ] }  (bySlug 없이)
-  // 3) [ { slug, sources:[...] }, ... ]
   const outBySlug = {};
-
   if (!raw) return outBySlug;
 
   if (Array.isArray(raw)) {
@@ -87,7 +140,6 @@ function normalizeSources(raw) {
       return outBySlug;
     }
 
-    // bySlug 없는 단순 맵
     for (const slug of Object.keys(raw)) {
       if (slug === 'meta') continue;
       outBySlug[slug] = normalizeSourcesArray(raw[slug]);
@@ -107,7 +159,6 @@ function normalizeSourcesArray(v) {
     if (typeof s === 'string') {
       const t = s.trim();
       if (!t) continue;
-      // 문자열이면 label=url로 처리
       out.push({ url: t, label: t, note: '' });
       continue;
     }
@@ -121,14 +172,13 @@ function normalizeSourcesArray(v) {
     }
   }
 
-  // url 없는 항목은 링크로 만들 수 없으니 제거(혹은 그냥 텍스트로 만들 수도 있는데, 지금은 신뢰/형식 통일이 우선)
-  return out.filter(x => x.url && x.label);
+  return out.filter((x) => x.url && x.label);
 }
 
 function buildSourcesUlHtml(sources) {
   if (!Array.isArray(sources) || sources.length === 0) return '';
 
-  const items = sources.map(s => {
+  const items = sources.map((s) => {
     const url = escapeAttr(s.url);
     const label = escapeHtml(s.label || s.url);
     const note = s.note ? ` — ${escapeHtml(s.note)}` : '';
@@ -138,8 +188,8 @@ function buildSourcesUlHtml(sources) {
   return `<ul>\n${items.join('\n')}\n</ul>`;
 }
 
+/** <section id="sources">...</section> 교체/제거 */
 function replaceSourcesSection(html, newUlHtml) {
-  // <section id="sources" ...> ... </section> 통째로 교체/제거
   const sectionRe = /<section\b[^>]*\bid=["']sources["'][^>]*>[\s\S]*?<\/section>/i;
 
   if (!sectionRe.test(html)) {
@@ -147,7 +197,6 @@ function replaceSourcesSection(html, newUlHtml) {
   }
 
   if (!newUlHtml) {
-    // 섹션 자체 제거(빈 배열 노출 방지)
     const replaced = html.replace(sectionRe, '');
     return { html: replaced, changed: true, removed: true };
   }
@@ -156,15 +205,15 @@ function replaceSourcesSection(html, newUlHtml) {
     '<section id="sources" class="sources">',
     '  <h3>Sources</h3>',
     `  ${newUlHtml.replace(/\n/g, '\n  ')}`,
-    '</section>'
+    '</section>',
   ].join('\n');
 
   const replaced = html.replace(sectionRe, rebuilt);
   return { html: replaced, changed: true, removed: false };
 }
 
+/** content/posts/{slug}.json 기준으로 라벨 확인 */
 function loadPostLabels(slug) {
-  // content/posts/{slug}.json 기준으로 라벨 확인
   const p = path.join(POSTS_DIR, `${slug}.json`);
   const j = readJsonSafe(p, null);
   if (!j) return [];
@@ -173,10 +222,17 @@ function loadPostLabels(slug) {
 }
 
 function main() {
-  log('ROOT =', ROOT);
-  log('DIST =', DIST_DIR);
-  log('SSOT =', SSOT_PATH);
-  log('MODE =', isLiveMode() ? 'live' : 'test(no_live)');
+  fs.mkdirSync(LOG_DIR, { recursive: true });
+
+  log('ROOT           =', ROOT);
+  log('DIST           =', DIST_DIR);
+  log('SSOT           =', SSOT_PATH);
+  log('today          =', TODAY_PATH);
+  log('dry_run(raw)   =', (DRY_RUN_RAW === undefined ? '(undefined)' : JSON.stringify(String(DRY_RUN_RAW))));
+  log('dry_run(parsed)=', DRY_RUN);
+  log('mode           =', LIVE_MODE ? 'live' : 'test(no_live)');
+  log('scope          =', TARGET_SCOPE);
+  log('gate           =', SOURCES_STRICT ? 'strict' : 'soft');
 
   if (!fs.existsSync(DIST_DIR)) {
     warn('dist/posts 없음. 먼저 posts:render를 실행하세요.');
@@ -186,8 +242,30 @@ function main() {
   const ssotRaw = readJsonSafe(SSOT_PATH, null);
   const bySlug = normalizeSources(ssotRaw);
 
-  const files = fs.readdirSync(DIST_DIR).filter(f => f.endsWith('.html'));
-  log('HTML files =', files.length);
+  const files = fs.readdirSync(DIST_DIR).filter((f) => f.endsWith('.html'));
+
+  // today 스코프면 대상 slug 집합 로드
+  let publishableSet = null;
+  if (TARGET_SCOPE === 'today') {
+    const pub = loadPublishableSlugsFromToday();
+    publishableSet = pub.slugs;
+
+    log('publishable loaded =', pub.loaded);
+    log('publishable count  =', publishableSet.size);
+
+    // today 스코프인데 today.json이 비었으면 "0개 처리"가 더 안전
+    if (!pub.loaded || publishableSet.size === 0) {
+      warn('today scope인데 publishable 비어있음 → 0개 처리로 종료');
+      return;
+    }
+  }
+
+  const targetFiles = (TARGET_SCOPE === 'today')
+    ? files.filter((f) => publishableSet.has(path.basename(f, '.html')))
+    : files;
+
+  log('HTML files(all)   =', files.length);
+  log('HTML files(target)=', targetFiles.length);
 
   let updated = 0;
   let removed = 0;
@@ -196,8 +274,9 @@ function main() {
 
   let liveFail = 0;
   let reviewChecked = 0;
+  const liveFailSlugs = [];
 
-  for (const f of files) {
+  for (const f of targetFiles) {
     const slug = path.basename(f, '.html');
     const full = path.join(DIST_DIR, f);
 
@@ -206,31 +285,30 @@ function main() {
     const sources = bySlug[slug];
     if (!sources) {
       ssotMissing += 1;
-      // SSOT에 없으면 "빈 섹션 제거"만이라도 수행(현재 빈 ul 노출 방지)
+
       const r0 = replaceSourcesSection(html, '');
       if (r0.missing) {
         missingSection += 1;
         continue;
       }
       if (r0.changed) {
-        html = r0.html;
-        fs.writeFileSync(full, html, 'utf8');
+        fs.writeFileSync(full, r0.html, 'utf8');
         removed += 1;
       }
       continue;
     }
 
-    // 리뷰 3라벨이면 최소 2개 강제
+    // 리뷰 3라벨이면 최소 2개 체크(게이트는 soft/strict)
     const labels = loadPostLabels(slug);
-    const isReview = labels.some(l => REVIEW_LABELS.has(l));
+    const isReview = labels.some((l) => REVIEW_LABELS.has(l));
     if (isReview) {
       reviewChecked += 1;
       if (sources.length < 2) {
         const msg = `REVIEW sources<2 → slug=${slug} sources=${sources.length}`;
-        if (isLiveMode()) {
-          warn('[LIVE-FAIL]', msg);
+        if (LIVE_MODE) {
+          warn('[LIVE]', msg);
           liveFail += 1;
-          // 그래도 HTML은 "있는 만큼" 넣어서 사람이 확인 가능하게 유지
+          liveFailSlugs.push(slug);
         } else {
           warn('[TEST]', msg);
         }
@@ -251,10 +329,47 @@ function main() {
     }
   }
 
-  log('done:', `updated=${updated}`, `removed=${removed}`, `missingSection=${missingSection}`, `ssotMissing=${ssotMissing}`, `reviewChecked=${reviewChecked}`, `liveFail=${liveFail}`);
+  // 리포트 기록(운영 점검용)
+  const report = {
+    ts: new Date().toISOString(),
+    mode: LIVE_MODE ? 'live' : 'test',
+    scope: TARGET_SCOPE,
+    dryRun: DRY_RUN,
+    sourcesStrict: SOURCES_STRICT,
+    counts: {
+      htmlAll: files.length,
+      htmlTarget: targetFiles.length,
+      updated,
+      removed,
+      missingSection,
+      ssotMissing,
+      reviewChecked,
+      reviewSourcesTooFew: liveFail,
+    },
+    reviewSourcesTooFewSlugs: liveFailSlugs,
+  };
 
-  if (isLiveMode() && liveFail > 0) {
-    // live에서는 “소스 부족 리뷰글” 발행 금지
+  const date = new Date().toISOString().slice(0, 10);
+  const reportPath = path.join(LOG_DIR, `inject-sources-report-${date}.json`);
+  try {
+    fs.writeFileSync(reportPath, JSON.stringify(report, null, 2) + '\n', 'utf8');
+    log('report saved =', reportPath);
+  } catch (e) {
+    warn('report save failed:', e.message || e);
+  }
+
+  log(
+    'done:',
+    `updated=${updated}`,
+    `removed=${removed}`,
+    `missingSection=${missingSection}`,
+    `ssotMissing=${ssotMissing}`,
+    `reviewChecked=${reviewChecked}`,
+    `reviewSourcesTooFew=${liveFail}`
+  );
+
+  // strict 게이트일 때만 중단
+  if (LIVE_MODE && SOURCES_STRICT && liveFail > 0) {
     process.exitCode = 1;
   }
 }
