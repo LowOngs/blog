@@ -7,7 +7,26 @@
  * - 라벨 6개 강제 + profileId 필수 + 오염(누락/오타) 즉시 차단
  */
 
+// ✅ 로컬/CI 공통: .env 로드(필수)
 require('./lib/env.cjs');
+
+/**
+ * AOIA FLOW MAP REFERENCE
+ * --------------------------------------------------
+ * Flow Map: System_files/docs/aoia-flow-map.md
+ *
+ * Role:
+ *   - today.json(스케줄 결과, SSOT) → content/posts/*.json(포스트 SSOT) 변환
+ *
+ * Position:
+ *   - Input:  dist/queue/today.json
+ *   - Output: content/posts/*.json (slug 기반 신규 생성만)
+ *
+ * Invariants:
+ *   - label은 6개 허용값만 통과
+ *   - profileId는 labels.json 매핑 필수(없으면 즉시 중단)
+ *   - title 누락 시 생성 금지(침묵/빈문서 방지)
+ */
 
 const fs = require('fs');
 const path = require('path');
