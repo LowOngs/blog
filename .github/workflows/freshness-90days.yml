@@ -39,25 +39,92 @@ jobs:
       DRY_RUN_INPUT: ${{ github.event.inputs.DRY_RUN || 'true' }}
 
     steps:
+      - name: Guard (schedule requires PUBLISH_MODE=enable + auto-enable.json)
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          set -euo pipefail
+          echo "event_name=$EVENT_NAME"
+          echo "PUBLISH_MODE=${PUBLISH_MODE}"
+
+          # 기본값: 파이프라인 실행
+          echo "SKIP_PIPELINE=false" >> $GITHUB_ENV
+
+          # workflow_dispatch는 항상 허용(점검/커밋 목적)
+          if [ "$EVENT_NAME" != "schedule" ]; then
+            echo "[GUARD] workflow_dispatch -> allowed"
+            exit 0
+          fi
+
+          # schedule일 때만 강제 통제
+          if [ "${PUBLISH_MODE}" != "enable" ]; then
+            echo "[GUARD] blocked: PUBLISH_MODE != enable"
+            echo "SKIP_PIPELINE=true" >> $GITHUB_ENV
+            exit 0
+          fi
+
+          if [ ! -f "System_files/manifests/auto-enable.json" ]; then
+            echo "[GUARD] blocked: missing System_files/manifests/auto-enable.json"
+            echo "SKIP_PIPELINE=true" >> $GITHUB_ENV
+            exit 0
+          fi
+
+          sw=$(node -e "try{const j=require('./System_files/manifests/auto-enable.json');process.stdout.write(String(!!j.autoEnable));}catch(e){process.stdout.write('false');}")
+          if [ "$sw" != "true" ]; then
+            echo "[GUARD] blocked: autoEnable != true"
+            echo "SKIP_PIPELINE=true" >> $GITHUB_ENV
+            exit 0
+          fi
+
+          echo "[GUARD] schedule allowed"
+          echo "SKIP_PIPELINE=false" >> $GITHUB_ENV
+
       - name: Checkout
+        if: env.SKIP_PIPELINE != 'true'
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Setup Node
+        if: env.SKIP_PIPELINE != 'true'
         uses: actions/setup-node@v4
         with:
           node-version: "24"
 
       - name: Install (repo root)
+        if: env.SKIP_PIPELINE != 'true'
         run: npm ci
 
-      - name: Export runtime env
+      - name: Export runtime env (DRY_RUN + BODY_WRITE_MODE)
+        if: env.SKIP_PIPELINE != 'true'
+        shell: bash
         run: |
-          echo "DRY_RUN=${DRY_RUN_INPUT}" >> $GITHUB_ENV
+          set -euo pipefail
+          EVENT="${{ github.event_name }}"
+
+          # BODY_WRITE_MODE: freshness는 운영상 local 고정(대량 처리 가능)
           echo "BODY_WRITE_MODE=local" >> $GITHUB_ENV
 
+          # DRY_RUN:
+          # - schedule + PUBLISH_MODE=enable일 때만 false (실제 업로드/발행)
+          # - 그 외는 입력값(기본 true) 유지
+          DR="${DRY_RUN_INPUT}"
+          if [ "$EVENT" = "schedule" ] && [ "${PUBLISH_MODE}" = "enable" ]; then
+            DR="false"
+          fi
+
+          echo "DRY_RUN=$DR" >> $GITHUB_ENV
+
+          echo "Resolved:"
+          echo "  EVENT=$EVENT"
+          echo "  PUBLISH_MODE=${PUBLISH_MODE}"
+          echo "  DRY_RUN_INPUT=${DRY_RUN_INPUT}"
+          echo "  DRY_RUN=$DR"
+          echo "  BODY_WRITE_MODE=local"
+
       - name: Sanity check (required scripts exist)
+        if: env.SKIP_PIPELINE != 'true'
         run: |
           test -f System_files/scripts/build/review-due-90days.cjs
           test -f System_files/scripts/build/review-next-from-due.cjs
@@ -86,15 +153,18 @@ jobs:
           test -f System_files/scripts/build/build-trust-page.cjs
 
       - name: Run 90days chain (due -> next -> diff -> inject)
+        if: env.SKIP_PIPELINE != 'true'
         run: |
           npm run reviews:freshness
 
       - name: Validate body images manifest
+        if: env.SKIP_PIPELINE != 'true'
         working-directory: System_files
         run: |
           node scripts/build/validate-body-images.cjs
 
       - name: Render posts
+        if: env.SKIP_PIPELINE != 'true'
         working-directory: System_files
         run: |
           node scripts/build/render-posts.cjs
@@ -102,59 +172,69 @@ jobs:
           node scripts/build/review-meta-block.cjs
 
       - name: Build OG images (after render)
+        if: env.SKIP_PIPELINE != 'true'
         working-directory: System_files
         run: |
           node scripts/build/images-renew.cjs
           node scripts/build/images-build-og.cjs
 
-      - name: Upload images to R2
+      - name: Upload images to R2 (DRY_RUN safe)
+        if: env.SKIP_PIPELINE != 'true'
         working-directory: System_files
         run: |
           npm run images:upload
 
       - name: Validate & repair
+        if: env.SKIP_PIPELINE != 'true'
         working-directory: System_files
         run: |
           node scripts/build/validate-repair.cjs
 
       - name: Preflight QA
+        if: env.SKIP_PIPELINE != 'true'
         working-directory: System_files
         run: |
           npm run posts:qa
 
       # ✅ AOIA: authority/feed/tools 갱신
       - name: Build AI meta (authority, etc.)
+        if: env.SKIP_PIPELINE != 'true'
         working-directory: System_files
         run: |
           node scripts/build/ai-meta.js
 
       - name: Build AI feed
+        if: env.SKIP_PIPELINE != 'true'
         working-directory: System_files
         run: |
           node scripts/build/build-feed.cjs
 
       - name: Validate AI feed
+        if: env.SKIP_PIPELINE != 'true'
         working-directory: System_files
         run: |
           node scripts/build/validate-feed.cjs
 
       - name: Build tools (edit-request)
+        if: env.SKIP_PIPELINE != 'true'
         working-directory: System_files
         run: |
           node scripts/build/copy-tools.cjs
 
       - name: Build Trust page
+        if: env.SKIP_PIPELINE != 'true'
         working-directory: System_files
         run: |
           node scripts/build/build-trust-page.cjs
 
       - name: Publish to Blogger (skip when DRY_RUN=true)
-        if: env.DRY_RUN != 'true'
+        if: env.SKIP_PIPELINE != 'true' && env.DRY_RUN != 'true'
         working-directory: System_files
         run: |
           node scripts/publish/blogger.cjs
 
       - name: Commit freshness updates
+        if: env.SKIP_PIPELINE != 'true'
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@users.noreply.github.com"
