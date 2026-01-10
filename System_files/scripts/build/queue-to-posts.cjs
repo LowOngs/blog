@@ -1,6 +1,13 @@
-// System_files/scripts/build/queue-to-posts.cjs
-// dist/queue/today.json → content/posts/*.json 자동 생성기
-// ✅ 잔재 정리: queue.mode / scheduleMode / seedMeta.scheduleMode 제거
+#!/usr/bin/env node
+'use strict';
+
+/**
+ * System_files/scripts/build/queue-to-posts.cjs
+ * dist/queue/today.json → content/posts/*.json 자동 생성기
+ * - 라벨 6개 강제 + profileId 필수 + 오염(누락/오타) 즉시 차단
+ */
+
+require('./lib/env.cjs');
 
 const fs = require('fs');
 const path = require('path');
@@ -8,9 +15,9 @@ const path = require('path');
 // ────────────────────────────────────
 //  경로 설정
 // ────────────────────────────────────
-const ROOT        = path.resolve(__dirname, '..', '..'); // System_files
-const QUEUE_DIR   = path.join(ROOT, 'dist', 'queue');
-const QUEUE_FILE  = path.join(QUEUE_DIR, 'today.json');
+const ROOT = path.resolve(__dirname, '..', '..'); // System_files
+const QUEUE_DIR = path.join(ROOT, 'dist', 'queue');
+const QUEUE_FILE = path.join(QUEUE_DIR, 'today.json');
 const CONTENT_DIR = path.join(ROOT, 'content', 'posts');
 
 fs.mkdirSync(CONTENT_DIR, { recursive: true });
@@ -19,12 +26,29 @@ function log(...a) {
   console.log('[seed→post]', ...a);
 }
 
+function fatal(msg) {
+  console.error('[seed→post][FATAL]', msg);
+  process.exit(1);
+}
+
+// ────────────────────────────────────
+// 라벨(SSOT) 고정
+// ────────────────────────────────────
+const ALLOWED_LABELS = new Set([
+  'app-reviews',
+  'device-reviews',
+  'subscription-services',
+  'how-to-playbooks',
+  'smart-savings',
+  'templates-checklists',
+]);
+
 // ────────────────────────────────────
 //  프로필 로딩 (라벨 → profileId 매핑만 사용)
 // ────────────────────────────────────
 const SEEDPOOL_DIR = path.join(ROOT, 'seedpool');
 const PROFILES_DIR = path.join(SEEDPOOL_DIR, 'profiles');
-const LABELS_FILE  = path.join(PROFILES_DIR, 'labels.json');
+const LABELS_FILE = path.join(PROFILES_DIR, 'labels.json');
 
 function safeReadJson(file, fallback) {
   try {
@@ -44,11 +68,7 @@ const LABEL_TO_PROFILE_ID = safeReadJson(LABELS_FILE, {});
 
 function getProfileIdForLabel(label) {
   const pid = LABEL_TO_PROFILE_ID[label];
-  if (!pid) {
-    log(`경고: 라벨에 대한 프로필 ID 없음 → label=${label}`);
-    return null;
-  }
-  return pid;
+  return pid ? String(pid) : null;
 }
 
 // ────────────────────────────────────
@@ -64,8 +84,7 @@ try {
   const raw = fs.readFileSync(QUEUE_FILE, 'utf8');
   queue = JSON.parse(raw);
 } catch (e) {
-  console.error('[seed→post] today.json 파싱 실패:', e.message || e);
-  process.exit(1);
+  fatal(`today.json 파싱 실패: ${e.message || e}`);
 }
 
 log(`today.json 로드 완료 → date=${queue.date || 'N/A'}`);
@@ -81,12 +100,12 @@ if (!items.length) {
 //  ✅ blogger.cjs가 확실히 인식하는 prefix로 고정
 // ────────────────────────────────────
 const LABEL_TO_PREFIX = {
-  'app-reviews':            'app',
-  'device-reviews':         'device',
-  'subscription-services':  'subscription',
-  'how-to-playbooks':       'howto',
-  'smart-savings':          'smart',
-  'templates-checklists':   'template'
+  'app-reviews': 'app',
+  'device-reviews': 'device',
+  'subscription-services': 'subscription',
+  'how-to-playbooks': 'howto',
+  'smart-savings': 'smart',
+  'templates-checklists': 'template',
 };
 
 const counters = {}; // label별 일련번호
@@ -97,11 +116,8 @@ function pad3(n) {
 
 // queue.date 또는 item.date, 없으면 오늘 날짜 사용
 function getDateString(item) {
-  const base =
-    item.date ||
-    queue.date ||
-    new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
-  return base.replace(/-/g, ''); // "YYYYMMDD"
+  const base = item.date || queue.date || new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
+  return String(base).slice(0, 10).replace(/-/g, ''); // "YYYYMMDD"
 }
 
 function isoUtcMidnight(dateYYYYMMDD) {
@@ -133,24 +149,45 @@ function buildBodyPrompt(item, label) {
     '- Do NOT write TL;DR, Key Facts, FAQ, or Sources (they are injected separately).',
     '- Step-by-step guidance (when applicable)',
     '- Common mistakes and quick fixes',
-    '- A concise conclusion'
+    '- A concise conclusion',
   ].filter(Boolean);
 
   return lines.join('\n');
 }
 
+function requireValidLabel(label, idx) {
+  const v = String(label || '').trim();
+  if (!v) fatal(`items[${idx}] label 누락 (today.json 오염)`);
+  if (!ALLOWED_LABELS.has(v)) {
+    fatal(`items[${idx}] label 비정상: "${v}" (허용: ${Array.from(ALLOWED_LABELS).join(', ')})`);
+  }
+  return v;
+}
+
+function requireValidTitle(title, idx) {
+  const t = String(title || '').trim();
+  if (!t) fatal(`items[${idx}] title 누락 (label은 정상이어도 title 없으면 생성 금지)`);
+  return t;
+}
+
 let created = 0;
 let skipped = 0;
 
-for (const item of items) {
-  const label   = item.label;
-  const prefix  = LABEL_TO_PREFIX[label] || 'post';
-  const ymd     = getDateString(item);
+for (let i = 0; i < items.length; i++) {
+  const item = items[i] || {};
+
+  const label = requireValidLabel(item.label, i);
+  const title = requireValidTitle(item.title, i);
+
+  const prefix = LABEL_TO_PREFIX[label];
+  if (!prefix) fatal(`라벨 prefix 매핑 누락: label="${label}"`);
+
+  const ymd = getDateString(item);
 
   if (!counters[label]) counters[label] = 1;
   else counters[label]++;
 
-  const idx  = pad3(counters[label]);     // 001, 002, ...
+  const idx = pad3(counters[label]); // 001, 002, ...
   const slug = `${prefix}-${ymd}-${idx}`; // 예: app-20251212-001
 
   const targetPath = path.join(CONTENT_DIR, `${slug}.json`);
@@ -161,47 +198,49 @@ for (const item of items) {
     continue;
   }
 
-  const queueDate  = (item.date || queue.date || new Date().toISOString().slice(0, 10));
-  const ymdISO     = queueDate.replace(/-/g, '');
+  const queueDate = String(item.date || queue.date || new Date().toISOString().slice(0, 10)).slice(0, 10);
+  const ymdISO = queueDate.replace(/-/g, '');
   const updatedISO = isoUtcMidnight(ymdISO);
 
   const profileId = getProfileIdForLabel(label);
+  if (!profileId) {
+    fatal(`profileId 없음: label="${label}" (seedpool/profiles/labels.json 매핑 확인 필요)`);
+  }
 
   const doc = {
     slug,
-    title: item.title,
-    description: item.angle || item.title,
+    title,
+    description: (item.angle || item.title || '').trim(),
     labels: [label],
-    intent: item.intent || 'review',
+    intent: (item.intent || '').trim() || 'review',
     updated: updatedISO,
 
     bodyPrompt: buildBodyPrompt(item, label),
-    body: "",
+    body: '',
 
     aio: {
       tldr: [],
       keyfacts: [],
       faq: [],
       sources: [],
-      sourcesNote: 'Add at least 2 official sources when finalizing the post.'
+      sourcesNote: 'Add at least 2 official sources when finalizing the post.',
     },
 
     seedMeta: {
       queueDate,
-      label: item.label,
-      mode: item.mode,
+      label,
       profileId,
-      id: item.id,
-      angle: item.angle,
-      audience: item.audience,
-      intent: item.intent,
-      priority: item.priority,
-      notes: item.notes
-    }
+      id: item.id || null,
+      angle: item.angle || null,
+      audience: item.audience || null,
+      intent: item.intent || null,
+      priority: item.priority ?? null,
+      notes: item.notes || null,
+    },
   };
 
   fs.writeFileSync(targetPath, JSON.stringify(doc, null, 2), 'utf8');
-  log(`created ${path.basename(targetPath)} from seed id=${item.id}`);
+  log(`created ${path.basename(targetPath)} from seed id=${item.id || '(no-id)'}`);
   created++;
 }
 
