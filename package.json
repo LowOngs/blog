@@ -46,7 +46,9 @@
 
     "deploy": "npm run images:upload && npm run images:rewrite && npm run build",
 
-    "local:dryrun": "node ./System_files/scripts/build/seed-scheduler.cjs && node ./System_files/scripts/build/queue-to-posts.cjs && node ./System_files/scripts/build/ids.cjs && node ./System_files/scripts/build/generate-body.cjs && node ./System_files/scripts/build/review-resolver.cjs && npm run posts:body-images:validate && npm run posts:render && npm run posts:normalize && npm run posts:review:meta && npm run images:renew && npm run images:build:og && npm run images:upload && npm run images:rewrite && npm run posts:render && npm run posts:normalize && npm run posts:review:meta && npm run posts:validate && npm run posts:qa && npm run feed:build && npm run feed:validate && npm run tools:copy && npm run publish:blogger"
+    "local:dryrun": "node ./System_files/scripts/build/seed-scheduler.cjs && node ./System_files/scripts/build/queue-to-posts.cjs && node ./System_files/scripts/build/ids.cjs && node ./System_files/scripts/build/generate-body.cjs && node ./System_files/scripts/build/review-resolver.cjs && npm run posts:body-images:validate && npm run posts:render && npm run posts:normalize && npm run posts:review:meta && npm run images:renew && npm run images:build:og && npm run images:upload && npm run images:rewrite && npm run posts:render && npm run posts:normalize && npm run posts:review:meta && npm run posts:validate && npm run posts:qa && npm run feed:build && npm run feed:validate && npm run tools:copy",
+
+    "local:publish": "npm run publish:blogger"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.654.0",
