@@ -1,6 +1,4 @@
-// b/System_files/scripts/build/review-resolver.cjs
-
- 'use strict';
+'use strict';
  
  /**
   * System_files/scripts/build/review-resolver.cjs
