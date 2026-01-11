@@ -24,7 +24,7 @@
  const path = require('path');
  
  function readJsonSafe(p) {
-@@
+
  function toNumberOrNull(v) {
    const n = Number(v);
    return Number.isFinite(n) ? n : null;
@@ -182,7 +182,7 @@
  function clampHistogramPctObject(hist) {
    if (!hist || typeof hist !== 'object') return null;
    const out = {};
-@@
+
  function isSsotSnapshotShape(obj) {
    if (!obj || typeof obj !== 'object') return false;
    // SSOT 스냅샷형 키
@@ -281,7 +281,7 @@
  // SSOT 캐시(프로세스 내 1회 로드)
  let _ssotCache = null;
  let _ssotCachePath = null;
-@@
+
  function resolveReviewData({ ROOT, postJson }) {
    try {
      if (!postJson || typeof postJson !== 'object') return null;
