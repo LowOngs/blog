@@ -170,6 +170,11 @@
       color:var(--c-muted);
       margin-bottom:8px;
     }
+
+    /* ✅ 템플릿 기본(빈) 리뷰 블록은 숨김
+       - review-meta-block.cjs가 SSOT로 치환하면 이 클래스가 사라져 자동 노출됨 */
+    .review-block--empty{ display:none; }
+
     .review-rating-table{
       width:100%;
       border-collapse:collapse;
@@ -290,9 +295,23 @@
       {{body}}
     </section>
 
-    <!-- 리뷰 전용 (렌더러가 조건부 삽입) -->
+    <!-- ─────────────────────────────────────────────
+      ✅ 리뷰 섹션 “실물”을 템플릿에서 항상 탑재 (B안)
+      - dist 산출물에 섹션이 항상 존재 → review-meta-block.cjs가 SSOT로 치환 가능
+      - 기본 상태는 숨김(.review-block--empty)
+      - SSOT 치환 시 새 HTML에는 이 클래스가 없어 자동 노출됨
+      - id="review-rating-block" / id="review-insights-block"는 절대 변경 금지
+    ───────────────────────────────────────────── -->
+
     <!--SLOT:REVIEW_RATING_WRAPPER-->
+    <section id="review-rating-block" class="review-block review-block--empty">
+      <!-- placeholder: replaced by review-meta-block.cjs when SSOT exists -->
+    </section>
+
     <!--SLOT:REVIEW_INSIGHTS_WRAPPER-->
+    <section id="review-insights-block" class="review-block review-block--empty">
+      <!-- placeholder: replaced by review-meta-block.cjs when SSOT exists -->
+    </section>
   </main>
 
   <!-- FAQ -->
