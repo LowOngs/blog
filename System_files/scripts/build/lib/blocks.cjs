@@ -99,22 +99,33 @@ function renderHistogram(hist = {}) {
 }
 
 function pickReviewRating(reviewData) {
-  // ✅ render-posts가 넘기는 구조: reviewData.rating.overall / votes / lastChecked / nextCheck
+  // ✅ 1) 최신 형태: reviewData.rating.overall / votes / lastChecked / source
   const r = reviewData?.rating && typeof reviewData.rating === 'object' ? reviewData.rating : null;
-  if (!r) return null;
+  if (r) {
+    const overall = Number(r.overall);
+    if (!Number.isFinite(overall)) return null;
 
-  const overall = Number(r.overall);
-  if (!Number.isFinite(overall)) return null;
+    return {
+      overall,
+      votes: Number(r.votes || 0) || 0,
+      scale: Number(r.scale || 5) || 5,
+      lastChecked: String(r.lastChecked || ''),
+      source: String(r.source || reviewData?.source || ''),
+      storeId: r.storeId ?? null,
+    };
+  }
+
+  // ✅ 2) 스냅샷 형태(호환): ratingCurrent/votesCurrent/lastChecked/source
+  const overall2 = Number(reviewData?.ratingCurrent);
+  if (!Number.isFinite(overall2)) return null;
 
   return {
-    overall,
-    votes: Number(r.votes || 0) || 0,
-    scale: Number(r.scale || 5) || 5,
-    lastChecked: String(r.lastChecked || ''),
-    nextCheck: String(r.nextCheck || ''),
-    platform: String(r.platform || ''),
-    source: String(r.source || reviewData?.source || ''),
-    storeId: r.storeId ?? null,
+    overall: overall2,
+    votes: Number(reviewData?.votesCurrent || 0) || 0,
+    scale: 5,
+    lastChecked: String(reviewData?.lastChecked || ''),
+    source: String(reviewData?.source || ''),
+    storeId: null,
   };
 }
 
@@ -124,8 +135,6 @@ function renderReviewRatingBlock(reviewData) {
 
   const safeRating = Number.isFinite(rating.overall) ? rating.overall.toFixed(1) : 'N/A';
   const updatedAt = rating.lastChecked || '';
-  const nextCheck = rating.nextCheck || '';
-  const platform = rating.platform || (reviewData?.bucket || '');
   const source = rating.source || 'review dataset';
 
   const histogramHtml = reviewData?.histogram ? renderHistogram(reviewData.histogram) : '';
@@ -136,8 +145,6 @@ function renderReviewRatingBlock(reviewData) {
     Rating: <strong>${escapeHtml(safeRating)}</strong>
     · Votes: ${escapeHtml(String(rating.votes))}
     · Updated: ${escapeHtml(updatedAt || 'N/A')}
-    · Next check: ${escapeHtml(nextCheck || 'N/A')}
-    · Platform: ${escapeHtml(platform)}
     · Source: ${escapeHtml(source)}
   </div>
 
