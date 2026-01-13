@@ -9,18 +9,18 @@
     "posts:render": "node ./System_files/scripts/build/render-posts.cjs",
     "posts:normalize": "node ./System_files/scripts/build/normalize-body.cjs",
     "posts:review:meta": "node ./System_files/scripts/build/review-meta-block.cjs",
+
     "posts:validate": "node ./System_files/scripts/build/validate-repair.cjs",
+    "posts:review:ssot:validate": "node ./System_files/scripts/build/validate-review-ssot.cjs",
     "posts:qa": "node ./System_files/scripts/build/qa-check.cjs",
 
     "posts:body-images:validate": "node ./System_files/scripts/build/validate-body-images.cjs",
-
-    "reviews:ssot:validate": "node ./System_files/scripts/build/validate-review-ssot.cjs",
 
     "reviews:due": "node ./System_files/scripts/build/review-due-90days.cjs",
     "reviews:next": "node ./System_files/scripts/build/review-next-from-due.cjs",
     "reviews:diff": "node ./System_files/scripts/build/review-diff-update.cjs",
     "reviews:inject": "node ./System_files/scripts/build/review-resolver.cjs",
-    "reviews:freshness": "npm run reviews:ssot:validate && npm run reviews:due && npm run reviews:next && npm run reviews:diff && npm run reviews:inject",
+    "reviews:freshness": "npm run reviews:due && npm run reviews:next && npm run reviews:diff && npm run reviews:inject",
 
     "review:ratings:update": "node ./System_files/scripts/build/update-review-ratings.cjs",
     "posts:review:update": "node ./System_files/scripts/build/review-diff-update.cjs",
@@ -42,13 +42,13 @@
 
     "pages:trust": "node ./System_files/scripts/build/build-trust-page.cjs",
 
-    "build": "npm run reviews:ssot:validate && npm run posts:body-images:validate && npm run posts:render && npm run posts:normalize && npm run posts:review:meta && npm run posts:validate",
+    "build": "npm run posts:body-images:validate && npm run posts:render && npm run posts:normalize && npm run posts:review:meta && npm run posts:validate && npm run posts:review:ssot:validate && npm run posts:qa",
 
-    "posts:local:full": "npm run reviews:ssot:validate && npm run posts:body-images:validate && npm run posts:render && npm run posts:normalize && npm run posts:review:meta && npm run images:renew && npm run images:build:og && npm run images:upload && npm run images:rewrite && npm run posts:render && npm run posts:normalize && npm run posts:review:meta && npm run posts:validate && npm run posts:qa && npm run feed:build && npm run feed:validate && npm run tools:copy",
+    "posts:local:full": "npm run posts:body-images:validate && npm run posts:render && npm run posts:normalize && npm run posts:review:meta && npm run images:renew && npm run images:build:og && npm run images:upload && npm run images:rewrite && npm run posts:render && npm run posts:normalize && npm run posts:review:meta && npm run posts:validate && npm run posts:review:ssot:validate && npm run posts:qa && npm run feed:build && npm run feed:validate && npm run tools:copy",
 
     "deploy": "npm run images:upload && npm run images:rewrite && npm run build",
 
-    "local:dryrun": "npm run reviews:ssot:validate && node ./System_files/scripts/build/seed-scheduler.cjs && node ./System_files/scripts/build/queue-to-posts.cjs && node ./System_files/scripts/build/ids.cjs && node ./System_files/scripts/build/generate-body.cjs && node ./System_files/scripts/build/review-resolver.cjs && npm run posts:body-images:validate && npm run posts:render && npm run posts:normalize && npm run posts:review:meta && npm run images:renew && npm run images:build:og && npm run images:upload && npm run images:rewrite && npm run posts:render && npm run posts:normalize && npm run posts:review:meta && npm run posts:validate && npm run posts:qa && npm run feed:build && npm run feed:validate && npm run tools:copy",
+    "local:dryrun": "node ./System_files/scripts/build/seed-scheduler.cjs && node ./System_files/scripts/build/queue-to-posts.cjs && node ./System_files/scripts/build/ids.cjs && node ./System_files/scripts/build/generate-body.cjs && node ./System_files/scripts/build/review-resolver.cjs && npm run posts:body-images:validate && npm run posts:render && npm run posts:normalize && npm run posts:review:meta && npm run images:renew && npm run images:build:og && npm run images:upload && npm run images:rewrite && npm run posts:render && npm run posts:normalize && npm run posts:review:meta && npm run posts:validate && npm run posts:review:ssot:validate && npm run posts:qa && npm run feed:build && npm run feed:validate && npm run tools:copy",
 
     "local:publish": "npm run publish:blogger"
   },
