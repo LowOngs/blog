@@ -1,4 +1,4 @@
-// scripts/build/lib/blocks.js
+// System_files/scripts/build/lib/blocks.cjs
 // HTML block render helpers (TLDR / KeyFacts / FAQ / Sources / Review blocks)
 // - render-posts.cjs가 post.reviewData(SSOT) 를 그대로 넘기므로, 여기서 구조를 확정 렌더합니다.
 
@@ -158,7 +158,7 @@ function renderReviewInsightsBlock(reviewData) {
 
   const list = safe.length
     ? `<ul class="review-insights-list">\n${safe.map(x => `  <li>${escapeHtml(x)}</li>`).join('\n')}\n</ul>`
-    : `<p style="margin:0;color:#6b7280;font-size:14px;">No insights available yet for this post.</p>`;
+    : `<p style="margin:0;color:#6b7280;font-size:14px;">데이터 수집/검증 후 업데이트 됩니다.</p>`;
 
   return `<section id="review-insights-block" class="review-block">
   <div class="review-block__title">User insights snapshot</div>
