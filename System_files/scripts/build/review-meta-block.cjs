@@ -1,7 +1,23 @@
 #!/usr/bin/env node
 'use strict';
 
-/** review-meta-block: dist/posts의 review-rating/insights 섹션을 review-ratings SSOT로 교체 */
+/**
+ * System_files/scripts/build/review-meta-block.cjs
+ * - dist/posts/*.html 안의 리뷰 섹션(review-rating / insights)을
+ *   SSOT(content/reviews/review-ratings.json) 기준으로 "교체 또는 삽입"합니다.
+ *
+ * ✅ 정책(1단계)
+ * - SSOT 우선: content/reviews/review-ratings.json (bySlug[slug])
+ * - HTML에 기존 섹션이 있으면 replace
+ * - 기존 섹션이 없으면 아래 우선순위로 "삽입"
+ *   1) <!--SLOT:REVIEW-->
+ *   2) <!--SLOT:FAQ--> 또는 id="faq" 섹션 앞
+ *   3) </main> 직전
+ *
+ * ✅ insights 규칙(1단계)
+ * - SSOT의 insights 배열을 그대로 출력(최대 12개 권장)
+ * - 부족해도 출력(빈 배열이면 "no insights" 주석만 남김)
+ */
 
 const fs = require('fs');
 const path = require('path');
@@ -27,6 +43,44 @@ function loadRatings() {
     console.error('[review-meta] review-ratings.json 파싱 실패:', e.message);
     return { bySlug: {} };
   }
+}
+
+function toNumberOrNull(v) {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+
+function normalizeRatingData(raw) {
+  if (!raw || typeof raw !== 'object') return null;
+
+  // SSOT 스냅샷형(권장)
+  const snapshot = {
+    lastChecked: raw.lastChecked ? String(raw.lastChecked) : null,
+    status: raw.status ? String(raw.status) : 'ok',
+    store: raw.store ? String(raw.store) : 'multi',
+
+    ratingCurrent: toNumberOrNull(raw.ratingCurrent),
+    ratingPrevious: toNumberOrNull(raw.ratingPrevious),
+    ratingDiff: toNumberOrNull(raw.ratingDiff),
+
+    votesCurrent: toNumberOrNull(raw.votesCurrent),
+    votesPrevious: toNumberOrNull(raw.votesPrevious),
+    votesDiff: toNumberOrNull(raw.votesDiff),
+
+    histogram: (raw.histogram && typeof raw.histogram === 'object') ? raw.histogram : null,
+    insights: Array.isArray(raw.insights) ? raw.insights : [],
+  };
+
+  // rating/votes 둘 다 없으면 무효
+  const hasAny =
+    snapshot.ratingCurrent !== null ||
+    snapshot.votesCurrent !== null ||
+    snapshot.ratingPrevious !== null ||
+    snapshot.votesPrevious !== null;
+
+  if (!hasAny) return null;
+
+  return snapshot;
 }
 
 function formatRating(val) {
@@ -102,6 +156,7 @@ function buildRatingBlock(data) {
 
   const votesCurrent = formatInt(data.votesCurrent);
   const votesPrevious = formatInt(data.votesPrevious);
+
   const votesDiff = (typeof data.votesDiff === 'number' && !Number.isNaN(data.votesDiff))
     ? (data.votesDiff > 0 ? `+${data.votesDiff.toLocaleString('en-US')}` : data.votesDiff.toLocaleString('en-US'))
     : 'n/a';
@@ -145,10 +200,23 @@ function buildRatingBlock(data) {
   ].join('\n');
 }
 
+function escapeHtml(s) {
+  // 최소한의 XSS 방어(인사이트는 SSOT이지만 안전하게)
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
 function buildInsightsBlock(data) {
   const insights = Array.isArray(data.insights) ? data.insights : [];
 
-  if (!insights.length) {
+  const cleaned = insights
+    .map(t => (t ? String(t).trim() : ''))
+    .filter(Boolean)
+    .slice(0, 12);
+
+  if (!cleaned.length) {
     return [
       '  <section id="review-insights-block" class="review-block">',
       '    <!-- no insights -->',
@@ -156,10 +224,8 @@ function buildInsightsBlock(data) {
     ].join('\n');
   }
 
-  const items = insights
-    .map(t => (t ? String(t).trim() : ''))
-    .filter(Boolean)
-    .map(t => `      <li>${t}</li>`)
+  const items = cleaned
+    .map(t => `      <li>${escapeHtml(t)}</li>`)
     .join('\n');
 
   return [
@@ -178,6 +244,32 @@ function replaceSection(html, sectionId, newBlockHtml) {
   );
   if (!pattern.test(html)) return { html, changed: false };
   return { html: html.replace(pattern, newBlockHtml), changed: true };
+}
+
+function insertReviewBlocks(html, combinedHtml) {
+  // 1) SLOT:REVIEW
+  if (html.includes('<!--SLOT:REVIEW-->')) {
+    return { html: html.replace('<!--SLOT:REVIEW-->', combinedHtml), inserted: true, where: 'SLOT:REVIEW' };
+  }
+
+  // 2) FAQ 앞 (SLOT:FAQ or id="faq")
+  if (html.includes('<!--SLOT:FAQ-->')) {
+    return { html: html.replace('<!--SLOT:FAQ-->', `${combinedHtml}\n<!--SLOT:FAQ-->`), inserted: true, where: 'BEFORE_SLOT:FAQ' };
+  }
+
+  const faqSection = /<section\s+id="faq"[\s\S]*?>/i;
+  if (faqSection.test(html)) {
+    return { html: html.replace(faqSection, `${combinedHtml}\n$&`), inserted: true, where: 'BEFORE_FAQ' };
+  }
+
+  // 3) </main> 직전
+  const mainClose = /<\/main>/i;
+  if (mainClose.test(html)) {
+    return { html: html.replace(mainClose, `${combinedHtml}\n$&`), inserted: true, where: 'BEFORE_</main>' };
+  }
+
+  // fallback: 맨 끝
+  return { html: `${html}\n${combinedHtml}\n`, inserted: true, where: 'APPEND' };
 }
 
 function main() {
@@ -200,39 +292,49 @@ function main() {
 
   let updatedCount = 0;
   let ratingMissing = 0;
-  let slotMissing = 0;
+  let insertedCount = 0;
+  let replacedCount = 0;
+  let invalidData = 0;
 
   for (const file of files) {
     const slug = path.basename(file, '.html');
-    const ratingData = bySlug[slug];
+    const raw = bySlug[slug];
+    const ratingData = normalizeRatingData(raw);
     const fullPath = path.join(DIST_DIR, file);
 
-    if (!ratingData) {
+    if (!raw) {
       ratingMissing += 1;
+      continue;
+    }
+    if (!ratingData) {
+      invalidData += 1;
       continue;
     }
 
     let html = fs.readFileSync(fullPath, 'utf8');
 
-    const hasRatingSlot = html.includes('id="review-rating-block"');
-    const hasInsightsSlot = html.includes('id="review-insights-block"');
-    if (!hasRatingSlot || !hasInsightsSlot) {
-      slotMissing += 1;
-      continue;
-    }
-
     const ratingBlockHtml = buildRatingBlock(ratingData);
     const insightsBlockHtml = buildInsightsBlock(ratingData);
+    const combined = `${ratingBlockHtml}\n${insightsBlockHtml}`;
 
     let changed = false;
 
+    // 1) 기존 섹션 있으면 교체
     const r1 = replaceSection(html, 'review-rating-block', ratingBlockHtml);
     html = r1.html;
-    if (r1.changed) changed = true;
+    if (r1.changed) { changed = true; replacedCount += 1; }
 
     const r2 = replaceSection(html, 'review-insights-block', insightsBlockHtml);
     html = r2.html;
-    if (r2.changed) changed = true;
+    if (r2.changed) { changed = true; replacedCount += 1; }
+
+    // 2) 둘 다 없어서 교체가 하나도 안 됐다면 삽입
+    if (!r1.changed && !r2.changed) {
+      const ins = insertReviewBlocks(html, combined);
+      html = ins.html;
+      changed = true;
+      insertedCount += 1;
+    }
 
     if (changed) {
       fs.writeFileSync(fullPath, html, 'utf8');
@@ -241,7 +343,7 @@ function main() {
   }
 
   log('────────────────────────────────────────────');
-  log(`[review-meta] 처리 완료: 업데이트=${updatedCount}, rating없음=${ratingMissing}, 슬롯없음=${slotMissing}`);
+  log(`[review-meta] 처리 완료: 업데이트=${updatedCount}, rating없음=${ratingMissing}, 삽입=${insertedCount}, 교체=${replacedCount}, SSOT데이터무효=${invalidData}`);
   log('────────────────────────────────────────────');
 }
 
