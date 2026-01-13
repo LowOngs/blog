@@ -6,22 +6,16 @@
  *
  * ✅ 정책(1단계)
  * - 리뷰 SSOT(단일 소스) 우선: content/reviews/review-ratings.json
- * - SSOT 스키마(스냅샷형):
- *   ratingCurrent / votesCurrent / ratingPrevious / votesPrevious / ratingDiff / votesDiff / histogram / insights
- *   + (선택) lastChecked / nextCheck / platform / source / storeId / scale
+ * - SSOT 스키마(스냅샷형): lastChecked / status / source / ratingCurrent / votesCurrent / ratingPrevious / votesPrevious / ratingDiff / votesDiff / histogram / insights
  * - SSOT에 없으면 postJson.review 또는 postJson.reviews (있을 때만) fallback
  * - 리뷰 라벨이 아니면 null 반환(리뷰 블록 미출력)
  *
  * ✅ insights 규칙(1단계 확정)
  * - 총 12개 상한(최대 12)
  * - 긍정(pos) 최대 6, 부정(neg) 최대 6 → pos+neg 최대 12
- * - 부족하면 있는 만큼만 출력(억지로 12개 채우지 않음)
+ * - 부족하면 있는 만큼만 출력
  * - 중복/의미없는 짧은 문장 제거
- * - 실행마다 결과가 바뀌지 않게 결정론적 정렬(입력 순서 영향 제거)
- *
- * ✅ blocks.cjs 연동 형태(중요)
- * - 반환 객체는 다음을 포함해야 함:
- *   { rating: { overall, votes, scale, lastChecked, nextCheck, platform, source, storeId }, histogram, insights, source }
+ * - 실행마다 결과가 바뀌지 않게 결정론적 정렬
  */
 
 const fs = require('fs');
@@ -107,7 +101,6 @@ function normalizeInsightsBalanced(v) {
     return { all: [], pos: [], neg: [], counts: { pos: 0, neg: 0, total: 0 } };
   }
 
-  // 결정론 정렬(입력 순서 제거)
   const sorted = cleaned.slice().sort((a, b) => a.localeCompare(b, 'en'));
 
   const pos = [];
@@ -123,20 +116,25 @@ function normalizeInsightsBalanced(v) {
 
   const all = [...pos, ...neg].slice(0, 12);
 
-  return { all, pos, neg, counts: { pos: pos.length, neg: neg.length, total: all.length } };
+  return {
+    all,
+    pos,
+    neg,
+    counts: { pos: pos.length, neg: neg.length, total: all.length },
+  };
 }
 
 /* ------------------------------ histogram 처리 ------------------------------ */
-/**
- * blocks.cjs가 normalizeHistogram에서 "1".."5" 키를 int로 정리하므로
- * 여기서는 형태만 보존(객체면 그대로)하고, 명백히 잘못된 경우만 null 처리합니다.
- */
-function normalizeHistogramPassThrough(hist) {
+
+function clampHistogramPctObject(hist) {
   if (!hist || typeof hist !== 'object') return null;
-  if (Array.isArray(hist)) return null;
-  const keys = Object.keys(hist);
-  if (keys.length === 0) return null;
-  return hist;
+  const out = {};
+  for (const k of Object.keys(hist)) {
+    const v = Number(hist[k]);
+    if (!Number.isFinite(v)) continue;
+    out[k] = Math.max(0, Math.min(100, v));
+  }
+  return Object.keys(out).length ? out : null;
 }
 
 /* ------------------------------ SSOT 로딩 ------------------------------ */
@@ -155,116 +153,93 @@ function isReviewLabel(label) {
   return v === 'app-reviews' || v === 'device-reviews' || v === 'subscription-services';
 }
 
-function pickLabel(postJson) {
-  // labels 우선(SSOT 규격), 그다음 legacy 필드들
-  const labels = Array.isArray(postJson?.labels) ? postJson.labels : [];
-  const first = labels.length ? labels[0] : '';
-  return String(first || postJson?.label || postJson?.mainLabel || '').trim();
-}
-
-/* ------------------------------ normalize(SSOT 스냅샷 → blocks용) ------------------------------ */
+/* ------------------------------ normalize(스냅샷/폴백) ------------------------------ */
 
 function normalizeFromSnapshot(obj) {
   if (!obj || typeof obj !== 'object') return null;
 
   const ratingCurrent = toNumberOrNull(obj.ratingCurrent);
   const votesCurrent = toNumberOrNull(obj.votesCurrent);
-
   const ratingPrevious = toNumberOrNull(obj.ratingPrevious);
   const votesPrevious = toNumberOrNull(obj.votesPrevious);
 
-  // rating/votes가 둘 다 완전 비면 무효
-  if (
-    ratingCurrent === null &&
-    votesCurrent === null &&
-    ratingPrevious === null &&
-    votesPrevious === null
-  ) {
+  if (ratingCurrent === null && votesCurrent === null && ratingPrevious === null && votesPrevious === null) {
     return null;
   }
 
   const ins = normalizeInsightsBalanced(obj.insights);
 
-  // blocks.cjs가 기대하는 rating 객체
-  const overall = ratingCurrent !== null ? ratingCurrent : ratingPrevious;
-  const votes = votesCurrent !== null ? votesCurrent : (votesPrevious !== null ? votesPrevious : 0);
-
-  if (overall === null) return null;
-
-  const scale = toNumberOrNull(obj.scale) || 5;
-
-  const rating = {
-    overall,
-    votes: votes || 0,
-    scale,
-    lastChecked: obj.lastChecked ? String(obj.lastChecked) : '',
-    nextCheck: obj.nextCheck ? String(obj.nextCheck) : '',
-    platform: obj.platform ? String(obj.platform) : (obj.store ? String(obj.store) : ''),
-    source: obj.source ? String(obj.source) : '',
-    storeId: (obj.storeId === undefined) ? null : obj.storeId,
-  };
-
+  // ✅ blocks.cjs가 기대하는 형태로 맞춤 (rating.overall/votes/lastChecked/source)
   return {
-    rating,
-    histogram: normalizeHistogramPassThrough(obj.histogram),
-    insights: ins.all,
-    // blocks.cjs에서 reviewData.source fallback도 보므로 같이 제공
-    source: rating.source || '',
-    // 디버그/추적용(필요 시)
-    snapshot: {
-      ratingCurrent,
-      votesCurrent,
-      ratingPrevious,
-      votesPrevious,
-      ratingDiff: toNumberOrNull(obj.ratingDiff),
-      votesDiff: toNumberOrNull(obj.votesDiff),
-      status: obj.status ? String(obj.status) : 'ok',
-      lastChecked: rating.lastChecked,
-      nextCheck: rating.nextCheck,
-      insightsCounts: ins.counts,
+    rating: {
+      overall: ratingCurrent ?? ratingPrevious ?? 0,
+      votes: votesCurrent ?? votesPrevious ?? 0,
+      scale: 5,
+      lastChecked: obj.lastChecked ? String(obj.lastChecked) : '',
+      source: obj.source ? String(obj.source) : '',
+      storeId: null,
     },
+
+    // 스냅샷 원본도 유지(향후 확장 대비)
+    lastChecked: obj.lastChecked ? String(obj.lastChecked) : null,
+    status: obj.status ? String(obj.status) : 'ok',
+    source: obj.source ? String(obj.source) : '',
+
+    ratingCurrent,
+    votesCurrent,
+    ratingPrevious,
+    votesPrevious,
+    ratingDiff: toNumberOrNull(obj.ratingDiff),
+    votesDiff: toNumberOrNull(obj.votesDiff),
+
+    histogram: clampHistogramPctObject(obj.histogram),
+
+    insights: ins.all,
+    insightsPositive: ins.pos,
+    insightsNegative: ins.neg,
+    insightsCounts: ins.counts,
   };
 }
 
 function normalizeFromFallback(obj) {
   if (!obj || typeof obj !== 'object') return null;
 
-  // 다양한 필드명 허용
-  const overall = toNumberOrNull(obj.rating ?? obj.score ?? obj.stars ?? obj.overall);
-  const votes = toNumberOrNull(obj.votes ?? obj.ratingsCount ?? obj.count) || 0;
+  const ratingCurrent = toNumberOrNull(obj.rating ?? obj.score ?? obj.stars ?? obj.overall);
+  const votesCurrent = toNumberOrNull(obj.votes ?? obj.ratingsCount ?? obj.count);
 
-  if (overall === null) return null;
+  if (ratingCurrent === null && votesCurrent === null) return null;
 
   const ins = normalizeInsightsBalanced(obj.insights);
 
-  const rating = {
-    overall,
-    votes,
-    scale: toNumberOrNull(obj.scale) || 5,
-    lastChecked: obj.lastChecked ? String(obj.lastChecked) : '',
-    nextCheck: obj.nextCheck ? String(obj.nextCheck) : '',
-    platform: obj.platform ? String(obj.platform) : (obj.store ? String(obj.store) : ''),
-    source: obj.source ? String(obj.source) : '',
-    storeId: (obj.storeId === undefined) ? null : obj.storeId,
-  };
+  const source = obj.source ? String(obj.source) : '';
 
   return {
-    rating,
-    histogram: normalizeHistogramPassThrough(obj.histogram),
-    insights: ins.all,
-    source: rating.source || '',
-    snapshot: {
-      ratingCurrent: overall,
-      votesCurrent: votes,
-      ratingPrevious: null,
-      votesPrevious: null,
-      ratingDiff: null,
-      votesDiff: null,
-      status: obj.status ? String(obj.status) : 'ok',
-      lastChecked: rating.lastChecked,
-      nextCheck: rating.nextCheck,
-      insightsCounts: ins.counts,
+    rating: {
+      overall: ratingCurrent ?? 0,
+      votes: votesCurrent ?? 0,
+      scale: Number(obj.scale || 5) || 5,
+      lastChecked: obj.lastChecked ? String(obj.lastChecked) : '',
+      source,
+      storeId: obj.storeId ?? null,
     },
+
+    lastChecked: obj.lastChecked ? String(obj.lastChecked) : null,
+    status: obj.status ? String(obj.status) : 'ok',
+    source,
+
+    ratingCurrent,
+    votesCurrent,
+    ratingPrevious: null,
+    votesPrevious: null,
+    ratingDiff: null,
+    votesDiff: null,
+
+    histogram: clampHistogramPctObject(obj.histogram),
+
+    insights: ins.all,
+    insightsPositive: ins.pos,
+    insightsNegative: ins.neg,
+    insightsCounts: ins.counts,
   };
 }
 
@@ -274,8 +249,7 @@ function resolveReviewData({ ROOT, postJson }) {
   try {
     if (!postJson || typeof postJson !== 'object') return null;
 
-    // 리뷰 글만 리뷰 블록 출력
-    const label = pickLabel(postJson);
+    const label = (postJson.label || postJson.mainLabel || (postJson.labels && postJson.labels[0]) || '').toString();
     if (!isReviewLabel(label)) return null;
 
     const slug = String(postJson.slug || '').trim();
@@ -284,19 +258,16 @@ function resolveReviewData({ ROOT, postJson }) {
     if (slug) {
       const ssot = readSsotOnce(ROOT);
 
-      // 기대 형태:
-      // - { bySlug: { [slug]: {...} } }
-      // - { [slug]: {...} }
       const found =
         (ssot && ssot.bySlug && typeof ssot.bySlug === 'object' && ssot.bySlug[slug]) ||
-        (ssot && typeof ssot === 'object' && ssot[slug]) ||
+        (ssot && ssot[slug]) ||
         null;
 
       const normalized = normalizeFromSnapshot(found);
       if (normalized) return normalized;
     }
 
-    // 2) fallback (있을 때만)
+    // 2) fallback
     return normalizeFromFallback(postJson.review || postJson.reviews || null);
   } catch {
     return null;
