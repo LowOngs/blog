@@ -1,0 +1,167 @@
+{
+  "generatedAt": "2025-12-10T12:57:21.988Z",
+  "today": "2025-12-10",
+  "seedDir": "C:\\google-blog\\System_files\\seedpool",
+  "totalLabels": 6,
+  "totalTrend": 15,
+  "totalEvergreen": 15,
+  "parseErrors": 0,
+  "labels": [
+    {
+      "file": "app-reviews.json",
+      "label": "app-reviews",
+      "trendLimit": 200,
+      "evergreenLimit": 200,
+      "trendCount": 1,
+      "evergreenCount": 1,
+      "trendShortage": 199,
+      "evergreenShortage": 199,
+      "expiredTrend": 0,
+      "expiredDetail": [],
+      "issues": [
+        {
+          "type": "trend_shortage",
+          "message": "trend 시드가 부족합니다 (1/200)",
+          "current": 1,
+          "required": 200
+        },
+        {
+          "type": "evergreen_shortage",
+          "message": "evergreen 시드가 부족합니다 (1/200)",
+          "current": 1,
+          "required": 200
+        }
+      ]
+    },
+    {
+      "file": "device-reviews.json",
+      "label": "device-reviews",
+      "trendLimit": 60,
+      "evergreenLimit": 60,
+      "trendCount": 1,
+      "evergreenCount": 1,
+      "trendShortage": 59,
+      "evergreenShortage": 59,
+      "expiredTrend": 0,
+      "expiredDetail": [],
+      "issues": [
+        {
+          "type": "trend_shortage",
+          "message": "trend 시드가 부족합니다 (1/60)",
+          "current": 1,
+          "required": 60
+        },
+        {
+          "type": "evergreen_shortage",
+          "message": "evergreen 시드가 부족합니다 (1/60)",
+          "current": 1,
+          "required": 60
+        }
+      ]
+    },
+    {
+      "file": "how-to-playbooks.json",
+      "label": "how-to-playbooks",
+      "trendLimit": 200,
+      "evergreenLimit": 200,
+      "trendCount": 10,
+      "evergreenCount": 10,
+      "trendShortage": 190,
+      "evergreenShortage": 190,
+      "expiredTrend": 0,
+      "expiredDetail": [],
+      "issues": [
+        {
+          "type": "trend_shortage",
+          "message": "trend 시드가 부족합니다 (10/200)",
+          "current": 10,
+          "required": 200
+        },
+        {
+          "type": "evergreen_shortage",
+          "message": "evergreen 시드가 부족합니다 (10/200)",
+          "current": 10,
+          "required": 200
+        }
+      ]
+    },
+    {
+      "file": "smart-savings.json",
+      "label": "smart-savings",
+      "trendLimit": 80,
+      "evergreenLimit": 80,
+      "trendCount": 1,
+      "evergreenCount": 1,
+      "trendShortage": 79,
+      "evergreenShortage": 79,
+      "expiredTrend": 0,
+      "expiredDetail": [],
+      "issues": [
+        {
+          "type": "trend_shortage",
+          "message": "trend 시드가 부족합니다 (1/80)",
+          "current": 1,
+          "required": 80
+        },
+        {
+          "type": "evergreen_shortage",
+          "message": "evergreen 시드가 부족합니다 (1/80)",
+          "current": 1,
+          "required": 80
+        }
+      ]
+    },
+    {
+      "file": "subscription-services.json",
+      "label": "subscription-services",
+      "trendLimit": 60,
+      "evergreenLimit": 60,
+      "trendCount": 1,
+      "evergreenCount": 1,
+      "trendShortage": 59,
+      "evergreenShortage": 59,
+      "expiredTrend": 0,
+      "expiredDetail": [],
+      "issues": [
+        {
+          "type": "trend_shortage",
+          "message": "trend 시드가 부족합니다 (1/60)",
+          "current": 1,
+          "required": 60
+        },
+        {
+          "type": "evergreen_shortage",
+          "message": "evergreen 시드가 부족합니다 (1/60)",
+          "current": 1,
+          "required": 60
+        }
+      ]
+    },
+    {
+      "file": "templates-checklists.json",
+      "label": "templates-checklists",
+      "trendLimit": 60,
+      "evergreenLimit": 60,
+      "trendCount": 1,
+      "evergreenCount": 1,
+      "trendShortage": 59,
+      "evergreenShortage": 59,
+      "expiredTrend": 0,
+      "expiredDetail": [],
+      "issues": [
+        {
+          "type": "trend_shortage",
+          "message": "trend 시드가 부족합니다 (1/60)",
+          "current": 1,
+          "required": 60
+        },
+        {
+          "type": "evergreen_shortage",
+          "message": "evergreen 시드가 부족합니다 (1/60)",
+          "current": 1,
+          "required": 60
+        }
+      ]
+    }
+  ]
+}
