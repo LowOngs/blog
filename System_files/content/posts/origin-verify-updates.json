@@ -1,0 +1,31 @@
+{
+  "slug": "origin-verify-updates",
+  "title": "How Ongs Blog Verifies Updates (90-day refresh + version tags)",
+  "label": "firstgate",
+  "description": "",
+  "body": "",
+  "aio": {
+    "tldr": [
+      "We update guides on a fixed cadence and keep change visibility.",
+      "Every post is version-tagged and source-linked."
+    ],
+    "keyfacts": [],
+    "faq": [],
+    "sources": []
+  },
+  "seedMeta": {
+    "kind": "origin",
+    "seedId": "origin-0001",
+    "labelHint": "how-to-playbooks",
+    "intent": "trust",
+    "trustClaims": [
+      "90-day refresh policy for eligible posts",
+      "Source-linked key facts and change visibility"
+    ],
+    "proofLinks": [
+      "https://ongsblog.com/ai/authority.json"
+    ],
+    "pickedAt": "2026-01-06T13:01:25.418Z"
+  },
+  "pageId": "page000011"
+}
