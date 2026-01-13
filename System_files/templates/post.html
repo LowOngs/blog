@@ -24,12 +24,14 @@
       --radius:12px;
     }
 
-    body{
+    /* ✅ 핵심: Blogger 테마를 덮지 않기 위해 html/body는 건드리지 않음
+       - 흰 배경/패딩 문제의 원인: body{background:#fff; padding:24px;}
+       - 해결: 글 영역만 감싸는 래퍼(.ongs-post)에만 스타일 적용 */
+    .ongs-post{
       font:16px/1.65 system-ui,Segoe UI,Arial,sans-serif;
       color:var(--c-text);
-      margin:0;
       padding:24px;
-      background:#fff;
+      background:transparent; /* Blogger 배경이 그대로 보이게 */
     }
 
     /* ─────────────────────────────────────────────
@@ -84,7 +86,7 @@
     details.collapsible{
       border:1px solid var(--c-border);
       border-radius:var(--radius);
-      background:#fff;
+      background:transparent; /* ✅ 테마 배경 존중 */
       margin:12px 0;
       overflow:hidden;
     }
@@ -93,15 +95,14 @@
       cursor:pointer;
       padding:12px 14px;
       font-weight:650;
+      background:#fff; /* summary는 가독성 위해 유지 */
     }
     details.collapsible > summary::-webkit-details-marker{display:none}
     details.collapsible[open] > summary{border-bottom:1px solid var(--c-border)}
     details.collapsible .panel{padding:12px 14px; background:var(--c-bg)}
 
     /* ─────────────────────────────────────────────
-      ✅ 본문 타이포 강제 통일
-      - 모든 라벨에서 h2/h3/h4 스타일을 동일하게 유지
-      - generate-body.cjs / LLM이 만든 h2/h3가 그대로 안정적으로 보이게 하는 목적
+      ✅ 본문 타이포 강제 통일 (글 영역 내부만)
     ───────────────────────────────────────────── */
     main{
       margin-top:16px;
@@ -224,10 +225,6 @@
 
     /* ─────────────────────────────────────────────
       ✅ Ad slots (MID + BOTTOM) — 위치 확정
-      - MID: Key Facts 끝난 직후(본문 시작 전)
-      - BOTTOM: FAQ와 Sources 사이(또는 Sources 위)
-      - 실제 애드센스 스크립트는 슬롯 div 내부에 "직접" 삽입
-      - 이 파일은 "자리 확정"이 목적이므로, 계정별 코드는 넣지 않음
     ───────────────────────────────────────────── */
     .ad-slot{
       border:1px dashed var(--c-border);
@@ -247,100 +244,94 @@
 </head>
 <body>
 
-  <!-- Page badge -->
-  <a class="page-badge" id="pageId" data-page-id="{{pageId}}" href="{{canonical}}" rel="nofollow">{{pageId}}</a>
-  <!--SLOT:PAGE_BADGE-->
+  <!-- ✅ 글 전체를 래핑: Blogger 배경/레이아웃 존중 -->
+  <div class="ongs-post">
 
-  <div class="updated-badge" aria-label="Updated">Updated {{updated}}</div>
+    <!-- Page badge -->
+    <a class="page-badge" id="pageId" data-page-id="{{pageId}}" href="{{canonical}}" rel="nofollow">{{pageId}}</a>
+    <!--SLOT:PAGE_BADGE-->
 
-  <figure class="post-hero" style="overflow:hidden;">
-    <img src="{{heroImage}}" alt="{{heroAlt}}" loading="eager" fetchpriority="high" style="max-width:100%;height:auto;" />
-  </figure>
-  <!--SLOT:HERO_IMAGE-->
+    <div class="updated-badge" aria-label="Updated">Updated {{updated}}</div>
 
-  <!-- TL;DR -->
-  <section id="tldr">
-    <section class="tldr">
-      {{tldr}}
-      <!--SLOT:AFTER_TLDR-->
-    </section>
-  </section>
+    <figure class="post-hero" style="overflow:hidden;">
+      <img src="{{heroImage}}" alt="{{heroAlt}}" loading="eager" fetchpriority="high" style="max-width:100%;height:auto;" />
+    </figure>
+    <!--SLOT:HERO_IMAGE-->
 
-  <!-- Key Facts -->
-  <details class="collapsible" id="keyfacts">
-    <summary>Key Facts</summary>
-    <div class="panel">
-      <section class="keyfacts">
-        {{keyfacts}}
+    <!-- TL;DR -->
+    <section id="tldr">
+      <section class="tldr">
+        {{tldr}}
+        <!--SLOT:AFTER_TLDR-->
       </section>
+    </section>
+
+    <!-- Key Facts -->
+    <details class="collapsible" id="keyfacts">
+      <summary>Key Facts</summary>
+      <div class="panel">
+        <section class="keyfacts">
+          {{keyfacts}}
+        </section>
+      </div>
+    </details>
+
+    <!-- Ad Slot (MID) -->
+    <div class="ad-slot" id="ad-mid" aria-label="Ad slot (mid)">
+      <div class="ad-slot__label">Ad (mid)</div>
+      <!-- SLOT:ADS_MID -->
+      <!-- 여기에 애드센스 코드(계정별) 삽입 -->
     </div>
-  </details>
 
-  <!-- ─────────────────────────────────────────────
-    ✅ Ad Slot (MID) — 본문 시작 직전
-    - 히어로/OG(LCP)와 멀리 떨어져 충돌 위험 낮음
-    - TL;DR 박스 내부가 아니라 레이아웃 안정
-    - 렌더러가 필요 시 이 슬롯에 애드센스 코드를 "삽입"해도 되고,
-      당장은 블로그 편집기/스킨에서 수동 삽입해도 됨.
-  ───────────────────────────────────────────── -->
-  <div class="ad-slot" id="ad-mid" aria-label="Ad slot (mid)">
-    <div class="ad-slot__label">Ad (mid)</div>
-    <!-- SLOT:ADS_MID -->
-    <!-- 여기에 애드센스 코드(계정별) 삽입 -->
+    <main>
+      <!-- 본문 -->
+      <section id="review-base-block">
+        {{body}}
+      </section>
+
+      <!-- ─────────────────────────────────────────────
+        ✅ 리뷰 섹션 “실물”을 템플릿에서 항상 탑재 (B안)
+        - dist 산출물에 섹션이 항상 존재 → review-meta-block.cjs가 SSOT로 치환 가능
+        - 기본 상태는 숨김(.review-block--empty)
+        - SSOT 치환 시 새 HTML에는 이 클래스가 없어 자동 노출됨
+        - id="review-rating-block" / id="review-insights-block"는 절대 변경 금지
+      ───────────────────────────────────────────── -->
+
+      <!--SLOT:REVIEW_RATING_WRAPPER-->
+      <section id="review-rating-block" class="review-block review-block--empty">
+        <!-- placeholder: replaced by review-meta-block.cjs when SSOT exists -->
+      </section>
+
+      <!--SLOT:REVIEW_INSIGHTS_WRAPPER-->
+      <section id="review-insights-block" class="review-block review-block--empty">
+        <!-- placeholder: replaced by review-meta-block.cjs when SSOT exists -->
+      </section>
+    </main>
+
+    <!-- FAQ -->
+    <!--SLOT:FAQ_WRAPPER-->
+
+    <!-- Ad Slot (BOTTOM) -->
+    <div class="ad-slot" id="ad-bottom" aria-label="Ad slot (bottom)">
+      <div class="ad-slot__label">Ad (bottom)</div>
+      <!-- SLOT:ADS_BOTTOM -->
+      <!-- 여기에 애드센스 코드(계정별) 삽입 -->
+    </div>
+
+    <!-- Sources -->
+    <!--SLOT:SOURCES_WRAPPER-->
+
+    <!-- Desktop: auto open Key Facts -->
+    <script>
+      (function(){
+        try{
+          var isDesktop = window.matchMedia('(min-width: 769px)').matches;
+          var kf = document.getElementById('keyfacts');
+          if(isDesktop && kf && !kf.hasAttribute('open')) kf.setAttribute('open','');
+        }catch(e){}
+      })();
+    </script>
+
   </div>
-
-  <main>
-    <!-- 본문 -->
-    <section id="review-base-block">
-      {{body}}
-    </section>
-
-    <!-- ─────────────────────────────────────────────
-      ✅ 리뷰 섹션 “실물”을 템플릿에서 항상 탑재 (B안)
-      - dist 산출물에 섹션이 항상 존재 → review-meta-block.cjs가 SSOT로 치환 가능
-      - 기본 상태는 숨김(.review-block--empty)
-      - SSOT 치환 시 새 HTML에는 이 클래스가 없어 자동 노출됨
-      - id="review-rating-block" / id="review-insights-block"는 절대 변경 금지
-    ───────────────────────────────────────────── -->
-
-    <!--SLOT:REVIEW_RATING_WRAPPER-->
-    <section id="review-rating-block" class="review-block review-block--empty">
-      <!-- placeholder: replaced by review-meta-block.cjs when SSOT exists -->
-    </section>
-
-    <!--SLOT:REVIEW_INSIGHTS_WRAPPER-->
-    <section id="review-insights-block" class="review-block review-block--empty">
-      <!-- placeholder: replaced by review-meta-block.cjs when SSOT exists -->
-    </section>
-  </main>
-
-  <!-- FAQ -->
-  <!--SLOT:FAQ_WRAPPER-->
-
-  <!-- ─────────────────────────────────────────────
-    ✅ Ad Slot (BOTTOM) — FAQ 이후 / Sources 이전
-    - 글을 다 읽은 후라 UX 충돌이 적음
-    - Sources 링크 클릭을 방해하지 않게 "Sources 바로 위"에 배치
-  ───────────────────────────────────────────── -->
-  <div class="ad-slot" id="ad-bottom" aria-label="Ad slot (bottom)">
-    <div class="ad-slot__label">Ad (bottom)</div>
-    <!-- SLOT:ADS_BOTTOM -->
-    <!-- 여기에 애드센스 코드(계정별) 삽입 -->
-  </div>
-
-  <!-- Sources -->
-  <!--SLOT:SOURCES_WRAPPER-->
-
-  <!-- Desktop: auto open Key Facts -->
-  <script>
-    (function(){
-      try{
-        var isDesktop = window.matchMedia('(min-width: 769px)').matches;
-        var kf = document.getElementById('keyfacts');
-        if(isDesktop && kf && !kf.hasAttribute('open')) kf.setAttribute('open','');
-      }catch(e){}
-    })();
-  </script>
-
 </body>
 </html>
