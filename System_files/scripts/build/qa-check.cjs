@@ -3,6 +3,13 @@
  * dist/posts/*.html 대상으로 AIO/SEO 이미지·스키마 QA 체크
  * - og:image: 실제 CDN URL + HTTP 200 여부 검사
  * - Article / BreadcrumbList 스키마 존재 여부 확인
+ * - ✅ (추가) 리뷰 라벨인데 SSOT 누락이면 CRIT (자동발행 스킵 근거)
+ *
+ * 판정 규칙(요약)
+ * - PASS: 문제 없음
+ * - WARN: 경고(발행은 가능)
+ * - FAIL: 오류(빌드 실패급)
+ * - CRIT: 자동발행에서는 제외해야 하는 치명 이슈(특히 리뷰 SSOT 누락)
  */
 
 const fs = require('fs');
@@ -42,6 +49,35 @@ function hasBreadcrumbList(html) {
   );
 }
 
+function isReviewFileName(fileName) {
+  // 프로젝트 slug prefix 규칙 기반(가장 안전/간단)
+  // app-YYYYMMDD-###, device-..., subscription-...
+  const base = String(fileName || '').toLowerCase();
+  return (
+    base.startsWith('app-') ||
+    base.startsWith('device-') ||
+    base.startsWith('subscription-')
+  );
+}
+
+function detectMissingReviewSsot(html) {
+  // render 단계에서 아래 중 하나라도 박혀 있으면 "SSOT 누락"으로 확정
+  // - reviewStatus="missing-ssot" (권장)
+  // - data-review-status="missing-ssot"
+  // - HTML 주석에 missing-ssot
+  const h = String(html || '');
+  if (!h) return false;
+
+  const patterns = [
+    /reviewStatus\s*=\s*["']missing-ssot["']/i,
+    /data-review-status\s*=\s*["']missing-ssot["']/i,
+    /missing-ssot/i,
+    /데이터\s*수집\/?검증\s*후\s*업데이트\s*됩니다/i, // 플레이스홀더 문구 감지(최후 방어)
+  ];
+
+  return patterns.some((re) => re.test(h));
+}
+
 async function headCheck(url) {
   try {
     const res = await fetch(url, { method: 'HEAD' });
@@ -49,6 +85,14 @@ async function headCheck(url) {
   } catch (e) {
     return { ok: false, status: 0, error: e.message };
   }
+}
+
+function rankStatus(cur, next) {
+  // PASS < WARN < FAIL < CRIT
+  const w = { PASS: 0, WARN: 1, FAIL: 2, CRIT: 3 };
+  const a = w[cur] ?? 0;
+  const b = w[next] ?? 0;
+  return b > a ? next : cur;
 }
 
 async function checkOne(fileName) {
@@ -69,32 +113,38 @@ async function checkOne(fileName) {
   let status = 'PASS';
   const messages = [];
 
+  // 0) ✅ 리뷰 SSOT 누락은 CRIT (리뷰 라벨만)
+  if (isReviewFileName(fileName)) {
+    const missing = detectMissingReviewSsot(html);
+    if (missing) {
+      status = rankStatus(status, 'CRIT');
+      messages.push('[CRIT] 리뷰 라벨인데 SSOT 누락(missing-ssot) → 자동발행 제외 대상');
+    }
+  }
+
   // 1) Article / BreadcrumbList
   if (!hasArticle) {
-    status = 'WARN';
+    status = rankStatus(status, 'WARN');
     messages.push('[WARN] Article 스키마 없음');
   }
   if (!hasBreadcrumb) {
-    status = 'WARN';
+    status = rankStatus(status, 'WARN');
     messages.push('[WARN] BreadcrumbList 스키마 없음');
   }
 
   // 2) og:image
   if (!ogUrl) {
-    status = 'FAIL';
+    status = rankStatus(status, 'FAIL');
     messages.push('[FAIL] og:image 메타 태그 없음');
   } else {
     if (!ogUrl.startsWith(CDN_BASE)) {
-      // CDN_BASE 기준이 아니면 경고
-      if (status !== 'FAIL') status = 'WARN';
-      messages.push(
-        `[WARN] og:image CDN_BASE(${CDN_BASE}) 기준이 아님 → ${ogUrl}`,
-      );
+      status = rankStatus(status, 'WARN');
+      messages.push(`[WARN] og:image CDN_BASE(${CDN_BASE}) 기준이 아님 → ${ogUrl}`);
     }
 
     const result = await headCheck(ogUrl);
     if (!result.ok) {
-      status = 'FAIL';
+      status = rankStatus(status, 'FAIL');
       messages.push(
         `[FAIL] og:image 응답 오류 (status=${result.status}${
           result.error ? `, error=${result.error}` : ''
@@ -133,6 +183,7 @@ async function main() {
   let passCount = 0;
   let warnCount = 0;
   let failCount = 0;
+  let critCount = 0;
 
   for (const file of files) {
     const result = await checkOne(file);
@@ -140,6 +191,7 @@ async function main() {
     if (result.status === 'PASS') passCount++;
     else if (result.status === 'WARN') warnCount++;
     else if (result.status === 'FAIL') failCount++;
+    else if (result.status === 'CRIT') critCount++;
 
     console.log(`파일: ${file}`);
     console.log(`상태: ${result.status}`);
@@ -153,11 +205,12 @@ async function main() {
 
   console.log('────────────────────────────────────────────');
   console.log(
-    `[qa-check] 결과: PASS ${passCount} / WARN ${warnCount} / FAIL ${failCount}`,
+    `[qa-check] 결과: PASS ${passCount} / WARN ${warnCount} / FAIL ${failCount} / CRIT ${critCount}`,
   );
   console.log('────────────────────────────────────────────');
 
-  if (failCount > 0) {
+  // FAIL/CRIT는 CI 실패로 처리(자동발행 제외 로직은 7번에서 사용)
+  if (failCount > 0 || critCount > 0) {
     process.exitCode = 1;
   }
 }
