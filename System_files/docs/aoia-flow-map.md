@@ -1,9 +1,9 @@
 # AOIA Flow Map (SSOT)
 - Path: System_files/docs/aoia-flow-map.md
-- Last Updated: 2026-01-10 (+0900)
+- Last Updated: 2026-01-13 (+0900)
 
 본 문서는 AOIA 파이프라인의 최상위 지도(SSOT)입니다.
-지도에 없는 구조/변경은 사전 합의 없이 제안/반영하지 않습니다.
+지도에 없는 구조/변경은 사전 합의 없이 반영하지 않습니다.
 
 ────────────────────────────────────────────────────────────
 0) Ground Rules (변경/운영 규칙)
@@ -52,116 +52,157 @@
 [산출물/배포 영역: System_files/dist/*]
 - dist/posts/                 : 렌더된 HTML 산출물
 - dist/images/                : 생성된 이미지 산출물(og/body)
-- dist/queue/                 : 스케줄/발행 스코프 SSOT(today.json 등)
+- dist/queue/                 : 스케줄/발행 스코프 SSOT(today*.json 등)
 - dist/ai/                    : AI/크롤러 외부 노출 산출물(feed/authority)
 
 ────────────────────────────────────────────────────────────
-3) AI Output Path Policy (중요: ai 폴더 2개 분리 선언)
+3) Queue SSOT (A안 분리: today.json + today.expanded.json)
 ────────────────────────────────────────────────────────────
-여기서부터는 “혼선 방지”를 위해 강제 규칙으로 고정합니다.
-
-[A) System_files/ai/  (소스/정의/로직 영역)]
-- 목적: AI 관련 로직/정의/참조 데이터를 “만드는 곳”
-- 원칙: 외부에 직접 노출되는 파일을 두지 않는다.
-- 예: 내부 규칙, 생성 로직의 원천, 실험용 자료(노출 금지)
-
-[B) dist/ai/  (산출물/노출/배포 영역)]
-- 목적: AI/크롤러가 실제로 “읽는 결과물”을 두는 곳
-- 원칙: 외부 노출 파일은 무조건 dist/ai 에만 생성한다.
-- 예:
-  - dist/ai/feed.ndjson
-  - dist/ai/authority.json
-
-[결론]
-- authority.json은 “정의 문서”가 아니라 “AI가 읽는 최종 선언 산출물”이므로
-  → 반드시 dist/ai/authority.json 이다.
-- System_files/ai/authority.json 은 금지(혼선 유발).
-
-────────────────────────────────────────────────────────────
-4) Review Pipeline Map (리뷰 파이프라인 지도)
-────────────────────────────────────────────────────────────
-[SSOT]
-- content/reviews/review-ratings.json
-
-[갱신기]
-- scripts/build/review-rating.cjs
-  - app-ratings 스냅샷 → review-ratings(SSOT) bySlug 갱신
-  - 기존 histogram/insights 보존 정책 유지
-
-[리졸버]
-- scripts/build/review-resolver.cjs
-  - SSOT 읽기 전용
-  - 렌더러가 필요한 형태로 normalize
-  - insights 정책: 긍정/부정 분리 + 각각 최대 6개(총 최대 12개)
-    - 한쪽만 12개로 채워지는 형태 금지(불합리 방지)
-    - 부정이 부족하면: 긍정 6 + 부정 있는대로(최대 6)
-    - 긍정이 부족하면: 부정 6 + 긍정 있는대로(최대 6)
-
-[렌더]
-- scripts/build/render-posts.cjs
-  - review-resolver 결과를 blocks로 출력
-  - 리뷰 라벨(app/device/subscription)만 리뷰 블록 출력
-
-────────────────────────────────────────────────────────────
-5) Publish Scope SSOT (발행 스코프 SSOT)
-────────────────────────────────────────────────────────────
-[SSOT]
+[SSOT - 계획]
 - dist/queue/today.json
-  - publishable 기준 스코프
-  - 기본값: today.json에 포함된 slug만 발행 대상
-  - 수동 위험 옵션(all)은 제한적/명시적 설정에서만 허용
+  - “오늘 발행 계획(시드/라벨/슬롯)”의 원본 SSOT
+  - seed-scheduler.cjs가 생성
 
-[최종 발행]
-- scripts/publish/blogger.cjs
-  - 외부 API 호출 단일 책임
-  - canPublish 게이트 준수(위 1절)
-  - Seed Ledger publish 단계 업서트
+[SSOT - 확장(실행용)]
+- dist/queue/today.expanded.json
+  - “실행용 확장 큐”
+  - 목적: 워크플로 오류(스코프/slug 불일치)를 감내하지 않기 위해,
+          today.json의 items를 기반으로 생성될 slug/파일명/스코프를 ‘고정’한다.
+  - 포함(권장 필드):
+    - date
+    - items[]: { id, label, mode, title, ... }
+    - expanded[]: { slug, label, sourceItemId, prefix, ymd, seq, profileId, queueDate, ... }
+    - publishableSlugs[] (또는 expanded[].slug 로 대체 가능)
 
-────────────────────────────────────────────────────────────
-6) Images Pipeline (OG + Body)
-────────────────────────────────────────────────────────────
-[SSOT]
-- manifests/images-manifest.json
-
-[생성]
-- scripts/build/images-build-og.cjs (Sharp 기반 OG 생성)
-- (body 이미지 정책은 중제목 출력 검증 이후 확정)
-
-[업로드]
-- scripts/build/r2-upload.cjs
-  - DRY_RUN 파서 단일화 적용
-  - dist/images/og, dist/images/body → R2 images/og/*, images/body/*
-
-[치환]
-- scripts/build/rewrite-images.js
-  - 본문/메타 이미지 경로를 CDN_BASE 기준으로 치환
+[생성기]
+- (신규 또는 기존 스텝) scripts/build/today-expand.cjs  (권장)
+  - input:  dist/queue/today.json
+  - output: dist/queue/today.expanded.json
+  - 계약:
+    - label 6개 강제
+    - profileId(labels.json) 매핑 필수
+    - slug 규칙(라벨→prefix + ymd + seq) 결정론적
+    - 중복 slug 금지
 
 ────────────────────────────────────────────────────────────
-7) Ledger (Seed Ledger SSOT)
+4) High-Level Flow (Start → End)
 ────────────────────────────────────────────────────────────
-[SSOT]
-- logs/seed-ledger.jsonl
+A) Seed Pick / Schedule
+  1) seedpool/*.json
+    └─ scripts/build/seed-scheduler.cjs
+       output: dist/queue/today.json  (Plan SSOT)
 
-[업서트 포인트]
-- ids 단계: assigned 기록
-- publish 단계: published(url/postId/status) 기록
-- 동일 recordKey(pageId/slug) 기준 멱등 업데이트
+  2) (A안 분리) Expand Queue
+    └─ scripts/build/today-expand.cjs
+       input : dist/queue/today.json
+       output: dist/queue/today.expanded.json  (Execution SSOT)
+
+B) Queue → Posts (JSON SSOT)
+  3) dist/queue/today.expanded.json (Execution SSOT)
+    └─ scripts/build/queue-to-posts.cjs
+       output: content/posts/*.json (slug 기반 신규 생성만)
+       contract:
+         - labels: 반드시 6개 중 1개 (labels:[label])
+         - profileId: labels.json 매핑 필수(없으면 FAIL)
+         - title 누락이면 FAIL
+
+C) Body / Content Generation
+  4) content/posts/*.json
+    └─ scripts/build/generate-body.cjs, normalize-body.cjs
+       output: content/posts/*.json (body 채움, overwrite 정책 준수)
+
+D) IDs (pageId assignment)
+  5) content/posts/*.json + dist/queue/today.expanded.json
+    └─ scripts/build/ids.cjs (+ lib/page-ids.cjs)
+       output:
+         - post json에 pageId 반영
+         - manifests/page-ids.json(+ journal) (SSOT)
+       contract:
+         - render에서 신규 발급 금지
+         - ids가 발급/기록 책임
+
+E) Render (HTML)
+  6) content/posts/*.json + templates/post.html + manifests/*
+    └─ scripts/build/render-posts.cjs
+       output: dist/posts/*.html
+       contract:
+         - pageId 누락 시 ids.cjs 1회 재실행 후 재로딩, 그래도 없으면 FAIL
+         - TLDR/KeyFacts/FAQ/Sources/Review 슬롯은 blocks로 렌더
+         - 이미지 SSOT(manifests/*) 기준
+
+F) Review Pipeline (Bundle)
+  7) content/reviews/review-ratings.json (SSOT)
+    └─ scripts/build/review-*.cjs (번들)
+       output: dist/posts/*.html 내 리뷰 섹션 갱신/주입
+       (상세는 review-pipeline-map.md 참조)
+
+G) Validate / QA
+  8) dist/posts/*.html
+    └─ scripts/build/validate-repair.cjs
+    └─ scripts/build/qa-check.cjs   (✅ 리포트 파일 출력 포함)
+       output: logs/* (리포트/요약/상세)
+
+H) Upload (R2)
+  9) dist/* + manifests/*
+    └─ scripts/build/r2-upload.cjs
+       contract: DRY_RUN 파서 단일화 준수
+
+I) Publish (Blogger)
+  10) dist/posts/*.html + dist/queue/today.expanded.json (Execution SSOT scope)
+    └─ scripts/publish/blogger.cjs
+       contract:
+         - canPublish 게이트 강제 (DRY_RUN=false AND PUBLISH_MODE=enable)
+         - 기본 스코프: today(expanded) 기반 publishableSlugs만
+         - all(전체 발행)은 수동/위험 옵션으로만
+       output: Blogger posts + logs/publish-*.log + seed-ledger upsert
 
 ────────────────────────────────────────────────────────────
-8) QA / Validate (검증 단계)
+5) SSOT Registry
 ────────────────────────────────────────────────────────────
-- validate는 “교정/검증” 단계이며 신규 발급/외부 호출 금지 원칙 유지
-- 필수 블록/슬롯 확인(TL;DR, Key Facts, FAQ, Sources, Updated 배지 등)
-- og:image 200 OK 등 핵심 점검은 qa-check에 포함(필요 시)
+Queue SSOT:
+- dist/queue/today.json                 : 오늘 발행 계획(Plan SSOT)
+- dist/queue/today.expanded.json        : 실행용 확장 큐(Execution SSOT)
+
+Post SSOT:
+- content/posts/{slug}.json             : 포스트 원본(JSON)
+
+ID SSOT:
+- manifests/page-ids.json (+ journal)   : pageId 연속성/기록
+
+Review SSOT:
+- content/reviews/review-ratings.json   : slug별 rating/insights 통합 SSOT
+
+Image SSOT:
+- manifests/images-manifest.json        : OG/hero 추출 SSOT
+- manifests/images-body-manifest.json   : 본문 1장 주입 SSOT
+
+Ledgers/Logs:
+- logs/seed-ledger.jsonl                : seed/pageId/publish 장부(SSOT)
+- logs/publish-blogger-YYYY-MM-DD.log   : 상세 로그
+- logs/publish-summary-YYYY-MM-DD.log   : 요약 로그
+- logs/qa-*.json (또는 qa-report-*.json) : qa-check 리포트(정책에 맞춰 1개로 고정 권장)
 
 ────────────────────────────────────────────────────────────
-9) Change Control (지도 변경 트리거)
+6) Debug Playbook (진단 루트)
 ────────────────────────────────────────────────────────────
-다음 중 하나라도 해당하면 지도 갱신이 필요합니다.
-- 경로/폴더 역할 변경
-- SSOT 파일 위치/스키마 변경
-- DRY_RUN / PUBLISH_MODE 게이트 변경
-- 리뷰/피드/authority 산출 경로 변경
+Case-1) “대량 발행/429”
+- Check: blogger.cjs scope(today.expanded publishable) + MAX_POSTS + POST_SLEEP_MS
+- Map: I(Publish) ← Queue Execution SSOT
 
-항상 먼저 질문:
-“지도 맵도 함께 변경할까요?”
+Case-2) “pageId 누락”
+- Check: ids.cjs가 Execution SSOT 대상만 발급하는지
+- Check: render가 신규 발급 금지 지키는지
+- Map: D(IDs) ← B(Posts) ← Queue
+
+Case-3) “DRY_RUN인데 실제 발행/업로드”
+- Check: parseDryRun 규칙(false/0만 live)
+- Check: blogger/r2-upload gate
+- Map: H(Upload) + I(Publish)
+
+Case-4) “리뷰 섹션 비어있음/CRIT”
+- Check: review-pipeline-map.md의 SSOT(bySlug) 존재 + injector 실행 여부
+- Map: Review Bundle → Render/Inject
+
+────────────────────────────────────────────────────────────
+End of Map (SSOT)
+────────────────────────────────────────────────────────────
