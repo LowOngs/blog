@@ -1,4 +1,4 @@
-// System_files/scripts/build/lib/blocks.cjs
+// scripts/build/lib/blocks.cjs
 // HTML block render helpers (TLDR / KeyFacts / FAQ / Sources / Review blocks)
 // - render-posts.cjs가 post.reviewData(SSOT) 를 그대로 넘기므로, 여기서 구조를 확정 렌더합니다.
 
