@@ -5,6 +5,9 @@
  * System_files/scripts/build/queue-to-posts.cjs
  * dist/queue/today.json → content/posts/*.json 자동 생성기
  * - 라벨 6개 강제 + profileId 필수 + 오염(누락/오타) 즉시 차단
+ * - ✅ (추가) dist/queue/today.expanded.json 생성
+ *   - today.json(원본)은 절대 수정하지 않음(워크플로 경합/오염 방지)
+ *   - 각 item에 generatedSlug를 주입한 확장본만 별도 파일로 저장
  */
 
 // ✅ 로컬/CI 공통: .env 로드(필수)
@@ -17,15 +20,18 @@ require('./lib/env.cjs');
  *
  * Role:
  *   - today.json(스케줄 결과, SSOT) → content/posts/*.json(포스트 SSOT) 변환
+ *   - ✅ today.expanded.json(확장본) 생성: item ↔ slug 매칭키 제공
  *
  * Position:
  *   - Input:  dist/queue/today.json
  *   - Output: content/posts/*.json (slug 기반 신규 생성만)
+ *   - Output: dist/queue/today.expanded.json (today.json + generatedSlug)
  *
  * Invariants:
  *   - label은 6개 허용값만 통과
  *   - profileId는 labels.json 매핑 필수(없으면 즉시 중단)
  *   - title 누락 시 생성 금지(침묵/빈문서 방지)
+ *   - today.json 원본 수정 금지
  */
 
 const fs = require('fs');
@@ -37,8 +43,9 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..', '..'); // System_files
 const QUEUE_DIR = path.join(ROOT, 'dist', 'queue');
 const QUEUE_FILE = path.join(QUEUE_DIR, 'today.json');
-const CONTENT_DIR = path.join(ROOT, 'content', 'posts');
+const QUEUE_EXPANDED_FILE = path.join(QUEUE_DIR, 'today.expanded.json');
 
+const CONTENT_DIR = path.join(ROOT, 'content', 'posts');
 fs.mkdirSync(CONTENT_DIR, { recursive: true });
 
 function log(...a) {
@@ -192,8 +199,12 @@ function requireValidTitle(title, idx) {
 let created = 0;
 let skipped = 0;
 
+// ✅ today.expanded.json용: 원본 items를 복사해서 generatedSlug만 주입
+const expandedItems = items.map((it) => (it && typeof it === 'object' ? { ...it } : it));
+
 for (let i = 0; i < items.length; i++) {
   const item = items[i] || {};
+  const outItem = expandedItems[i] && typeof expandedItems[i] === 'object' ? expandedItems[i] : null;
 
   const label = requireValidLabel(item.label, i);
   const title = requireValidTitle(item.title, i);
@@ -208,6 +219,11 @@ for (let i = 0; i < items.length; i++) {
 
   const idx = pad3(counters[label]); // 001, 002, ...
   const slug = `${prefix}-${ymd}-${idx}`; // 예: app-20251212-001
+
+  // ✅ expanded item에 generatedSlug 주입(항상)
+  if (outItem) {
+    outItem.generatedSlug = slug;
+  }
 
   const targetPath = path.join(CONTENT_DIR, `${slug}.json`);
 
@@ -261,6 +277,20 @@ for (let i = 0; i < items.length; i++) {
   fs.writeFileSync(targetPath, JSON.stringify(doc, null, 2), 'utf8');
   log(`created ${path.basename(targetPath)} from seed id=${item.id || '(no-id)'}`);
   created++;
+}
+
+// ✅ today.expanded.json 저장(원본 today.json은 절대 수정하지 않음)
+try {
+  const expanded = {
+    ...queue,
+    expandedAt: new Date().toISOString(),
+    items: expandedItems,
+  };
+
+  fs.writeFileSync(QUEUE_EXPANDED_FILE, JSON.stringify(expanded, null, 2), 'utf8');
+  log(`expanded queue written → ${QUEUE_EXPANDED_FILE}`);
+} catch (e) {
+  fatal(`today.expanded.json 저장 실패: ${e.message || e}`);
 }
 
 log(`완료: created=${created}, skipped=${skipped}`);
