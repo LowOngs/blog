@@ -3,7 +3,8 @@
  * dist/posts/*.html 대상으로 AIO/SEO 이미지·스키마 QA 체크
  * - og:image: 실제 CDN URL + HTTP 200 여부 검사
  * - Article / BreadcrumbList 스키마 존재 여부 확인
- * - ✅ (추가) 리뷰 라벨인데 SSOT 누락이면 CRIT (자동발행 스킵 근거)
+ * - ✅ 리뷰 라벨인데 SSOT 누락이면 CRIT (자동발행 스킵 근거)
+ * - ✅ (추가) logs/qa-report.json 리포트 저장(7단계에서 읽기 위함)
  *
  * 판정 규칙(요약)
  * - PASS: 문제 없음
@@ -17,9 +18,20 @@ const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const DIST = path.join(ROOT, 'dist', 'posts');
+const LOGS = path.join(ROOT, 'logs');
 
 const CDN_BASE_RAW = process.env.CDN_BASE || 'https://ongsblog.com/images';
 const CDN_BASE = CDN_BASE_RAW.replace(/\/+$/, '');
+
+function ensureDir(dir) {
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+}
+
+function nowKstDate() {
+  const d = new Date();
+  const k = new Date(d.getTime() + 9 * 60 * 60 * 1000);
+  return k.toISOString().slice(0, 10);
+}
 
 function readHtml(filePath) {
   try {
@@ -38,7 +50,6 @@ function extractOgImage(html) {
 }
 
 function hasArticleSchema(html) {
-  // JSON-LD 내 Article 유무 간단 체크
   return html.includes('"@type":"Article"') || html.includes('"@type": "Article"');
 }
 
@@ -50,8 +61,6 @@ function hasBreadcrumbList(html) {
 }
 
 function isReviewFileName(fileName) {
-  // 프로젝트 slug prefix 규칙 기반(가장 안전/간단)
-  // app-YYYYMMDD-###, device-..., subscription-...
   const base = String(fileName || '').toLowerCase();
   return (
     base.startsWith('app-') ||
@@ -61,10 +70,6 @@ function isReviewFileName(fileName) {
 }
 
 function detectMissingReviewSsot(html) {
-  // render 단계에서 아래 중 하나라도 박혀 있으면 "SSOT 누락"으로 확정
-  // - reviewStatus="missing-ssot" (권장)
-  // - data-review-status="missing-ssot"
-  // - HTML 주석에 missing-ssot
   const h = String(html || '');
   if (!h) return false;
 
@@ -72,9 +77,8 @@ function detectMissingReviewSsot(html) {
     /reviewStatus\s*=\s*["']missing-ssot["']/i,
     /data-review-status\s*=\s*["']missing-ssot["']/i,
     /missing-ssot/i,
-    /데이터\s*수집\/?검증\s*후\s*업데이트\s*됩니다/i, // 플레이스홀더 문구 감지(최후 방어)
+    /데이터\s*수집\/?검증\s*후\s*업데이트\s*됩니다/i,
   ];
-
   return patterns.some((re) => re.test(h));
 }
 
@@ -88,7 +92,6 @@ async function headCheck(url) {
 }
 
 function rankStatus(cur, next) {
-  // PASS < WARN < FAIL < CRIT
   const w = { PASS: 0, WARN: 1, FAIL: 2, CRIT: 3 };
   const a = w[cur] ?? 0;
   const b = w[next] ?? 0;
@@ -101,8 +104,9 @@ async function checkOne(fileName) {
   if (!html) {
     return {
       status: 'FAIL',
-      reason: 'HTML 읽기 실패',
       file: fileName,
+      slug: fileName.replace(/\.html$/i, ''),
+      messages: ['[FAIL] HTML 읽기 실패'],
     };
   }
 
@@ -113,7 +117,7 @@ async function checkOne(fileName) {
   let status = 'PASS';
   const messages = [];
 
-  // 0) ✅ 리뷰 SSOT 누락은 CRIT (리뷰 라벨만)
+  // 0) 리뷰 SSOT 누락은 CRIT (리뷰 라벨만)
   if (isReviewFileName(fileName)) {
     const missing = detectMissingReviewSsot(html);
     if (missing) {
@@ -158,8 +162,23 @@ async function checkOne(fileName) {
   return {
     status,
     file: fileName,
+    slug: fileName.replace(/\.html$/i, ''),
     messages,
   };
+}
+
+function writeReport(report) {
+  ensureDir(LOGS);
+
+  const dateStr = nowKstDate();
+  const dated = path.join(LOGS, `qa-report-${dateStr}.json`);
+  const latest = path.join(LOGS, 'qa-report.json');
+
+  fs.writeFileSync(dated, JSON.stringify(report, null, 2) + '\n', 'utf8');
+  fs.writeFileSync(latest, JSON.stringify(report, null, 2) + '\n', 'utf8');
+
+  console.log(`[qa-check] report saved → ${dated}`);
+  console.log(`[qa-check] report saved → ${latest}`);
 }
 
 async function main() {
@@ -185,8 +204,11 @@ async function main() {
   let failCount = 0;
   let critCount = 0;
 
+  const items = [];
+
   for (const file of files) {
     const result = await checkOne(file);
+    items.push(result);
 
     if (result.status === 'PASS') passCount++;
     else if (result.status === 'WARN') warnCount++;
@@ -196,9 +218,7 @@ async function main() {
     console.log(`파일: ${file}`);
     console.log(`상태: ${result.status}`);
     if (result.messages && result.messages.length) {
-      for (const msg of result.messages) {
-        console.log(`  - ${msg}`);
-      }
+      for (const msg of result.messages) console.log(`  - ${msg}`);
     }
     console.log('');
   }
@@ -209,6 +229,15 @@ async function main() {
   );
   console.log('────────────────────────────────────────────');
 
+  const report = {
+    generatedAt: new Date().toISOString(),
+    cdnBase: CDN_BASE,
+    counts: { pass: passCount, warn: warnCount, fail: failCount, crit: critCount },
+    items
+  };
+
+  writeReport(report);
+
   // FAIL/CRIT는 CI 실패로 처리(자동발행 제외 로직은 7번에서 사용)
   if (failCount > 0 || critCount > 0) {
     process.exitCode = 1;
@@ -216,11 +245,8 @@ async function main() {
 }
 
 if (require.main === module) {
-  // Node 18+ 기준 global fetch 사용
   if (typeof fetch !== 'function') {
-    console.error(
-      '[qa-check] 이 스크립트는 Node 18 이상(전역 fetch 지원) 환경을 전제로 합니다.',
-    );
+    console.error('[qa-check] Node 18+ (전역 fetch 지원) 필요');
     process.exit(1);
   }
   main().catch((err) => {
