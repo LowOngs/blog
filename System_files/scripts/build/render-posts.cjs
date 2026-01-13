@@ -283,11 +283,17 @@ function resolveAio(postJson) {
   };
 }
 
+/**
+ * 슬롯 마커(예: <!--SLOT:FAQ_WRAPPER-->) "뒤"에 insertHtml을 주입합니다.
+ * - 마커는 그대로 남겨 템플릿 구조를 깨지 않음
+ * - wrapper 내부/외부 경계에서 블록이 튀는 리스크 제거
+ */
 function injectAfterSlot(html, slotMarker, insertHtml) {
   if (!insertHtml) return html;
   const idx = html.indexOf(slotMarker);
   if (idx === -1) return html;
-  return html.slice(0, idx) + insertHtml + '\n' + html.slice(idx);
+  const after = idx + slotMarker.length;
+  return html.slice(0, after) + '\n' + insertHtml + html.slice(after);
 }
 
 /* ───────────────────── render one ───────────────────── */
