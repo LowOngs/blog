@@ -5,34 +5,15 @@
  * System_files/scripts/publish/blogger.cjs
  * publish scope를 today.json(SSOT)로 고정 + 백오프/슬립/재시도 조건 정교화
  * ✅ 게이트 단일화: canPublish = (DRY_RUN=false) AND (PUBLISH_MODE=enable)
+ * ✅ (추가) QA 리포트(qa-report.json)에서 CRIT slug는 자동발행 스킵 + ledger 기록
  */
 
 const path = require('path');
 const fs = require('fs');
 const fg = require('fast-glob');
 
-// ✅ 로컬/CI 공통: 단일 env 로더 (ROOT/ENV 정합성 고정)
 const { parseDryRun } = require(path.join(__dirname, '..', 'build', 'lib', 'env.cjs'));
-
-// Seed Ledger (Minimal v1)
 const { upsert: upsertSeedLedger } = require(path.join(__dirname, '..', 'build', 'lib', 'seed-ledger.cjs'));
-
-/**
- * AOIA FLOW MAP REFERENCE
- * --------------------------------------------------
- * Flow Map: System_files/docs/aoia-flow-map.md
- *
- * Role:
- *   - Blogger 최종 발행 단계(외부 API 호출) 단일 책임
- *
- * Position:
- *   - Input: dist/posts/*.html + dist/queue/today.json(publishable)
- *   - Process: today.json 스코프 필터링 → 라벨 추론 → Blogger API 발행(백오프/템포)
- *   - Output: logs/publish-*.log, logs/publish-summary-*.log, seed-ledger publish 업서트
- *
- * Notes:
- *   - 수정 시 flow-map과 함께 “스코프(today.json) + 게이트(canPublish) + 템포(슬립/백오프)”를 동시 점검
- */
 
 // ────────────────────────────────────
 //  라벨 매핑: 내부 코드 → Blogger 라벨
@@ -97,34 +78,22 @@ if (!BLOG_ID || !CLIENT_ID || !CLIENT_SECRET || !REFRESH_TOKEN) {
   fail('환경변수 누락(BLOGGER_BLOG_ID / GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET / GOOGLE_REFRESH_TOKEN)');
 }
 
-// 최종 게이트(명시 enable일 때만 “가능 후보”)
 const PUBLISH_MODE = String(process.env.PUBLISH_MODE || 'disable').toLowerCase(); // enable|disable
-
-// 스코프: 기본 today, 수동으로만 all 허용
 const PUBLISH_SCOPE = String(process.env.PUBLISH_SCOPE || 'today').toLowerCase(); // today|all
-
-// LABEL: 내부 코드(app-reviews 등), 빈 문자열이면 제한 없음
 const LABEL_FILTER = String(process.env.LABEL || '').trim();
-
-// MAX_POSTS: 숫자 또는 빈 문자열(제한 없음)
 const MAX_POSTS_RAW = process.env.MAX_POSTS || '';
 const MAX_POSTS_NUM = MAX_POSTS_RAW && !Number.isNaN(Number(MAX_POSTS_RAW))
   ? Number(MAX_POSTS_RAW)
-  : 0; // 0 = 제한 없음
+  : 0;
 
-// DRY_RUN 단일 파서(규칙: false/0만 live, 그 외 전부 dry-run)
 const DRY_RUN_RAW = process.env.DRY_RUN;
 const DRY_RUN = parseDryRun(DRY_RUN_RAW);
 
-// ✅ 단일 규칙(필수): 발행 가능 조건
-// - DRY_RUN=true  → 절대 외부 API 호출 0%
-// - DRY_RUN=false AND PUBLISH_MODE=enable → 발행 가능
 const canPublish = (!DRY_RUN) && (PUBLISH_MODE === 'enable');
 
-// 발행 템포(슬립)
-const POST_SLEEP_MS = Number(process.env.POST_SLEEP_MS || '1200'); // 기본 1.2s
-const MAX_BACKOFF_MS = Number(process.env.MAX_BACKOFF_MS || '30000'); // 백오프 상한(기본 30s)
-const RETRY_TRIES = Number(process.env.RETRY_TRIES || '6'); // 재시도 횟수(기본 6)
+const POST_SLEEP_MS = Number(process.env.POST_SLEEP_MS || '1200');
+const MAX_BACKOFF_MS = Number(process.env.MAX_BACKOFF_MS || '30000');
+const RETRY_TRIES = Number(process.env.RETRY_TRIES || '6');
 
 // ────────────────────────────────────
 //  유틸
@@ -145,11 +114,9 @@ function parseRetryAfterMs(headers) {
     const s = String(v).trim();
     if (!s) return 0;
 
-    // seconds
     const sec = Number(s);
     if (!Number.isNaN(sec) && sec >= 0) return Math.floor(sec * 1000);
 
-    // HTTP-date
     const t = Date.parse(s);
     if (!Number.isNaN(t)) {
       const diff = t - Date.now();
@@ -241,7 +208,6 @@ function safeReadJson(filePath, fallback = null) {
   }
 }
 
-// today.json에서 publishable slug 추출(유연)
 function loadPublishableSlugs() {
   const raw = safeReadJson(TODAY_JSON, null);
   const out = new Set();
@@ -270,6 +236,27 @@ function loadPublishableSlugs() {
   }
 
   return { loaded: true, slugs: out };
+}
+
+// ────────────────────────────────────
+//  ✅ QA 리포트 로드 + CRIT slug 추출
+// ────────────────────────────────────
+function loadQaCritMap() {
+  const reportPath = path.join(ROOT, 'logs', 'qa-report.json');
+  const report = safeReadJson(reportPath, null);
+  const crit = new Map(); // slug -> messages[]
+  if (!report || !Array.isArray(report.items)) {
+    return { loaded: false, reportPath, crit };
+  }
+  for (const it of report.items) {
+    if (!it || typeof it !== 'object') continue;
+    if (it.status !== 'CRIT') continue;
+    const slug = String(it.slug || '').trim();
+    if (!slug) continue;
+    const msgs = Array.isArray(it.messages) ? it.messages : [];
+    crit.set(slug, msgs);
+  }
+  return { loaded: true, reportPath, crit };
 }
 
 // ────────────────────────────────────
@@ -383,8 +370,12 @@ async function publishWithTokenRefresh(tokenHolder, payload, labelForLog) {
   log('[blogger] DRY_RUN(parsed)      =', DRY_RUN);
   log('[blogger] canPublish           =', canPublish);
 
+  // ✅ QA CRIT 로드
+  const qa = loadQaCritMap();
+  log('[blogger] QA report loaded     =', qa.loaded, 'path=', qa.reportPath);
+  log('[blogger] QA CRIT count        =', qa.crit.size);
+
   // ✅ DRY_RUN이면 항상 “외부 API 호출 0%”
-  // ✅ DRY_RUN=false인데 PUBLISH_MODE!=enable이면 발행 차단
   if (!canPublish) {
     if (DRY_RUN) {
       log('[blogger] DRY_RUN 모드 — Blogger API 호출 없이 로그/seed-ledger(dryrun)만 남깁니다.');
@@ -447,8 +438,12 @@ async function publishWithTokenRefresh(tokenHolder, payload, labelForLog) {
     });
   }
 
+  // ✅ CRIT 스킵 기록(sidecar)
+  const qaSkip = [];
+
   let ok = 0;
   let bad = 0;
+  let skipped = 0;
   let used = 0;
 
   for (const name of files) {
@@ -468,6 +463,39 @@ async function publishWithTokenRefresh(tokenHolder, payload, labelForLog) {
       continue;
     }
 
+    // ✅ 7단계 핵심: QA CRIT면 발행 스킵 + ledger에 근거 남김
+    if (qa.crit.has(slug)) {
+      const msgs = qa.crit.get(slug) || [];
+      const note = `QA CRIT → auto-skip: ${msgs.join(' | ')}`.slice(0, 2000);
+
+      log(`[SKIP_CRIT] ${name} → ${note}`);
+      qaSkip.push({ slug, file: name, status: 'CRIT', messages: msgs });
+
+      // ledger 기록(재시도/원인 추적 SSOT)
+      try {
+        const html = fs.existsSync(p) ? fs.readFileSync(p, 'utf8') : '';
+        const pageId = html ? extractPageId(html) : '';
+        upsertSeedLedger({
+          stage: 'publish',
+          status: 'skipped',
+          slug,
+          pageId,
+          label: labelCode || '',
+          source: slug.startsWith('firstgate-') ? 'firstgate' : '',
+          dryRun: true, // “발행 안 함” 의미(외부 API 호출 없음)
+          notes: note,
+        });
+      } catch (e) {
+        warn('seed-ledger upsert(skip) fail:', e.message || e);
+      }
+
+      skipped++;
+      used++;
+
+      if (POST_SLEEP_MS > 0) await sleep(jitter(POST_SLEEP_MS, 0.1));
+      continue;
+    }
+
     try {
       const html = fs.readFileSync(p, 'utf8');
       const title = extractTitle(html);
@@ -476,7 +504,6 @@ async function publishWithTokenRefresh(tokenHolder, payload, labelForLog) {
 
       const bloggerLabels = humanLabel ? [humanLabel] : [];
 
-      // ✅ DRY_RUN 또는 PUBLISH_MODE 차단 시: “출력은 하되 외부 API 호출은 0%”
       if (!canPublish) {
         log(`[NO_PUBLISH] ${name} → title="${title}" labels=[${bloggerLabels.join(', ')}]`);
         try {
@@ -571,13 +598,29 @@ async function publishWithTokenRefresh(tokenHolder, payload, labelForLog) {
     }
   }
 
+  // ✅ CRIT 스킵 결과 sidecar 저장(오늘 큐에 잔류한 이유를 파일로 남김)
+  try {
+    const sidecar = path.join(ROOT, 'dist', 'queue', 'today.qa-skip.json');
+    fs.mkdirSync(path.dirname(sidecar), { recursive: true });
+    fs.writeFileSync(sidecar, JSON.stringify({
+      date: todayISODate,
+      generatedAt: new Date().toISOString(),
+      qaReport: qa.reportPath,
+      skippedCount: qaSkip.length,
+      items: qaSkip
+    }, null, 2) + '\n', 'utf8');
+    log('[blogger] QA skip sidecar saved →', sidecar);
+  } catch (e) {
+    warn('write today.qa-skip.json failed:', e.message || e);
+  }
+
   const summaryLine =
-    `[${new Date().toISOString()}] publish result ok=${ok} bad=${bad} used=${used}` +
+    `[${new Date().toISOString()}] publish result ok=${ok} bad=${bad} skipped=${skipped} used=${used}` +
     ` PUBLISH_SCOPE=${PUBLISH_SCOPE} LABEL_FILTER="${LABEL_FILTER}" MAX_POSTS=${MAX_POSTS_NUM || 0}` +
     ` DRY_RUN=${DRY_RUN} canPublish=${canPublish}`;
   append(SUMMARY_LOG, summaryLine);
   log('요약 로그 기록 →', SUMMARY_LOG);
-  log(`✨ publish 완료: 성공 ${ok} / 실패 ${bad} | 로그: ${DETAIL_LOG}`);
+  log(`✨ publish 완료: 성공 ${ok} / 실패 ${bad} / 스킵(CRIT) ${skipped} | 로그: ${DETAIL_LOG}`);
 })().catch((e) => {
   fail(e.message || e);
 });
