@@ -1,11 +1,4 @@
 {
-  "bySlug": {
-    "app-20251207-001": {
-      "insights": [
-        "Fast sync across devices",
-        "Simple UI with low friction",
-        "Premium features are optional but useful"
-      ]
-    }
-  }
+  "updatedAt": "2026-01-15",
+  "bySlug": {}
 }
