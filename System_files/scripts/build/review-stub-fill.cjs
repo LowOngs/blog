@@ -1,8 +1,9 @@
 // System_files/scripts/build/review-stub-fill.cjs
-// 역할: content/posts에서 리뷰 슬러그(app-/device-/subscription-)를 찾아, reviews/* 파일들에 최소 구조(stub)를 업서트한다.
+// 역할: content/posts에서 리뷰 슬러그(app-/device-/subscription-)를 찾아,
+// content/reviews/* 파일들에 최소 구조(stub)를 "없을 때만" 업서트한다.
 
-import fs from "fs";
-import path from "path";
+const fs = require("fs");
+const path = require("path");
 
 const ROOT = path.resolve(__dirname, "..", ".."); // System_files/scripts/build 기준
 const POSTS_DIR = path.join(ROOT, "content", "posts");
@@ -23,13 +24,15 @@ function writeJson(filePath, obj) {
 }
 
 function nowYmdKst() {
-  // KST 기준 날짜 문자열만(정밀도 과도하게 필요 없음)
   const d = new Date(Date.now() + 9 * 60 * 60 * 1000);
   return d.toISOString().slice(0, 10);
 }
 
 function isReviewSlug(slug) {
-  return slug.startsWith("app-") || slug.startsWith("device-") || slug.startsWith("subscription-");
+  return (
+    typeof slug === "string" &&
+    (slug.startsWith("app-") || slug.startsWith("device-") || slug.startsWith("subscription-"))
+  );
 }
 
 function bucketOf(slug) {
@@ -38,11 +41,12 @@ function bucketOf(slug) {
   return "subscription";
 }
 
-function ensureMaps(file, base = { updatedAt: nowYmdKst(), bySlug: {} }) {
-  if (!file || typeof file !== "object") return base;
-  if (!file.bySlug || typeof file.bySlug !== "object") file.bySlug = {};
-  if (!file.updatedAt) file.updatedAt = nowYmdKst();
-  return file;
+function ensureMaps(obj) {
+  const base = { updatedAt: nowYmdKst(), bySlug: {} };
+  if (!obj || typeof obj !== "object") return base;
+  if (!obj.bySlug || typeof obj.bySlug !== "object") obj.bySlug = {};
+  if (!obj.updatedAt) obj.updatedAt = nowYmdKst();
+  return obj;
 }
 
 function ensureRatingEntry(bySlug, slug) {
@@ -79,13 +83,13 @@ function ensureSourcesEntry(bySlug, slug) {
 
 function listPostSlugs() {
   if (!fs.existsSync(POSTS_DIR)) return [];
-  const files = fs.readdirSync(POSTS_DIR).filter(f => f.endsWith(".json"));
+  const files = fs.readdirSync(POSTS_DIR).filter((f) => f.endsWith(".json"));
   const slugs = [];
   for (const f of files) {
     const p = path.join(POSTS_DIR, f);
     const j = readJson(p, null);
-    const slug = j?.slug || f.replace(/\.json$/, "");
-    if (slug && isReviewSlug(slug)) slugs.push(slug);
+    const slug = (j && j.slug) ? j.slug : f.replace(/\.json$/, "");
+    if (isReviewSlug(slug)) slugs.push(slug);
   }
   return Array.from(new Set(slugs)).sort();
 }
@@ -103,9 +107,10 @@ function main() {
     deviceRatingsNext: path.join(REVIEWS_DIR, "device-ratings-next.json"),
     deviceInsights: path.join(REVIEWS_DIR, "device-insights.json"),
 
-    // 파일명이 실제로 subsctiption-insights.json 라면 그 철자를 유지해야 합니다.
     subscriptionRatings: path.join(REVIEWS_DIR, "subscription-ratings.json"),
     subscriptionRatingsNext: path.join(REVIEWS_DIR, "subscription-ratings-next.json"),
+
+    // ⚠️ 파일명이 실제로 subsctiption-insights.json 라면 그 철자 그대로 유지
     subscriptionInsights: path.join(REVIEWS_DIR, "subsctiption-insights.json"),
 
     reviewSources: path.join(REVIEWS_DIR, "review-sources.json")
@@ -147,10 +152,20 @@ function main() {
     if (ensureSourcesEntry(reviewSources.bySlug, slug)) created++;
   }
 
-  // updatedAt 갱신
-  for (const obj of [appRatings, appRatingsNext, appInsights, deviceRatings, deviceRatingsNext, deviceInsights, subscriptionRatings, subscriptionRatingsNext, subscriptionInsights, reviewSources]) {
-    obj.updatedAt = ymd;
-  }
+  // updatedAt 갱신(이 스크립트 실행 시점 기록)
+  const allObjs = [
+    appRatings,
+    appRatingsNext,
+    appInsights,
+    deviceRatings,
+    deviceRatingsNext,
+    deviceInsights,
+    subscriptionRatings,
+    subscriptionRatingsNext,
+    subscriptionInsights,
+    reviewSources
+  ];
+  for (const obj of allObjs) obj.updatedAt = ymd;
 
   writeJson(paths.appRatings, appRatings);
   writeJson(paths.appRatingsNext, appRatingsNext);
