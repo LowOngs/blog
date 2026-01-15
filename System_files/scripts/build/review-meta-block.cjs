@@ -1,196 +1,343 @@
 #!/usr/bin/env node
 'use strict';
 
-// System_files/scripts/build/review-meta-block.cjs
-// 역할: review-ratings.json(SSOT) 기반으로 dist/posts/*.html의 리뷰 섹션 2개를 치환한다.
-// 핵심: 리뷰 slug(app-/device-/subscription-)만 대상으로 처리한다(비리뷰 글은 스킵).
+/**
+ * review-meta-block: dist/posts의 review-rating/insights 섹션을 review-ratings SSOT로 교체
+ *
+ * ✅ 유지(기존 기능 그대로)
+ * 1) rating 슬롯이 없어도 insights 슬롯만 있으면 insights는 교체(독립 처리)
+ * 2) insights를 Positive / Negative로 분리하여 각 6개 목표로 출력(부족 시 6 미만 허용)
+ * 3) 0개인 경우에도 섹션을 숨기지 않고 안내 멘트(영문)를 반드시 출력
+ *
+ * ✅ 이번 업데이트(추가/보강 — 기존 동작을 크게 바꾸지 않음)
+ * A) .env 로더를 “최상단(공통규칙)”에 고정(가장 먼저 로딩)
+ * B) 리뷰 대상 파일만 처리하는 옵션 추가(기본값: ON)
+ *    - app-/device-/subscription- 파일만 대상으로 잡아서 ssot-missing 노이즈를 제거
+ *    - 필요 시 ENV로 전체 파일 대상으로 되돌릴 수 있음
+ *      REVIEW_META_ONLY_REVIEW_SLUGS=false  -> 전체 dist/posts/*.html 대상으로 동작
+ */
 
-const fs = require("fs");
-const path = require("path");
+require('./lib/env.cjs'); // ✅ 공통 규칙: env 로더 최우선
 
-const ROOT = path.resolve(__dirname, "..", "..");
-const DIST_DIR = path.join(ROOT, "dist", "posts");
-const SSOT_PATH = path.join(ROOT, "content", "reviews", "review-ratings.json");
+const fs = require('fs');
+const path = require('path');
 
-function readJson(filePath, fallback) {
+const ROOT = path.resolve(__dirname, '../..');
+const DIST_DIR = path.join(ROOT, 'dist', 'posts');
+const DATA_DIR = path.join(ROOT, 'content', 'reviews');
+const RATINGS_PATH = path.join(DATA_DIR, 'review-ratings.json');
+
+// ✅ 기본값: 리뷰 슬러그만 처리(노이즈 제거)
+// - 환경변수로 OFF 가능: REVIEW_META_ONLY_REVIEW_SLUGS=false
+const ONLY_REVIEW_SLUGS = String(process.env.REVIEW_META_ONLY_REVIEW_SLUGS ?? 'true').toLowerCase() !== 'false';
+
+function log(msg) {
+  console.log(msg);
+}
+
+function loadRatings() {
+  if (!fs.existsSync(RATINGS_PATH)) return { bySlug: {} };
+  const raw = fs.readFileSync(RATINGS_PATH, 'utf8');
   try {
-    if (!fs.existsSync(filePath)) return fallback;
-    return JSON.parse(fs.readFileSync(filePath, "utf8"));
-  } catch {
-    return fallback;
+    const json = JSON.parse(raw);
+    return json || { bySlug: {} };
+  } catch (e) {
+    console.error('[review-meta] review-ratings.json parse failed:', e.message);
+    return { bySlug: {} };
   }
 }
 
-function isReviewSlug(slug) {
-  return slug.startsWith("app-") || slug.startsWith("device-") || slug.startsWith("subscription-");
+function formatRating(val) {
+  if (typeof val !== 'number' || Number.isNaN(val)) return 'n/a';
+  const fixed = val.toFixed(1);
+  return fixed.endsWith('.0') ? fixed.slice(0, -2) : fixed;
 }
 
-function replaceSection(html, sectionId, newInnerHtml) {
-  const re = new RegExp(
-    `<section\\s+id=["']${sectionId}["'][^>]*>[\\s\\S]*?<\\/section>`,
-    "i"
-  );
-  if (!re.test(html)) return { ok: false, html };
-  const replaced = html.replace(re, `<section id="${sectionId}">\n${newInnerHtml}\n</section>`);
-  return { ok: true, html: replaced };
+function formatInt(val) {
+  if (typeof val !== 'number' || Number.isNaN(val)) return 'n/a';
+  return val.toLocaleString('en-US');
 }
 
-function esc(s) {
-  return String(s ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+function formatDiff(val) {
+  if (typeof val !== 'number' || Number.isNaN(val)) return 'n/a';
+  const fixed = val.toFixed(1);
+  const core = fixed.endsWith('.0') ? fixed.slice(0, -2) : fixed;
+  if (val > 0) return `+${core}`;
+  return core;
 }
 
-function clampPct(n) {
-  const x = Number(n) || 0;
-  if (x < 0) return 0;
-  if (x > 100) return 100;
-  return x;
+function formatLastChecked(v) {
+  if (!v) return 'n/a';
+  return String(v);
 }
 
-function buildRatingBlock(entry) {
-  const lastChecked = esc(entry.lastChecked || "");
-  const status = esc(entry.status || "unknown");
-  const store = esc(entry.store || "unknown");
-  const source = esc(entry.source || "manual");
+function buildHistogramHtml(histogram) {
+  if (!histogram || typeof histogram !== 'object') return '';
 
-  const rc = Number(entry.ratingCurrent || 0).toFixed(1);
-  const rp = Number(entry.ratingPrevious || 0).toFixed(1);
-  const rd = Number(entry.ratingDiff || 0).toFixed(1);
+  const stars = [5, 4, 3, 2, 1];
+  const rows = [];
 
-  const vc = Number(entry.votesCurrent || 0);
-  const vp = Number(entry.votesPrevious || 0);
-  const vd = Number(entry.votesDiff || 0);
+  for (const star of stars) {
+    const raw = Number(histogram[String(star)] ?? 0);
+    if (!Number.isFinite(raw)) continue;
 
-  const h = entry.histogram || {};
-  const rows = [5,4,3,2,1].map(star => {
-    const pct = clampPct(h[String(star)]);
-    return `
-<div class="hist-row">
-  <div class="hist-star">${star}★</div>
-  <div class="hist-bar"><div class="hist-fill" style="width:${pct}%"></div></div>
-  <div class="hist-pct">${pct}%</div>
-</div>`.trim();
-  }).join("\n");
+    const pct = Math.max(0, Math.min(100, raw));
+    const pctText = (pct % 1 === 0)
+      ? String(pct)
+      : pct.toFixed(1).replace(/\.0$/, '');
 
-  return `
-<h3>User ratings snapshot (last 90 days)</h3>
-<div class="review-meta">
-  <div>Last checked: <strong>${lastChecked}</strong></div>
-  <div>Status: <strong>${status}</strong></div>
-  <div>Store: <strong>${store}</strong></div>
-  <div>Source: <strong>${source}</strong></div>
-</div>
+    rows.push(
+      [
+        '<div class="review-histogram-row">',
+        `  <div class="review-histogram-label">${star}★</div>`,
+        '  <div class="review-histogram-bar-wrap">',
+        `    <div class="review-histogram-bar" style="width: ${pct}%;"></div>`,
+        '  </div>',
+        `  <div class="review-histogram-value">${pctText}%</div>`,
+        '</div>',
+      ].join('\n')
+    );
+  }
 
-<table class="review-table">
-  <thead><tr><th></th><th>Current</th><th>3 months ago</th><th>Change</th></tr></thead>
-  <tbody>
-    <tr><td>Rating</td><td>${rc}</td><td>${rp}</td><td>${rd}</td></tr>
-    <tr><td>Votes</td><td>${vc}</td><td>${vp}</td><td>${vd}</td></tr>
-  </tbody>
-</table>
+  if (!rows.length) return '';
 
-<div class="histogram">
-${rows}
-</div>
-`.trim();
+  return [
+    '',
+    '  <div class="review-histogram" aria-label="Rating distribution">',
+    rows.map(r => '    ' + r).join('\n').replace(/\n/g, '\n    '),
+    '  </div>',
+  ].join('\n');
 }
 
-function uniqLower(arr) {
-  const seen = new Set();
+function buildRatingBlock(data) {
+  const lastChecked = formatLastChecked(data.lastChecked);
+  const status = data.status || 'n/a';
+  const store = data.store || 'multi';
+
+  const ratingCurrent = formatRating(data.ratingCurrent);
+  const ratingPrevious = formatRating(data.ratingPrevious);
+  const ratingDiff = formatDiff(data.ratingDiff);
+
+  const votesCurrent = formatInt(data.votesCurrent);
+  const votesPrevious = formatInt(data.votesPrevious);
+  const votesDiff = (typeof data.votesDiff === 'number' && !Number.isNaN(data.votesDiff))
+    ? (data.votesDiff > 0 ? `+${data.votesDiff.toLocaleString('en-US')}` : data.votesDiff.toLocaleString('en-US'))
+    : 'n/a';
+
+  const histogramHtml = buildHistogramHtml(data.histogram);
+
+  return [
+    '  <section id="review-rating-block" class="review-block">',
+    '    <div class="review-block__title">User ratings snapshot (last 90 days)</div>',
+    '    <div class="review-block__meta">',
+    `      Last checked: ${lastChecked} · Status: ${status} · Store: ${store}`,
+    '    </div>',
+    '    <table class="review-rating-table">',
+    '      <thead>',
+    '        <tr>',
+    '          <th scope="col"></th>',
+    '          <th scope="col">Average rating</th>',
+    '          <th scope="col">Ratings count</th>',
+    '        </tr>',
+    '      </thead>',
+    '      <tbody>',
+    '        <tr>',
+    '          <th scope="row">Current</th>',
+    `          <td>${ratingCurrent}</td>`,
+    `          <td>${votesCurrent}</td>`,
+    '        </tr>',
+    '        <tr>',
+    '          <th scope="row">3 months ago</th>',
+    `          <td>${ratingPrevious}</td>`,
+    `          <td>${votesPrevious}</td>`,
+    '        </tr>',
+    '        <tr>',
+    '          <th scope="row">Change</th>',
+    `          <td>${ratingDiff}</td>`,
+    `          <td>${votesDiff}</td>`,
+    '        </tr>',
+    '      </tbody>',
+    '    </table>',
+    histogramHtml,
+    '  </section>',
+  ].join('\n');
+}
+
+function normalizeTextList(list) {
+  return (Array.isArray(list) ? list : [])
+    .map(t => (t ? String(t).trim() : ''))
+    .filter(Boolean);
+}
+
+function takeUpTo6(list) {
   const out = [];
-  for (const s of arr) {
-    const k = String(s).trim().toLowerCase();
-    if (!k) continue;
-    if (seen.has(k)) continue;
-    seen.add(k);
-    out.push(String(s).trim());
+  const seen = new Set();
+  for (const item of list) {
+    const key = item.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(item);
+    if (out.length >= 6) break;
   }
   return out;
 }
 
-function buildInsightsBlock(entry) {
-  const insights = Array.isArray(entry.insights) ? entry.insights : [];
-  const cleaned = uniqLower(insights).slice(0, 12);
+function pickPositiveNegative(data) {
+  // ✅ 권장 스키마 A: insights: { positive, negative }
+  if (data && data.insights && typeof data.insights === 'object' && !Array.isArray(data.insights)) {
+    const pos = normalizeTextList(data.insights.positive);
+    const neg = normalizeTextList(data.insights.negative);
+    return { positive: pos, negative: neg };
+  }
 
-  // 기존 프로젝트 방향(positive/negative 분리)이 아니라도,
-  // 지금 단계에서는 최소 “비어도 안내문구 1개”를 넣어 빈칸 방지.
-  const list = cleaned.length
-    ? cleaned.map(x => `<li>${esc(x)}</li>`).join("\n")
-    : `<li>${esc("Insights are not available yet. This section will be updated after the next review refresh.")}</li>`;
+  // ✅ 권장 스키마 B: insightsPositive / insightsNegative
+  if (data && (Array.isArray(data.insightsPositive) || Array.isArray(data.insightsNegative))) {
+    const pos = normalizeTextList(data.insightsPositive);
+    const neg = normalizeTextList(data.insightsNegative);
+    return { positive: pos, negative: neg };
+  }
 
-  return `
-<h3>What users mention most</h3>
-<ul class="review-insights">
-${list}
-</ul>
-`.trim();
+  // ✅ 과거 호환: insights: string[] (단일 배열)
+  const flat = normalizeTextList(data && data.insights);
+  return { positive: flat, negative: [] };
+}
+
+function buildInsightsBlock(data) {
+  const { positive, negative } = pickPositiveNegative(data);
+
+  const posPicked = takeUpTo6(positive);
+  const negPicked = takeUpTo6(negative);
+
+  const POS_EMPTY_MSG =
+    'Positive feedback exists, but there are not enough specific, detailed comments to summarize yet.';
+  const NEG_EMPTY_MSG =
+    'No meaningful negative issues (specific complaints or problems) have been identified so far.';
+
+  const posHtml = posPicked.length
+    ? posPicked.map(t => `        <li>${t}</li>`).join('\n')
+    : `        <li class="review-insights-empty">${POS_EMPTY_MSG}</li>`;
+
+  const negHtml = negPicked.length
+    ? negPicked.map(t => `        <li>${t}</li>`).join('\n')
+    : `        <li class="review-insights-empty">${NEG_EMPTY_MSG}</li>`;
+
+  return [
+    '  <section id="review-insights-block" class="review-block">',
+    '    <div class="review-block__title">User insights snapshot</div>',
+    '    <div class="review-block__meta">Positive vs. negative signals (up to 6 each). If evidence is insufficient, a notice is shown.</div>',
+    '',
+    '    <div class="review-insights-split">',
+    '      <div class="review-insights-col review-insights-col--positive">',
+    '        <div class="review-insights-col__title">What users like</div>',
+    '        <ul class="review-insights-list">',
+    posHtml,
+    '        </ul>',
+    '      </div>',
+    '',
+    '      <div class="review-insights-col review-insights-col--negative">',
+    '        <div class="review-insights-col__title">What users dislike</div>',
+    '        <ul class="review-insights-list">',
+    negHtml,
+    '        </ul>',
+    '      </div>',
+    '    </div>',
+    '  </section>',
+  ].join('\n');
+}
+
+function replaceSection(html, sectionId, newBlockHtml) {
+  const pattern = new RegExp(
+    `<section\\s+id="${sectionId}"[\\s\\S]*?<\\/section>`,
+    'i'
+  );
+  if (!pattern.test(html)) return { html, changed: false };
+  return { html: html.replace(pattern, newBlockHtml), changed: true };
+}
+
+// ✅ 추가: 리뷰 슬러그 판정(기본 ON 필터링)
+function isReviewSlug(slug) {
+  return slug.startsWith('app-') || slug.startsWith('device-') || slug.startsWith('subscription-');
 }
 
 function main() {
-  console.log("────────────────────────────────────────────");
-  console.log("[review-meta] start");
-  console.log(`[review-meta] ROOT = ${ROOT}`);
-  console.log(`[review-meta] DIST = ${DIST_DIR}`);
-  console.log(`[review-meta] SSOT = ${SSOT_PATH}`);
+  log('────────────────────────────────────────────');
+  log('[review-meta] start');
+  log(`[review-meta] ROOT = ${ROOT}`);
+  log(`[review-meta] DIST = ${DIST_DIR}`);
+  log(`[review-meta] SSOT = ${RATINGS_PATH}`);
+  log(`[review-meta] ONLY_REVIEW_SLUGS = ${ONLY_REVIEW_SLUGS}`);
+
+  const ratings = loadRatings();
+  const bySlug = ratings.bySlug || {};
 
   if (!fs.existsSync(DIST_DIR)) {
-    console.log("[review-meta] dist/posts not found -> exit");
+    log('[review-meta] dist/posts does not exist. exit.');
     return;
   }
 
-  const ssot = readJson(SSOT_PATH, null);
-  const bySlug = (ssot && ssot.bySlug && typeof ssot.bySlug === "object") ? ssot.bySlug : {};
+  const files = fs.readdirSync(DIST_DIR).filter(f => f.endsWith('.html'));
+  log(`[review-meta] posts loaded: ${files.length}`);
 
-  const files = fs.readdirSync(DIST_DIR).filter(f => f.endsWith(".html"));
-  console.log(`[review-meta] posts loaded: ${files.length}`);
-  console.log("────────────────────────────────────────────");
-
-  let updated = 0;
-  let ssotMissing = 0;
+  let updatedCount = 0;
+  let ratingMissing = 0;
   let slotMissing = 0;
   let skippedNonReview = 0;
 
-  for (const f of files) {
-    const slug = f.replace(/\.html$/i, "");
-    if (!isReviewSlug(slug)) {
-      skippedNonReview++;
+  for (const file of files) {
+    const slug = path.basename(file, '.html');
+
+    // ✅ 추가: 리뷰 슬러그만 처리(기본)
+    if (ONLY_REVIEW_SLUGS && !isReviewSlug(slug)) {
+      skippedNonReview += 1;
       continue;
     }
 
-    const full = path.join(DIST_DIR, f);
-    const html = fs.readFileSync(full, "utf8");
+    const ratingData = bySlug[slug];
+    const fullPath = path.join(DIST_DIR, file);
 
-    const entry = bySlug[slug];
-    if (!entry) {
-      ssotMissing++;
-      // 슬롯 자체는 유지(placeholder 유지)하고 건드리지 않음
+    if (!ratingData) {
+      ratingMissing += 1;
       continue;
     }
 
-    const ratingBlock = buildRatingBlock(entry);
-    const insightsBlock = buildInsightsBlock(entry);
+    let html = fs.readFileSync(fullPath, 'utf8');
 
-    let nextHtml = html;
+    const hasRatingSlot = html.includes('id="review-rating-block"');
+    const hasInsightsSlot = html.includes('id="review-insights-block"');
+
+    // ✅ 둘 다 없으면 이 파일은 교체할 곳이 없음
+    if (!hasRatingSlot && !hasInsightsSlot) {
+      slotMissing += 1;
+      continue;
+    }
+
     let changed = false;
 
-    const r1 = replaceSection(nextHtml, "review-rating-block", ratingBlock);
-    if (!r1.ok) slotMissing++;
-    else { nextHtml = r1.html; changed = true; }
+    // ✅ rating 슬롯이 있으면 rating만 교체
+    if (hasRatingSlot) {
+      const ratingBlockHtml = buildRatingBlock(ratingData);
+      const r1 = replaceSection(html, 'review-rating-block', ratingBlockHtml);
+      html = r1.html;
+      if (r1.changed) changed = true;
+    }
 
-    const r2 = replaceSection(nextHtml, "review-insights-block", insightsBlock);
-    if (!r2.ok) slotMissing++;
-    else { nextHtml = r2.html; changed = true; }
+    // ✅ insights 슬롯이 있으면 insights만 교체 (rating 슬롯 없어도 가능)
+    if (hasInsightsSlot) {
+      const insightsBlockHtml = buildInsightsBlock(ratingData);
+      const r2 = replaceSection(html, 'review-insights-block', insightsBlockHtml);
+      html = r2.html;
+      if (r2.changed) changed = true;
+    }
 
-    if (changed && nextHtml !== html) {
-      fs.writeFileSync(full, nextHtml, "utf8");
-      updated++;
+    if (changed) {
+      fs.writeFileSync(fullPath, html, 'utf8');
+      updatedCount += 1;
     }
   }
 
-  console.log(`[review-meta] done: updated=${updated}, ssot-missing=${ssotMissing}, slot-missing=${slotMissing}, skippedNonReview=${skippedNonReview}`);
-  console.log("────────────────────────────────────────────");
+  log('────────────────────────────────────────────');
+  log(`[review-meta] done: updated=${updatedCount}, ssot-missing=${ratingMissing}, slot-missing=${slotMissing}, skipped-non-review=${skippedNonReview}`);
+  log('────────────────────────────────────────────');
 }
 
 main();
