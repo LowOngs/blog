@@ -1,11 +1,4 @@
 {
-  "bySlug": {
-    "device-20251207-001": {
-      "insights": [
-        "Battery life is stable in daily use",
-        "Build quality feels solid",
-        "Setup is easy for first-time users"
-      ]
-    }
-  }
+  "updatedAt": "2026-01-15",
+  "bySlug": {}
 }
