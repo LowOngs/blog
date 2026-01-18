@@ -5,37 +5,16 @@
  * System_files/scripts/build/queue-to-posts.cjs
  * dist/queue/today.json → content/posts/*.json 자동 생성기
  * - 라벨 6개 강제 + profileId 필수 + 오염(누락/오타) 즉시 차단
- * - ✅ (추가) dist/queue/today.expanded.json 생성
- *   - today.json(원본)은 절대 수정하지 않음(워크플로 경합/오염 방지)
- *   - 각 item에 generatedSlug를 주입한 확장본만 별도 파일로 저장
+ * - ✅ dist/queue/today.expanded.json 생성 (generatedSlug 주입)
+ * - ✅ (추가) 리뷰 글(app/device/subscription)에 review.reviewId(영구) 주입
  */
 
 // ✅ 로컬/CI 공통: .env 로드(필수)
 require('./lib/env.cjs');
 
-/**
- * AOIA FLOW MAP REFERENCE
- * --------------------------------------------------
- * Flow Map: System_files/docs/aoia-flow-map.md
- *
- * Role:
- *   - today.json(스케줄 결과, SSOT) → content/posts/*.json(포스트 SSOT) 변환
- *   - ✅ today.expanded.json(확장본) 생성: item ↔ slug 매칭키 제공
- *
- * Position:
- *   - Input:  dist/queue/today.json
- *   - Output: content/posts/*.json (slug 기반 신규 생성만)
- *   - Output: dist/queue/today.expanded.json (today.json + generatedSlug)
- *
- * Invariants:
- *   - label은 6개 허용값만 통과
- *   - profileId는 labels.json 매핑 필수(없으면 즉시 중단)
- *   - title 누락 시 생성 금지(침묵/빈문서 방지)
- *   - today.json 원본 수정 금지
- */
-
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 // ────────────────────────────────────
 //  경로 설정
@@ -122,8 +101,7 @@ if (!items.length) {
 }
 
 // ────────────────────────────────────
-//  라벨 → 파일 prefix 매핑
-//  ✅ blogger.cjs가 확실히 인식하는 prefix로 고정
+//  라벨 → 파일 prefix 매핑 (blogger.cjs 인식 prefix 고정)
 // ────────────────────────────────────
 const LABEL_TO_PREFIX = {
   'app-reviews': 'app',
@@ -140,7 +118,6 @@ function pad3(n) {
   return String(n).padStart(3, '0');
 }
 
-// queue.date 또는 item.date, 없으면 오늘 날짜 사용
 function getDateString(item) {
   const base = item.date || queue.date || new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
   return String(base).slice(0, 10).replace(/-/g, ''); // "YYYYMMDD"
@@ -196,6 +173,24 @@ function requireValidTitle(title, idx) {
   return t;
 }
 
+// ────────────────────────────────────
+//  ✅ reviewId 생성 규약(영구, 결정론적)
+// ────────────────────────────────────
+const SITE_BASE = String(process.env.SITE_BASE || 'https://ongsblog.com').replace(/\/+$/, '');
+
+function bucketOfPrefix(prefix) {
+  if (prefix === 'app') return 'app';
+  if (prefix === 'device') return 'device';
+  if (prefix === 'subscription') return 'subscription';
+  return null;
+}
+
+function makeReviewId(bucket, slug) {
+  const seed = `${SITE_BASE}|${slug}`;
+  const sha = crypto.createHash('sha256').update(seed, 'utf8').digest('hex');
+  return `rv_${bucket}_${sha.slice(0, 10)}`;
+}
+
 let created = 0;
 let skipped = 0;
 
@@ -217,13 +212,11 @@ for (let i = 0; i < items.length; i++) {
   if (!counters[label]) counters[label] = 1;
   else counters[label]++;
 
-  const idx = pad3(counters[label]); // 001, 002, ...
-  const slug = `${prefix}-${ymd}-${idx}`; // 예: app-20251212-001
+  const idx = pad3(counters[label]);
+  const slug = `${prefix}-${ymd}-${idx}`;
 
   // ✅ expanded item에 generatedSlug 주입(항상)
-  if (outItem) {
-    outItem.generatedSlug = slug;
-  }
+  if (outItem) outItem.generatedSlug = slug;
 
   const targetPath = path.join(CONTENT_DIR, `${slug}.json`);
 
@@ -241,6 +234,17 @@ for (let i = 0; i < items.length; i++) {
   if (!profileId) {
     fatal(`profileId 없음: label="${label}" (seedpool/profiles/labels.json 매핑 확인 필요)`);
   }
+
+  // ✅ 리뷰 글이면 reviewId 주입
+  const bucket = bucketOfPrefix(prefix);
+  const reviewBlock = bucket
+    ? {
+        reviewId: makeReviewId(bucket, slug),
+        bucket,
+        // 확장 대비 최소 메타(원하면 나중에 provider/sourceMap 추가)
+        createdAt: new Date().toISOString(),
+      }
+    : null;
 
   const doc = {
     slug,
@@ -260,6 +264,9 @@ for (let i = 0; i < items.length; i++) {
       sources: [],
       sourcesNote: 'Add at least 2 official sources when finalizing the post.',
     },
+
+    // ✅ (추가) 리뷰 글에만 삽입
+    ...(reviewBlock ? { review: reviewBlock } : {}),
 
     seedMeta: {
       queueDate,
