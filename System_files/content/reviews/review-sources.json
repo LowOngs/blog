@@ -1,14 +1,13 @@
-
 {
+  "updatedAt": "2026-01-18",
   "bySlug": {
     "app-20251207-001": [
       {
-        "label": "Todoist Help Center",
-        "url": "https://todoist.com/help"
-      },
-      {
-        "label": "Microsoft To Do Support",
-        "url": "https://support.microsoft.com/"
+        "type": "official",
+        "provider": "googleplay",
+        "label": "Google Play (official)",
+        "url": "https://play.google.com/store/apps/details?id=xxx",
+        "lastChecked": "2026-01-18"
       }
     ]
   }
