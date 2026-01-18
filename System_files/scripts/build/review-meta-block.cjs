@@ -12,9 +12,10 @@
  * ✅ 이번 업데이트(추가/보강 — 기존 동작을 크게 바꾸지 않음)
  * A) .env 로더를 “최상단(공통규칙)”에 고정(가장 먼저 로딩)
  * B) 리뷰 대상 파일만 처리하는 옵션 추가(기본값: ON)
- *    - app-/device-/subscription- 파일만 대상으로 잡아서 ssot-missing 노이즈를 제거
- *    - 필요 시 ENV로 전체 파일 대상으로 되돌릴 수 있음
- *      REVIEW_META_ONLY_REVIEW_SLUGS=false  -> 전체 dist/posts/*.html 대상으로 동작
+ * C) ✅ (추가) reviewId 우선 매칭 + slug 폴백
+ *    - posts SSOT(content/posts/{slug}.json)에서 reviewId를 읽음
+ *    - SSOT(review-ratings.json)에 byReviewId가 있으면 먼저 찾고,
+ *      없으면 기존 bySlug[slug]로 처리
  */
 
 require('./lib/env.cjs'); // ✅ 공통 규칙: env 로더 최우선
@@ -24,6 +25,7 @@ const path = require('path');
 
 const ROOT = path.resolve(__dirname, '../..');
 const DIST_DIR = path.join(ROOT, 'dist', 'posts');
+const POSTS_DIR = path.join(ROOT, 'content', 'posts');          // ✅ 추가
 const DATA_DIR = path.join(ROOT, 'content', 'reviews');
 const RATINGS_PATH = path.join(DATA_DIR, 'review-ratings.json');
 
@@ -35,15 +37,24 @@ function log(msg) {
   console.log(msg);
 }
 
+function safeReadJson(filePath, fallback) {
+  try {
+    if (!fs.existsSync(filePath)) return fallback;
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  } catch {
+    return fallback;
+  }
+}
+
 function loadRatings() {
-  if (!fs.existsSync(RATINGS_PATH)) return { bySlug: {} };
+  if (!fs.existsSync(RATINGS_PATH)) return { bySlug: {}, byReviewId: {} };
   const raw = fs.readFileSync(RATINGS_PATH, 'utf8');
   try {
     const json = JSON.parse(raw);
-    return json || { bySlug: {} };
+    return json || { bySlug: {}, byReviewId: {} };
   } catch (e) {
     console.error('[review-meta] review-ratings.json parse failed:', e.message);
-    return { bySlug: {} };
+    return { bySlug: {}, byReviewId: {} };
   }
 }
 
@@ -183,21 +194,18 @@ function takeUpTo6(list) {
 }
 
 function pickPositiveNegative(data) {
-  // ✅ 권장 스키마 A: insights: { positive, negative }
   if (data && data.insights && typeof data.insights === 'object' && !Array.isArray(data.insights)) {
     const pos = normalizeTextList(data.insights.positive);
     const neg = normalizeTextList(data.insights.negative);
     return { positive: pos, negative: neg };
   }
 
-  // ✅ 권장 스키마 B: insightsPositive / insightsNegative
   if (data && (Array.isArray(data.insightsPositive) || Array.isArray(data.insightsNegative))) {
     const pos = normalizeTextList(data.insightsPositive);
     const neg = normalizeTextList(data.insightsNegative);
     return { positive: pos, negative: neg };
   }
 
-  // ✅ 과거 호환: insights: string[] (단일 배열)
   const flat = normalizeTextList(data && data.insights);
   return { positive: flat, negative: [] };
 }
@@ -246,17 +254,21 @@ function buildInsightsBlock(data) {
 }
 
 function replaceSection(html, sectionId, newBlockHtml) {
-  const pattern = new RegExp(
-    `<section\\s+id="${sectionId}"[\\s\\S]*?<\\/section>`,
-    'i'
-  );
+  const pattern = new RegExp(`<section\\s+id="${sectionId}"[\\s\\S]*?<\\/section>`, 'i');
   if (!pattern.test(html)) return { html, changed: false };
   return { html: html.replace(pattern, newBlockHtml), changed: true };
 }
 
-// ✅ 추가: 리뷰 슬러그 판정(기본 ON 필터링)
 function isReviewSlug(slug) {
   return slug.startsWith('app-') || slug.startsWith('device-') || slug.startsWith('subscription-');
+}
+
+// ✅ 추가: posts SSOT에서 reviewId 읽기 (없으면 null)
+function getReviewIdForSlug(slug) {
+  const p = path.join(POSTS_DIR, `${slug}.json`);
+  const j = safeReadJson(p, null);
+  const rid = j && (j.reviewId || (j.seedMeta && j.seedMeta.reviewId));
+  return rid ? String(rid) : null;
 }
 
 function main() {
@@ -269,6 +281,7 @@ function main() {
 
   const ratings = loadRatings();
   const bySlug = ratings.bySlug || {};
+  const byReviewId = ratings.byReviewId || {}; // ✅ 추가(없으면 {})
 
   if (!fs.existsSync(DIST_DIR)) {
     log('[review-meta] dist/posts does not exist. exit.');
@@ -283,16 +296,30 @@ function main() {
   let slotMissing = 0;
   let skippedNonReview = 0;
 
+  // ✅ 추가 통계(선택)
+  let matchedById = 0;
+  let matchedBySlug = 0;
+
   for (const file of files) {
     const slug = path.basename(file, '.html');
 
-    // ✅ 추가: 리뷰 슬러그만 처리(기본)
     if (ONLY_REVIEW_SLUGS && !isReviewSlug(slug)) {
       skippedNonReview += 1;
       continue;
     }
 
-    const ratingData = bySlug[slug];
+    // ✅ 1순위: reviewId 기반
+    const reviewId = getReviewIdForSlug(slug);
+    let ratingData = null;
+
+    if (reviewId && byReviewId[reviewId]) {
+      ratingData = byReviewId[reviewId];
+      matchedById += 1;
+    } else if (bySlug[slug]) {
+      ratingData = bySlug[slug];
+      matchedBySlug += 1;
+    }
+
     const fullPath = path.join(DIST_DIR, file);
 
     if (!ratingData) {
@@ -305,7 +332,6 @@ function main() {
     const hasRatingSlot = html.includes('id="review-rating-block"');
     const hasInsightsSlot = html.includes('id="review-insights-block"');
 
-    // ✅ 둘 다 없으면 이 파일은 교체할 곳이 없음
     if (!hasRatingSlot && !hasInsightsSlot) {
       slotMissing += 1;
       continue;
@@ -313,7 +339,6 @@ function main() {
 
     let changed = false;
 
-    // ✅ rating 슬롯이 있으면 rating만 교체
     if (hasRatingSlot) {
       const ratingBlockHtml = buildRatingBlock(ratingData);
       const r1 = replaceSection(html, 'review-rating-block', ratingBlockHtml);
@@ -321,7 +346,6 @@ function main() {
       if (r1.changed) changed = true;
     }
 
-    // ✅ insights 슬롯이 있으면 insights만 교체 (rating 슬롯 없어도 가능)
     if (hasInsightsSlot) {
       const insightsBlockHtml = buildInsightsBlock(ratingData);
       const r2 = replaceSection(html, 'review-insights-block', insightsBlockHtml);
@@ -337,6 +361,7 @@ function main() {
 
   log('────────────────────────────────────────────');
   log(`[review-meta] done: updated=${updatedCount}, ssot-missing=${ratingMissing}, slot-missing=${slotMissing}, skipped-non-review=${skippedNonReview}`);
+  log(`[review-meta] match: byId=${matchedById}, bySlug=${matchedBySlug}`);
   log('────────────────────────────────────────────');
 }
 
