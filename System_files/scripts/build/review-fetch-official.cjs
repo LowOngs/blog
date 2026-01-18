@@ -1,32 +1,26 @@
 #!/usr/bin/env node
 'use strict';
+// review-fetch-official: 공식 API(1안)로 평점/투표/히스토그램을 수집해 *-ratings-next.json 업서트 + review-sources.json 업서트(품질 필터 포함)
 
-/**
- * System_files/scripts/build/review-fetch-official.cjs
- * 역할: (A안) 공식 API/공식 데이터 소스 기반으로 rating/votes/histogram을 수집해
- *       content/reviews/*-ratings-next.json + review-sources.json에 업서트한다.
- */
-
-require('./lib/env.cjs'); // ✅ 공통 규칙: env 로더 최우선(반드시 첫줄급)
+require('./lib/env.cjs'); // ✅ 공통 규칙: env 로더 최우선
 
 const fs = require('fs');
 const path = require('path');
 
 // ─────────────────────────────────────────────
-// What: 경로/게이트(안전 스위치)
+// What: 공통 설정/게이트(외부 호출/쓰기 통제)
 // Why: DRY_RUN에서 외부 호출/WRITE 금지(사고 방지)
 // I/O: R(process.env), W(없음)
-// Invariants: DRY_RUN이면 네트워크 호출/파일 WRITE 0%
+// Invariants: DRY_RUN이면 네트워크 호출/파일 WRITE 금지
 // ─────────────────────────────────────────────
 const ROOT = path.resolve(__dirname, '..', '..'); // System_files
 const POSTS_DIR = path.join(ROOT, 'content', 'posts');
 const REVIEWS_DIR = path.join(ROOT, 'content', 'reviews');
 
-function parseLive() {
+const isLive = (() => {
   const v = String(process.env.DRY_RUN ?? 'true').trim().toLowerCase();
   return (v === 'false' || v === '0');
-}
-const IS_LIVE = parseLive();
+})();
 
 const MAX_CALLS_PER_RUN = Number(process.env.REVIEW_FETCH_MAX_CALLS ?? 25);
 const ONLY_REVIEW_SLUGS = String(process.env.REVIEW_FETCH_ONLY_REVIEW_SLUGS ?? 'true').toLowerCase() !== 'false';
@@ -35,16 +29,33 @@ const PROVIDERS_ALLOW = String(process.env.REVIEW_FETCH_PROVIDERS ?? 'googleplay
   .map(s => s.trim().toLowerCase())
   .filter(Boolean);
 
+// sources 품질 필터 옵션(기본: ON)
+const VALIDATE_SOURCES = String(process.env.REVIEW_SOURCES_VALIDATE ?? 'true').toLowerCase() !== 'false';
+const SOURCE_MAX_PER_SLUG = Number(process.env.REVIEW_SOURCES_MAX_PER_SLUG ?? 20);
+
+// 허용 도메인(기본값 + ENV 확장)
+const SOURCE_ALLOW_DOMAINS = (() => {
+  const extra = String(process.env.REVIEW_SOURCES_ALLOW_DOMAINS ?? '')
+    .split(',')
+    .map(s => s.trim().toLowerCase())
+    .filter(Boolean);
+
+  // 기본 allow: 공식 페이지 도메인(최소)
+  const base = [
+    'play.google.com',
+    'amazon.com',
+    'www.amazon.com',
+    'trustpilot.com',
+    'www.trustpilot.com',
+  ];
+
+  return Array.from(new Set([...base, ...extra]));
+})();
+
 function log(...a) { console.log('[review-fetch]', ...a); }
 function warn(...a) { console.warn('[review-fetch][WARN]', ...a); }
 function fatal(...a) { console.error('[review-fetch][FATAL]', ...a); process.exit(1); }
 
-// ─────────────────────────────────────────────
-// What: 유틸(날짜/JSON I/O)
-// Why: SSOT 스키마/멱등/오염 방지
-// I/O: R/W(content/reviews/*.json, content/posts/*.json)
-// Invariants: 파싱 실패는 fallback(전체 중단 최소화), WRITE는 LIVE에서만
-// ─────────────────────────────────────────────
 function nowYmdKst() {
   const d = new Date(Date.now() + 9 * 60 * 60 * 1000);
   return d.toISOString().slice(0, 10);
@@ -73,12 +84,6 @@ function ensureMaps(obj) {
   return obj;
 }
 
-// ─────────────────────────────────────────────
-// What: 리뷰 대상 판정/버킷 분류
-// Why: 3버킷(app/device/subscription)만 공식 fetch 대상으로 제한
-// I/O: R(slug), W(없음)
-// Invariants: 리뷰 외 라벨은 절대 외부 호출 금지
-// ─────────────────────────────────────────────
 function isReviewSlug(slug) {
   return typeof slug === 'string' && (
     slug.startsWith('app-') || slug.startsWith('device-') || slug.startsWith('subscription-')
@@ -91,13 +96,11 @@ function bucketOf(slug) {
   return 'subscription';
 }
 
-// ─────────────────────────────────────────────
-// What: 히스토그램/차이값 정규화
-// Why: 렌더러/SSOT가 기대하는 키/숫자 안정성 보장
-// I/O: R(fetched.histogram), W(entry.histogram)
-// Invariants: '1'..'5' 키 항상 존재, NaN 금지
-// ─────────────────────────────────────────────
 function normalizeHistogram(h) {
+  // What: 1~5 키를 가진 퍼센트/비율 형태 정규화
+  // Why: SSOT/렌더가 기대하는 키 존재 보장
+  // I/O: R(entry.histogram), W(entry.histogram)
+  // Invariants: '1'..'5' 키가 항상 존재, NaN 방지
   const out = { '1': 0, '2': 0, '3': 0, '4': 0, '5': 0 };
   if (!h || typeof h !== 'object') return out;
   for (const k of ['1', '2', '3', '4', '5']) {
@@ -116,18 +119,15 @@ function computeDiff(current, previous, decimals = 1) {
   return Math.round(diff * m) / m;
 }
 
-// ─────────────────────────────────────────────
-// What: posts JSON에서 review fetch 키 추출(과도기 호환)
-// Why: 필드 확정 전에도 동작(후방호환), storeId 없으면 호출 금지
-// I/O: R(content/posts/*.json), W(없음)
-// Invariants: provider+storeId 없으면 fetch 스킵
-// ─────────────────────────────────────────────
 function pickReviewKey(doc) {
+  // What: posts JSON에서 provider/storeId/reviewId/url를 안전하게 추출
+  // Why: 필드 확정 전 과도기(다중 후보 필드) 호환
+  // I/O: R(content/posts/*.json), W(없음)
+  // Invariants: provider/storeId 없으면 fetch 스킵(외부 호출 금지)
   const slug = String(doc.slug || '').trim();
   const reviewId = doc.reviewId || doc.seedMeta?.reviewId || null;
 
   const rt = doc.reviewTarget || doc.seedMeta?.reviewTarget || null;
-
   const provider =
     (rt && (rt.provider || rt.kind)) ||
     doc.provider ||
@@ -157,6 +157,10 @@ function pickReviewKey(doc) {
 }
 
 function listPostDocs() {
+  // What: posts 폴더 스캔 후 JSON 로드
+  // Why: 리뷰 대상 후보를 여기서 1차 확보
+  // I/O: R(content/posts/*.json), W(없음)
+  // Invariants: 파싱 실패는 스킵(전체 중단 금지)
   if (!fs.existsSync(POSTS_DIR)) return [];
   const files = fs.readdirSync(POSTS_DIR).filter(f => f.endsWith('.json'));
   const out = [];
@@ -172,127 +176,34 @@ function listPostDocs() {
 }
 
 // ─────────────────────────────────────────────
-// What: 공식 출처 URL 생성(가능한 범위)
-// Why: review-sources.json에 “공식 링크” 최소 1개 기록
-// I/O: R(provider/storeId), W(없음)
-// Invariants: storeId 없으면 null
-// ─────────────────────────────────────────────
-function buildProviderUrl(provider, storeId) {
-  if (!storeId) return null;
-
-  if (provider === 'googleplay' || provider === 'google-play' || provider === 'playstore') {
-    return `https://play.google.com/store/apps/details?id=${encodeURIComponent(storeId)}`;
-  }
-  if (provider === 'amazon' || provider === 'amazonpaapi' || provider === 'paapi') {
-    return `https://www.amazon.com/dp/${encodeURIComponent(storeId)}`;
-  }
-  if (provider === 'trustpilot') {
-    return `https://www.trustpilot.com/review/${encodeURIComponent(storeId)}`;
-  }
-  return null;
-}
-
-function sourceLabel(provider) {
-  if (provider === 'amazon' || provider === 'amazonpaapi' || provider === 'paapi') return 'Amazon (official)';
-  if (provider === 'trustpilot') return 'Trustpilot (official)';
-  return 'Google Play (official)';
-}
-
-// ─────────────────────────────────────────────
-// What: review-sources.json 업서트
-// Why: AIO/검증/갱신 루프의 근거 데이터(링크) 축적
-// I/O: R/W(content/reviews/review-sources.json)
-// Invariants: url 없으면 변경 금지, 중복 URL 금지, 최대 20개
-// ─────────────────────────────────────────────
-function upsertSources(sourcesBySlug, slug, provider, url) {
-  if (!url) return false;
-
-  const arr = Array.isArray(sourcesBySlug[slug]) ? sourcesBySlug[slug] : [];
-  const key = String(url).trim();
-
-  const exists = arr.some(x => x && typeof x === 'object' && String(x.url || '').trim() === key);
-  if (exists) {
-    sourcesBySlug[slug] = arr;
-    return false;
-  }
-
-  arr.push({ label: sourceLabel(provider), url: key });
-  sourcesBySlug[slug] = arr.slice(0, 20);
-  return true;
-}
-
-// ─────────────────────────────────────────────
-// What: *-ratings-next.json 엔트리 업서트
-// Why: diff-update/merge 단계가 기대하는 필드 보장
-// I/O: R(*-ratings.json baseline), W(*-ratings-next.json)
-// Invariants: fetched 없으면 변경 금지(오염 방지)
-// ─────────────────────────────────────────────
-function upsertNextEntry(nextBySlug, baseBySlug, slug, provider, storeId, fetched) {
-  if (!fetched) return { changed: false, reason: 'no-data' };
-
-  const base = baseBySlug[slug] || null;
-  const prevRating = base && Number.isFinite(Number(base.ratingCurrent)) ? Number(base.ratingCurrent) : 0;
-  const prevVotes = base && Number.isFinite(Number(base.votesCurrent)) ? Number(base.votesCurrent) : 0;
-
-  const ratingCurrent = Number(fetched.ratingCurrent);
-  const votesCurrent = Number(fetched.votesCurrent);
-
-  const entry = nextBySlug[slug] && typeof nextBySlug[slug] === 'object' ? nextBySlug[slug] : {};
-
-  entry.lastChecked = nowYmdKst();
-  entry.status = 'ok';
-  entry.store = provider || 'unknown';
-  entry.source = 'official';
-  entry.storeId = storeId || null;
-
-  entry.ratingCurrent = Number.isFinite(ratingCurrent) ? ratingCurrent : 0;
-  entry.votesCurrent = Number.isFinite(votesCurrent) ? votesCurrent : 0;
-
-  entry.ratingPrevious = prevRating;
-  entry.votesPrevious = prevVotes;
-
-  entry.ratingDiff = computeDiff(entry.ratingCurrent, entry.ratingPrevious, 1);
-  entry.votesDiff = Math.round(entry.votesCurrent - entry.votesPrevious);
-
-  entry.histogram = normalizeHistogram(fetched.histogram);
-
-  // insights는 (B안)에서 채움. 여기선 보존/기본만 보장.
-  if (!Array.isArray(entry.insights)) entry.insights = [];
-
-  nextBySlug[slug] = entry;
-  return { changed: true, reason: 'upserted' };
-}
-
-// ─────────────────────────────────────────────
-// What: Provider 어댑터(공식 API) 인터페이스(스켈레톤)
-// Why: provider 구조/API 변경 리스크를 격리
-// I/O: R(공식 API), W(없음)
+// What: Provider 어댑터(공식 API) 인터페이스
+// Why: provider 변경(구조/API 변경) 리스크를 격리
+// I/O: R(process.env keys), W(없음)
 // Invariants: DRY_RUN이면 절대 호출하지 않음(반드시 null 반환)
 // ─────────────────────────────────────────────
-async function fetchGooglePlay(/* key */) {
-  if (!IS_LIVE) return null;
-  // TODO(옹스님): Google Play 공식 경로 확정 후 구현
-  // expected return: { ratingCurrent:number, votesCurrent:number, histogram?:{'1'..'5':number} }
+async function fetchGooglePlay({ storeId }) {
+  if (!isLive) return null;
+  // TODO(옹스님): Google Play 공식 API 경로 확정 후 구현
   return null;
 }
 
-async function fetchAmazon(/* key */) {
-  if (!IS_LIVE) return null;
-  // TODO(옹스님): Amazon PA-API 승인 후 구현
+async function fetchAmazon({ storeId }) {
+  if (!isLive) return null;
+  // TODO(옹스님): Amazon PA-API(파트너 승인 후) 구현
   return null;
 }
 
-async function fetchTrustpilot(/* key */) {
-  if (!IS_LIVE) return null;
+async function fetchTrustpilot({ storeId }) {
+  if (!isLive) return null;
   // TODO(옹스님): Trustpilot 공식 API 키/엔드포인트 확정 후 구현
   return null;
 }
 
 async function fetchCommon(provider, key) {
   // What: provider별 fetch 분기
-  // Why: 단일 진입점으로 호출량/정책을 통제
-  // I/O: R(provider/key), W(없음)
-  // Invariants: allowlist 밖이면 호출 금지
+  // Why: 단일 진입점으로 allowlist/정책을 강제
+  // I/O: R(provider, storeId), W(없음)
+  // Invariants: provider allowlist 밖이면 호출 금지
   if (!provider || !PROVIDERS_ALLOW.includes(provider)) return null;
 
   if (provider === 'googleplay' || provider === 'google-play' || provider === 'playstore') {
@@ -307,19 +218,149 @@ async function fetchCommon(provider, key) {
   return null;
 }
 
+function upsertNextEntry(nextMap, baselineMap, slug, provider, storeId, fetched) {
+  // What: *-ratings-next.json의 slug 엔트리를 업서트
+  // Why: diff-update/merge 단계가 기대하는 필드 보장
+  // I/O: R(*-ratings.json baseline), W(*-ratings-next.json)
+  // Invariants: fetched가 없으면 next를 변경하지 않음(오염 방지)
+  if (!fetched) return { changed: false, reason: 'no-data' };
+
+  const base = baselineMap[slug] || null;
+  const prevRating = base && Number.isFinite(Number(base.ratingCurrent)) ? Number(base.ratingCurrent) : 0;
+  const prevVotes = base && Number.isFinite(Number(base.votesCurrent)) ? Number(base.votesCurrent) : 0;
+
+  const ratingCurrent = Number(fetched.ratingCurrent);
+  const votesCurrent = Number(fetched.votesCurrent);
+
+  const entry = nextMap[slug] && typeof nextMap[slug] === 'object' ? nextMap[slug] : {};
+
+  entry.lastChecked = nowYmdKst();
+  entry.status = 'ok';
+  entry.store = provider || 'unknown';
+  entry.source = 'official';
+  entry.storeId = storeId || null;
+
+  entry.ratingCurrent = Number.isFinite(ratingCurrent) ? ratingCurrent : 0;
+  entry.votesCurrent = Number.isFinite(votesCurrent) ? votesCurrent : 0;
+
+  entry.ratingPrevious = prevRating;
+  entry.votesPrevious = prevVotes;
+
+  entry.ratingDiff = computeDiff(entry.ratingCurrent, entry.ratingPrevious, 1);
+  entry.votesDiff = Math.round((entry.votesCurrent - entry.votesPrevious));
+
+  entry.histogram = normalizeHistogram(fetched.histogram);
+
+  // insights는 2안에서 채우는 영역(여기선 건드리지 않음)
+  if (!Array.isArray(entry.insights)) entry.insights = [];
+
+  nextMap[slug] = entry;
+  return { changed: true, reason: 'upserted' };
+}
+
+function buildProviderUrl(provider, storeId) {
+  // What: 공식 페이지 URL 생성
+  // Why: sources 기록에 활용
+  // I/O: R(provider/storeId), W(없음)
+  // Invariants: storeId 없으면 null
+  if (!storeId) return null;
+
+  if (provider === 'googleplay' || provider === 'google-play' || provider === 'playstore') {
+    return `https://play.google.com/store/apps/details?id=${encodeURIComponent(storeId)}`;
+  }
+  if (provider === 'amazon') {
+    return `https://www.amazon.com/dp/${encodeURIComponent(storeId)}`;
+  }
+  if (provider === 'trustpilot') {
+    return `https://www.trustpilot.com/review/${encodeURIComponent(storeId)}`;
+  }
+  return null;
+}
+
 // ─────────────────────────────────────────────
-// main
+// What: review-sources 품질 필터(검증)
+// Why: 저품질/오염 URL이 SSOT로 들어가면 장기적으로 리스크가 커짐
+// I/O: R(url,label), W(없음)
+// Invariants: https만 허용, javascript/data/file 차단, 도메인 allowlist 적용
 // ─────────────────────────────────────────────
+function validateSource(label, url) {
+  if (!VALIDATE_SOURCES) return { ok: true, reason: 'disabled' };
+
+  const lbl = (label ? String(label).trim() : '');
+  const u = (url ? String(url).trim() : '');
+
+  if (!u) return { ok: false, reason: 'empty_url' };
+  if (u.length > 500) return { ok: false, reason: 'url_too_long' };
+  if (lbl && lbl.length > 120) return { ok: false, reason: 'label_too_long' };
+
+  // block obvious bad schemes
+  const low = u.toLowerCase();
+  if (low.startsWith('javascript:')) return { ok: false, reason: 'bad_scheme_js' };
+  if (low.startsWith('data:')) return { ok: false, reason: 'bad_scheme_data' };
+  if (low.startsWith('file:')) return { ok: false, reason: 'bad_scheme_file' };
+
+  let parsed;
+  try {
+    parsed = new URL(u);
+  } catch {
+    return { ok: false, reason: 'invalid_url' };
+  }
+
+  if (parsed.protocol !== 'https:') return { ok: false, reason: 'not_https' };
+
+  const host = String(parsed.hostname || '').toLowerCase();
+  if (!host) return { ok: false, reason: 'no_host' };
+
+  // allowlist: exact match OR subdomain match
+  const okHost = SOURCE_ALLOW_DOMAINS.some(d => host === d || host.endsWith(`.${d}`));
+  if (!okHost) return { ok: false, reason: 'host_not_allowed' };
+
+  return { ok: true, reason: 'ok' };
+}
+
+function upsertSources(sourcesMap, slug, provider, storeId, url) {
+  // What: review-sources.json에 공식 출처를 최소 1개 기록(품질 필터 적용)
+  // Why: AIO/신뢰/추적(검증/갱신 루프) 기반 마련
+  // I/O: R/W(content/reviews/review-sources.json)
+  // Invariants: url 없거나 validate 실패면 sources는 건드리지 않음(오염 방지)
+  if (!url) return { changed: false, reason: 'no_url' };
+
+  const label = provider === 'amazon'
+    ? 'Amazon (official)'
+    : provider === 'trustpilot'
+      ? 'Trustpilot (official)'
+      : 'Google Play (official)';
+
+  const v = validateSource(label, url);
+  if (!v.ok) return { changed: false, reason: `invalid_source:${v.reason}` };
+
+  const arr = Array.isArray(sourcesMap[slug]) ? sourcesMap[slug] : [];
+  const key = String(url).trim();
+
+  const exists = arr.some(x => x && typeof x === 'object' && String(x.url || '').trim() === key);
+  if (exists) {
+    sourcesMap[slug] = arr.slice(0, SOURCE_MAX_PER_SLUG);
+    return { changed: false, reason: 'exists' };
+  }
+
+  arr.push({ label, url: key });
+
+  // 너무 많아지는 것 방지(장기 운영 안전)
+  sourcesMap[slug] = arr.slice(0, SOURCE_MAX_PER_SLUG);
+  return { changed: true, reason: 'added' };
+}
+
 async function main() {
   log('────────────────────────────────────────────');
   log('[review-fetch] start');
   log(`[review-fetch] ROOT = ${ROOT}`);
   log(`[review-fetch] POSTS = ${POSTS_DIR}`);
   log(`[review-fetch] REVIEWS = ${REVIEWS_DIR}`);
-  log(`[review-fetch] DRY_RUN = ${IS_LIVE ? 'false(live)' : 'true(dry-run)'}`);
+  log(`[review-fetch] DRY_RUN = ${isLive ? 'false(live)' : 'true(dry-run)'}`);
   log(`[review-fetch] ONLY_REVIEW_SLUGS = ${ONLY_REVIEW_SLUGS}`);
   log(`[review-fetch] MAX_CALLS_PER_RUN = ${MAX_CALLS_PER_RUN}`);
   log(`[review-fetch] PROVIDERS_ALLOW = ${PROVIDERS_ALLOW.join(', ')}`);
+  log(`[review-fetch] SOURCES_VALIDATE = ${VALIDATE_SOURCES} (maxPerSlug=${SOURCE_MAX_PER_SLUG})`);
 
   const paths = {
     appRatings: path.join(REVIEWS_DIR, 'app-ratings.json'),
@@ -334,10 +375,6 @@ async function main() {
     reviewSources: path.join(REVIEWS_DIR, 'review-sources.json'),
   };
 
-  // What: SSOT/next/sources 로드
-  // Why: upsert 대상 준비
-  // I/O: R(content/reviews/*.json), W(없음)
-  // Invariants: 구조 깨져도 ensureMaps로 복구(최소 구조)
   const appBase = ensureMaps(safeReadJson(paths.appRatings, null));
   const appNext = ensureMaps(safeReadJson(paths.appRatingsNext, null));
 
@@ -349,27 +386,18 @@ async function main() {
 
   const sources = ensureMaps(safeReadJson(paths.reviewSources, null));
 
-  // What: posts 스캔 → 후보 구성
-  // Why: 리뷰 대상만 추려서 호출량/비용 통제
-  // I/O: R(content/posts/*.json), W(없음)
-  // Invariants: provider+storeId 없으면 외부 호출 금지
   const docs = listPostDocs();
-  const candidates = [];
 
+  const candidates = [];
   for (const doc of docs) {
     const k = pickReviewKey(doc);
     if (!k.slug) continue;
-
     if (ONLY_REVIEW_SLUGS && !isReviewSlug(k.slug)) continue;
     if (!isReviewSlug(k.slug)) continue; // fetch는 리뷰 3버킷만(정책)
-
     candidates.push(k);
   }
 
-  // What: 호출 우선순위 정렬
-  // Why: storeId/provider가 있는 것부터 처리(성공률 우선)
-  // I/O: R(candidates), W(없음)
-  // Invariants: 정렬만, 데이터 변형 금지
+  // 호출 대상 정렬: storeId 있는 것 우선, provider 있는 것 우선
   candidates.sort((a, b) => {
     const as = (a.storeId ? 1 : 0) + (a.provider ? 1 : 0);
     const bs = (b.storeId ? 1 : 0) + (b.provider ? 1 : 0);
@@ -377,7 +405,7 @@ async function main() {
   });
 
   let scanned = 0;
-  let planned = 0;
+  let callPlanned = 0;
   let fetchedOk = 0;
   let upserted = 0;
   let sourcesAdded = 0;
@@ -385,6 +413,7 @@ async function main() {
   let skippedNoKey = 0;
   let skippedProvider = 0;
   let skippedLimit = 0;
+  let skippedSourceInvalid = 0;
 
   for (const k of candidates) {
     scanned += 1;
@@ -403,19 +432,17 @@ async function main() {
       continue;
     }
 
-    if (planned >= MAX_CALLS_PER_RUN) {
+    if (callPlanned >= MAX_CALLS_PER_RUN) {
       skippedLimit += 1;
       continue;
     }
 
-    planned += 1;
+    callPlanned += 1;
 
-    // What: DRY_RUN 계획 로그
-    // Why: 호출/WRITE 없이 계획만 검증
-    // I/O: R(candidate), W(없음)
-    // Invariants: DRY_RUN이면 네트워크/WRITE 금지
-    if (!IS_LIVE) {
+    // DRY_RUN이면 외부 호출 없이 “계획 로그”만 출력
+    if (!isLive) {
       log(`DRY_RUN plan: slug=${slug} provider=${provider} storeId=${storeId}`);
+      // sources도 DRY_RUN에서는 변경하지 않음(WRITE 금지)
       continue;
     }
 
@@ -428,6 +455,9 @@ async function main() {
     }
 
     if (!fetched) continue;
+
+    // fetched expected shape:
+    // { ratingCurrent:number, votesCurrent:number, histogram?:{'1'..'5':number} }
     fetchedOk += 1;
 
     const bucket = bucketOf(slug);
@@ -443,20 +473,21 @@ async function main() {
       if (r.changed) upserted += 1;
     }
 
+    // sources 업서트(공식 페이지 URL 기록, 품질 필터 적용)
     const url = k.url || buildProviderUrl(provider, storeId);
-    if (upsertSources(sources.bySlug, slug, provider, url)) {
-      sourcesAdded += 1;
-    }
+    const s = upsertSources(sources.bySlug, slug, provider, storeId, url);
+    if (s.changed) sourcesAdded += 1;
+    else if (String(s.reason || '').startsWith('invalid_source:')) skippedSourceInvalid += 1;
   }
 
-  // What: updatedAt 갱신
-  // Why: “언제 마지막으로 갱신 시도/반영했는지” 추적
-  // I/O: W(content/reviews/*next.json, review-sources.json)
-  // Invariants: LIVE에서만 실제 WRITE
+  // updatedAt 갱신
   const ymd = nowYmdKst();
-  for (const obj of [appNext, deviceNext, subNext, sources]) obj.updatedAt = ymd;
+  for (const obj of [appNext, deviceNext, subNext, sources]) {
+    obj.updatedAt = ymd;
+  }
 
-  if (IS_LIVE) {
+  // WRITE(라이브에서만)
+  if (isLive) {
     writeJson(paths.appRatingsNext, appNext);
     writeJson(paths.deviceRatingsNext, deviceNext);
     writeJson(paths.subscriptionRatingsNext, subNext);
@@ -464,11 +495,11 @@ async function main() {
   }
 
   log('────────────────────────────────────────────');
-  log(`[review-fetch] done: scanned=${scanned} planned=${planned} fetchedOk=${fetchedOk} upserted=${upserted} sourcesAdded=${sourcesAdded}`);
-  log(`[review-fetch] skipped: noKey=${skippedNoKey} providerNotAllowed=${skippedProvider} overLimit=${skippedLimit}`);
+  log(`[review-fetch] done: scanned=${scanned} planned=${callPlanned} fetchedOk=${fetchedOk} upserted=${upserted} sourcesAdded=${sourcesAdded}`);
+  log(`[review-fetch] skipped: noKey=${skippedNoKey} providerNotAllowed=${skippedProvider} overLimit=${skippedLimit} sourceInvalid=${skippedSourceInvalid}`);
   log('────────────────────────────────────────────');
 
-  if (!IS_LIVE) {
+  if (!isLive) {
     log('[review-fetch] DRY_RUN: no network calls, no file writes.');
   }
 }
