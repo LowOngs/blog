@@ -1,6 +1,10 @@
 // System_files/scripts/build/review-stub-fill.cjs
 // 역할: content/posts에서 리뷰 슬러그(app-/device-/subscription-)를 찾아,
 // content/reviews/* 파일들에 최소 구조(stub)를 "없을 때만" 업서트한다.
+// ✅ (추가) posts의 review.reviewId를 읽어 rating/insights 엔트리에 reviewId를 백필한다.
+
+// ✅ 로컬/CI 공통: .env 로드(필수)
+require('./lib/env.cjs');
 
 const fs = require("fs");
 const path = require("path");
@@ -49,9 +53,47 @@ function ensureMaps(obj) {
   return obj;
 }
 
-function ensureRatingEntry(bySlug, slug) {
-  if (bySlug[slug]) return false;
+// ✅ 공통: reviewId를 "없을 때만" 채우는 유틸(불일치면 경고만)
+function backfillReviewId(entry, slug, reviewId, bucket) {
+  if (!entry || typeof entry !== "object") return false;
+  let changed = false;
+
+  if (reviewId) {
+    if (!entry.reviewId) {
+      entry.reviewId = reviewId;
+      changed = true;
+    } else if (entry.reviewId !== reviewId) {
+      console.warn(`[review-stub-fill][WARN] reviewId mismatch slug=${slug} ssot=${entry.reviewId} post=${reviewId}`);
+      // 기존 값 유지(SSOT 보호)
+    }
+  }
+
+  if (!entry.slug) {
+    entry.slug = slug;
+    changed = true;
+  }
+  if (!entry.bucket) {
+    entry.bucket = bucket;
+    changed = true;
+  }
+
+  return changed;
+}
+
+function ensureRatingEntry(bySlug, slug, reviewId) {
+  const bucket = bucketOf(slug);
+
+  if (bySlug[slug]) {
+    // ✅ 기존 엔트리면 reviewId/slug/bucket만 백필
+    return backfillReviewId(bySlug[slug], slug, reviewId, bucket);
+  }
+
   bySlug[slug] = {
+    // ✅ 연동 규약: reviewId는 있으면 저장(없으면 null로 둠)
+    reviewId: reviewId || null,
+    slug,
+    bucket,
+
     lastChecked: nowYmdKst(),
     status: "unknown",
     store: "unknown",
@@ -69,34 +111,61 @@ function ensureRatingEntry(bySlug, slug) {
   return true;
 }
 
-function ensureInsightsEntry(bySlug, slug) {
-  if (bySlug[slug]) return false;
-  bySlug[slug] = { insights: [] };
+function ensureInsightsEntry(bySlug, slug, reviewId) {
+  const bucket = bucketOf(slug);
+
+  if (bySlug[slug]) {
+    // ✅ 기존 엔트리면 reviewId/slug/bucket만 백필
+    return backfillReviewId(bySlug[slug], slug, reviewId, bucket);
+  }
+
+  bySlug[slug] = {
+    reviewId: reviewId || null,
+    slug,
+    bucket,
+    insights: []
+  };
   return true;
 }
 
+// ⚠️ review-sources.json은 기존 스키마(bySlug[slug] = [])를 유지(파이프라인 호환)
+// → 여기서는 reviewId를 배열에 억지로 넣지 않습니다(스키마 오염/파싱 위험).
 function ensureSourcesEntry(bySlug, slug) {
   if (bySlug[slug]) return false;
   bySlug[slug] = [];
   return true;
 }
 
-function listPostSlugs() {
+function listReviewPosts() {
   if (!fs.existsSync(POSTS_DIR)) return [];
   const files = fs.readdirSync(POSTS_DIR).filter((f) => f.endsWith(".json"));
-  const slugs = [];
+
+  const out = [];
   for (const f of files) {
     const p = path.join(POSTS_DIR, f);
     const j = readJson(p, null);
+
     const slug = (j && j.slug) ? j.slug : f.replace(/\.json$/, "");
-    if (isReviewSlug(slug)) slugs.push(slug);
+    if (!isReviewSlug(slug)) continue;
+
+    const reviewId = (j && j.review && typeof j.review === "object" && typeof j.review.reviewId === "string")
+      ? j.review.reviewId
+      : null;
+
+    out.push({ slug, reviewId });
   }
-  return Array.from(new Set(slugs)).sort();
+
+  // slug 유니크
+  const map = new Map();
+  for (const r of out) {
+    if (!map.has(r.slug)) map.set(r.slug, r);
+  }
+  return Array.from(map.values()).sort((a, b) => a.slug.localeCompare(b.slug));
 }
 
 function main() {
   const ymd = nowYmdKst();
-  const slugs = listPostSlugs();
+  const posts = listReviewPosts();
 
   const paths = {
     appRatings: path.join(REVIEWS_DIR, "app-ratings.json"),
@@ -130,26 +199,26 @@ function main() {
 
   const reviewSources = ensureMaps(readJson(paths.reviewSources, null));
 
-  let created = 0;
+  let createdOrFilled = 0;
 
-  for (const slug of slugs) {
+  for (const { slug, reviewId } of posts) {
     const b = bucketOf(slug);
 
     if (b === "app") {
-      if (ensureRatingEntry(appRatings.bySlug, slug)) created++;
-      if (ensureRatingEntry(appRatingsNext.bySlug, slug)) created++;
-      if (ensureInsightsEntry(appInsights.bySlug, slug)) created++;
+      if (ensureRatingEntry(appRatings.bySlug, slug, reviewId)) createdOrFilled++;
+      if (ensureRatingEntry(appRatingsNext.bySlug, slug, reviewId)) createdOrFilled++;
+      if (ensureInsightsEntry(appInsights.bySlug, slug, reviewId)) createdOrFilled++;
     } else if (b === "device") {
-      if (ensureRatingEntry(deviceRatings.bySlug, slug)) created++;
-      if (ensureRatingEntry(deviceRatingsNext.bySlug, slug)) created++;
-      if (ensureInsightsEntry(deviceInsights.bySlug, slug)) created++;
+      if (ensureRatingEntry(deviceRatings.bySlug, slug, reviewId)) createdOrFilled++;
+      if (ensureRatingEntry(deviceRatingsNext.bySlug, slug, reviewId)) createdOrFilled++;
+      if (ensureInsightsEntry(deviceInsights.bySlug, slug, reviewId)) createdOrFilled++;
     } else {
-      if (ensureRatingEntry(subscriptionRatings.bySlug, slug)) created++;
-      if (ensureRatingEntry(subscriptionRatingsNext.bySlug, slug)) created++;
-      if (ensureInsightsEntry(subscriptionInsights.bySlug, slug)) created++;
+      if (ensureRatingEntry(subscriptionRatings.bySlug, slug, reviewId)) createdOrFilled++;
+      if (ensureRatingEntry(subscriptionRatingsNext.bySlug, slug, reviewId)) createdOrFilled++;
+      if (ensureInsightsEntry(subscriptionInsights.bySlug, slug, reviewId)) createdOrFilled++;
     }
 
-    if (ensureSourcesEntry(reviewSources.bySlug, slug)) created++;
+    if (ensureSourcesEntry(reviewSources.bySlug, slug)) createdOrFilled++;
   }
 
   // updatedAt 갱신(이 스크립트 실행 시점 기록)
@@ -181,7 +250,7 @@ function main() {
 
   writeJson(paths.reviewSources, reviewSources);
 
-  console.log(`[review-stub-fill] slugs=${slugs.length} createdOrFilled=${created}`);
+  console.log(`[review-stub-fill] slugs=${posts.length} createdOrFilled=${createdOrFilled}`);
 }
 
 main();
