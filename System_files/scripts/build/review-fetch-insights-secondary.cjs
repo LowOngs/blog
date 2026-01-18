@@ -1,143 +1,204 @@
-
 #!/usr/bin/env node
 'use strict';
-// review-fetch-insights-secondary.cjs
-// 2안: 비공식/세컨더리 소스(블로그·포럼·리뷰 페이지)에서 인사이트 문구만 수집하여 SSOT에 업서트
+// review-fetch-insights-secondary: 2차 인사이트 엔진 (비공식/저비용, GPT 미사용)
 
-require('./lib/env.cjs'); // env 최상단 로딩
+require('./lib/env.cjs'); // ✅ 공통 규칙: env 로더 최우선
 
 const fs = require('fs');
 const path = require('path');
 
 // ─────────────────────────────────────────────
-// 공통 설정
+// 기본 경로 설정
 // ─────────────────────────────────────────────
-const ROOT = path.resolve(__dirname, '..', '..');
+const ROOT = path.resolve(__dirname, '..', '..'); // System_files
 const POSTS_DIR = path.join(ROOT, 'content', 'posts');
 const REVIEWS_DIR = path.join(ROOT, 'content', 'reviews');
-const SOURCES_PATH = path.join(REVIEWS_DIR, 'review-sources.json');
 
-const DRY_RUN = !(['false', '0'].includes(String(process.env.DRY_RUN ?? 'true').toLowerCase()));
-const MAX_ITEMS = Number(process.env.REVIEW_INSIGHTS_MAX ?? 10);
+// DRY_RUN 기본 true
+const isLive = (() => {
+  const v = String(process.env.DRY_RUN ?? 'true').trim().toLowerCase();
+  return (v === 'false' || v === '0');
+})();
 
-// ─────────────────────────────────────────────
-// 유틸
-// ─────────────────────────────────────────────
-function log(...a) { console.log('[review-insights-2nd]', ...a); }
-function warn(...a) { console.warn('[review-insights-2nd][WARN]', ...a); }
+function log(...a) { console.log('[review-insights-2]', ...a); }
+function warn(...a) { console.warn('[review-insights-2][WARN]', ...a); }
+function fatal(...a) { console.error('[review-insights-2][FATAL]', ...a); process.exit(1); }
 
-function safeReadJson(p, fb) {
-  try {
-    if (!fs.existsSync(p)) return fb;
-    return JSON.parse(fs.readFileSync(p, 'utf8'));
-  } catch {
-    return fb;
-  }
-}
-
-function writeJson(p, o) {
-  fs.mkdirSync(path.dirname(p), { recursive: true });
-  fs.writeFileSync(p, JSON.stringify(o, null, 2) + '\n', 'utf8');
-}
-
-function nowYmd() {
-  const d = new Date(Date.now() + 9 * 3600 * 1000);
+function nowYmdKst() {
+  const d = new Date(Date.now() + 9 * 60 * 60 * 1000);
   return d.toISOString().slice(0, 10);
 }
 
+// ─────────────────────────────────────────────
+// JSON 유틸
+// ─────────────────────────────────────────────
+function safeReadJson(file, fallback) {
+  try {
+    if (!fs.existsSync(file)) return fallback;
+    return JSON.parse(fs.readFileSync(file, 'utf8'));
+  } catch {
+    return fallback;
+  }
+}
+
+function writeJson(file, obj) {
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, JSON.stringify(obj, null, 2) + '\n', 'utf8');
+}
+
+function ensureMaps(obj) {
+  const base = { updatedAt: nowYmdKst(), bySlug: {} };
+  if (!obj || typeof obj !== 'object') return base;
+  if (!obj.bySlug || typeof obj.bySlug !== 'object') obj.bySlug = {};
+  if (!obj.updatedAt) obj.updatedAt = nowYmdKst();
+  return obj;
+}
+
+// ─────────────────────────────────────────────
+// 리뷰 대상 판별
+// ─────────────────────────────────────────────
 function isReviewSlug(slug) {
-  return slug.startsWith('app-') || slug.startsWith('device-') || slug.startsWith('subscription-');
+  return typeof slug === 'string' &&
+    (slug.startsWith('app-') || slug.startsWith('device-') || slug.startsWith('subscription-'));
 }
 
-// ─────────────────────────────────────────────
-// 2안 핵심: 인사이트 생성기(LLM 미사용, 룰 기반 요약)
-// ─────────────────────────────────────────────
-function extractInsightsFromText(text) {
-  if (!text) return [];
-  const lines = text
-    .split(/\r?\n/)
-    .map(l => l.trim())
-    .filter(l => l.length > 20 && l.length < 160);
-
-  const positives = [];
-  const negatives = [];
-
-  for (const l of lines) {
-    if (/good|fast|easy|useful|great|stable/i.test(l)) positives.push(l);
-    else if (/bad|slow|bug|problem|issue|expensive/i.test(l)) negatives.push(l);
-  }
-
-  return {
-    positive: positives.slice(0, 6),
-    negative: negatives.slice(0, 6),
-  };
-}
-
-// ─────────────────────────────────────────────
-// 메인
-// ─────────────────────────────────────────────
-async function main() {
-  log('start');
-  log('DRY_RUN =', DRY_RUN);
-
-  const sources = safeReadJson(SOURCES_PATH, { updatedAt: nowYmd(), bySlug: {} });
-
-  if (!fs.existsSync(POSTS_DIR)) {
-    warn('posts dir missing');
-    return;
-  }
-
+function listPostDocs() {
+  if (!fs.existsSync(POSTS_DIR)) return [];
   const files = fs.readdirSync(POSTS_DIR).filter(f => f.endsWith('.json'));
-  let processed = 0;
-
+  const out = [];
   for (const f of files) {
-    if (processed >= MAX_ITEMS) break;
+    const p = path.join(POSTS_DIR, f);
+    const j = safeReadJson(p, null);
+    if (!j || typeof j !== 'object') continue;
+    const slug = j.slug || f.replace(/\.json$/, '');
+    j.slug = slug;
+    out.push(j);
+  }
+  return out;
+}
 
-    const post = safeReadJson(path.join(POSTS_DIR, f), null);
-    if (!post || !isReviewSlug(post.slug)) continue;
+// ─────────────────────────────────────────────
+// 인사이트 추출 규칙(룰 기반, LLM 미사용)
+// ─────────────────────────────────────────────
 
-    const slug = post.slug;
-    const srcList = sources.bySlug[slug];
-    if (!Array.isArray(srcList) || srcList.length === 0) continue;
+// 긍정/부정 키워드(확장 가능)
+const POSITIVE_KEYWORDS = [
+  'fast', 'easy', 'simple', 'useful', 'reliable', 'stable',
+  'convenient', 'intuitive', 'helpful', 'good', 'great'
+];
 
-    // 2안 정책: 외부 fetch 없음, source.label 기반 더미 텍스트 처리
-    const combinedText = srcList.map(s => s.label).join('\n');
+const NEGATIVE_KEYWORDS = [
+  'slow', 'bug', 'issue', 'problem', 'crash', 'confusing',
+  'expensive', 'hard', 'difficult', 'bad'
+];
 
-    const insights = extractInsightsFromText(combinedText);
+// 문장 정규화
+function normalizeSentence(s) {
+  return String(s || '')
+    .replace(/\s+/g, ' ')
+    .replace(/[^\w\s.,-]/g, '')
+    .trim();
+}
+
+// 간단한 긍/부정 판별
+function classifySentence(text) {
+  const t = text.toLowerCase();
+  const posHit = POSITIVE_KEYWORDS.some(k => t.includes(k));
+  const negHit = NEGATIVE_KEYWORDS.some(k => t.includes(k));
+
+  if (posHit && !negHit) return 'positive';
+  if (negHit && !posHit) return 'negative';
+  return null;
+}
+
+// 최대 6개까지, 중복 제거
+function collectInsights(sentences) {
+  const pos = [];
+  const neg = [];
+  const seen = new Set();
+
+  for (const raw of sentences) {
+    const s = normalizeSentence(raw);
+    if (!s) continue;
+    const key = s.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+
+    const c = classifySentence(s);
+    if (c === 'positive' && pos.length < 6) pos.push(s);
+    else if (c === 'negative' && neg.length < 6) neg.push(s);
+
+    if (pos.length >= 6 && neg.length >= 6) break;
+  }
+
+  return { positive: pos, negative: neg };
+}
+
+// ─────────────────────────────────────────────
+// 메인 로직
+// ─────────────────────────────────────────────
+function main() {
+  log('────────────────────────────────────────────');
+  log('[review-insights-2] start');
+  log(`[review-insights-2] DRY_RUN = ${isLive ? 'false(live)' : 'true(dry-run)'}`);
+
+  const paths = {
+    appInsights: path.join(REVIEWS_DIR, 'app-insights.json'),
+    deviceInsights: path.join(REVIEWS_DIR, 'device-insights.json'),
+    subscriptionInsights: path.join(REVIEWS_DIR, 'subsctiption-insights.json'),
+  };
+
+  const appInsights = ensureMaps(safeReadJson(paths.appInsights, null));
+  const deviceInsights = ensureMaps(safeReadJson(paths.deviceInsights, null));
+  const subInsights = ensureMaps(safeReadJson(paths.subscriptionInsights, null));
+
+  const docs = listPostDocs();
+
+  let processed = 0;
+  let updated = 0;
+
+  for (const doc of docs) {
+    const slug = doc.slug;
+    if (!isReviewSlug(slug)) continue;
+
+    processed += 1;
+
+    // 2안 입력 소스:
+    // - post.body
+    // - post.aio.sourcesNote
+    // - seedMeta.notes
+    const textPool = [];
+    if (typeof doc.body === 'string') textPool.push(...doc.body.split(/[.!?]\s+/));
+    if (typeof doc.seedMeta?.notes === 'string') textPool.push(doc.seedMeta.notes);
+    if (typeof doc.aio?.sourcesNote === 'string') textPool.push(doc.aio.sourcesNote);
+
+    const insights = collectInsights(textPool);
     if (!insights.positive.length && !insights.negative.length) continue;
 
-    if (!DRY_RUN) {
-      // insights는 review-fetch-official에서 건드리지 않으므로
-      // bucket별 *-insights.json 에 직접 쓰지 않고
-      // review-ratings-next.json에 병합 대상 필드로만 남김
-      const bucket =
-        slug.startsWith('app-') ? 'app' :
-        slug.startsWith('device-') ? 'device' : 'subscription';
+    let target;
+    if (slug.startsWith('app-')) target = appInsights.bySlug;
+    else if (slug.startsWith('device-')) target = deviceInsights.bySlug;
+    else target = subInsights.bySlug;
 
-      const nextPath = path.join(REVIEWS_DIR, `${bucket}-ratings-next.json`);
-      const next = safeReadJson(nextPath, { updatedAt: nowYmd(), bySlug: {} });
-
-      const entry = next.bySlug[slug] || {};
-      entry.insights = {
-        positive: insights.positive,
-        negative: insights.negative,
-      };
-      entry.lastChecked = nowYmd();
-
-      next.bySlug[slug] = entry;
-      next.updatedAt = nowYmd();
-
-      writeJson(nextPath, next);
-    }
-
-    processed++;
+    target[slug] = { insights };
+    updated += 1;
   }
 
-  log(`done processed=${processed}`);
-  if (DRY_RUN) log('DRY_RUN: no file writes');
+  const ymd = nowYmdKst();
+  appInsights.updatedAt = ymd;
+  deviceInsights.updatedAt = ymd;
+  subInsights.updatedAt = ymd;
+
+  if (isLive) {
+    writeJson(paths.appInsights, appInsights);
+    writeJson(paths.deviceInsights, deviceInsights);
+    writeJson(paths.subscriptionInsights, subInsights);
+  }
+
+  log('────────────────────────────────────────────');
+  log(`[review-insights-2] done: processed=${processed}, updated=${updated}`);
+  if (!isLive) log('[review-insights-2] DRY_RUN: no file writes.');
+  log('────────────────────────────────────────────');
 }
 
-main().catch(e => {
-  console.error(e);
-  process.exit(1);
-});
+main();
