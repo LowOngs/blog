@@ -1,8 +1,14 @@
+// System_files/content/posts/subscription-20251207-001.json
 {
   "slug": "subscription-20251207-001",
   "title": "When productivity app subscriptions are really worth paying for in 2025",
   "description": "A clear, numbers-based look at when it makes sense to pay for productivity app subscriptions and when free plans are enough.",
   "label": "subscription-services",
+  "reviewTarget": {
+    "provider": "trustpilot",
+    "storeId": "CHANGE_ME_TRUSTPILOT_SLUG",
+    "url": "https://www.trustpilot.com/review/CHANGE_ME_TRUSTPILOT_SLUG"
+  },
   "tldr": [
     "Many people pay for subscriptions that don’t actually change how they work.",
     "Paid plans make sense when they unlock collaboration, automation, or admin-level control.",
