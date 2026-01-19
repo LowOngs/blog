@@ -225,7 +225,7 @@ function main() {
   const deviceInsights = readJson(path.join(REVIEWS_DIR, 'device-insights.json'), null);
 
   // ⚠️ 철자 유지
-  const subscriptionInsights = readJson(path.join(REVIEWS_DIR, 'subsctiption-insights.json'), null);
+  const subscriptionInsights = readJson(path.join(REVIEWS_DIR, 'subscription-insights.json'), null);
 
   const sources = readJson(path.join(REVIEWS_DIR, 'review-sources.json'), null);
 
