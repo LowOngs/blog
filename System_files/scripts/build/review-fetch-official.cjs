@@ -1,6 +1,7 @@
-// System_files/scripts/build/review-fetch-official.cjs
 #!/usr/bin/env node
 'use strict';
+
+// System_files/scripts/build/review-fetch-official.cjs
 // review-fetch-official: 공식 API(1안)로 평점/투표/히스토그램을 수집해 *-ratings-next.json 업서트 (+ 스케줄링/실패정책/소스검증 내장)
 
 require('./lib/env.cjs'); // ✅ 공통 규칙: env 로더 최우선
