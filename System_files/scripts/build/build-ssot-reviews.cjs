@@ -1,19 +1,11 @@
 #!/usr/bin/env node
 'use strict';
 
-/**
- * build-ssot-reviews.cjs
- * - 입력:
- *   content/reviews/review-ratings.json (baseline, bySlug)
- *   content/reviews/review-ratings-next.json (next, bySlug)
- * - 출력:
- *   content/ssot/reviews.bySlug.json (SSOT)
- *
- * 원칙:
- * - baseline 초기화 금지
- * - next가 없으면 baseline→SSOT로만 복사(갱신시간만 업데이트)
- * - 변경 판정은 "핵심 필드" 기준으로만(가볍고 안전)
- */
+// System_files/scripts/build/build-ssot-reviews.cjs
+// 역할: review-ratings-next.json(bySlug)을 baseline(review-ratings.json)에 안전 업서트하고,
+//      읽기 전용 미러(content/ssot/reviews.bySlug.json)도 함께 갱신한다.
+
+require('./lib/env.cjs'); // ✅ env 로더 최우선
 
 const fs = require('fs');
 const path = require('path');
@@ -26,12 +18,18 @@ const BASELINE_PATH = path.join(REV_DIR, 'review-ratings.json');
 const NEXT_PATH = path.join(REV_DIR, 'review-ratings-next.json');
 const OUT_PATH = path.join(SSOT_DIR, 'reviews.bySlug.json');
 
+function parseDryRun(v) {
+  const s = String(v ?? '').trim().toLowerCase();
+  if (s === 'false' || s === '0') return false;
+  return true; // 기본 안전
+}
+
+const DRY_RUN = parseDryRun(process.env.DRY_RUN);
+
 function nowIsoKst() {
-  const d = new Date();
-  const kst = new Date(d.getTime() + 9 * 60 * 60 * 1000);
-  const iso = kst.toISOString().replace('Z', '+09:00');
-  // toISOString이 UTC 기준이라 +09 보정했으니, 표기만 +09:00으로
-  return iso;
+  const d = new Date(Date.now() + 9 * 60 * 60 * 1000);
+  // 표기용(+09:00) — 엄밀한 TZ 처리까진 안 하지만, 프로젝트 표기 규칙 유지
+  return d.toISOString().replace('Z', '+09:00');
 }
 
 function ensureDir(dir) {
@@ -54,9 +52,7 @@ function safeReadJSON(filePath, defaultValue) {
       return { bySlug };
     }
 
-    if (!data.bySlug || typeof data.bySlug !== 'object') {
-      return { bySlug: {} };
-    }
+    if (!data.bySlug || typeof data.bySlug !== 'object') return { bySlug: {} };
     return data;
   } catch (e) {
     console.error(`[ssot] JSON 파싱 실패: ${filePath}`);
@@ -67,25 +63,30 @@ function safeReadJSON(filePath, defaultValue) {
 }
 
 function writePretty(filePath, obj) {
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.writeFileSync(filePath, JSON.stringify(obj, null, 2) + '\n', 'utf8');
+}
+
+function clone(obj) {
+  return obj ? JSON.parse(JSON.stringify(obj)) : obj;
 }
 
 /**
  * 변경 판정(가볍게):
- * - ratingCurrent / votesCurrent / status / histogram / insights 중 하나라도 달라지면 변경
+ * - ratingCurrent / votesCurrent / status / store / lastChecked / histogram / insights 중 하나라도 달라지면 변경
  */
 function isChanged(prev, curr) {
   if (!prev) return true;
-  const keys = ['ratingCurrent', 'votesCurrent', 'status', 'store', 'lastChecked'];
+
+  const keys = ['ratingCurrent', 'votesCurrent', 'status', 'store', 'lastChecked', 'storeId', 'source'];
   for (const k of keys) {
-    if (prev[k] !== curr[k]) return true;
+    if ((prev[k] ?? null) !== (curr[k] ?? null)) return true;
   }
 
-  // histogram 비교
+  // histogram 비교(1~5)
   const a = prev.histogram && typeof prev.histogram === 'object' ? prev.histogram : {};
   const b = curr.histogram && typeof curr.histogram === 'object' ? curr.histogram : {};
-  const stars = ['5', '4', '3', '2', '1'];
-  for (const s of stars) {
+  for (const s of ['1', '2', '3', '4', '5']) {
     if (Number(a[s] ?? 0) !== Number(b[s] ?? 0)) return true;
   }
 
@@ -107,6 +108,8 @@ function main() {
   console.log('[ssot] baseline  =', BASELINE_PATH);
   console.log('[ssot] next      =', NEXT_PATH);
   console.log('[ssot] out       =', OUT_PATH);
+  console.log('[ssot] DRY_RUN   =', DRY_RUN ? 'true(dry-run)' : 'false(live)');
+  console.log('────────────────────────────────────────────');
 
   ensureDir(SSOT_DIR);
 
@@ -116,11 +119,8 @@ function main() {
   const baseBySlug = baseline.bySlug || {};
   const nextBySlug = next.bySlug || {};
 
-  const out = {
-    version: 1,
-    updatedAt: nowIsoKst(),
-    bySlug: { ...baseBySlug }
-  };
+  // baseline 초기화 금지: baseline을 복사해서 “업서트”만 한다.
+  const mergedBaseline = { bySlug: clone(baseBySlug) || {} };
 
   const nextSlugs = Object.keys(nextBySlug);
   let newCount = 0;
@@ -131,22 +131,41 @@ function main() {
     const curr = nextBySlug[slug];
     if (!curr || typeof curr !== 'object') continue;
 
-    const prev = out.bySlug[slug];
+    const prev = mergedBaseline.bySlug[slug];
     if (!prev) newCount++;
 
     if (isChanged(prev, curr)) {
-      out.bySlug[slug] = curr;
+      mergedBaseline.bySlug[slug] = curr;
       if (prev) changedCount++;
     } else {
       sameCount++;
     }
   }
 
-  writePretty(OUT_PATH, out);
+  // 읽기전용 SSOT 미러(항상 갱신)
+  const mirror = {
+    version: 1,
+    updatedAt: nowIsoKst(),
+    bySlug: mergedBaseline.bySlug,
+  };
 
-  console.log('────────────────────────────────────────────');
+  // DRY_RUN이면 파일 WRITE 금지
+  if (DRY_RUN) {
+    console.log(`[ssot] DRY_RUN preview: next=${nextSlugs.length} | 신규=${newCount} | 변경=${changedCount} | 동일=${sameCount}`);
+    console.log('[ssot] DRY_RUN: no file writes.');
+    return;
+  }
+
+  // ✅ LIVE: baseline(review-ratings.json) 갱신 (업서트)
+  // - baseline이 “주입기/리졸버/검증기”의 실제 SSOT이므로 반드시 여기가 갱신되어야 함.
+  writePretty(BASELINE_PATH, { bySlug: mergedBaseline.bySlug });
+
+  // ✅ LIVE: 미러도 함께 저장(디버깅/관측용)
+  writePretty(OUT_PATH, mirror);
+
   console.log(`[ssot] 완료: next=${nextSlugs.length} | 신규=${newCount} | 변경=${changedCount} | 동일=${sameCount}`);
-  console.log('[ssot] SSOT 저장 완료:', OUT_PATH);
+  console.log('[ssot] baseline 저장 완료:', BASELINE_PATH);
+  console.log('[ssot] SSOT 미러 저장 완료:', OUT_PATH);
 }
 
 main();
