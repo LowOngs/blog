@@ -2,7 +2,7 @@
 'use strict';
 
 // System_files/scripts/build/review-fetch-official.cjs
-// review-fetch-official: 공식 API(1안)로 평점/투표/히스토그램을 수집해 *-ratings-next.json 업서트 (+ 스케줄링/실패정책/소스검증 내장)
+// review-fetch-official: 공식(준공식) 페이지에서 rating/votes 최소치 추출 → *-ratings-next.json 업서트 (+ 스케줄링/실패정책/소스검증/ledger lastError)
 
 require('./lib/env.cjs'); // ✅ 공통 규칙: env 로더 최우선
 
@@ -43,7 +43,7 @@ const FAIL_BACKOFF_DAYS_1 = Number(process.env.REVIEW_FAIL_BACKOFF_DAYS_1 ?? 1);
 const FAIL_BACKOFF_DAYS_2 = Number(process.env.REVIEW_FAIL_BACKOFF_DAYS_2 ?? 3);
 const FAIL_BACKOFF_DAYS_3 = Number(process.env.REVIEW_FAIL_BACKOFF_DAYS_3 ?? 7);
 
-// ledger 파일(스케줄링 SSOT: “시도/실패/다음 허용일”만 기록)
+// ledger 파일(스케줄링 SSOT: “시도/실패/다음 허용일(+사유)” 기록)
 const LEDGER_PATH = path.join(LOGS_DIR, 'review-fetch-ledger.json');
 
 function log(...a) { console.log('[review-fetch]', ...a); }
@@ -64,7 +64,6 @@ function nowYmdKst() {
   return d.toISOString().slice(0, 10);
 }
 function ymdToEpochMs(ymd) {
-  // ymd: YYYY-MM-DD
   const s = String(ymd || '').trim();
   if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return null;
   const ms = Date.parse(`${s}T00:00:00Z`);
@@ -88,7 +87,7 @@ function addDaysIso(baseIso, days) {
 // What: JSON 안전 입출력
 // Why: 파싱 실패로 전체 중단 방지 + DRY_RUN 안전
 // I/O: R/W(json files)
-// Invariants: DRY_RUN이면 절대 WRITE하지 않음(여기서는 호출부에서 통제)
+// Invariants: DRY_RUN이면 절대 WRITE하지 않음(호출부에서 통제)
 // ─────────────────────────────────────────────
 function safeReadJson(file, fallback) {
   try {
@@ -115,7 +114,7 @@ function ensureMaps(obj) {
 // What: 리뷰 슬러그/버킷 판정
 // Why: 오염 방지 + bucket별 파일에 정확히 upsert
 // I/O: R(slug), W(없음)
-// Invariants: app/device/subscription 3버킷만 official fetch 대상
+// Invariants: app/device/subscription 3버킷만 fetch 대상
 // ─────────────────────────────────────────────
 function isReviewSlug(slug) {
   return typeof slug === 'string' && (
@@ -213,11 +212,7 @@ function computeDiff(current, previous, decimals = 1) {
 // Invariants: https만 허용, provider별 공식 도메인만 허용(기본)
 // ─────────────────────────────────────────────
 function safeUrl(u) {
-  try {
-    return new URL(String(u));
-  } catch {
-    return null;
-  }
+  try { return new URL(String(u)); } catch { return null; }
 }
 
 function validateSourceUrl(url, provider) {
@@ -227,14 +222,12 @@ function validateSourceUrl(url, provider) {
 
   const host = U.hostname.toLowerCase();
 
-  // provider별 허용 도메인(공식만)
   if (provider === 'googleplay' || provider === 'google-play' || provider === 'playstore') {
     const ok = (host === 'play.google.com');
     return ok ? { ok: true } : { ok: false, reason: 'host-not-allowed' };
   }
 
   if (provider === 'amazon' || provider === 'amazonpaapi' || provider === 'paapi') {
-    // 아마존은 국가 도메인이 다양하므로 *.amazon.* + amzn.to(공식 단축)까지만
     const ok =
       host === 'amzn.to' ||
       host.startsWith('www.amazon.') ||
@@ -247,7 +240,6 @@ function validateSourceUrl(url, provider) {
     return ok ? { ok: true } : { ok: false, reason: 'host-not-allowed' };
   }
 
-  // 알 수 없는 provider는 차단(오염 방지)
   return { ok: false, reason: 'provider-unknown' };
 }
 
@@ -265,7 +257,6 @@ function normalizeSourceLabel(provider) {
 // ─────────────────────────────────────────────
 function buildProviderUrl(provider, storeId) {
   if (!storeId) return null;
-
   if (provider === 'googleplay' || provider === 'google-play' || provider === 'playstore') {
     return `https://play.google.com/store/apps/details?id=${encodeURIComponent(storeId)}`;
   }
@@ -292,9 +283,6 @@ function ensureLedger(obj) {
 }
 
 function makeLedgerKey(provider, storeId, slug, reviewId) {
-  // What: ledger key(중복 방지 키)
-  // Why: provider/storeId가 핵심, 보조로 reviewId/slug를 덧붙여 안정성↑
-  // Invariants: provider/storeId는 필수(없으면 null)
   if (!provider || !storeId) return null;
   const rid = reviewId ? String(reviewId) : '';
   const s = slug ? String(slug) : '';
@@ -308,9 +296,6 @@ function backoffDaysForFailCount(n) {
 }
 
 function ledgerCanRun(entry) {
-  // What: ledger 기반으로 “지금 시도 가능?” 판정
-  // Why: 연속 실패 시 불필요 호출/차단 리스크 감소
-  // Invariants: nextEligibleAt이 미래면 스킵
   if (!entry || typeof entry !== 'object') return true;
   const nextAt = entry.nextEligibleAt ? String(entry.nextEligibleAt) : null;
   if (!nextAt) return true;
@@ -319,14 +304,15 @@ function ledgerCanRun(entry) {
   return Date.now() >= ms;
 }
 
-function ledgerMarkAttempt(ledger, key, ok) {
+function ledgerMarkAttempt(ledger, key, ok, reason) {
   const e = (ledger.byKey[key] && typeof ledger.byKey[key] === 'object') ? ledger.byKey[key] : {};
   e.lastTriedAt = nowIso();
 
   if (ok) {
     e.lastOkAt = e.lastTriedAt;
     e.failCount = 0;
-    e.nextEligibleAt = null; // 성공 시 즉시 90일 룰에만 의존
+    e.nextEligibleAt = null;
+    e.lastError = null;
   } else {
     const prev = Number(e.failCount || 0);
     const nextFail = prev + 1;
@@ -334,6 +320,8 @@ function ledgerMarkAttempt(ledger, key, ok) {
 
     const waitDays = backoffDaysForFailCount(nextFail);
     e.nextEligibleAt = addDaysIso(e.lastTriedAt, waitDays);
+
+    e.lastError = reason ? String(reason).slice(0, 300) : 'fetch-null';
   }
 
   ledger.byKey[key] = e;
@@ -362,28 +350,130 @@ function looksEmptyRating(entry) {
 }
 
 // ─────────────────────────────────────────────
-// What: Provider 어댑터(공식 API) 인터페이스
-// Why: provider 변경(구조/API 변경) 리스크를 격리
-// I/O: R(process.env keys), W(없음)
-// Invariants: DRY_RUN이면 절대 호출하지 않음(반드시 null 반환)
+// What: HTML fetch + JSON-LD(AggregateRating) 추출
+// Why: 공식 API가 없거나 승인 전이라도 “최소치(rating/votes)”는 안정적으로 확보
+// I/O: R(network html), W(없음)
+// Invariants: live에서만 호출, 실패 시 null + reason 제공
+// ─────────────────────────────────────────────
+async function fetchHtml(url) {
+  const res = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AOIAReviewFetcher/1.0',
+      'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      'accept-language': 'en-US,en;q=0.9',
+    }
+  });
+  if (!res.ok) throw new Error(`http-${res.status}`);
+  const ct = String(res.headers.get('content-type') || '');
+  const text = await res.text();
+  return { text, contentType: ct, status: res.status };
+}
+
+function extractJsonLdBlocks(html) {
+  const blocks = [];
+  const re = /<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
+  let m;
+  while ((m = re.exec(html)) !== null) {
+    const raw = (m[1] || '').trim();
+    if (raw) blocks.push(raw);
+  }
+  return blocks;
+}
+
+function findAggregateRating(obj) {
+  if (!obj) return null;
+  if (Array.isArray(obj)) {
+    for (const it of obj) {
+      const r = findAggregateRating(it);
+      if (r) return r;
+    }
+    return null;
+  }
+  if (typeof obj !== 'object') return null;
+
+  // direct
+  if (obj.aggregateRating && typeof obj.aggregateRating === 'object') return obj.aggregateRating;
+
+  // graph
+  if (obj['@graph']) return findAggregateRating(obj['@graph']);
+
+  // nested scan (shallow)
+  for (const k of Object.keys(obj)) {
+    const v = obj[k];
+    if (v && typeof v === 'object') {
+      const r = findAggregateRating(v);
+      if (r) return r;
+    }
+  }
+  return null;
+}
+
+function parseAggregateRatingFromLdJson(html) {
+  const blocks = extractJsonLdBlocks(html);
+  for (const raw of blocks) {
+    try {
+      const j = JSON.parse(raw);
+      const ar = findAggregateRating(j);
+      if (!ar) continue;
+
+      const ratingValue = Number(ar.ratingValue ?? ar.rating ?? ar['ratingValue']);
+      const ratingCount = Number(ar.ratingCount ?? ar.reviewCount ?? ar['ratingCount'] ?? ar['reviewCount']);
+
+      if (Number.isFinite(ratingValue) && ratingValue > 0 && Number.isFinite(ratingCount) && ratingCount > 0) {
+        return { ratingValue, ratingCount };
+      }
+    } catch {
+      // ignore single block parse error
+    }
+  }
+  return null;
+}
+
+// ─────────────────────────────────────────────
+// What: Provider 어댑터(준공식: HTML/JSON-LD 기반 최소치)
+// Why: 오늘 당장 fetchedOk/upsert를 실현(승인 전 단계)
+// I/O: R(network), W(없음)
+// Invariants: histogram은 없으면 0으로(오염 방지), amazon은 PA-API 전까지 스킵
 // ─────────────────────────────────────────────
 async function fetchGooglePlay({ storeId }) {
   if (!isLive) return null;
-  // TODO(옹스님): Google Play Developer API/공식 제공 경로 확정 후 구현
-  // expected: { ratingCurrent:number, votesCurrent:number, histogram?:{'1'..'5':number} }
-  return null;
+  const url = buildProviderUrl('googleplay', storeId);
+  if (!url) return null;
+
+  const { text } = await fetchHtml(url);
+  const ar = parseAggregateRatingFromLdJson(text);
+  if (!ar) return null;
+
+  return {
+    ratingCurrent: ar.ratingValue,
+    votesCurrent: ar.ratingCount,
+    histogram: null, // GP에서 안정적으로 얻기 어려워서 0 처리
+  };
 }
 
 async function fetchAmazon({ storeId }) {
   if (!isLive) return null;
-  // TODO(옹스님): Amazon PA-API(파트너 승인 후)로 별점/리뷰수 얻는 구현
+  // PA-API 승인/키 없으면 여기서 억지로 크롤링하지 않습니다.
+  // (향후 REVIEW_FETCH_AMAZON_MODE=paapi 같은 스위치로 분기 가능)
+  void storeId;
   return null;
 }
 
 async function fetchTrustpilot({ storeId }) {
   if (!isLive) return null;
-  // TODO(옹스님): Trustpilot 공식 API 키/엔드포인트 확정 후 구현
-  return null;
+  const url = buildProviderUrl('trustpilot', storeId);
+  if (!url) return null;
+
+  const { text } = await fetchHtml(url);
+  const ar = parseAggregateRatingFromLdJson(text);
+  if (!ar) return null;
+
+  return {
+    ratingCurrent: ar.ratingValue,
+    votesCurrent: ar.ratingCount,
+    histogram: null,
+  };
 }
 
 async function fetchCommon(provider, key) {
@@ -436,7 +526,6 @@ function upsertNextEntry(nextMap, baselineMap, slug, provider, storeId, fetched)
 
   entry.histogram = normalizeHistogram(fetched.histogram);
 
-  // insights는 2안에서 채우는 영역(여기선 건드리지 않음)
   if (!Array.isArray(entry.insights)) entry.insights = [];
 
   nextMap[slug] = entry;
@@ -484,7 +573,6 @@ function scoreCandidate(ssotEntry) {
   if (needsRefreshBy90Days(ssotEntry)) score += 100;
   if (looksEmptyRating(ssotEntry)) score += 50;
 
-  // status가 unknown/error면 우선순위 조금 상승
   const st = (ssotEntry && ssotEntry.status) ? String(ssotEntry.status) : '';
   if (st && st !== 'ok') score += 10;
 
@@ -516,11 +604,9 @@ async function main() {
 
     reviewSources: path.join(REVIEWS_DIR, 'review-sources.json'),
 
-    // SSOT(90일 룰 판정용)
     reviewSsot: path.join(REVIEWS_DIR, 'review-ratings.json'),
   };
 
-  // bucket baseline/next
   const appBase = ensureMaps(safeReadJson(paths.appRatings, null));
   const appNext = ensureMaps(safeReadJson(paths.appRatingsNext, null));
 
@@ -532,28 +618,18 @@ async function main() {
 
   const sources = ensureMaps(safeReadJson(paths.reviewSources, null));
 
-  // scheduling SSOT(merge된 통합 ssot)
   const ssotAll = safeReadJson(paths.reviewSsot, { bySlug: {}, byReviewId: {} }) || { bySlug: {}, byReviewId: {} };
   const ssotBySlug = (ssotAll && ssotAll.bySlug && typeof ssotAll.bySlug === 'object') ? ssotAll.bySlug : {};
   const ssotByReviewId = (ssotAll && ssotAll.byReviewId && typeof ssotAll.byReviewId === 'object') ? ssotAll.byReviewId : {};
 
-  // ledger
   const ledger = ensureLedger(safeReadJson(LEDGER_PATH, null));
-
   const docs = listPostDocs();
 
-  // ─────────────────────────────────────────────
-  // What: 후보 추출 + SSOT/ledger 기반 “오늘 할당” 결정
-  // Why: 90일 룰 분산 + 실패 백오프 + MAX_CALLS_PER_RUN
-  // I/O: R(posts/ssot/ledger), W(없음)
-  // Invariants: provider/storeId 없는 건 외부 호출 금지
-  // ─────────────────────────────────────────────
   const candidates = [];
   for (const doc of docs) {
     const k = pickReviewKey(doc);
     if (!k.slug) continue;
 
-    // 리뷰 파일만
     if (ONLY_REVIEW_SLUGS && !isReviewSlug(k.slug)) continue;
     if (!isReviewSlug(k.slug)) continue;
 
@@ -563,7 +639,6 @@ async function main() {
     if (!provider || !storeId) continue;
     if (!PROVIDERS_ALLOW.includes(provider)) continue;
 
-    // 1순위: reviewId 매칭된 ssot 엔트리, 2순위: slug
     const ssotEntry =
       (k.reviewId && ssotByReviewId[k.reviewId]) ||
       ssotBySlug[k.slug] ||
@@ -587,7 +662,6 @@ async function main() {
     });
   }
 
-  // 정렬: score desc → (90일 초과/빈값 우선이 score에 반영됨) → slug asc
   candidates.sort((a, b) => {
     if (b.score !== a.score) return b.score - a.score;
     return String(a.slug).localeCompare(String(b.slug));
@@ -598,15 +672,8 @@ async function main() {
   let fetchedOk = 0;
   let upserted = 0;
   let sourcesAdded = 0;
-
   let skippedLimit = 0;
 
-  // ─────────────────────────────────────────────
-  // What: MAX_CALLS_PER_RUN 만큼만 실행(일일 배치)
-  // Why: 비용/차단/속도 리스크 통제
-  // I/O: R(posts), W(next/sources/ledger) (live에서만)
-  // Invariants: DRY_RUN이면 네트워크/WRITE 0%
-  // ─────────────────────────────────────────────
   for (const k of candidates) {
     scanned += 1;
 
@@ -617,26 +684,28 @@ async function main() {
 
     planned += 1;
 
-    // DRY_RUN이면 계획만 출력(안전)
     if (!isLive) {
       log(`DRY_RUN plan: slug=${k.slug} provider=${k.provider} storeId=${k.storeId} score=${k.score}`);
       continue;
     }
 
     let fetched = null;
+    let failReason = null;
+
     try {
       fetched = await fetchCommon(k.provider, { storeId: k.storeId, slug: k.slug, reviewId: k.reviewId });
+      if (!fetched) failReason = 'no-parsable-data';
     } catch (e) {
-      warn(`fetch failed: slug=${k.slug} provider=${k.provider} -> ${e.message || e}`);
+      failReason = e && (e.message || e.stack) ? (e.message || e.stack) : String(e);
+      warn(`fetch failed: slug=${k.slug} provider=${k.provider} -> ${failReason}`);
       fetched = null;
     }
 
     if (!fetched) {
-      ledgerMarkAttempt(ledger, k.ledgerKey, false);
+      ledgerMarkAttempt(ledger, k.ledgerKey, false, failReason);
       continue;
     }
 
-    // 성공
     fetchedOk += 1;
     ledgerMarkAttempt(ledger, k.ledgerKey, true);
 
@@ -653,18 +722,15 @@ async function main() {
       if (r.changed) upserted += 1;
     }
 
-    // sources 업서트(공식 페이지 URL 기록)
     const url = k.url || buildProviderUrl(k.provider, k.storeId);
     const s = upsertSources(sources.bySlug, k.slug, k.provider, url);
     if (s.changed) sourcesAdded += 1;
   }
 
-  // updatedAt 갱신
   const ymd = nowYmdKst();
   for (const obj of [appNext, deviceNext, subNext, sources]) obj.updatedAt = ymd;
   ledger.updatedAt = ymd;
 
-  // WRITE(라이브에서만)
   if (isLive) {
     writeJson(paths.appRatingsNext, appNext);
     writeJson(paths.deviceRatingsNext, deviceNext);
