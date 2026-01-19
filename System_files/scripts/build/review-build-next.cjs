@@ -265,4 +265,3 @@ function main() {
 }
 
 main();
-```0
