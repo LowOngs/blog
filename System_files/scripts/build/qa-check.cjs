@@ -3,14 +3,14 @@
  * dist/posts/*.html 대상으로 AIO/SEO 이미지·스키마 QA 체크
  * - og:image: 실제 CDN URL + HTTP 200 여부 검사
  * - Article / BreadcrumbList 스키마 존재 여부 확인
- * - ✅ 리뷰 라벨인데 SSOT 누락이면 CRIT (자동발행 스킵 근거)
- * - ✅ (추가) logs/qa-report.json 리포트 저장(7단계에서 읽기 위함)
+ * - ✅ 리뷰 라벨인데 "실제 placeholder(EMPTY)"가 남아있으면 CRIT
+ * - ✅ logs/qa-report.json 리포트 저장(7단계에서 읽기 위함)
  *
  * 판정 규칙(요약)
  * - PASS: 문제 없음
  * - WARN: 경고(발행은 가능)
  * - FAIL: 오류(빌드 실패급)
- * - CRIT: 자동발행에서는 제외해야 하는 치명 이슈(특히 리뷰 SSOT 누락)
+ * - CRIT: 자동발행에서는 제외해야 하는 치명 이슈(리뷰 SSOT 누락 등)
  */
 
 const fs = require('fs');
@@ -69,17 +69,38 @@ function isReviewFileName(fileName) {
   );
 }
 
+/**
+ * ✅ 강화된 "리뷰 SSOT 누락" 판정
+ * What: 리뷰 슬러그인데 review 섹션이 placeholder(EMPTY) 상태로 남아 있는지 검사
+ * Why : 단순 텍스트(missing-ssot) 검색은 주석/문서에 의해 오탐 가능성이 큼
+ * I/O : READ html string
+ * Invariants:
+ *  - CRIT는 "진짜 결함"만(placeholder 잔존) 잡는다
+ */
 function detectMissingReviewSsot(html) {
   const h = String(html || '');
   if (!h) return false;
 
-  const patterns = [
-    /reviewStatus\s*=\s*["']missing-ssot["']/i,
-    /data-review-status\s*=\s*["']missing-ssot["']/i,
-    /missing-ssot/i,
-    /데이터\s*수집\/?검증\s*후\s*업데이트\s*됩니다/i,
-  ];
-  return patterns.some((re) => re.test(h));
+  // 1) 구조화된 속성(있으면 가장 신뢰)
+  if (/data-review-status\s*=\s*["']missing-ssot["']/i.test(h)) return true;
+
+  // 2) placeholder class가 남아 있으면 SSOT 주입 실패로 판정
+  // - B안 템플릿에서 기본 placeholder는 review-block--empty를 포함
+  const hasEmptyClass =
+    /<section[^>]+id=["']review-rating-block["'][^>]*class=["'][^"']*review-block--empty[^"']*["'][^>]*>/i.test(h) ||
+    /<section[^>]+id=["']review-insights-block["'][^>]*class=["'][^"']*review-block--empty[^"']*["'][^>]*>/i.test(h);
+
+  if (hasEmptyClass) return true;
+
+  // 3) placeholder 코멘트가 남아 있어도 SSOT 미주입으로 판정
+  // (주석 문구가 약간 바뀌어도 잡히도록 넓게)
+  const hasPlaceholderComment =
+    /placeholder:\s*replaced\s*by\s*(review-meta-block\.cjs|inject-reviews-from-ssot\.cjs)\s*when\s*ssot\s*exists/i.test(h);
+
+  if (hasPlaceholderComment) return true;
+
+  // ❌ 기존의 /missing-ssot/i 같은 광범위 패턴은 오탐 위험으로 제거
+  return false;
 }
 
 async function headCheck(url) {
@@ -122,7 +143,7 @@ async function checkOne(fileName) {
     const missing = detectMissingReviewSsot(html);
     if (missing) {
       status = rankStatus(status, 'CRIT');
-      messages.push('[CRIT] 리뷰 라벨인데 SSOT 누락(missing-ssot) → 자동발행 제외 대상');
+      messages.push('[CRIT] 리뷰 라벨인데 review 섹션이 placeholder(EMPTY) 상태 → SSOT 주입 실패');
     }
   }
 
