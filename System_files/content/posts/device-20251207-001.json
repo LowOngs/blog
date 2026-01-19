@@ -3,6 +3,11 @@
   "title": "Best budget laptops under $800 for work, study, and side projects",
   "description": "A grounded guide to picking a budget laptop under $800 that can handle studying, remote work, and light side projects without frustration.",
   "label": "device-reviews",
+  "reviewTarget": {
+    "provider": "amazon",
+    "storeId": "CHANGE_ME_ASIN",
+    "url": "https://www.amazon.com/dp/CHANGE_ME_ASIN"
+  },
   "tldr": [
     "Under $800, you must focus on CPU class, RAM, and SSD speed before anything else.",
     "A balanced 14–15 inch laptop is usually best for mixed work, study, and side projects.",
