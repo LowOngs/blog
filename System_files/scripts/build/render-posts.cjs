@@ -3,7 +3,7 @@
 
 require('./lib/env.cjs'); // ✅ .env 로드(필수)
 
-/** render-posts: content/posts → dist/posts 렌더 (pageId 직접 발급 금지, 리뷰는 resolver로 연결) */
+/** render-posts: content/posts → dist/posts 렌더 (pageId 직접 발급 금지, 리뷰는 후처리 주입기로 치환) */
 
 const fs = require('fs');
 const path = require('path');
@@ -20,7 +20,9 @@ const BODY_IMAGE_MANIFEST_PATH = path.join(MANIFESTS_DIR, 'images-body-manifest.
 const { buildMeta } = require('./lib/meta.cjs');
 const { isValidPageId } = require('./lib/page-ids.cjs');
 const blocks = require('./lib/blocks.cjs');
-const { resolveReviewData } = require('./review-resolver.cjs');
+// NOTE: 리뷰는 render 단계에서 HTML을 “추가 생성/주입”하지 않는다.
+//       템플릿에 존재하는 placeholder 섹션을 inject-reviews-from-ssot.cjs 등이 replaceSection으로 치환한다.
+// const { resolveReviewData } = require('./review-resolver.cjs');
 
 /* ───────────────────── file/json ───────────────────── */
 
@@ -340,9 +342,12 @@ function renderOne(template, postJson, jsonPath, bodyImgCtx, idsCtx) {
     }
   }
 
-  const reviewData = resolveReviewData({ ROOT, postJson });
-  const reviewRatingHtml   = reviewData ? blocks.renderReviewRatingBlock(reviewData) : '';
-  const reviewInsightsHtml = reviewData ? blocks.renderReviewInsightsBlock(reviewData) : '';
+  // REVIEW POLICY (IMPORTANT)
+  // What: render 단계에서 review 섹션을 “추가 생성/주입”하지 않는다.
+  // Why: templates/post.html에 동일 id의 placeholder 섹션이 이미 존재하므로, injectAfterSlot로 추가하면 id가 2번 등장(중복)한다.
+  // I/O: READ templates/post.html, WRITE dist/posts/*.html (중복 id 생성 금지)
+  // Invariants: id="review-rating-block", id="review-insights-block"는 dist에 1개만 존재해야 한다.
+  // → 실제 값 치환은 inject-reviews-from-ssot.cjs / review-meta-block.cjs가 replaceSection으로 수행.
 
   let html = template;
 
@@ -364,8 +369,8 @@ function renderOne(template, postJson, jsonPath, bodyImgCtx, idsCtx) {
 
   html = injectAfterSlot(html, '<!--SLOT:FAQ_WRAPPER-->', faqHtml);
   html = injectAfterSlot(html, '<!--SLOT:SOURCES_WRAPPER-->', sourcesHtml);
-  html = injectAfterSlot(html, '<!--SLOT:REVIEW_RATING_WRAPPER-->', reviewRatingHtml);
-  html = injectAfterSlot(html, '<!--SLOT:REVIEW_INSIGHTS_WRAPPER-->', reviewInsightsHtml);
+
+  // DO NOT inject review blocks here (prevents duplicate <section id="review-*-block">)
 
   if (bodyHtml.includes('class="post-body-image"')) html = injectBodyImageCssOnce(html);
 
