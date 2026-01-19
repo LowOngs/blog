@@ -15,8 +15,10 @@
  * - 90일 이상: STALE
  * - 날짜가 없거나 파싱 실패: MISSING_DATE (WARN 취급)
  *
- * ⚠️ 주의: 이 파일은 "경고/표시"까지 담당합니다.
- * 실제 업데이트(수집/크롤/갱신)는 후속 스크립트로 분리 권장.
+ * ✅ 최소패치(중요)
+ * - 템플릿(B안)에서 모든 글에 리뷰 섹션이 존재하므로,
+ *   리뷰 글이 아닌 경우 ratingMissing이 "가짜 결함"으로 누적됨.
+ * - 따라서 slug prefix(app-/device-/subscription-)인 경우에만 주입을 시도한다.
  */
 
 const fs = require('fs');
@@ -28,6 +30,17 @@ const RATINGS_PATH = path.join(ROOT, 'content', 'reviews', 'review-ratings.json'
 
 function log(...a) { console.log('[inject-reviews]', ...a); }
 function warn(...a) { console.warn('[inject-reviews][WARN]', ...a); }
+
+// ─────────────────────────────────────────────
+// What/Why/I-O/Invariants
+// What: dist/posts HTML의 review 섹션 2개를 SSOT로 치환한다.
+// Why : 템플릿(B안) placeholder를 "실데이터 섹션"으로 바꿔 표시한다.
+// I/O : READ content/reviews/review-ratings.json, dist/posts/*.html
+//       WRITE dist/posts/*.html (in-place overwrite)
+// Invariants:
+//  - 리뷰가 아닌 글은 스킵(가짜 ratingMissing 금지)
+//  - section id는 고정(review-rating-block / review-insights-block)
+// ─────────────────────────────────────────────
 
 // ─────────────────────────────────────────────
 // JSON Safe
@@ -75,19 +88,16 @@ function parseDateUtcMaybe(v) {
   const s = String(v).trim();
   if (!s) return null;
 
-  // YYYY-MM-DD 형태는 UTC 00:00:00로 취급
   if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
     const d = new Date(s + 'T00:00:00Z');
     return Number.isNaN(d.getTime()) ? null : d;
   }
 
-  // ISO8601 등은 Date가 파싱하도록
   const d = new Date(s);
   return Number.isNaN(d.getTime()) ? null : d;
 }
 
 function pickFreshnessDate(data) {
-  // SSOT 쪽 필드명 변화에 대비해 후보를 둡니다.
   const candidates = [
     data && data.lastChecked,
     data && data.updatedAt,
@@ -122,24 +132,12 @@ function daysSinceUtc(dateObj) {
 function getFreshnessStatus(data) {
   const picked = pickFreshnessDate(data);
   if (!picked.date) {
-    return {
-      status: 'MISSING_DATE',
-      daysSince: null,
-      dateRaw: null,
-      warn: true,
-      stale: false
-    };
+    return { status: 'MISSING_DATE', daysSince: null, dateRaw: null, warn: true, stale: false };
   }
   const ds = daysSinceUtc(picked.date);
   const stale = ds >= STALE_DAYS;
   const w = !stale && ds >= WARN_DAYS;
-  return {
-    status: stale ? 'STALE' : (w ? 'WARN' : 'FRESH'),
-    daysSince: ds,
-    dateRaw: picked.raw,
-    warn: w,
-    stale
-  };
+  return { status: stale ? 'STALE' : (w ? 'WARN' : 'FRESH'), daysSince: ds, dateRaw: picked.raw, warn: w, stale };
 }
 
 // ─────────────────────────────────────────────
@@ -238,7 +236,6 @@ function buildInsightsBlock(slug, data) {
   const insights = Array.isArray(data.insights) ? data.insights : [];
 
   if (!insights.length) {
-    // 비어 있으면 “빈 섹션” 유지(레이아웃 유지)
     return [
       '  <section id="review-insights-block" class="review-block">',
       '  ',
@@ -268,6 +265,14 @@ function replaceSection(html, sectionId, newBlockHtml) {
 }
 
 // ─────────────────────────────────────────────
+// Review slug gate (MIN PATCH)
+// ─────────────────────────────────────────────
+function isReviewSlug(slug) {
+  const s = String(slug || '');
+  return s.startsWith('app-') || s.startsWith('device-') || s.startsWith('subscription-');
+}
+
+// ─────────────────────────────────────────────
 // main
 // ─────────────────────────────────────────────
 function main() {
@@ -286,22 +291,29 @@ function main() {
   const files = fs.readdirSync(DIST_DIR).filter(f => f.endsWith('.html'));
   log('HTML files =', files.length);
 
-  // 기존 카운트
   let updated = 0;
   let ratingMissing = 0;
   let slotMissing = 0;
 
-  // freshness 카운트
   let freshCount = 0;
   let warnCount = 0;
   let staleCount = 0;
   let missingDateCount = 0;
 
-  // 선택: 파일별 freshness 로그를 너무 많이 찍고 싶지 않으면 false로 바꾸세요.
   const VERBOSE_FRESHNESS = true;
+
+  // (추가) 운영 통계를 분리
+  let skippedNotReview = 0;
 
   for (const file of files) {
     const slug = path.basename(file, '.html');
+
+    // ✅ 최소패치: 리뷰 글만 주입 대상
+    if (!isReviewSlug(slug)) {
+      skippedNotReview += 1;
+      continue;
+    }
+
     const data = bySlug[slug];
 
     const fullPath = path.join(DIST_DIR, file);
@@ -316,11 +328,11 @@ function main() {
     }
 
     if (!data) {
+      // ✅ 여기부터는 "진짜 결함"만 카운트됨(리뷰 슬러그인데 SSOT가 없음)
       ratingMissing += 1;
       continue;
     }
 
-    // ✅ Freshness 검사 (UTC 기준)
     const f = getFreshnessStatus(data);
     if (f.status === 'FRESH') freshCount += 1;
     else if (f.status === 'WARN') warnCount += 1;
@@ -358,19 +370,24 @@ function main() {
     `updated=${updated}`,
     `ratingMissing=${ratingMissing}`,
     `slotMissing=${slotMissing}`,
+    `skippedNotReview=${skippedNotReview}`,
     `fresh=${freshCount}`,
     `warn=${warnCount}`,
     `stale=${staleCount}`,
     `missingDate=${missingDateCount}`
   );
 
-  // 운영자가 “지금 당장 뭘 해야 하냐”를 한 줄로 보게 만드는 요약
   if (staleCount > 0) {
     warn(`ACTION: STALE=${staleCount} (>=${STALE_DAYS}d). Update/refresh SSOT for those slugs.`);
   } else if (warnCount > 0 || missingDateCount > 0) {
     warn(`SOON: WARN=${warnCount}, MISSING_DATE=${missingDateCount}. Refresh before hitting ${STALE_DAYS}d.`);
   } else {
     log(`OK: All review freshness checks are within ${WARN_DAYS}d.`);
+  }
+
+  // 강화(가벼운 실패 신호 옵션): 리뷰 대상인데 SSOT 누락이 있으면 CI에서 잡고 싶을 때
+  if (String(process.env.REVIEW_SSOT_STRICT || '').toLowerCase() === '1') {
+    if (ratingMissing > 0 || slotMissing > 0) process.exitCode = 1;
   }
 }
 
