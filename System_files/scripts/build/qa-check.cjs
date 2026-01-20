@@ -1,16 +1,23 @@
 #!/usr/bin/env node
+'use strict';
+
 /* qa-check.cjs
- * dist/posts/*.html 대상으로 AIO/SEO 이미지·스키마 QA 체크
- * - og:image: 실제 CDN URL + HTTP 200 여부 검사
- * - Article / BreadcrumbList 스키마 존재 여부 확인
- * - ✅ 리뷰 라벨인데 "실제 placeholder(EMPTY)"가 남아있으면 CRIT
- * - ✅ logs/qa-report.json 리포트 저장(7단계에서 읽기 위함)
+ * dist/posts/*.html 대상 AIO/SEO/무결성 QA 체크
  *
  * 판정 규칙(요약)
  * - PASS: 문제 없음
  * - WARN: 경고(발행은 가능)
  * - FAIL: 오류(빌드 실패급)
- * - CRIT: 자동발행에서는 제외해야 하는 치명 이슈(리뷰 SSOT 누락 등)
+ * - CRIT: 자동발행에서는 제외해야 하는 치명 이슈(무결성)
+ *
+ * ✅ CRIT(무결성) — 현재 확정 3개(qa-check 담당)
+ * 1) 리뷰 라벨인데 missing-ssot 노출
+ * 2) 템플릿 계약(핵심 ID: tldr/keyfacts/faq/sources) 누락
+ * 3) pageId 무결성 파손(미존재/다중불일치)
+ *
+ * ⚠️ 나머지 2개(CRIT) — “하드 차단” 책임 파일에서 처리 권장
+ * 4) PUBLISH 게이트 위반 → scripts/publish/blogger.cjs
+ * 5) DRY_RUN 게이트 위반 → scripts/build/r2-upload.cjs
  */
 
 const fs = require('fs');
@@ -69,38 +76,52 @@ function isReviewFileName(fileName) {
   );
 }
 
-/**
- * ✅ 강화된 "리뷰 SSOT 누락" 판정
- * What: 리뷰 슬러그인데 review 섹션이 placeholder(EMPTY) 상태로 남아 있는지 검사
- * Why : 단순 텍스트(missing-ssot) 검색은 주석/문서에 의해 오탐 가능성이 큼
- * I/O : READ html string
- * Invariants:
- *  - CRIT는 "진짜 결함"만(placeholder 잔존) 잡는다
- */
+/* ─────────────────────────────
+ * CRIT #1: 리뷰 SSOT 누락 노출 감지
+ * ───────────────────────────── */
 function detectMissingReviewSsot(html) {
   const h = String(html || '');
   if (!h) return false;
 
-  // 1) 구조화된 속성(있으면 가장 신뢰)
-  if (/data-review-status\s*=\s*["']missing-ssot["']/i.test(h)) return true;
+  const patterns = [
+    /reviewStatus\s*=\s*["']missing-ssot["']/i,
+    /data-review-status\s*=\s*["']missing-ssot["']/i,
+    /missing-ssot/i,
+    /데이터\s*수집\/?검증\s*후\s*업데이트\s*됩니다/i,
+  ];
+  return patterns.some((re) => re.test(h));
+}
 
-  // 2) placeholder class가 남아 있으면 SSOT 주입 실패로 판정
-  // - B안 템플릿에서 기본 placeholder는 review-block--empty를 포함
-  const hasEmptyClass =
-    /<section[^>]+id=["']review-rating-block["'][^>]*class=["'][^"']*review-block--empty[^"']*["'][^>]*>/i.test(h) ||
-    /<section[^>]+id=["']review-insights-block["'][^>]*class=["'][^"']*review-block--empty[^"']*["'][^>]*>/i.test(h);
+/* ─────────────────────────────
+ * CRIT #2: 템플릿 계약(핵심 ID) 감지
+ * - render 구조가 깨지면 AIO/인용 구조도 무너짐
+ * ───────────────────────────── */
+const REQUIRED_BLOCK_IDS = [
+  'tldr',
+  'keyfacts',
+  'faq',
+  'sources',
+];
 
-  if (hasEmptyClass) return true;
+function detectMissingCoreBlocks(html) {
+  const missing = [];
+  for (const id of REQUIRED_BLOCK_IDS) {
+    const re = new RegExp(`id=["']${id}["']`, 'i');
+    if (!re.test(html)) missing.push(id);
+  }
+  return missing;
+}
 
-  // 3) placeholder 코멘트가 남아 있어도 SSOT 미주입으로 판정
-  // (주석 문구가 약간 바뀌어도 잡히도록 넓게)
-  const hasPlaceholderComment =
-    /placeholder:\s*replaced\s*by\s*(review-meta-block\.cjs|inject-reviews-from-ssot\.cjs)\s*when\s*ssot\s*exists/i.test(h);
-
-  if (hasPlaceholderComment) return true;
-
-  // ❌ 기존의 /missing-ssot/i 같은 광범위 패턴은 오탐 위험으로 제거
-  return false;
+/* ─────────────────────────────
+ * CRIT #3: pageId 무결성 감지
+ * - pageId는 meta/schema/canonical/ledger 연쇄의 핵심
+ * ───────────────────────────── */
+function detectPageIds(html) {
+  const h = String(html || '');
+  const re = /page\d{6}/g;
+  const matches = h.match(re) || [];
+  const uniq = Array.from(new Set(matches));
+  return uniq;
 }
 
 async function headCheck(url) {
@@ -131,21 +152,41 @@ async function checkOne(fileName) {
     };
   }
 
-  const ogUrl = extractOgImage(html);
-  const hasArticle = hasArticleSchema(html);
-  const hasBreadcrumb = hasBreadcrumbList(html);
-
   let status = 'PASS';
   const messages = [];
 
-  // 0) 리뷰 SSOT 누락은 CRIT (리뷰 라벨만)
+  // ── CRIT #2: 핵심 블록 계약 검사 (전 파일 공통)
+  const missingCore = detectMissingCoreBlocks(html);
+  if (missingCore.length) {
+    status = rankStatus(status, 'CRIT');
+    messages.push(`[CRIT] 핵심 블록 ID 누락 → ${missingCore.join(', ')}`);
+  }
+
+  // ── CRIT #3: pageId 무결성(미존재/다중불일치)
+  const pageIds = detectPageIds(html);
+  if (!pageIds.length) {
+    status = rankStatus(status, 'CRIT');
+    messages.push('[CRIT] pageId(page######) 미검출 → 메타/스키마/ledger 연쇄 위험');
+  } else if (pageIds.length > 1) {
+    status = rankStatus(status, 'CRIT');
+    messages.push(`[CRIT] pageId가 다중 존재(불일치 가능) → ${pageIds.join(', ')}`);
+  } else {
+    messages.push(`[OK] pageId 감지 → ${pageIds[0]}`);
+  }
+
+  // ── CRIT #1: 리뷰 라벨인데 SSOT 누락 노출
   if (isReviewFileName(fileName)) {
     const missing = detectMissingReviewSsot(html);
     if (missing) {
       status = rankStatus(status, 'CRIT');
-      messages.push('[CRIT] 리뷰 라벨인데 review 섹션이 placeholder(EMPTY) 상태 → SSOT 주입 실패');
+      messages.push('[CRIT] 리뷰 라벨인데 SSOT 누락(missing-ssot) 노출 → 자동발행 제외');
     }
   }
+
+  // 기존 검사들(SEO/AIO 품질)
+  const ogUrl = extractOgImage(html);
+  const hasArticle = hasArticleSchema(html);
+  const hasBreadcrumb = hasBreadcrumbList(html);
 
   // 1) Article / BreadcrumbList
   if (!hasArticle) {
@@ -254,12 +295,13 @@ async function main() {
     generatedAt: new Date().toISOString(),
     cdnBase: CDN_BASE,
     counts: { pass: passCount, warn: warnCount, fail: failCount, crit: critCount },
+    requiredBlockIds: REQUIRED_BLOCK_IDS,
     items
   };
 
   writeReport(report);
 
-  // FAIL/CRIT는 CI 실패로 처리(자동발행 제외 로직은 7번에서 사용)
+  // FAIL/CRIT는 CI 실패로 처리
   if (failCount > 0 || critCount > 0) {
     process.exitCode = 1;
   }
