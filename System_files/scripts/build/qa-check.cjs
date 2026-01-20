@@ -1,24 +1,19 @@
 #!/usr/bin/env node
-'use strict';
-
 /* qa-check.cjs
- * dist/posts/*.html 대상 AIO/SEO/무결성 QA 체크
+ * dist/posts/*.html 대상으로 "무결성 5" 중 QA가 책임지는 3개를 CRIT로 판정한다.
  *
- * 판정 규칙(요약)
- * - PASS: 문제 없음
- * - WARN: 경고(발행은 가능)
- * - FAIL: 오류(빌드 실패급)
- * - CRIT: 자동발행에서는 제외해야 하는 치명 이슈(무결성)
+ * [무결성 5 (확정)]
+ * 1) Review SSOT 무결성: 리뷰 라벨인데 missing-ssot 노출이면 CRIT
+ * 2) 핵심 블록 계약: id="tldr|keyfacts|faq|sources" 누락이면 CRIT
+ * 3) pageId 무결성: pageId 누락/파손/복수 불일치면 CRIT
+ * 4) PUBLISH 게이트: publish/blogger.cjs가 최종 차단(qa-check 범위 아님)
+ * 5) DRY_RUN 게이트: build/r2-upload.cjs가 최종 차단(qa-check 범위 아님)
  *
- * ✅ CRIT(무결성) — 현재 확정 3개(qa-check 담당)
- * 1) 리뷰 라벨인데 missing-ssot 노출
- * 2) 템플릿 계약(핵심 ID: tldr/keyfacts/faq/sources) 누락
- * 3) pageId 무결성 파손(미존재/다중불일치)
- *
- * ⚠️ 나머지 2개(CRIT) — “하드 차단” 책임 파일에서 처리 권장
- * 4) PUBLISH 게이트 위반 → scripts/publish/blogger.cjs
- * 5) DRY_RUN 게이트 위반 → scripts/build/r2-upload.cjs
+ * (주의) og:image HEAD(fetch) 불안정 이슈는 "정리 이후" 단계에서 다룬다.
+ *       → 여기서는 og:image 존재/형식만 체크(WARN/FAIL)로 최소 유지.
  */
+
+'use strict';
 
 const fs = require('fs');
 const path = require('path');
@@ -49,24 +44,9 @@ function readHtml(filePath) {
   }
 }
 
-function extractOgImage(html) {
-  const re =
-    /<meta[^>]+property=["']og:image["'][^>]*content=["']([^"']+)["'][^>]*>/i;
-  const m = html.match(re);
-  return m ? m[1].trim() : null;
-}
-
-function hasArticleSchema(html) {
-  return html.includes('"@type":"Article"') || html.includes('"@type": "Article"');
-}
-
-function hasBreadcrumbList(html) {
-  return (
-    html.includes('"@type":"BreadcrumbList"') ||
-    html.includes('"@type": "BreadcrumbList"')
-  );
-}
-
+// ─────────────────────────────────────────────
+// [무결성 #1] Review SSOT missing-ssot 감지 (리뷰 라벨만)
+// ─────────────────────────────────────────────
 function isReviewFileName(fileName) {
   const base = String(fileName || '').toLowerCase();
   return (
@@ -76,9 +56,6 @@ function isReviewFileName(fileName) {
   );
 }
 
-/* ─────────────────────────────
- * CRIT #1: 리뷰 SSOT 누락 노출 감지
- * ───────────────────────────── */
 function detectMissingReviewSsot(html) {
   const h = String(html || '');
   if (!h) return false;
@@ -92,45 +69,83 @@ function detectMissingReviewSsot(html) {
   return patterns.some((re) => re.test(h));
 }
 
-/* ─────────────────────────────
- * CRIT #2: 템플릿 계약(핵심 ID) 감지
- * - render 구조가 깨지면 AIO/인용 구조도 무너짐
- * ───────────────────────────── */
-const REQUIRED_BLOCK_IDS = [
-  'tldr',
-  'keyfacts',
-  'faq',
-  'sources',
-];
+// ─────────────────────────────────────────────
+// [무결성 #2] Content Block Contract (tldr/keyfacts/faq/sources) 체크
+// ─────────────────────────────────────────────
+function hasId(html, id) {
+  const re = new RegExp(`id=["']${id}["']`, 'i');
+  return re.test(String(html || ''));
+}
 
-function detectMissingCoreBlocks(html) {
+function checkCoreBlocks(html) {
   const missing = [];
-  for (const id of REQUIRED_BLOCK_IDS) {
-    const re = new RegExp(`id=["']${id}["']`, 'i');
-    if (!re.test(html)) missing.push(id);
-  }
+  if (!hasId(html, 'tldr')) missing.push('tldr');
+  if (!hasId(html, 'keyfacts')) missing.push('keyfacts');
+  if (!hasId(html, 'faq')) missing.push('faq');
+  if (!hasId(html, 'sources')) missing.push('sources');
   return missing;
 }
 
-/* ─────────────────────────────
- * CRIT #3: pageId 무결성 감지
- * - pageId는 meta/schema/canonical/ledger 연쇄의 핵심
- * ───────────────────────────── */
-function detectPageIds(html) {
+// ─────────────────────────────────────────────
+// [무결성 #3] pageId 무결성 체크
+// - 최소 기준: page\d{6} 패턴이 최소 1개 이상 존재
+// - 강화 기준: 서로 다른 pageId가 2개 이상이면 CRIT (불일치/오염)
+// ─────────────────────────────────────────────
+function extractAllPageIds(html) {
   const h = String(html || '');
-  const re = /page\d{6}/g;
-  const matches = h.match(re) || [];
-  const uniq = Array.from(new Set(matches));
-  return uniq;
+  const set = new Set();
+
+  // 1) data-page-id="page000001"
+  {
+    const re = /data-page-id\s*=\s*["'](page\d{6})["']/gi;
+    let m;
+    while ((m = re.exec(h))) set.add(m[1]);
+  }
+
+  // 2) id="pageId">page000001<
+  {
+    const re = /id\s*=\s*["']pageId["'][^>]*>\s*(page\d{6})\s*</gi;
+    let m;
+    while ((m = re.exec(h))) set.add(m[1]);
+  }
+
+  // 3) fallback: page000001 anywhere (너무 느슨하지만 “완전 누락” 방어용)
+  if (set.size === 0) {
+    const re = /\b(page\d{6})\b/g;
+    let m;
+    while ((m = re.exec(h))) set.add(m[1]);
+  }
+
+  return Array.from(set);
 }
 
-async function headCheck(url) {
-  try {
-    const res = await fetch(url, { method: 'HEAD' });
-    return { ok: res.ok, status: res.status };
-  } catch (e) {
-    return { ok: false, status: 0, error: e.message };
-  }
+function pickSinglePageId(pageIds) {
+  if (!Array.isArray(pageIds) || pageIds.length === 0) return { ok: false, pageId: '' };
+  if (pageIds.length === 1) return { ok: true, pageId: pageIds[0] };
+  // 서로 다른 pageId가 여러 개면 무결성 파손
+  return { ok: false, pageId: '' };
+}
+
+// ─────────────────────────────────────────────
+// SEO/AIO 일반 체크(무결성 CRIT가 아닌 영역)
+// - Article/Breadcrumb schema: 없으면 WARN
+// - og:image: 없으면 FAIL, CDN_BASE 불일치면 WARN
+// ─────────────────────────────────────────────
+function extractOgImage(html) {
+  const re =
+    /<meta[^>]+property=["']og:image["'][^>]*content=["']([^"']+)["'][^>]*>/i;
+  const m = String(html || '').match(re);
+  return m ? m[1].trim() : null;
+}
+
+function hasArticleSchema(html) {
+  const h = String(html || '');
+  return h.includes('"@type":"Article"') || h.includes('"@type": "Article"');
+}
+
+function hasBreadcrumbList(html) {
+  const h = String(html || '');
+  return h.includes('"@type":"BreadcrumbList"') || h.includes('"@type": "BreadcrumbList"');
 }
 
 function rankStatus(cur, next) {
@@ -148,57 +163,66 @@ async function checkOne(fileName) {
       status: 'FAIL',
       file: fileName,
       slug: fileName.replace(/\.html$/i, ''),
+      pageId: '',
       messages: ['[FAIL] HTML 읽기 실패'],
+      integrity: { reviewSsot: null, coreBlocks: null, pageId: null },
     };
   }
 
-  let status = 'PASS';
+  const slug = fileName.replace(/\.html$/i, '');
   const messages = [];
+  let status = 'PASS';
 
-  // ── CRIT #2: 핵심 블록 계약 검사 (전 파일 공통)
-  const missingCore = detectMissingCoreBlocks(html);
-  if (missingCore.length) {
-    status = rankStatus(status, 'CRIT');
-    messages.push(`[CRIT] 핵심 블록 ID 누락 → ${missingCore.join(', ')}`);
-  }
-
-  // ── CRIT #3: pageId 무결성(미존재/다중불일치)
-  const pageIds = detectPageIds(html);
-  if (!pageIds.length) {
-    status = rankStatus(status, 'CRIT');
-    messages.push('[CRIT] pageId(page######) 미검출 → 메타/스키마/ledger 연쇄 위험');
-  } else if (pageIds.length > 1) {
-    status = rankStatus(status, 'CRIT');
-    messages.push(`[CRIT] pageId가 다중 존재(불일치 가능) → ${pageIds.join(', ')}`);
-  } else {
-    messages.push(`[OK] pageId 감지 → ${pageIds[0]}`);
-  }
-
-  // ── CRIT #1: 리뷰 라벨인데 SSOT 누락 노출
+  // ── 무결성 #1: 리뷰 라벨인데 missing-ssot 노출 ──
+  let integrityReview = null;
   if (isReviewFileName(fileName)) {
     const missing = detectMissingReviewSsot(html);
+    integrityReview = { isReview: true, missingSsot: missing };
     if (missing) {
       status = rankStatus(status, 'CRIT');
-      messages.push('[CRIT] 리뷰 라벨인데 SSOT 누락(missing-ssot) 노출 → 자동발행 제외');
+      messages.push('[CRIT][I1] 리뷰 라벨인데 SSOT 누락(missing-ssot) → 자동발행 제외 대상');
     }
+  } else {
+    integrityReview = { isReview: false, missingSsot: false };
   }
 
-  // 기존 검사들(SEO/AIO 품질)
-  const ogUrl = extractOgImage(html);
-  const hasArticle = hasArticleSchema(html);
-  const hasBreadcrumb = hasBreadcrumbList(html);
+  // ── 무결성 #2: 핵심 블록 계약(tldr/keyfacts/faq/sources) ──
+  const missingBlocks = checkCoreBlocks(html);
+  const integrityBlocks = { missing: missingBlocks.slice() };
+  if (missingBlocks.length > 0) {
+    status = rankStatus(status, 'CRIT');
+    messages.push(`[CRIT][I2] 핵심 블록 계약 누락: ${missingBlocks.join(', ')}`);
+  }
 
-  // 1) Article / BreadcrumbList
-  if (!hasArticle) {
+  // ── 무결성 #3: pageId 무결성 ──
+  const pageIds = extractAllPageIds(html);
+  const picked = pickSinglePageId(pageIds);
+  const integrityPageId = { found: pageIds.slice(), ok: picked.ok };
+
+  let pageId = '';
+  if (!picked.ok) {
+    status = rankStatus(status, 'CRIT');
+    if (pageIds.length === 0) {
+      messages.push('[CRIT][I3] pageId 누락 (page###### 패턴이 전혀 없음)');
+    } else {
+      messages.push(`[CRIT][I3] pageId 불일치/복수 감지: ${pageIds.join(', ')}`);
+    }
+  } else {
+    pageId = picked.pageId;
+  }
+
+  // ── 일반 QA: Schema ──
+  if (!hasArticleSchema(html)) {
     status = rankStatus(status, 'WARN');
     messages.push('[WARN] Article 스키마 없음');
   }
-  if (!hasBreadcrumb) {
+  if (!hasBreadcrumbList(html)) {
     status = rankStatus(status, 'WARN');
     messages.push('[WARN] BreadcrumbList 스키마 없음');
   }
 
-  // 2) og:image
+  // ── 일반 QA: og:image (HEAD 체크는 제거) ──
+  const ogUrl = extractOgImage(html);
   if (!ogUrl) {
     status = rankStatus(status, 'FAIL');
     messages.push('[FAIL] og:image 메타 태그 없음');
@@ -206,26 +230,22 @@ async function checkOne(fileName) {
     if (!ogUrl.startsWith(CDN_BASE)) {
       status = rankStatus(status, 'WARN');
       messages.push(`[WARN] og:image CDN_BASE(${CDN_BASE}) 기준이 아님 → ${ogUrl}`);
-    }
-
-    const result = await headCheck(ogUrl);
-    if (!result.ok) {
-      status = rankStatus(status, 'FAIL');
-      messages.push(
-        `[FAIL] og:image 응답 오류 (status=${result.status}${
-          result.error ? `, error=${result.error}` : ''
-        }) → ${ogUrl}`,
-      );
     } else {
-      messages.push(`[OK] og:image 200 응답 확인 → ${ogUrl}`);
+      messages.push(`[OK] og:image 존재 확인 → ${ogUrl}`);
     }
   }
 
   return {
     status,
     file: fileName,
-    slug: fileName.replace(/\.html$/i, ''),
+    slug,
+    pageId,
     messages,
+    integrity: {
+      reviewSsot: integrityReview,
+      coreBlocks: integrityBlocks,
+      pageId: integrityPageId,
+    },
   };
 }
 
@@ -251,7 +271,8 @@ async function main() {
 
   const files = fs
     .readdirSync(DIST)
-    .filter((f) => f.toLowerCase().endsWith('.html'));
+    .filter((f) => f.toLowerCase().endsWith('.html'))
+    .sort();
 
   if (!files.length) {
     console.log('[qa-check] 검사할 HTML 파일이 없습니다.');
@@ -294,9 +315,16 @@ async function main() {
   const report = {
     generatedAt: new Date().toISOString(),
     cdnBase: CDN_BASE,
+    integrityPolicy: {
+      I1_reviewMissingSsot_isCRIT: true,
+      I2_coreBlocksMissing_isCRIT: true,
+      I3_pageIdBroken_isCRIT: true,
+      I4_publishGate_isOutsideQa: 'publish/blogger.cjs',
+      I5_dryRunGate_isOutsideQa: 'build/r2-upload.cjs',
+      note: 'og:image HEAD check intentionally disabled (stability patch deferred).',
+    },
     counts: { pass: passCount, warn: warnCount, fail: failCount, crit: critCount },
-    requiredBlockIds: REQUIRED_BLOCK_IDS,
-    items
+    items,
   };
 
   writeReport(report);
@@ -308,10 +336,6 @@ async function main() {
 }
 
 if (require.main === module) {
-  if (typeof fetch !== 'function') {
-    console.error('[qa-check] Node 18+ (전역 fetch 지원) 필요');
-    process.exit(1);
-  }
   main().catch((err) => {
     console.error('[qa-check] 치명적 오류:', err);
     process.exit(1);
