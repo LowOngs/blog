@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 'use strict';
 
-require('./lib/env.cjs'); // ✅ .env 로드(필수)
+require('./lib/env.cjs'); // ✅ 공통 규칙: env 로더 최우선
 
-/** render-posts: content/posts → dist/posts 렌더 (pageId 직접 발급 금지, 리뷰는 후처리 주입기로 치환) */
+/** render-posts: content/posts → dist/posts 렌더 (pageId 직접 발급 금지, "뼈대 생성 금지") */
 
 const fs = require('fs');
 const path = require('path');
@@ -20,9 +20,19 @@ const BODY_IMAGE_MANIFEST_PATH = path.join(MANIFESTS_DIR, 'images-body-manifest.
 const { buildMeta } = require('./lib/meta.cjs');
 const { isValidPageId } = require('./lib/page-ids.cjs');
 const blocks = require('./lib/blocks.cjs');
-// NOTE: 리뷰는 render 단계에서 HTML을 “추가 생성/주입”하지 않는다.
-//       템플릿에 존재하는 placeholder 섹션을 inject-reviews-from-ssot.cjs 등이 replaceSection으로 치환한다.
-// const { resolveReviewData } = require('./review-resolver.cjs');
+
+/* ─────────────────────────────────────────────
+ * 역할 원칙(지도/합의 반영)
+ *
+ * What: render는 "템플릿 뼈대"에 데이터만 채운다.
+ * Why : 템플릿(post.html)이 구조를 책임지고, render는 조립/치환만 해야 한다.
+ * I/O : READ templates/post.html + content/posts/*.json
+ *       WRITE dist/posts/*.html
+ * Invariants:
+ *  - render가 FAQ/Sources/Review 같은 "섹션 뼈대"를 새로 만들지 않는다.
+ *  - 템플릿에 이미 존재하는 id를 render에서 중복 생성하지 않는다.
+ *  - Review는 render 단계에서 절대 주입/생성/치환하지 않는다(후속 injector 책임).
+ * ───────────────────────────────────────────── */
 
 /* ───────────────────── file/json ───────────────────── */
 
@@ -76,6 +86,14 @@ function tryReadJsonFile(p) {
 
 /* ───────────────────── ids rerun ───────────────────── */
 
+/**
+ * What: pageId 누락 시 ids.cjs를 "최대 1회" 재실행한다.
+ * Why : render가 pageId 발급을 담당하지 않지만, dist 산출물은 pageId가 필요하다.
+ * I/O : READ/WRITE는 ids.cjs가 담당(render는 spawn만)
+ * Invariants:
+ *  - ids.cjs는 내부 가드(BODY_WRITE_MODE/ today publishable 스코프 등)를 따른다.
+ *  - render는 ids를 반복 실행하지 않는다(1회만).
+ */
 function runIdsOnce() {
   const idsPath = path.join(__dirname, 'ids.cjs');
   const r = spawnSync(process.execPath, [idsPath], {
@@ -95,6 +113,14 @@ function loadBodyImageManifestOnce() {
   return { data: obj, source: BODY_IMAGE_MANIFEST_PATH };
 }
 
+/**
+ * What: BODY_IMAGE_ALLOW_DOMAINS 파서(보안 가드)
+ * Why : 본문 이미지 URL 허용 도메인을 제한해 악성/오염 링크 방지
+ * I/O : READ env + siteBase/cdnBase
+ * Invariants:
+ *  - https만 허용
+ *  - 기본 허용: siteBase/cdnBase host
+ */
 function parseAllowedDomainsFromEnv(siteBase, cdnBase) {
   const list = (process.env.BODY_IMAGE_ALLOW_DOMAINS || '').trim();
 
@@ -165,6 +191,13 @@ function buildBodyImageFigure(img, fallbackAlt) {
   ].filter(Boolean).join('\n');
 }
 
+/**
+ * What: 본문 이미지용 CSS 1회 주입
+ * Why : 템플릿 변경 없이 body-image 렌더 품질을 맞추기 위함
+ * I/O : READ/WRITE dist HTML 문자열
+ * Invariants:
+ *  - 마커(/* body-image-css */)가 있으면 중복 주입 금지
+ */
 function injectBodyImageCssOnce(html) {
   if (html.includes('/* body-image-css */')) return html;
 
@@ -206,6 +239,7 @@ function buildHeadFromMeta(meta) {
 
   const lines = [];
 
+  // canonical은 template에도 있지만, meta 모듈 결과를 우선으로 보강
   if (canonical) lines.push(`<link rel="canonical" href="${escapeAttr(canonical)}">`);
 
   lines.push(`<meta property="og:type" content="article">`);
@@ -234,6 +268,7 @@ function buildHeadFromMeta(meta) {
     lines.push(`<meta property="og:updated_time" content="${escapeAttr(tm.modifiedTime)}">`);
   }
 
+  // LCP 최적화: og:image preload
   if (ogImage) lines.push(`<link rel="preload" as="image" href="${escapeAttr(ogImage)}" fetchpriority="high">`);
 
   lines.push(buildSchemaScript(meta.schemaTags));
@@ -243,6 +278,14 @@ function buildHeadFromMeta(meta) {
 
 /* ───────────────────── pageId policy ───────────────────── */
 
+/**
+ * What: post JSON에 pageId가 없으면 ids.cjs를 1회 돌린 뒤 다시 읽는다.
+ * Why : dist 산출물은 pageId가 필요(무결성 #3), 발급은 ids.cjs만 담당.
+ * I/O : READ content/posts/{slug}.json, (필요 시) ids.cjs 실행
+ * Invariants:
+ *  - pageId 포맷은 page\d{6}로만 인정
+ *  - ids 재실행 후에도 없으면 FAIL(스코프/모드 문제 가능성)
+ */
 function ensurePageIdForPost(postJson, slug, jsonPath, idsCtx) {
   const existing = firstNonEmpty(
     postJson.pageId,
@@ -275,6 +318,13 @@ function ensurePageIdForPost(postJson, slug, jsonPath, idsCtx) {
   return { pageId: pid, wroteJson: false, via: 'ids.cjs' };
 }
 
+/**
+ * What: AIO 블록(tldr/keyfacts/faq/sources) 입력을 통합
+ * Why : postJson.aio / 최상위 키 혼재를 흡수
+ * I/O : READ postJson
+ * Invariants:
+ *  - 없다면 빈 배열로 처리(템플릿/blocks가 책임)
+ */
 function resolveAio(postJson) {
   const aio = postJson.aio && typeof postJson.aio === 'object' ? postJson.aio : {};
   return {
@@ -286,12 +336,21 @@ function resolveAio(postJson) {
 }
 
 /**
- * 슬롯 마커(예: <!--SLOT:FAQ_WRAPPER-->) "뒤"에 insertHtml을 주입합니다.
- * - 마커는 그대로 남겨 템플릿 구조를 깨지 않음
- * - wrapper 내부/외부 경계에서 블록이 튀는 리스크 제거
+ * What: SLOT 마커 뒤에 insertHtml을 주입한다.
+ * Why : 템플릿이 뼈대를 갖고, render는 그 자리에 채우기만 해야 함.
+ * I/O : READ/WRITE html string
+ * Invariants:
+ *  - slotMarker 없으면 no-op
+ *  - (중요) guardId가 이미 존재하면 중복 주입 금지
  */
-function injectAfterSlot(html, slotMarker, insertHtml) {
+function injectAfterSlot(html, slotMarker, insertHtml, guardId) {
   if (!insertHtml) return html;
+
+  // ✅ 템플릿/기존 산출물에 id가 이미 있으면 절대 중복 생성 금지
+  if (guardId && html.includes(`id="${guardId}"`)) {
+    return html;
+  }
+
   const idx = html.indexOf(slotMarker);
   if (idx === -1) return html;
   const after = idx + slotMarker.length;
@@ -326,8 +385,19 @@ function renderOne(template, postJson, jsonPath, bodyImgCtx, idsCtx) {
   const faqHtml     = blocks.renderFAQ(asArray(aio.faq));
   const sourcesHtml = blocks.renderSources(asArray(aio.sources));
 
+  // 본문은 sanitize 후 사용
   let bodyHtml = blocks.sanitizeBodyHTML(postJson.body || '');
 
+  /* ─────────────────────────────────────────────
+   * 본문 이미지(선택) — manifest 기반 preprend
+   *
+   * What: body 이미지 1장을 본문 앞에 추가(허용 도메인만)
+   * Why : 글의 시각적 품질/체류시간/SEO 보강
+   * I/O : READ manifests/images-body-manifest.json
+   * Invariants:
+   *  - https + allowDomains 통과만
+   *  - entry.safe===false면 스킵
+   * ───────────────────────────────────────────── */
   if (bodyImgCtx && bodyImgCtx.manifestObj) {
     const entry = pickBodyImageEntry(bodyImgCtx.manifestObj, slug, pageId);
     const img = normalizeBodyImage(entry);
@@ -342,15 +412,21 @@ function renderOne(template, postJson, jsonPath, bodyImgCtx, idsCtx) {
     }
   }
 
-  // REVIEW POLICY (IMPORTANT)
-  // What: render 단계에서 review 섹션을 “추가 생성/주입”하지 않는다.
-  // Why: templates/post.html에 동일 id의 placeholder 섹션이 이미 존재하므로, injectAfterSlot로 추가하면 id가 2번 등장(중복)한다.
-  // I/O: READ templates/post.html, WRITE dist/posts/*.html (중복 id 생성 금지)
-  // Invariants: id="review-rating-block", id="review-insights-block"는 dist에 1개만 존재해야 한다.
-  // → 실제 값 치환은 inject-reviews-from-ssot.cjs / review-meta-block.cjs가 replaceSection으로 수행.
+  /* ─────────────────────────────────────────────
+   * REVIEW POLICY (중요/강제)
+   *
+   * What: render 단계에서 review 섹션을 추가 생성/주입/치환하지 않는다.
+   * Why : 템플릿(post.html)에 review placeholder 섹션이 존재하는 구조(B안)이며,
+   *       render가 추가 생성하면 동일 id가 2개가 되어 무결성(#2/#DOM) 파손.
+   * I/O : READ templates/post.html, WRITE dist/posts/*.html
+   * Invariants:
+   *  - id="review-rating-block", id="review-insights-block"는 dist에서 최대 1개
+   *  - 실데이터 치환은 inject-reviews-from-ssot.cjs / review-meta-block.cjs가 담당
+   * ───────────────────────────────────────────── */
 
   let html = template;
 
+  // 기본 placeholder 치환(템플릿이 뼈대, render는 채우기)
   html = replaceAllSafe(html, '{{title}}', escapeHtml(title));
   html = replaceAllSafe(html, '{{description}}', escapeAttr(description));
   html = replaceAllSafe(html, '{{pageId}}', escapeHtml(pageId));
@@ -363,17 +439,29 @@ function renderOne(template, postJson, jsonPath, bodyImgCtx, idsCtx) {
   html = replaceAllSafe(html, '{{keyfacts}}', kfHtml);
   html = replaceAllSafe(html, '{{body}}', bodyHtml);
 
+  // updated 배지 치환(템플릿 구조 유지)
   if (updatedDate) html = html.replace('Updated {{updated}}', `Updated ${escapeHtml(updatedDate)}`);
 
+  // head meta 슬롯 치환
   html = html.replace('<!--META-->', buildHeadFromMeta(meta));
 
-  html = injectAfterSlot(html, '<!--SLOT:FAQ_WRAPPER-->', faqHtml);
-  html = injectAfterSlot(html, '<!--SLOT:SOURCES_WRAPPER-->', sourcesHtml);
+  /* ─────────────────────────────────────────────
+   * FAQ/Sources 주입 정책
+   *
+   * What: 템플릿에 FAQ/Sources "섹션이 없으므로" SLOT 뒤에 주입한다.
+   * Why : 템플릿은 뼈대를 담당하지만, FAQ/Sources는 "조건부 존재"라 slot 기반이 안전.
+   * I/O : READ template html, WRITE dist html
+   * Invariants:
+   *  - guardId로 중복 방지: 이미 id="faq"/"sources"가 있으면 주입 스킵
+   *  - 템플릿에 섹션을 박아버리면 여기 inject를 제거해야 한다(중복 위험)
+   * ───────────────────────────────────────────── */
+  html = injectAfterSlot(html, '<!--SLOT:FAQ_WRAPPER-->', faqHtml, 'faq');
+  html = injectAfterSlot(html, '<!--SLOT:SOURCES_WRAPPER-->', sourcesHtml, 'sources');
 
-  // DO NOT inject review blocks here (prevents duplicate <section id="review-*-block">)
-
+  // body image CSS는 실제 사용 시에만 1회 주입
   if (bodyHtml.includes('class="post-body-image"')) html = injectBodyImageCssOnce(html);
 
+  // 디버그용 주석(산출물에 1줄) — 안전/가벼움
   html = html.replace(
     '</head>',
     `<!-- render-posts: pageId=${escapeHtml(pageId)} via=${escapeHtml(pidRes.via)} bodyImage=${bodyImgCtx && bodyImgCtx.manifestLoaded ? 'on' : 'off'} -->\n</head>`
