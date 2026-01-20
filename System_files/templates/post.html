@@ -173,7 +173,7 @@
     }
 
     /* ✅ 템플릿 기본(빈) 리뷰 블록은 숨김
-       - review-meta-block.cjs가 SSOT로 치환하면 이 클래스가 사라져 자동 노출됨 */
+       - 주입기가 SSOT로 치환하면 이 클래스가 사라져 자동 노출되게 설계 */
     .review-block--empty{ display:none; }
 
     .review-rating-table{
@@ -290,25 +290,26 @@
       </section>
 
       <!-- ─────────────────────────────────────────────
-        ✅ 리뷰 섹션 “실물”을 템플릿에서 항상 탑재 (B안)
-        - dist 산출물에 섹션이 항상 존재 → review-meta-block.cjs가 SSOT로 치환 가능
-        - 기본 상태는 숨김(.review-block--empty)
-        - SSOT 치환 시 새 HTML에는 이 클래스가 없어 자동 노출됨
-        - id="review-rating-block" / id="review-insights-block"는 절대 변경 금지
+        ✅ 리뷰 섹션 “실물”은 템플릿이 담당 (뼈대)
+        - render는 절대 추가 생성/주입 금지
+        - 주입기(inject/review-meta)가 replaceSection으로 치환
+        - 기본은 숨김(.review-block--empty)
+        - 치환 HTML은 review-block--empty 클래스를 포함하지 않게 구성
+        - id는 절대 변경 금지
       ───────────────────────────────────────────── -->
 
       <!--SLOT:REVIEW_RATING_WRAPPER-->
       <section id="review-rating-block" class="review-block review-block--empty">
-        <!-- placeholder: replaced by review-meta-block.cjs when SSOT exists -->
+        <!-- placeholder: replaced by inject-reviews-from-ssot.cjs / review-meta-block.cjs -->
       </section>
 
       <!--SLOT:REVIEW_INSIGHTS_WRAPPER-->
       <section id="review-insights-block" class="review-block review-block--empty">
-        <!-- placeholder: replaced by review-meta-block.cjs when SSOT exists -->
+        <!-- placeholder: replaced by inject-reviews-from-ssot.cjs / review-meta-block.cjs -->
       </section>
     </main>
 
-    <!-- FAQ -->
+    <!-- FAQ (템플릿 뼈대는 슬롯만 유지, 실물 섹션은 render가 “slot 뒤에” 1회만 삽입) -->
     <!--SLOT:FAQ_WRAPPER-->
 
     <!-- Ad Slot (BOTTOM) -->
@@ -318,7 +319,7 @@
       <!-- 여기에 애드센스 코드(계정별) 삽입 -->
     </div>
 
-    <!-- Sources -->
+    <!-- Sources (템플릿 뼈대는 슬롯만 유지, 실물 섹션은 render가 “slot 뒤에” 1회만 삽입) -->
     <!--SLOT:SOURCES_WRAPPER-->
 
     <!-- Desktop: auto open Key Facts -->
