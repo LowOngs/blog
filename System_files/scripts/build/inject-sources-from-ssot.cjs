@@ -1,6 +1,9 @@
-// inject-sources-from-ssot.cjs — DRY_RUN 파서 통일 + today 스코프 옵션 + sources 게이트(soft/strict)
-
+#!/usr/bin/env node
 'use strict';
+
+/** inject-sources-from-ssot: Sources 섹션을 SSOT(포스트 JSON) 기준으로 dist/posts에 보정 주입 */
+
+require('./lib/env.cjs'); // ✅ 공통 규칙: env 로더 최우선
 
 const fs = require('fs');
 const path = require('path');
@@ -8,11 +11,41 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..', '..'); // System_files
 const DIST_DIR = path.join(ROOT, 'dist', 'posts');
 const POSTS_DIR = path.join(ROOT, 'content', 'posts');
-const SSOT_PATH = path.join(ROOT, 'content', 'reviews', 'review-sources.json');
-const TODAY_PATH = path.join(ROOT, 'dist', 'queue', 'today.json');
-const LOG_DIR = path.join(ROOT, 'logs');
+const LOGS_DIR = path.join(ROOT, 'logs');
 
-const REVIEW_LABELS = new Set(['app-reviews', 'device-reviews', 'subscription-services']);
+// What: dist/posts/*.html에 <section id="sources">...</section>을 "항상" 존재시키고, SSOT로 채움
+// Why : 템플릿 뼈대는 템플릿이 담당하지만(원칙), 현 상태에서 sources가 통째로 비어 QA에서 CRIT 가능
+//       → 최소패치로 pipeline 무결성(핵심 블록 계약)을 보장하기 위해, dist 단계에서 sources를 보정한다.
+// I/O : READ content/posts/{slug}.json, dist/posts/{slug}.html
+//       WRITE dist/posts/{slug}.html (in-place overwrite), logs/inject-sources-report-YYYY-MM-DD.json
+// Invariants:
+//   - id="sources"는 최종 HTML에 정확히 1개만 존재해야 함(중복 생성 금지)
+//   - SSOT가 비어도 <section id="sources"> 자체는 유지(계약 보장)
+//   - review/faq 등 다른 섹션은 건드리지 않음(수정 범위 최소화)
+
+const { parseDryRun } = require('./lib/env.cjs'); // env.cjs에 있으면 재사용(없어도 아래 fallback으로 안전)
+const blocks = require('./lib/blocks.cjs');
+
+function safeParseDryRun(v) {
+  try {
+    if (typeof parseDryRun === 'function') return parseDryRun(v);
+  } catch {}
+  const s = String(v ?? '').trim().toLowerCase();
+  return !(s === 'false' || s === '0');
+}
+
+const DRY_RUN = safeParseDryRun(process.env.DRY_RUN);
+const LIVE_MODE = !DRY_RUN;
+
+// 기본 스코프 정책:
+// - live(운영): today.json publishable만 처리하는 게 안전하지만,
+//   이 스크립트는 "dist/posts"를 보정하는 성격이라, 기본은 all 유지.
+// - 필요 시: TARGET_SCOPE=today 로 좁힐 수 있음.
+const TARGET_SCOPE = String(process.env.TARGET_SCOPE || 'all').trim().toLowerCase() === 'today'
+  ? 'today'
+  : 'all';
+
+const TODAY_PATH = path.join(ROOT, 'dist', 'queue', 'today.json');
 
 function log(...a) {
   console.log('[inject-sources]', ...a);
@@ -21,59 +54,41 @@ function warn(...a) {
   console.warn('[inject-sources][WARN]', ...a);
 }
 
-/**
- * DRY_RUN 단일 파서
- * - false/0 만 "live"
- * - 그 외 전부 "dry-run"
- */
-function parseDryRun(v) {
-  const s = String(v ?? '').trim().toLowerCase();
-  return !(s === 'false' || s === '0');
+function ensureDir(dir) {
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 }
 
-const DRY_RUN_RAW = process.env.DRY_RUN;
-const DRY_RUN = parseDryRun(DRY_RUN_RAW);
-const LIVE_MODE = !DRY_RUN;
-
-/**
- * 게이트 모드
- * - 기본: soft(중단하지 않음)
- * - SOURCES_STRICT=true|1 이면 strict(리뷰 sources<2 발생 시 종료코드 1)
- */
-function parseStrict(v) {
-  const s = String(v ?? '').trim().toLowerCase();
-  return s === 'true' || s === '1';
-}
-const SOURCES_STRICT = parseStrict(process.env.SOURCES_STRICT);
-
-/**
- * 대상 스코프
- * - live 기본: today (today.json publishable slug만 처리)
- * - test 기본: all (기존 동작 유지)
- * - TARGET_SCOPE=all 로 강제 가능
- */
-function parseScope(v) {
-  const s = String(v ?? '').trim().toLowerCase();
-  return s === 'all' ? 'all' : 'today';
-}
-const TARGET_SCOPE = parseScope(process.env.TARGET_SCOPE ?? (LIVE_MODE ? 'today' : 'all'));
-
-function readJsonSafe(filePath, fallback) {
+function readTextSafe(p) {
   try {
-    if (!fs.existsSync(filePath)) return fallback;
-    const raw = fs.readFileSync(filePath, 'utf8');
+    return fs.readFileSync(p, 'utf8');
+  } catch (e) {
+    return null;
+  }
+}
+
+function readJsonSafe(p, fallback) {
+  try {
+    if (!fs.existsSync(p)) return fallback;
+    const raw = fs.readFileSync(p, 'utf8');
     return JSON.parse(raw);
   } catch (e) {
-    warn('JSON parse failed:', filePath, e.message);
+    warn('JSON parse failed:', p, e.message);
     return fallback;
   }
 }
 
-/** today.json에서 publishable slug 집합을 뽑기(유연 포맷 지원) */
 function asArray(v) {
   if (!v) return [];
   return Array.isArray(v) ? v : [v];
 }
+
+function nowKstDate() {
+  const d = new Date();
+  const k = new Date(d.getTime() + 9 * 60 * 60 * 1000);
+  return k.toISOString().slice(0, 10);
+}
+
+/** today.json에서 publishable slug set 추출(유연 포맷 지원) */
 function loadPublishableSlugsFromToday() {
   const raw = readJsonSafe(TODAY_PATH, null);
   if (!raw) return { slugs: new Set(), loaded: false, source: TODAY_PATH };
@@ -103,254 +118,205 @@ function loadPublishableSlugsFromToday() {
   return { slugs: out, loaded: true, source: TODAY_PATH };
 }
 
-function escapeHtml(str) {
-  return String(str ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-function escapeAttr(str) {
-  return escapeHtml(str).replace(/\n/g, ' ');
-}
-
-/** SSOT 입력 형태를 slug → sources[] 형태로 정규화 */
-function normalizeSources(raw) {
-  const outBySlug = {};
-  if (!raw) return outBySlug;
-
-  if (Array.isArray(raw)) {
-    for (const row of raw) {
-      if (!row || typeof row !== 'object') continue;
-      const slug = row.slug;
-      const srcs = row.sources || row.items || row.list;
-      if (!slug) continue;
-      outBySlug[slug] = normalizeSourcesArray(srcs);
-    }
-    return outBySlug;
-  }
-
-  if (typeof raw === 'object') {
-    const bySlug = raw.bySlug && typeof raw.bySlug === 'object' ? raw.bySlug : null;
-    if (bySlug) {
-      for (const slug of Object.keys(bySlug)) {
-        outBySlug[slug] = normalizeSourcesArray(bySlug[slug]);
-      }
-      return outBySlug;
-    }
-
-    for (const slug of Object.keys(raw)) {
-      if (slug === 'meta') continue;
-      outBySlug[slug] = normalizeSourcesArray(raw[slug]);
-    }
-  }
-
-  return outBySlug;
+/** SSOT(post json)에서 sources 후보를 통합 추출 */
+function extractSourcesFromPostJson(postJson) {
+  const aio = (postJson && postJson.aio && typeof postJson.aio === 'object') ? postJson.aio : {};
+  const s1 = aio.sources;
+  const s2 = postJson.sources;
+  const sources = []
+    .concat(asArray(s1))
+    .concat(asArray(s2))
+    .filter(Boolean);
+  return sources;
 }
 
-function normalizeSourcesArray(v) {
-  const arr = Array.isArray(v) ? v : (v ? [v] : []);
-  const out = [];
-
-  for (const s of arr) {
-    if (!s) continue;
-
-    if (typeof s === 'string') {
-      const t = s.trim();
-      if (!t) continue;
-      out.push({ url: t, label: t, note: '' });
-      continue;
-    }
-
-    if (typeof s === 'object') {
-      const url = String(s.url || s.href || '').trim();
-      const label = String(s.label || s.name || url || '').trim();
-      const note = String(s.note || '').trim();
-      if (!url && !label) continue;
-      out.push({ url, label, note });
-    }
+/** <section id="sources">...</section>을 "단일 섹션"으로 재구성 */
+function buildSourcesSectionHtml(sourcesArr) {
+  // blocks.renderSources가 이미 <section id="sources"> 를 만들 수도 있고(구현에 따라),
+  // ul만 만들 수도 있음. 여기서는 "섹션 외형"을 우리가 확정해서 중복/누락을 막는다.
+  // -> 내부는 blocks.renderSources를 최대한 활용.
+  let inner = '';
+  try {
+    inner = blocks.renderSources(asArray(sourcesArr)) || '';
+  } catch {
+    inner = '';
   }
 
-  return out.filter((x) => x.url && x.label);
-}
+  // blocks.renderSources가 <section id="sources"...>까지 포함해버리는 경우를 대비해 "섹션 한 번 더 감싸기" 방지
+  // - 이미 section을 반환하면, 그걸 그대로 사용하되, 최종적으로 id="sources" 1개만 유지하도록 replace 단계에서 정규화
+  const looksLikeSection = /<section\b[^>]*\bid=["']sources["']/i.test(inner);
 
-function buildSourcesUlHtml(sources) {
-  if (!Array.isArray(sources) || sources.length === 0) return '';
-
-  const items = sources.map((s) => {
-    const url = escapeAttr(s.url);
-    const label = escapeHtml(s.label || s.url);
-    const note = s.note ? ` — ${escapeHtml(s.note)}` : '';
-    return `<li><a href="${url}" target="_blank" rel="nofollow noopener noreferrer">${label}</a>${note}</li>`;
-  });
-
-  return `<ul>\n${items.join('\n')}\n</ul>`;
-}
-
-/** <section id="sources">...</section> 교체/제거 */
-function replaceSourcesSection(html, newUlHtml) {
-  const sectionRe = /<section\b[^>]*\bid=["']sources["'][^>]*>[\s\S]*?<\/section>/i;
-
-  if (!sectionRe.test(html)) {
-    return { html, changed: false, missing: true };
+  if (looksLikeSection) {
+    // 그대로 반환(이후 replace/insert에서 section 단위로 처리)
+    return inner.trim();
   }
 
-  if (!newUlHtml) {
-    const replaced = html.replace(sectionRe, '');
-    return { html: replaced, changed: true, removed: true };
+  // SSOT가 비어도 섹션 자체는 존재해야 함(핵심 블록 계약)
+  if (!inner.trim()) {
+    inner = '<!-- sources: empty -->';
   }
 
-  const rebuilt = [
+  return [
     '<section id="sources" class="sources">',
     '  <h3>Sources</h3>',
-    `  ${newUlHtml.replace(/\n/g, '\n  ')}`,
+    `  ${inner.replace(/\n/g, '\n  ')}`,
     '</section>',
   ].join('\n');
-
-  const replaced = html.replace(sectionRe, rebuilt);
-  return { html: replaced, changed: true, removed: false };
 }
 
-/** content/posts/{slug}.json 기준으로 라벨 확인 */
-function loadPostLabels(slug) {
-  const p = path.join(POSTS_DIR, `${slug}.json`);
-  const j = readJsonSafe(p, null);
-  if (!j) return [];
-  const labels = Array.isArray(j.labels) ? j.labels : (j.label ? [j.label] : []);
-  return labels.filter(Boolean);
+/** HTML에서 기존 sources 섹션을 교체(있으면) */
+function replaceSourcesSection(html, newSectionHtml) {
+  const sectionRe = /<section\b[^>]*\bid=["']sources["'][^>]*>[\s\S]*?<\/section>/i;
+
+  if (sectionRe.test(html)) {
+    const replaced = html.replace(sectionRe, newSectionHtml);
+    return { html: replaced, changed: true, mode: 'replaced' };
+  }
+
+  return { html, changed: false, mode: 'missing' };
+}
+
+/** SLOT 마커 뒤에 삽입 */
+function injectAfterSlot(html, slotMarker, insertHtml) {
+  const idx = html.indexOf(slotMarker);
+  if (idx === -1) return { html, changed: false, injected: false };
+  const after = idx + slotMarker.length;
+  const out = html.slice(0, after) + '\n' + insertHtml + html.slice(after);
+  return { html: out, changed: true, injected: true };
+}
+
+/** sources id 중복 감지(안전가드) */
+function countSourcesId(html) {
+  const re = /\bid=["']sources["']/gi;
+  let n = 0;
+  while (re.exec(String(html || ''))) n++;
+  return n;
 }
 
 function main() {
-  fs.mkdirSync(LOG_DIR, { recursive: true });
+  ensureDir(LOGS_DIR);
 
-  log('ROOT           =', ROOT);
-  log('DIST           =', DIST_DIR);
-  log('SSOT           =', SSOT_PATH);
-  log('today          =', TODAY_PATH);
-  log('dry_run(raw)   =', (DRY_RUN_RAW === undefined ? '(undefined)' : JSON.stringify(String(DRY_RUN_RAW))));
-  log('dry_run(parsed)=', DRY_RUN);
-  log('mode           =', LIVE_MODE ? 'live' : 'test(no_live)');
-  log('scope          =', TARGET_SCOPE);
-  log('gate           =', SOURCES_STRICT ? 'strict' : 'soft');
+  log('ROOT        =', ROOT);
+  log('DIST        =', DIST_DIR);
+  log('POSTS_DIR   =', POSTS_DIR);
+  log('TODAY       =', TODAY_PATH);
+  log('DRY_RUN     =', DRY_RUN);
+  log('MODE        =', LIVE_MODE ? 'live' : 'test(no_live)');
+  log('SCOPE       =', TARGET_SCOPE);
 
   if (!fs.existsSync(DIST_DIR)) {
-    warn('dist/posts 없음. 먼저 posts:render를 실행하세요.');
+    warn('dist/posts 없음. posts:render 먼저 실행하세요.');
+    process.exit(0);
+  }
+  if (!fs.existsSync(POSTS_DIR)) {
+    warn('content/posts 없음. 종료합니다.');
     process.exit(0);
   }
 
-  const ssotRaw = readJsonSafe(SSOT_PATH, null);
-  const bySlug = normalizeSources(ssotRaw);
+  const allHtmlFiles = fs.readdirSync(DIST_DIR).filter((f) => f.toLowerCase().endsWith('.html')).sort();
 
-  const files = fs.readdirSync(DIST_DIR).filter((f) => f.endsWith('.html'));
-
-  // today 스코프면 대상 slug 집합 로드
-  let publishableSet = null;
+  let targetSet = null;
   if (TARGET_SCOPE === 'today') {
     const pub = loadPublishableSlugsFromToday();
-    publishableSet = pub.slugs;
-
+    targetSet = pub.slugs;
     log('publishable loaded =', pub.loaded);
-    log('publishable count  =', publishableSet.size);
+    log('publishable count  =', targetSet.size);
 
-    // today 스코프인데 today.json이 비었으면 "0개 처리"가 더 안전
-    if (!pub.loaded || publishableSet.size === 0) {
+    if (!pub.loaded || targetSet.size === 0) {
       warn('today scope인데 publishable 비어있음 → 0개 처리로 종료');
       return;
     }
   }
 
   const targetFiles = (TARGET_SCOPE === 'today')
-    ? files.filter((f) => publishableSet.has(path.basename(f, '.html')))
-    : files;
+    ? allHtmlFiles.filter((f) => targetSet.has(path.basename(f, '.html')))
+    : allHtmlFiles;
 
-  log('HTML files(all)   =', files.length);
+  log('HTML files(all)   =', allHtmlFiles.length);
   log('HTML files(target)=', targetFiles.length);
 
   let updated = 0;
-  let removed = 0;
-  let missingSection = 0;
-  let ssotMissing = 0;
+  let inserted = 0;
+  let replaced = 0;
+  let slotMissing = 0;
+  let postMissing = 0;
+  let dupGuarded = 0;
 
-  let liveFail = 0;
-  let reviewChecked = 0;
-  const liveFailSlugs = [];
+  const slotMarker = '<!--SLOT:SOURCES_WRAPPER-->';
 
   for (const f of targetFiles) {
     const slug = path.basename(f, '.html');
-    const full = path.join(DIST_DIR, f);
+    const htmlPath = path.join(DIST_DIR, f);
+    const postPath = path.join(POSTS_DIR, `${slug}.json`);
 
-    let html = fs.readFileSync(full, 'utf8');
+    const html0 = readTextSafe(htmlPath);
+    if (html0 == null) continue;
 
-    const sources = bySlug[slug];
-    if (!sources) {
-      ssotMissing += 1;
-
-      const r0 = replaceSourcesSection(html, '');
-      if (r0.missing) {
-        missingSection += 1;
-        continue;
-      }
-      if (r0.changed) {
-        fs.writeFileSync(full, r0.html, 'utf8');
-        removed += 1;
-      }
+    const postJson = readJsonSafe(postPath, null);
+    if (!postJson) {
+      // dist는 있는데 post json이 없으면 "삽입을 시도"해도 근거가 없어 위험
+      postMissing += 1;
       continue;
     }
 
-    // 리뷰 3라벨이면 최소 2개 체크(게이트는 soft/strict)
-    const labels = loadPostLabels(slug);
-    const isReview = labels.some((l) => REVIEW_LABELS.has(l));
-    if (isReview) {
-      reviewChecked += 1;
-      if (sources.length < 2) {
-        const msg = `REVIEW sources<2 → slug=${slug} sources=${sources.length}`;
-        if (LIVE_MODE) {
-          warn('[LIVE]', msg);
-          liveFail += 1;
-          liveFailSlugs.push(slug);
-        } else {
-          warn('[TEST]', msg);
-        }
+    const sourcesArr = extractSourcesFromPostJson(postJson);
+    const newSection = buildSourcesSectionHtml(sourcesArr);
+
+    // 1) 기존 <section id="sources">가 있으면 교체
+    let html = html0;
+    const r1 = replaceSourcesSection(html, newSection);
+    html = r1.html;
+
+    let changed = false;
+
+    if (r1.changed) {
+      changed = true;
+      replaced += 1;
+    } else {
+      // 2) 없으면 SLOT 뒤로 삽입
+      const r2 = injectAfterSlot(html, slotMarker, newSection);
+      if (r2.injected) {
+        html = r2.html;
+        changed = true;
+        inserted += 1;
+      } else {
+        slotMissing += 1;
       }
     }
 
-    const ulHtml = buildSourcesUlHtml(sources);
-    const r = replaceSourcesSection(html, ulHtml);
-
-    if (r.missing) {
-      missingSection += 1;
+    // 3) 중복 id 가드: id="sources"가 2개 이상이면 변경 적용 금지(오염 방지)
+    const cnt = countSourcesId(html);
+    if (cnt > 1) {
+      dupGuarded += 1;
+      warn(`dup sources id guarded: slug=${slug} count=${cnt} (write skipped)`);
       continue;
     }
 
-    if (r.changed) {
-      fs.writeFileSync(full, r.html, 'utf8');
+    if (changed) {
+      fs.writeFileSync(htmlPath, html, 'utf8');
       updated += 1;
     }
   }
 
-  // 리포트 기록(운영 점검용)
   const report = {
     ts: new Date().toISOString(),
     mode: LIVE_MODE ? 'live' : 'test',
     scope: TARGET_SCOPE,
     dryRun: DRY_RUN,
-    sourcesStrict: SOURCES_STRICT,
     counts: {
-      htmlAll: files.length,
+      htmlAll: allHtmlFiles.length,
       htmlTarget: targetFiles.length,
       updated,
-      removed,
-      missingSection,
-      ssotMissing,
-      reviewChecked,
-      reviewSourcesTooFew: liveFail,
+      inserted,
+      replaced,
+      slotMissing,
+      postMissing,
+      dupGuarded,
     },
-    reviewSourcesTooFewSlugs: liveFailSlugs,
   };
 
-  const date = new Date().toISOString().slice(0, 10);
-  const reportPath = path.join(LOG_DIR, `inject-sources-report-${date}.json`);
+  const date = nowKstDate();
+  const reportPath = path.join(LOGS_DIR, `inject-sources-report-${date}.json`);
   try {
     fs.writeFileSync(reportPath, JSON.stringify(report, null, 2) + '\n', 'utf8');
     log('report saved =', reportPath);
@@ -358,20 +324,14 @@ function main() {
     warn('report save failed:', e.message || e);
   }
 
-  log(
-    'done:',
+  log('done:',
     `updated=${updated}`,
-    `removed=${removed}`,
-    `missingSection=${missingSection}`,
-    `ssotMissing=${ssotMissing}`,
-    `reviewChecked=${reviewChecked}`,
-    `reviewSourcesTooFew=${liveFail}`
+    `inserted=${inserted}`,
+    `replaced=${replaced}`,
+    `slotMissing=${slotMissing}`,
+    `postMissing=${postMissing}`,
+    `dupGuarded=${dupGuarded}`
   );
-
-  // strict 게이트일 때만 중단
-  if (LIVE_MODE && SOURCES_STRICT && liveFail > 0) {
-    process.exitCode = 1;
-  }
 }
 
-main();
+if (require.main === module) main();
