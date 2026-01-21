@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-18",
+  "updatedAt": "2026-01-19",
   "bySlug": {
     "app-20251207-001": [
       {
@@ -8,6 +8,16 @@
         "label": "Google Play (official)",
         "url": "https://play.google.com/store/apps/details?id=xxx",
         "lastChecked": "2026-01-18"
+      },
+      {
+        "label": "Google Play (official)",
+        "url": "https://play.google.com/store/apps/details?id=com.todoist"
+      }
+    ],
+    "subscription-20251207-001": [
+      {
+        "label": "Trustpilot (official)",
+        "url": "https://www.trustpilot.com/review/todoist.com"
       }
     ]
   }
