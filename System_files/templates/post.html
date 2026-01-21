@@ -153,6 +153,12 @@
     .sources{font-size:.95rem; opacity:.92}
     .sources ul{margin:8px 0 0; padding-left:18px}
 
+    /* ✅ 핵심: 내용이 없으면 “빈칸 덩어리”가 보이지 않게 숨김
+       - render가 {{faq}} / {{sources}}를 빈 문자열로 치환하면 섹션이 truly empty가 됨
+       - (중요) 섹션 내부에 공백/개행이 있으면 :empty가 안 먹음 → 그래서 아래 HTML에서 {{faq}}를 한 줄로만 둠 */
+    #faq:empty{ display:none; }
+    #sources:empty{ display:none; }
+
     /* Review blocks */
     .review-block{
       border:1px solid var(--c-border);
@@ -309,8 +315,14 @@
       </section>
     </main>
 
-    <!-- FAQ (템플릿 뼈대는 슬롯만 유지, 실물 섹션은 render가 “slot 뒤에” 1회만 삽입) -->
+    <!-- ─────────────────────────────────────────────
+      ✅ FAQ “실물 섹션 뼈대” (무결성 계약)
+      - id="faq"는 반드시 존재해야 함(qa-check)
+      - 내용이 없으면 :empty로 숨김
+      - (중요) :empty가 동작하도록 내부는 공백 없이 {{faq}}만 둠
+    ───────────────────────────────────────────── -->
     <!--SLOT:FAQ_WRAPPER-->
+    <section id="faq" class="faq">{{faq}}</section>
 
     <!-- Ad Slot (BOTTOM) -->
     <div class="ad-slot" id="ad-bottom" aria-label="Ad slot (bottom)">
@@ -319,8 +331,14 @@
       <!-- 여기에 애드센스 코드(계정별) 삽입 -->
     </div>
 
-    <!-- Sources (템플릿 뼈대는 슬롯만 유지, 실물 섹션은 render가 “slot 뒤에” 1회만 삽입) -->
+    <!-- ─────────────────────────────────────────────
+      ✅ Sources “실물 섹션 뼈대” (무결성 계약)
+      - id="sources"는 반드시 존재해야 함(qa-check)
+      - 내용이 없으면 :empty로 숨김
+      - (중요) :empty가 동작하도록 내부는 공백 없이 {{sources}}만 둠
+    ───────────────────────────────────────────── -->
     <!--SLOT:SOURCES_WRAPPER-->
+    <section id="sources" class="sources">{{sources}}</section>
 
     <!-- Desktop: auto open Key Facts -->
     <script>
