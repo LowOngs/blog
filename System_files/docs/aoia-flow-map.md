@@ -12,13 +12,13 @@
 ────────────────────────────────────────────────────────────
 - 파일명/경로/SSOT는 한번 확정되면 임의 변경 금지(필요 시 지도 선변경 + 합의).
 - 변경 제안 시 반드시 먼저:
-  1) 변경 범위 2) 대상 파일 3) 이유 4) 전/후 차이 5) 파급 범위
+  1) 변경 범위 2) 대상 파일 3) 이유 4) 전/후 차이 5) 파급 범위
 - 주석 없는 블록은 구조 확정 전까지 삭제/변경 금지.
 - 공통 주석 규칙(확정):
-  - 모든 스크립트는 env 로더를 최상단에 둔다(require('./lib/env.cjs')).
-  - 파일 상단에는 변경 요약 1줄만 둔다.
-  - 각 기능 블록 바로 위에 반드시 4요소 주석:
-    1) What 2) Why 3) I/O(READ/WRITE 경로) 4) Invariants(멱등/게이트 등)
+  - 모든 스크립트는 env 로더를 최상단에 둔다(require('./lib/env.cjs')).
+  - 파일 상단에는 변경 요약 1줄만 둔다.
+  - 각 기능 블록 바로 위에 반드시 4요소 주석:
+    1) What 2) Why 3) I/O(READ/WRITE 경로) 4) Invariants(멱등/게이트 등)
 - “중복 파일 생성”을 막기 위해: 새 파일 만들기 전에 지도에서 기존 책임자를 먼저 찾는다.
 - pageId 신규 발급은 오직 ids.cjs 책임(렌더/검증/QA 단계에서 발급 금지).
 - 최종 주입자(Injector)는 “1개만” 고정(리뷰 주입 중복/덮어쓰기 방지).
@@ -53,8 +53,8 @@
 
 [ENV Loader 단일화]
 - scripts/build/lib/env.cjs
-  - 모든 스크립트가 동일 파서/동일 루트 규칙을 사용하도록 강제하는 핵심 파일.
-  - 여기서 어긋나면 “DRY_RUN인데 업로드/발행됨” 같은 사고가 난다.
+  - 모든 스크립트가 동일 파서/동일 루트 규칙을 사용하도록 강제하는 핵심 파일.
+  - 여기서 어긋나면 “DRY_RUN인데 업로드/발행됨” 같은 사고가 난다.
 
 [DRY_RUN 규칙(단일)]
 - false 또는 "0" 만 live
@@ -68,45 +68,45 @@
 3) Pipeline Trunk (Pick → Queue → Posts → IDs → Render → Inject → QA → Upload → Publish)
 ────────────────────────────────────────────────────────────
 A) Seed Pick / Schedule
-  - seedpool/* → seed-scheduler.cjs → dist/queue/today.json
-  - (별도) firstgate-pick.cjs → dist/queue/firstgate.json (first-gate 전용 1건 픽)
-  - (별도) origin-pick.cjs → dist/queue/origin-today.json (origin 전용 1건 픽)
+  - seedpool/* → seed-scheduler.cjs → dist/queue/today.json
+  - (별도) firstgate-pick.cjs → dist/queue/firstgate.json (first-gate 전용 1건 픽)
+  - (별도) origin-pick.cjs → dist/queue/origin-today.json (origin 전용 1건 픽)
 
 B) Expand Queue (Execution Scope 고정)
-  - today.json → today-expand.cjs(권장/또는 현행 확장 로직) → today.expanded.json
+  - today.json → today-expand.cjs(권장/또는 현행 확장 로직) → today.expanded.json
 
 C) Queue → Posts (posts JSON 생성/확장)
-  - today.expanded.json → queue-to-posts.cjs → content/posts/*.json
+  - today.expanded.json → queue-to-posts.cjs → content/posts/*.json
 
 D) Body Fill / Normalize
-  - generate-body.cjs + markdown-list.cjs → posts JSON body 채움/정규화
-  - normalize-body.cjs → dist/posts/*.html 본문 표준화(현재 구현 기준)
+  - generate-body.cjs + markdown-list.cjs → posts JSON body 채움/정규화
+  - normalize-body.cjs → dist/posts/*.html 본문 표준화(현재 구현 기준)
 
 E) PageId Assignment (발급 책임자)
-  - ids.cjs(+lib/page-ids.cjs) → posts JSON + manifests/page-ids.json + seed-ledger(assigned)
+  - ids.cjs(+lib/page-ids.cjs) → posts JSON + manifests/page-ids.json + seed-ledger(assigned)
 
 F) Render HTML (슬롯/뼈대 생성)
-  - render-posts.cjs(+lib/meta.cjs + lib/blocks.cjs + templates/post.html) → dist/posts/*.html
-  - NOTE: 리뷰 실제 데이터 “최종 반영”은 Injector가 책임(렌더는 슬롯/기본 섹션 생성)
+  - render-posts.cjs(+lib/meta.cjs + lib/blocks.cjs + templates/post.html) → dist/posts/*.html
+  - NOTE: 리뷰 실제 데이터 “최종 반영”은 Injector가 책임(렌더는 슬롯/기본 섹션 생성)
 
 G) Review Bundle (리뷰 전용 가지 — 2026-01-18~19 확정 업데이트)
-  - review-stub-fill.cjs            : 리뷰 대상 slug 감지 → bucket/insights/sources에 stub 업서트(없을 때만)
-  - review-fetch-official.cjs       : 공식 API(provider) 수집 → *-ratings-next.json + review-sources.json 업서트
-  - review-fetch-insights-secondary.cjs : 네트워크 없이 rule-based 인사이트 보완(2차)
-  - review-build-next.cjs           : bucket next + insights + sources 병합 → review-ratings-next.json 생성
-  - build-ssot-reviews.cjs          : review-ratings-next → review-ratings(SSOT) 멱등 병합 + export(bySlug)
-  - inject-reviews-from-ssot.cjs    : dist/posts 리뷰 섹션 치환(최종 주입자 고정) + freshness 통계
-  - (대체 주입자) review-meta-block.cjs : 사용 가능하나 최종 주입자 1개 고정 원칙
+  - review-stub-fill.cjs            : 리뷰 대상 slug 감지 → bucket/insights/sources에 stub 업서트(없을 때만)
+  - review-fetch-official.cjs       : 공식 API(provider) 수집 → *-ratings-next.json + review-sources.json 업서트
+  - review-fetch-insights-secondary.cjs : 네트워크 없이 rule-based 인사이트 보완(2차)
+  - review-build-next.cjs           : bucket next + insights + sources 병합 → review-ratings-next.json 생성
+  - build-ssot-reviews.cjs          : review-ratings-next → review-ratings(SSOT) 멱등 병합 + export(bySlug)
+  - inject-reviews-from-ssot.cjs    : dist/posts 리뷰 섹션 치환(최종 주입자 고정) + freshness 통계
+  - (대체 주입자) review-meta-block.cjs : 사용 가능하나 최종 주입자 1개 고정 원칙
 
 H) Validate / QA
-  - validate-repair.cjs → (마지막 안전망 패치)
-  - qa-check.cjs + check-content-blocks.cjs → 품질/누락/CRIT 판정 + logs 리포트(운영 근거)
+  - validate-repair.cjs → (마지막 안전망 패치)
+  - qa-check.cjs + check-content-blocks.cjs → 품질/누락/CRIT 판정 + logs 리포트(운영 근거)
 
 I) Upload (R2)
-  - r2-upload.cjs → dist/images + 필요 산출물 업로드
+  - r2-upload.cjs → dist/images + 필요 산출물 업로드
 
 J) Publish (Blogger)
-  - scripts/publish/blogger.cjs → Blogger 발행 + seed-ledger(published upsert)
+  - scripts/publish/blogger.cjs → Blogger 발행 + seed-ledger(published upsert)
 
 ────────────────────────────────────────────────────────────
 4) File Index (“열지 않고 판단”용) — 역할/입출력/결합/파급/증상
@@ -173,11 +173,11 @@ J) Publish (Blogger)
 ────────────────────────────────────────────────────────────
 [증상 → 원인 후보 파일]
 - 리뷰 섹션이 비어있음 / app만 나옴:
-  - review-stub-fill.cjs → review-build-next.cjs → build-ssot-reviews.cjs → inject-reviews-from-ssot.cjs
-  - templates/post.html 섹션 ID 계약 유지 여부(슬롯)
+  - review-stub-fill.cjs → review-build-next.cjs → build-ssot-reviews.cjs → inject-reviews-from-ssot.cjs
+  - templates/post.html 섹션 ID 계약 유지 여부(슬롯)
 - next 존재 but SSOT 변화 0:
-  - next==baseline 동일 / next 생성 실패 / slug mismatch
-  - build-ssot-reviews.cjs가 WARN로 알려줌
+  - next==baseline 동일 / next 생성 실패 / slug mismatch
+  - build-ssot-reviews.cjs가 WARN로 알려줌
 
 ────────────────────────────────────────────────────────────
 6) SSOT Registry (진짜 원본 목록)
