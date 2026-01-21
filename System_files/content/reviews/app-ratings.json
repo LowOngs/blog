@@ -1,18 +1,26 @@
 {
   "bySlug": {
     "app-20251207-001": {
-      "lastChecked": "2026-01-01",
+      "lastChecked": "2026-01-19",
       "status": "ok",
-      "store": "multi",
-      "ratingCurrent": 4.6,
-      "ratingPrevious": 4.5,
-      "ratingDiff": 0.1,
-      "votesCurrent": 12000,
-      "votesPrevious": 11000,
-      "votesDiff": 1000,
-      "histogram": { "1": 2, "2": 2, "3": 6, "4": 18, "5": 72 },
-      "source": "manual",
-      "storeId": null
+      "store": "googleplay",
+      "source": "official",
+      "storeId": "com.todoist",
+      "ratingCurrent": 4.653179168701172,
+      "ratingPrevious": 4.653179168701172,
+      "ratingDiff": 0,
+      "votesCurrent": 294151,
+      "votesPrevious": 294136,
+      "votesDiff": 15,
+      "histogram": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0
+      },
+      "insights": []
     }
-  }
+  },
+  "updatedAt": "2026-01-15"
 }
