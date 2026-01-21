@@ -11,6 +11,26 @@
  *
  * (주의) og:image HEAD(fetch) 불안정 이슈는 "정리 이후" 단계에서 다룬다.
  *       → 여기서는 og:image 존재/형식만 체크(WARN/FAIL)로 최소 유지.
+ *
+ * ─────────────────────────────────────────────
+ * [재발 방지 장치 추가(중요)]
+ * - 과거 사고: dist/posts 내에 review 섹션이 중복 생성되어
+ *   동일 id가 2~3개씩 생기는 DOM 파손이 발생했음(smartsavings 등).
+ *
+ * - 방지 정책(강제/CRIT):
+ *   A) 모든 HTML에서 아래 2개 섹션은 "정확히 1개"만 존재해야 한다.
+ *      - <section id="review-rating-block" ...>
+ *      - <section id="review-insights-block" ...>
+ *
+ *   B) 리뷰 글(app/device/subscription)은 리뷰 스냅샷이 반드시 1개 있어야 한다.
+ *      - "User ratings snapshot" 텍스트가 정확히 1회
+ *      - 없거나 2개 이상이면 주입 실패/중복 주입으로 판단하고 CRIT
+ *
+ *   C) 비리뷰 글(그 외)은 스냅샷이 0회여야 한다.
+ *      - "User ratings snapshot"이 나오면 오염(리뷰 주입이 잘못 들어감) → CRIT
+ *
+ * - 용어: "snapshot" = SSOT 기반 리뷰 요약(90일) 블록의 사람이 읽는 표시 문구.
+ * ─────────────────────────────────────────────
  */
 
 'use strict';
@@ -45,6 +65,22 @@ function readHtml(filePath) {
 }
 
 // ─────────────────────────────────────────────
+// [무결성 #0] Review 섹션 중복/누락(전 파일 공통) 감지
+// - review-rating-block / review-insights-block는 "정확히 1개"여야 함
+// - 중복이면 과거 사고 재발(렌더/정규화 단계에서 섹션 복제 등)
+// ─────────────────────────────────────────────
+function countSectionId(html, id) {
+  const h = String(html || '');
+  if (!h) return 0;
+
+  // "진짜 섹션"만 세기: <section ... id="...">
+  // (주석/설명 문구에서 id="..." 문자열이 나와도 카운트하지 않도록)
+  const re = new RegExp(`<section[^>]+id=["']${id}["']`, 'gi');
+  const m = h.match(re);
+  return m ? m.length : 0;
+}
+
+// ─────────────────────────────────────────────
 // [무결성 #1] Review SSOT missing-ssot 감지 (리뷰 라벨만)
 // ─────────────────────────────────────────────
 function isReviewFileName(fileName) {
@@ -67,6 +103,28 @@ function detectMissingReviewSsot(html) {
     /데이터\s*수집\/?검증\s*후\s*업데이트\s*됩니다/i,
   ];
   return patterns.some((re) => re.test(h));
+}
+
+// ─────────────────────────────────────────────
+// [무결성 #1.5] 리뷰 주입 성공 신호(스냅샷 문구) 검사
+// - 리뷰 글: "User ratings snapshot" 정확히 1회
+// - 비리뷰 글: 0회
+// ─────────────────────────────────────────────
+const SNAPSHOT_MARK = 'User ratings snapshot';
+
+function countSnapshotMark(html) {
+  const h = String(html || '');
+  if (!h) return 0;
+  // 단순 문자열 카운트(주입 블록에 확실히 들어가는 문구)
+  let c = 0;
+  let i = 0;
+  while (true) {
+    const idx = h.indexOf(SNAPSHOT_MARK, i);
+    if (idx === -1) break;
+    c++;
+    i = idx + SNAPSHOT_MARK.length;
+  }
+  return c;
 }
 
 // ─────────────────────────────────────────────
@@ -165,13 +223,31 @@ async function checkOne(fileName) {
       slug: fileName.replace(/\.html$/i, ''),
       pageId: '',
       messages: ['[FAIL] HTML 읽기 실패'],
-      integrity: { reviewSsot: null, coreBlocks: null, pageId: null },
+      integrity: {
+        reviewBlocks: null,
+        reviewSsot: null,
+        reviewSnapshot: null,
+        coreBlocks: null,
+        pageId: null,
+      },
     };
   }
 
   const slug = fileName.replace(/\.html$/i, '');
   const messages = [];
   let status = 'PASS';
+
+  // ── 무결성 #0: review 섹션 중복/누락(전 파일 공통) ──
+  const ratingCount = countSectionId(html, 'review-rating-block');
+  const insightsCount = countSectionId(html, 'review-insights-block');
+  const integrityReviewBlocks = { ratingCount, insightsCount };
+
+  if (ratingCount !== 1 || insightsCount !== 1) {
+    status = rankStatus(status, 'CRIT');
+    messages.push(
+      `[CRIT][I0] review 섹션 개수 파손: review-rating-block=${ratingCount}, review-insights-block=${insightsCount} (각각 1개여야 함)`,
+    );
+  }
 
   // ── 무결성 #1: 리뷰 라벨인데 missing-ssot 노출 ──
   let integrityReview = null;
@@ -184,6 +260,29 @@ async function checkOne(fileName) {
     }
   } else {
     integrityReview = { isReview: false, missingSsot: false };
+  }
+
+  // ── 무결성 #1.5: 리뷰 스냅샷 주입 여부(재발 방지 핵심) ──
+  const snapCount = countSnapshotMark(html);
+  const isReview = isReviewFileName(fileName);
+  const integritySnapshot = { isReview, snapshotMark: SNAPSHOT_MARK, count: snapCount };
+
+  if (isReview) {
+    // 리뷰 글은 "정확히 1개"가 있어야 정상(주입 성공 신호)
+    if (snapCount !== 1) {
+      status = rankStatus(status, 'CRIT');
+      if (snapCount === 0) {
+        messages.push('[CRIT][I1.5] 리뷰 라벨인데 스냅샷 문구가 없음 → 주입 누락 가능성(inject 미실행/치환 실패)');
+      } else {
+        messages.push(`[CRIT][I1.5] 리뷰 라벨인데 스냅샷 문구가 복수(${snapCount}) → 중복 주입/중복 섹션 가능성`);
+      }
+    }
+  } else {
+    // 비리뷰 글은 0개여야 정상(오염 방지)
+    if (snapCount !== 0) {
+      status = rankStatus(status, 'CRIT');
+      messages.push(`[CRIT][I1.5] 비리뷰 글에 스냅샷 문구가 존재(${snapCount}) → 리뷰 주입 오염`);
+    }
   }
 
   // ── 무결성 #2: 핵심 블록 계약(tldr/keyfacts/faq/sources) ──
@@ -242,7 +341,9 @@ async function checkOne(fileName) {
     pageId,
     messages,
     integrity: {
+      reviewBlocks: integrityReviewBlocks,
       reviewSsot: integrityReview,
+      reviewSnapshot: integritySnapshot,
       coreBlocks: integrityBlocks,
       pageId: integrityPageId,
     },
@@ -316,11 +417,19 @@ async function main() {
     generatedAt: new Date().toISOString(),
     cdnBase: CDN_BASE,
     integrityPolicy: {
+      // 기존 3개
       I1_reviewMissingSsot_isCRIT: true,
       I2_coreBlocksMissing_isCRIT: true,
       I3_pageIdBroken_isCRIT: true,
+
+      // 추가 2개(재발 방지)
+      I0_reviewSectionCount_isCRIT: 'review-rating-block & review-insights-block must be exactly 1 each (all files)',
+      I15_reviewSnapshotMark_isCRIT: `review files must have "${SNAPSHOT_MARK}" exactly once; non-review files must have 0`,
+
+      // 범위 외
       I4_publishGate_isOutsideQa: 'publish/blogger.cjs',
       I5_dryRunGate_isOutsideQa: 'build/r2-upload.cjs',
+
       note: 'og:image HEAD check intentionally disabled (stability patch deferred).',
     },
     counts: { pass: passCount, warn: warnCount, fail: failCount, crit: critCount },
