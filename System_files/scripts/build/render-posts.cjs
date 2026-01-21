@@ -196,7 +196,7 @@ function buildBodyImageFigure(img, fallbackAlt) {
  * Why : 템플릿 변경 없이 body-image 렌더 품질을 맞추기 위함
  * I/O : READ/WRITE dist HTML 문자열
  * Invariants:
- *  - 마커(body-image-css)가 있으면 중복 주입 금지
+ *  - 마커("body-image-css")가 있으면 중복 주입 금지
  */
 function injectBodyImageCssOnce(html) {
   if (html.includes('/* body-image-css */')) return html;
@@ -284,7 +284,6 @@ function buildHeadFromMeta(meta) {
  * I/O : READ content/posts/{slug}.json, (필요 시) ids.cjs 실행
  * Invariants:
  *  - pageId 포맷은 page\d{6}로만 인정
- *  - ids 재실행 후에도 없으면 FAIL(스코프/모드 문제 가능성)
  */
 function ensurePageIdForPost(postJson, slug, jsonPath, idsCtx) {
   const existing = firstNonEmpty(
@@ -357,55 +356,28 @@ function injectAfterSlot(html, slotMarker, insertHtml, guardId) {
   return html.slice(0, after) + '\n' + insertHtml + html.slice(after);
 }
 
-/* ───────────────────── body guard (duplicate section) ───────────────────── */
+/* ───────────────────── body policy ───────────────────── */
 
 /**
- * What: 본문(body) 내부에 섞여 들어온 "금지 섹션(section id=...)"을 제거한다.
+ * What: 본문(bodyHtml)에서 "절대 들어오면 안 되는 섹션"을 제거한다.
  * Why :
- *  - 템플릿(post.html)이 review/faq/sources 같은 구조 섹션을 이미 갖고 있다.
- *  - 그런데 body 안에 <section id="review-base-block"> 같은 태그가 들어오면
- *    dist에서 동일 id 섹션이 중복되어 DOM 무결성/QA/주입기가 모두 깨진다.
- * I/O : READ/WRITE body html string
+ *  - 템플릿(post.html)이 FAQ/Sources/Review 섹션의 SSOT 구조를 가진다.
+ *  - body 안에 같은 id 섹션이 들어오면 dist에서 id 중복(무결성 파손)이 발생한다.
+ *  - 특히 <section id="review-base-block"> 같은 덩어리가 body에 반복 삽입되면,
+ *    review-rating/insights 같은 placeholder도 함께 증식될 수 있다.
+ *
  * Invariants:
- *  - 제거 대상은 "본문 문자열 내부"의 <section ... id="X">...</section>만
- *  - 템플릿 자체 섹션은 건드리지 않는다(본문만 정리)
- *  - 수정 구간 외 소스는 삭제/변경하지 않는다
+ *  - 제거 범위는 "section 태그 단위"로만 제한한다(과삭제 방지).
+ *  - 그 외 텍스트/마크업은 손대지 않는다.
  */
-function stripSectionByIdFromBody(bodyHtml, sectionId) {
-  if (!bodyHtml || typeof bodyHtml !== 'string') return { html: bodyHtml || '', removed: 0 };
+function stripForbiddenSectionsFromBody(bodyHtml) {
+  if (!bodyHtml || typeof bodyHtml !== 'string') return '';
 
-  // <section ... id="sectionId" ...> ... </section> (non-greedy, global)
-  // - 섹션 내부에 줄바꿈/태그가 있어도 제거되도록 [\s\S]*? 사용
-  const re = new RegExp(
-    `<section\\b[^>]*\\bid=["']${sectionId}["'][^>]*>[\\s\\S]*?<\\/section>`,
-    'gi'
-  );
-
-  let removed = 0;
-  let next = bodyHtml;
-
-  // replace 한 번으로 끝나지 않는 케이스(중복 여러 개) 대비
-  for (;;) {
-    const before = next;
-    next = next.replace(re, () => { removed++; return ''; });
-    if (next === before) break;
-  }
-
-  return { html: next, removed };
-}
-
-/**
- * What: 본문에서 중복/오염을 유발하는 섹션들을 일괄 제거한다.
- * Why :
- *  - review-base-block: 본문에 들어오면 review placeholder가 본문에 복제됨
- *  - review-rating/insights: 템플릿에 이미 있으므로 본문에서 나오면 2개 이상 발생
- *  - faq/sources: slot 주입 구조와 충돌할 수 있으므로 본문에 섹션이 섞이면 제거
- * I/O : READ/WRITE body html string
- * Invariants:
- *  - 제거 대상 id는 "템플릿이 책임지는 구조 섹션"만 한정한다.
- */
-function sanitizeBodyNoDuplicateSections(bodyHtml) {
-  const targets = [
+  // ✅ 제거 대상: body에 존재하면 안 되는 섹션 id 목록
+  // - review-base-block: 본문에 들어오면 review 관련 중복의 촉매가 됨(현재 smartsavings 원인)
+  // - review-rating-block / review-insights-block: 템플릿에만 1개 존재해야 함
+  // - faq / sources: slot 주입 구조와 충돌(guard 오작동 + 중복 가능)
+  const forbiddenIds = [
     'review-base-block',
     'review-rating-block',
     'review-insights-block',
@@ -413,20 +385,20 @@ function sanitizeBodyNoDuplicateSections(bodyHtml) {
     'sources',
   ];
 
-  let html = bodyHtml || '';
-  const removedMap = {};
-  let removedTotal = 0;
+  let out = bodyHtml;
 
-  for (const id of targets) {
-    const r = stripSectionByIdFromBody(html, id);
-    html = r.html;
-    if (r.removed > 0) {
-      removedMap[id] = r.removed;
-      removedTotal += r.removed;
-    }
+  for (const id of forbiddenIds) {
+    // section 통째 제거(닫는 태그까지)
+    // - 최소 매칭으로 과삭제 방지
+    // - case-insensitive
+    const re = new RegExp(
+      `<section\\b[^>]*\\bid="${id}"[^>]*>[\\s\\S]*?<\\/section>`,
+      'gi'
+    );
+    out = out.replace(re, '');
   }
 
-  return { html, removedTotal, removedMap };
+  return out;
 }
 
 /* ───────────────────── render one ───────────────────── */
@@ -460,26 +432,8 @@ function renderOne(template, postJson, jsonPath, bodyImgCtx, idsCtx) {
   // 본문은 sanitize 후 사용
   let bodyHtml = blocks.sanitizeBodyHTML(postJson.body || '');
 
-  /* ─────────────────────────────────────────────
-   * 본문 금지 섹션 제거(중복 DOM 방지) — 중요
-   *
-   * What: body 내부에 들어온 review/faq/sources 섹션 태그를 제거한다.
-   * Why : 템플릿이 구조 섹션을 책임지는 설계. body가 섞이면 id 중복이 발생한다.
-   * I/O : READ/WRITE body html string
-   * Invariants:
-   *  - 템플릿은 그대로(수정 없음)
-   *  - 본문에서만 제거
-   *  - 제거가 발생하면 slug 기준으로 경고 로그를 남겨 추적 가능하게 한다.
-   * ───────────────────────────────────────────── */
-  {
-    const cleaned = sanitizeBodyNoDuplicateSections(bodyHtml);
-    if (cleaned.removedTotal > 0) {
-      console.warn(
-        `[render-posts][WARN] body 내부 금지 섹션 제거: slug=${slug} removed=${cleaned.removedTotal} detail=${JSON.stringify(cleaned.removedMap)}`
-      );
-      bodyHtml = cleaned.html;
-    }
-  }
+  // ✅ 핵심: body 안에 섹션 뼈대/충돌 id가 섞이면 dist에서 중복이 발생하므로 제거
+  bodyHtml = stripForbiddenSectionsFromBody(bodyHtml);
 
   /* ─────────────────────────────────────────────
    * 본문 이미지(선택) — manifest 기반 preprend
