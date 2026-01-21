@@ -1,18 +1,26 @@
 {
   "bySlug": {
     "subscription-20251207-001": {
-      "lastChecked": "2026-01-01",
+      "lastChecked": "2026-01-19",
       "status": "ok",
       "store": "trustpilot",
-      "ratingCurrent": 4.2,
-      "ratingPrevious": 4.2,
+      "source": "official",
+      "storeId": "todoist.com",
+      "ratingCurrent": 3.5,
+      "ratingPrevious": 3.5,
       "ratingDiff": 0,
-      "votesCurrent": 2100,
-      "votesPrevious": 2100,
+      "votesCurrent": 74,
+      "votesPrevious": 74,
       "votesDiff": 0,
-      "histogram": { "1": 5, "2": 7, "3": 13, "4": 25, "5": 50 },
-      "source": "manual",
-      "storeId": null
+      "histogram": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0
+      },
+      "insights": []
     }
-  }
+  },
+  "updatedAt": "2026-01-15"
 }
