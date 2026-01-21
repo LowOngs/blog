@@ -32,6 +32,8 @@ const blocks = require('./lib/blocks.cjs');
  *  - render가 FAQ/Sources/Review 같은 "섹션 뼈대"를 새로 만들지 않는다.
  *  - 템플릿에 이미 존재하는 id를 render에서 중복 생성하지 않는다.
  *  - Review는 render 단계에서 절대 주입/생성/치환하지 않는다(후속 injector 책임).
+ *  - ✅ FAQ/Sources는 템플릿에 <section id="faq|sources">가 존재한다는 전제(SSOT).
+ *    render는 {{faq}} / {{sources}}만 치환한다.
  * ───────────────────────────────────────────── */
 
 /* ───────────────────── file/json ───────────────────── */
@@ -196,7 +198,7 @@ function buildBodyImageFigure(img, fallbackAlt) {
  * Why : 템플릿 변경 없이 body-image 렌더 품질을 맞추기 위함
  * I/O : READ/WRITE dist HTML 문자열
  * Invariants:
- *  - 마커("body-image-css")가 있으면 중복 주입 금지
+ *  - 마커("/* body-image-css */")가 있으면 중복 주입 금지
  */
 function injectBodyImageCssOnce(html) {
   if (html.includes('/* body-image-css */')) return html;
@@ -284,6 +286,7 @@ function buildHeadFromMeta(meta) {
  * I/O : READ content/posts/{slug}.json, (필요 시) ids.cjs 실행
  * Invariants:
  *  - pageId 포맷은 page\d{6}로만 인정
+ *  - ids 재실행 후에도 없으면 FAIL(스코프/모드 문제 가능성)
  */
 function ensurePageIdForPost(postJson, slug, jsonPath, idsCtx) {
   const existing = firstNonEmpty(
@@ -334,73 +337,6 @@ function resolveAio(postJson) {
   };
 }
 
-/**
- * What: SLOT 마커 뒤에 insertHtml을 주입한다.
- * Why : 템플릿이 뼈대를 갖고, render는 그 자리에 채우기만 해야 함.
- * I/O : READ/WRITE html string
- * Invariants:
- *  - slotMarker 없으면 no-op
- *  - (중요) guardId가 이미 존재하면 중복 주입 금지
- */
-function injectAfterSlot(html, slotMarker, insertHtml, guardId) {
-  if (!insertHtml) return html;
-
-  // ✅ 템플릿/기존 산출물에 id가 이미 있으면 절대 중복 생성 금지
-  if (guardId && html.includes(`id="${guardId}"`)) {
-    return html;
-  }
-
-  const idx = html.indexOf(slotMarker);
-  if (idx === -1) return html;
-  const after = idx + slotMarker.length;
-  return html.slice(0, after) + '\n' + insertHtml + html.slice(after);
-}
-
-/* ───────────────────── body policy ───────────────────── */
-
-/**
- * What: 본문(bodyHtml)에서 "절대 들어오면 안 되는 섹션"을 제거한다.
- * Why :
- *  - 템플릿(post.html)이 FAQ/Sources/Review 섹션의 SSOT 구조를 가진다.
- *  - body 안에 같은 id 섹션이 들어오면 dist에서 id 중복(무결성 파손)이 발생한다.
- *  - 특히 <section id="review-base-block"> 같은 덩어리가 body에 반복 삽입되면,
- *    review-rating/insights 같은 placeholder도 함께 증식될 수 있다.
- *
- * Invariants:
- *  - 제거 범위는 "section 태그 단위"로만 제한한다(과삭제 방지).
- *  - 그 외 텍스트/마크업은 손대지 않는다.
- */
-function stripForbiddenSectionsFromBody(bodyHtml) {
-  if (!bodyHtml || typeof bodyHtml !== 'string') return '';
-
-  // ✅ 제거 대상: body에 존재하면 안 되는 섹션 id 목록
-  // - review-base-block: 본문에 들어오면 review 관련 중복의 촉매가 됨(현재 smartsavings 원인)
-  // - review-rating-block / review-insights-block: 템플릿에만 1개 존재해야 함
-  // - faq / sources: slot 주입 구조와 충돌(guard 오작동 + 중복 가능)
-  const forbiddenIds = [
-    'review-base-block',
-    'review-rating-block',
-    'review-insights-block',
-    'faq',
-    'sources',
-  ];
-
-  let out = bodyHtml;
-
-  for (const id of forbiddenIds) {
-    // section 통째 제거(닫는 태그까지)
-    // - 최소 매칭으로 과삭제 방지
-    // - case-insensitive
-    const re = new RegExp(
-      `<section\\b[^>]*\\bid="${id}"[^>]*>[\\s\\S]*?<\\/section>`,
-      'gi'
-    );
-    out = out.replace(re, '');
-  }
-
-  return out;
-}
-
 /* ───────────────────── render one ───────────────────── */
 
 function renderOne(template, postJson, jsonPath, bodyImgCtx, idsCtx) {
@@ -424,19 +360,18 @@ function renderOne(template, postJson, jsonPath, bodyImgCtx, idsCtx) {
   const updatedDate = (meta.updatedIso || '').slice(0, 10) || '';
 
   const aio = resolveAio(postJson);
+
+  // ✅ 템플릿(뼈대) + 치환만: blocks는 HTML "조각"만 생성
   const tldrHtml    = blocks.renderTLDR(asArray(aio.tldr));
   const kfHtml      = blocks.renderKeyFacts(asArray(aio.keyfacts));
-  const faqHtml     = blocks.renderFAQ(asArray(aio.faq));
-  const sourcesHtml = blocks.renderSources(asArray(aio.sources));
+  const faqHtml     = blocks.renderFAQ(asArray(aio.faq));         // ✅ {{faq}} 치환용
+  const sourcesHtml = blocks.renderSources(asArray(aio.sources)); // ✅ {{sources}} 치환용
 
   // 본문은 sanitize 후 사용
   let bodyHtml = blocks.sanitizeBodyHTML(postJson.body || '');
 
-  // ✅ 핵심: body 안에 섹션 뼈대/충돌 id가 섞이면 dist에서 중복이 발생하므로 제거
-  bodyHtml = stripForbiddenSectionsFromBody(bodyHtml);
-
   /* ─────────────────────────────────────────────
-   * 본문 이미지(선택) — manifest 기반 preprend
+   * 본문 이미지(선택) — manifest 기반 prepend
    *
    * What: body 이미지 1장을 본문 앞에 추가(허용 도메인만)
    * Why : 글의 시각적 품질/체류시간/SEO 보강
@@ -463,8 +398,8 @@ function renderOne(template, postJson, jsonPath, bodyImgCtx, idsCtx) {
    * REVIEW POLICY (중요/강제)
    *
    * What: render 단계에서 review 섹션을 추가 생성/주입/치환하지 않는다.
-   * Why : 템플릿(post.html)에 review placeholder 섹션이 존재하는 구조(B안)이며,
-   *       render가 추가 생성하면 동일 id가 2개가 되어 무결성(#2/#DOM) 파손.
+   * Why : 템플릿(post.html)에 review placeholder 섹션이 존재하는 구조이며,
+   *       render가 추가 생성하면 동일 id가 2개가 되어 무결성(#DOM) 파손.
    * I/O : READ templates/post.html, WRITE dist/posts/*.html
    * Invariants:
    *  - id="review-rating-block", id="review-insights-block"는 dist에서 최대 1개
@@ -486,24 +421,18 @@ function renderOne(template, postJson, jsonPath, bodyImgCtx, idsCtx) {
   html = replaceAllSafe(html, '{{keyfacts}}', kfHtml);
   html = replaceAllSafe(html, '{{body}}', bodyHtml);
 
+  // ✅ FAQ/Sources는 템플릿 섹션 뼈대가 SSOT
+  //    - render는 "주입"이 아니라 {{faq}}/{{sources}} 치환만 수행한다.
+  //    - blocks.renderFAQ/renderSources는 입력이 비면 ''(빈 문자열)로 내려가도록 설계되어 있어
+  //      시각적으로 빈칸 노출을 최소화(템플릿/CSS 정책과 결합).
+  html = replaceAllSafe(html, '{{faq}}', faqHtml);
+  html = replaceAllSafe(html, '{{sources}}', sourcesHtml);
+
   // updated 배지 치환(템플릿 구조 유지)
   if (updatedDate) html = html.replace('Updated {{updated}}', `Updated ${escapeHtml(updatedDate)}`);
 
   // head meta 슬롯 치환
   html = html.replace('<!--META-->', buildHeadFromMeta(meta));
-
-  /* ─────────────────────────────────────────────
-   * FAQ/Sources 주입 정책
-   *
-   * What: 템플릿에 FAQ/Sources "섹션이 없으므로" SLOT 뒤에 주입한다.
-   * Why : 템플릿은 뼈대를 담당하지만, FAQ/Sources는 "조건부 존재"라 slot 기반이 안전.
-   * I/O : READ template html, WRITE dist html
-   * Invariants:
-   *  - guardId로 중복 방지: 이미 id="faq"/"sources"가 있으면 주입 스킵
-   *  - 템플릿에 섹션을 박아버리면 여기 inject를 제거해야 한다(중복 위험)
-   * ───────────────────────────────────────────── */
-  html = injectAfterSlot(html, '<!--SLOT:FAQ_WRAPPER-->', faqHtml, 'faq');
-  html = injectAfterSlot(html, '<!--SLOT:SOURCES_WRAPPER-->', sourcesHtml, 'sources');
 
   // body image CSS는 실제 사용 시에만 1회 주입
   if (bodyHtml.includes('class="post-body-image"')) html = injectBodyImageCssOnce(html);
@@ -596,3 +525,4 @@ function main() {
 }
 
 if (require.main === module) main();
+```0
