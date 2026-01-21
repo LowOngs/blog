@@ -1,1 +1,26 @@
-{ "updatedAt": "2026-01-15", "bySlug": {} }
+{
+  "updatedAt": "2026-01-19",
+  "bySlug": {
+    "device-20251207-001": {
+      "lastChecked": "2026-01-15",
+      "status": "unknown",
+      "store": "unknown",
+      "source": "manual",
+      "storeId": null,
+      "ratingCurrent": 0,
+      "ratingPrevious": 0,
+      "ratingDiff": 0,
+      "votesCurrent": 0,
+      "votesPrevious": 0,
+      "votesDiff": 0,
+      "histogram": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0
+      },
+      "insights": []
+    }
+  }
+}
