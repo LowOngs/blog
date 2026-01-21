@@ -1,1 +1,26 @@
-{ "updatedAt": "2026-01-15", "bySlug": {} }
+{
+  "updatedAt": "2026-01-19",
+  "bySlug": {
+    "subscription-20251207-001": {
+      "lastChecked": "2026-01-19",
+      "status": "ok",
+      "store": "trustpilot",
+      "source": "official",
+      "storeId": "todoist.com",
+      "ratingCurrent": 3.5,
+      "ratingPrevious": 3.5,
+      "ratingDiff": 0,
+      "votesCurrent": 74,
+      "votesPrevious": 74,
+      "votesDiff": 0,
+      "histogram": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0
+      },
+      "insights": []
+    }
+  }
+}
