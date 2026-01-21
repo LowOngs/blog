@@ -196,7 +196,7 @@ function buildBodyImageFigure(img, fallbackAlt) {
  * Why : 템플릿 변경 없이 body-image 렌더 품질을 맞추기 위함
  * I/O : READ/WRITE dist HTML 문자열
  * Invariants:
- *  - 마커(/* body-image-css */)가 있으면 중복 주입 금지
+ *  - 마커(body-image-css)가 있으면 중복 주입 금지
  */
 function injectBodyImageCssOnce(html) {
   if (html.includes('/* body-image-css */')) return html;
