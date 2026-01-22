@@ -86,6 +86,41 @@ function tryReadJsonFile(p) {
   }
 }
 
+/* ───────────────────── hidden toggle helper ───────────────────── */
+
+/**
+ * What: HTML 조각이 "실질적으로 비어있는지" 판정
+ * Why : FAQ/Sources 데이터 없을 때 화면에 빈칸/박스가 보이는 것을 방지(hidden 토글)
+ * I/O : READ html fragment string
+ * Invariants:
+ *  - 태그/공백/&nbsp; 제거 후 텍스트가 0이면 blank로 간주
+ */
+function isBlankHtmlFragment(s) {
+  const t = String(s || '')
+    .replace(/<[^>]*>/g, '')
+    .replace(/&nbsp;/gi, ' ')
+    .trim();
+  return t.length === 0;
+}
+
+/**
+ * What: <section id="...">에 hidden 속성을 추가/제거
+ * Why : 코어블록(id)은 유지하면서, 내용 없을 때만 시각적으로 숨김
+ * I/O : READ/WRITE dist HTML 문자열
+ * Invariants:
+ *  - id="faq"/"sources" 섹션은 템플릿 SSOT로 이미 존재해야 함
+ *  - 중복 hidden 추가 금지, 존재 시 제거만 수행
+ */
+function toggleSectionHidden(html, sectionId, shouldHide) {
+  const reOpen = new RegExp(`(<section[^>]*id=["']${sectionId}["'][^>]*)(>)`, 'i');
+  const reHidden = new RegExp(`(<section[^>]*id=["']${sectionId}["'][^>]*?)\\s+hidden\\b`, 'i');
+
+  if (shouldHide) {
+    return html.replace(reOpen, (m, a, b) => (/\shidden\b/i.test(a) ? m : `${a} hidden${b}`));
+  }
+  return html.replace(reHidden, '$1');
+}
+
 /* ───────────────────── ids rerun ───────────────────── */
 
 /**
@@ -190,6 +225,7 @@ function buildBodyImageFigure(img, fallbackAlt) {
     `  <img src="${url}" alt="${alt}" loading="lazy" decoding="async"${wAttr}${hAttr} />`,
     caption ? `  ${caption}` : '',
     `</figure>`,
+    '',
   ].filter(Boolean).join('\n');
 }
 
@@ -428,6 +464,19 @@ function renderOne(template, postJson, jsonPath, bodyImgCtx, idsCtx) {
   html = replaceAllSafe(html, '{{faq}}', faqHtml);
   html = replaceAllSafe(html, '{{sources}}', sourcesHtml);
 
+  /* ─────────────────────────────────────────────
+   * FAQ/SOURCES hidden 토글 (요청 구현)
+   *
+   * What: 데이터가 없으면 해당 섹션을 hidden 처리하고, 있으면 hidden 제거
+   * Why : 화면에 빈칸/박스가 덜렁 보이는 문제를 제거(원래 기능 복원)
+   * I/O : READ faqHtml/sourcesHtml, WRITE dist HTML 문자열
+   * Invariants:
+   *  - id="faq"/"sources" 섹션 자체는 항상 존재(qa-check I2 계약 유지)
+   *  - 다른 구현물(blocks/meta/injector/qa)은 수정하지 않음
+   * ───────────────────────────────────────────── */
+  html = toggleSectionHidden(html, 'faq', isBlankHtmlFragment(faqHtml));
+  html = toggleSectionHidden(html, 'sources', isBlankHtmlFragment(sourcesHtml));
+
   // updated 배지 치환(템플릿 구조 유지)
   if (updatedDate) html = html.replace('Updated {{updated}}', `Updated ${escapeHtml(updatedDate)}`);
 
@@ -525,4 +574,3 @@ function main() {
 }
 
 if (require.main === module) main();
-```0
