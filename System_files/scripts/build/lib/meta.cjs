@@ -4,6 +4,7 @@
  * meta.cjs
  * - 각 포스트에 들어갈 canonical / og:image / JSON-LD(Article, FAQPage, BreadcrumbList, WebSite) 생성
  * - render-posts.cjs 에서 buildMeta(post, { slug, pageId, siteBase, cdnBase }) 형태로 호출
+ * - ✅ (회귀) meta가 "공장": meta head HTML(OG/Twitter/time/preload/schema)까지 생성
  */
 
 /* ───────────────────── 헬퍼 ───────────────────── */
@@ -55,6 +56,20 @@ function asArray(v) {
   return Array.isArray(v) ? v : [v];
 }
 
+/* HTML escape (head meta 생성용) */
+function escapeHtml(str) {
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function escapeAttr(str) {
+  return escapeHtml(str).replace(/\n/g, ' ');
+}
+
 /* FAQ 데이터 정규화
    - aio.faq 가
      · [{q, a}, …] 이거나
@@ -94,6 +109,63 @@ function labelToSection(mainLabel) {
     default:
       return 'Ongs Blog';
   }
+}
+
+/* ───────────────────── head meta 공장(HTML 생성) ───────────────────── */
+
+function buildSchemaScript(schemaTags) {
+  if (!Array.isArray(schemaTags) || schemaTags.length === 0) return '';
+  const json = JSON.stringify(schemaTags.length === 1 ? schemaTags[0] : schemaTags);
+  return `<script type="application/ld+json">${json}</script>`;
+}
+
+function buildHeadFromMetaResult(metaRes) {
+  const og = (metaRes && metaRes.metaTags && metaRes.metaTags.og) ? metaRes.metaTags.og : {};
+  const tw = (metaRes && metaRes.metaTags && metaRes.metaTags.twitter) ? metaRes.metaTags.twitter : {};
+  const tm = (metaRes && metaRes.metaTags && metaRes.metaTags.timeMeta) ? metaRes.metaTags.timeMeta : {};
+
+  const canonical = metaRes.canonicalUrl || og.url || '';
+  const title = og.title || metaRes.resolvedTitle || '';
+  const desc = og.description || metaRes.resolvedDescription || '';
+  const ogImage = og.image || metaRes.ogImage || '';
+  const ogAlt = og.imageAlt || metaRes.ogAlt || desc || title;
+
+  const lines = [];
+
+  if (canonical) lines.push(`<link rel="canonical" href="${escapeAttr(canonical)}">`);
+
+  lines.push(`<meta property="og:type" content="article">`);
+  if (canonical) lines.push(`<meta property="og:url" content="${escapeAttr(canonical)}">`);
+  if (title) lines.push(`<meta property="og:title" content="${escapeAttr(title)}">`);
+  if (desc) lines.push(`<meta property="og:description" content="${escapeAttr(desc)}">`);
+
+  if (ogImage) {
+    lines.push(`<meta property="og:image" content="${escapeAttr(ogImage)}">`);
+    lines.push(`<meta property="og:image:alt" content="${escapeAttr(ogAlt)}">`);
+    lines.push(`<meta property="og:image:width" content="1200">`);
+    lines.push(`<meta property="og:image:height" content="630">`);
+  }
+
+  lines.push(`<meta name="twitter:card" content="${escapeAttr(tw.card || 'summary_large_image')}">`);
+  if (tw.title || title) lines.push(`<meta name="twitter:title" content="${escapeAttr(tw.title || title)}">`);
+  if (tw.description || desc) lines.push(`<meta name="twitter:description" content="${escapeAttr(tw.description || desc)}">`);
+  if (tw.image || ogImage) {
+    lines.push(`<meta name="twitter:image" content="${escapeAttr(tw.image || ogImage)}">`);
+    lines.push(`<meta name="twitter:image:alt" content="${escapeAttr(tw.imageAlt || ogAlt)}">`);
+  }
+
+  if (tm.publishedTime) lines.push(`<meta property="article:published_time" content="${escapeAttr(tm.publishedTime)}">`);
+  if (tm.modifiedTime) {
+    lines.push(`<meta property="article:modified_time" content="${escapeAttr(tm.modifiedTime)}">`);
+    lines.push(`<meta property="og:updated_time" content="${escapeAttr(tm.modifiedTime)}">`);
+  }
+
+  // LCP 최적화: og:image preload
+  if (ogImage) lines.push(`<link rel="preload" as="image" href="${escapeAttr(ogImage)}" fetchpriority="high">`);
+
+  lines.push(buildSchemaScript(metaRes.schemaTags));
+
+  return lines.filter(Boolean).join('\n');
 }
 
 /* ───────────────────── 메인 빌더 ───────────────────── */
@@ -290,17 +362,22 @@ function buildMeta(post, ctx = {}) {
   const schemaTags = [articleJsonLd, breadcrumbJsonLd, authorityJsonLd];
   if (faqJsonLd) schemaTags.push(faqJsonLd);
 
-  return {
+  // ✅ meta 공장에서 headHtml까지 만들어 반환
+  const metaRes = {
     metaTags,
     schemaTags,
-    // 참고용 필드 (필요시 다른 스크립트에서 사용 가능)
     canonicalUrl,
     ogImage,
     ogAlt: heroAlt,
     updatedIso,
     publishedIso,
     pageId,
+    resolvedTitle: title,
+    resolvedDescription: description || title,
   };
+  metaRes.headHtml = buildHeadFromMetaResult(metaRes);
+
+  return metaRes;
 }
 
 module.exports = {
