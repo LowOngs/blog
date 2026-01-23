@@ -16,7 +16,7 @@ on:
         required: false
         default: "true"
   schedule:
-    - cron: "15 2 * * *" # KST 11:15 (UTC 02:15)
+    - cron: "15 2 * * *" # UTC 02:15 (KST 11:15)
 
 permissions:
   contents: write
@@ -28,7 +28,11 @@ concurrency:
 jobs:
   publish:
     runs-on: ubuntu-latest
+
     env:
+      # ── Runtime base (SSOT)
+      SYSTEM_ROOT: System_files
+
       CANONICAL_BASE: ${{ secrets.CANONICAL_BASE }}
       CDN_BASE: ${{ secrets.CDN_BASE }}
 
@@ -61,19 +65,14 @@ jobs:
         with:
           node-version: "24"
 
-      # ✅ 경로 수정 핵심: npm ci / npm run 은 System_files에서 실행
-      - name: Install (System_files)
-        working-directory: System_files
+      # repo root 기준
+      - name: Install dependencies
         run: npm ci
 
       - name: Decide modes
         id: modes
         shell: bash
         run: |
-          echo "RUN_MODE=${RUN_MODE}"
-          echo "MANUAL_JOB=${MANUAL_JOB}"
-          echo "DRY_RUN_INPUT=${DRY_RUN_INPUT}"
-
           parse_dry_run () {
             v="$(echo "${1:-}" | tr '[:upper:]' '[:lower:]' | xargs)"
             if [ "$v" = "false" ] || [ "$v" = "0" ]; then
@@ -83,16 +82,13 @@ jobs:
             fi
           }
 
-          EVENT_NAME="${{ github.event_name }}"
-
-          if [ "$EVENT_NAME" = "schedule" ]; then
+          if [ "${{ github.event_name }}" = "schedule" ]; then
             if [ "${SCHEDULE_MODE}" != "live" ]; then
               echo "SKIP_SCHEDULE=true" >> $GITHUB_OUTPUT
               exit 0
             fi
             echo "SKIP_SCHEDULE=false" >> $GITHUB_OUTPUT
             echo "FINAL_DRY_RUN=false" >> $GITHUB_OUTPUT
-            echo "FINAL_RUN_MODE=auto" >> $GITHUB_OUTPUT
             exit 0
           fi
 
@@ -100,58 +96,33 @@ jobs:
 
           if [ "${RUN_MODE}" = "auto" ]; then
             echo "FINAL_DRY_RUN=false" >> $GITHUB_OUTPUT
-            echo "FINAL_RUN_MODE=auto" >> $GITHUB_OUTPUT
           else
             echo "FINAL_DRY_RUN=$(parse_dry_run "${DRY_RUN_INPUT}")" >> $GITHUB_OUTPUT
-            echo "FINAL_RUN_MODE=manual" >> $GITHUB_OUTPUT
           fi
 
       - name: Stop (schedule disabled)
         if: steps.modes.outputs.SKIP_SCHEDULE == 'true'
-        run: |
-          echo "Schedule is disabled (SCHEDULE_MODE != live). Exit."
-          exit 0
+        run: exit 0
 
       - name: Export runtime env
-        shell: bash
         run: |
           echo "DRY_RUN=${{ steps.modes.outputs.FINAL_DRY_RUN }}" >> $GITHUB_ENV
 
-          if [ "${{ steps.modes.outputs.FINAL_DRY_RUN }}" = "true" ]; then
-            echo "BODY_WRITE_MODE=local" >> $GITHUB_ENV
-          else
-            echo "BODY_WRITE_MODE=active" >> $GITHUB_ENV
-          fi
+      # ─────────────────────────────────────────────
+      # 이하 전부 System_files 기준
+      # ─────────────────────────────────────────────
 
-      - name: Sanity check (required scripts exist)
+      - name: Sanity check
+        working-directory: System_files
         run: |
-          test -f System_files/scripts/build/seed-scheduler.cjs
-          test -f System_files/scripts/build/queue-to-posts.cjs
-          test -f System_files/scripts/build/ids.cjs
-          test -f System_files/scripts/build/generate-body.cjs
+          test -f scripts/build/seed-scheduler.cjs
+          test -f scripts/build/queue-to-posts.cjs
+          test -f scripts/build/ids.cjs
+          test -f scripts/build/generate-body.cjs
+          test -f scripts/build/render-posts.cjs
+          test -f scripts/publish/blogger.cjs
 
-          test -f System_files/scripts/build/review-resolver.cjs
-          test -f System_files/scripts/build/render-posts.cjs
-          test -f System_files/scripts/build/normalize-body.cjs
-          test -f System_files/scripts/build/review-meta-block.cjs
-
-          test -f System_files/scripts/build/validate-body-images.cjs
-          test -f System_files/scripts/build/images-renew.cjs
-          test -f System_files/scripts/build/images-build-og.cjs
-
-          test -f System_files/scripts/build/validate-repair.cjs
-          test -f System_files/scripts/build/qa-check.cjs
-          test -f System_files/scripts/publish/blogger.cjs
-
-          test -f System_files/scripts/build/ai-meta.js
-          test -f System_files/scripts/build/build-feed.cjs
-          test -f System_files/scripts/build/validate-feed.cjs
-          test -f System_files/scripts/build/copy-tools.cjs
-          test -f System_files/scripts/build/build-trust-page.cjs
-
-          test -f System_files/scripts/build/update-posts-index.cjs
-
-      - name: Build queue (scheduler)
+      - name: Build queue + body
         working-directory: System_files
         run: |
           node scripts/build/seed-scheduler.cjs
@@ -159,97 +130,60 @@ jobs:
           node scripts/build/ids.cjs
           node scripts/build/generate-body.cjs
 
-      - name: Inject reviewData (SSOT)
+      - name: Reviews / render
         working-directory: System_files
         run: |
           node scripts/build/review-resolver.cjs
-
-      - name: Validate body images manifest
-        working-directory: System_files
-        run: |
-          node scripts/build/validate-body-images.cjs
-
-      - name: Render posts (1st)
-        working-directory: System_files
-        run: |
           node scripts/build/render-posts.cjs
           node scripts/build/normalize-body.cjs
           node scripts/build/review-meta-block.cjs
 
-      - name: Build OG images (needs dist/posts)
+      - name: Images
         working-directory: System_files
         run: |
           node scripts/build/images-renew.cjs
           node scripts/build/images-build-og.cjs
-
-      - name: Upload images to R2
-        working-directory: System_files
-        run: |
           npm run images:upload
-
-      - name: Rewrite image URLs in posts JSON
-        working-directory: System_files
-        run: |
           npm run images:rewrite
 
-      - name: Render posts (2nd, after rewrite)
+      - name: Render after rewrite
         working-directory: System_files
         run: |
           node scripts/build/render-posts.cjs
           node scripts/build/normalize-body.cjs
-          node scripts/build/review-meta-block.cjs
 
-      - name: Validate & repair
+      - name: Validate & QA
         working-directory: System_files
         run: |
           node scripts/build/validate-repair.cjs
-
-      - name: Preflight QA
-        working-directory: System_files
-        run: |
           npm run posts:qa
 
-      - name: Update posts index (SSOT: content/posts -> dist/ai/posts-index.json)
+      - name: AI outputs
         working-directory: System_files
         run: |
           node scripts/build/update-posts-index.cjs
-
-      - name: Build AI meta (authority, etc.)
-        working-directory: System_files
-        run: |
           node scripts/build/ai-meta.js
-
-      - name: Build AI feed
-        working-directory: System_files
-        run: |
           node scripts/build/build-feed.cjs
-
-      - name: Validate AI feed
-        working-directory: System_files
-        run: |
           node scripts/build/validate-feed.cjs
 
-      - name: Build tools (edit-request)
+      - name: Tools + Trust page
         working-directory: System_files
         run: |
           node scripts/build/copy-tools.cjs
-
-      - name: Build Trust page
-        working-directory: System_files
-        run: |
           node scripts/build/build-trust-page.cjs
 
-      - name: Publish to Blogger (blocked by DRY_RUN + PUBLISH_MODE)
+      - name: Publish to Blogger
         if: env.DRY_RUN != 'true' && env.PUBLISH_MODE == 'enable'
         working-directory: System_files
         run: |
           node scripts/publish/blogger.cjs
 
-      - name: Commit generated artifacts
+      # repo root 기준
+      - name: Commit artifacts
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@users.noreply.github.com"
           git add -A
-          git diff --cached --quiet && echo "No changes" && exit 0
+          git diff --cached --quiet && exit 0
           git commit -m "build: publish pipeline output"
           git push
