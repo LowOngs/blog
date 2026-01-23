@@ -148,6 +148,9 @@ jobs:
           test -f System_files/scripts/build/copy-tools.cjs
           test -f System_files/scripts/build/build-trust-page.cjs
 
+          # NEW: posts-index updater (content/posts SSOT -> dist/ai/posts-index.json)
+          test -f System_files/scripts/build/update-posts-index.cjs
+
       - name: Build queue (scheduler)
         working-directory: System_files
         run: |
@@ -205,6 +208,11 @@ jobs:
         working-directory: System_files
         run: |
           npm run posts:qa
+
+      - name: Update posts index (SSOT: content/posts -> dist/ai/posts-index.json)
+        working-directory: System_files
+        run: |
+          node scripts/build/update-posts-index.cjs
 
       - name: Build AI meta (authority, etc.)
         working-directory: System_files
