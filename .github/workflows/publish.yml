@@ -61,7 +61,9 @@ jobs:
         with:
           node-version: "24"
 
-      - name: Install (repo root)
+      # ✅ 경로 수정 핵심: npm ci / npm run 은 System_files에서 실행
+      - name: Install (System_files)
+        working-directory: System_files
         run: npm ci
 
       - name: Decide modes
@@ -72,7 +74,6 @@ jobs:
           echo "MANUAL_JOB=${MANUAL_JOB}"
           echo "DRY_RUN_INPUT=${DRY_RUN_INPUT}"
 
-          # DRY_RUN 파서 규칙: false/0만 live, 그 외 전부 dry-run
           parse_dry_run () {
             v="$(echo "${1:-}" | tr '[:upper:]' '[:lower:]' | xargs)"
             if [ "$v" = "false" ] || [ "$v" = "0" ]; then
@@ -148,7 +149,6 @@ jobs:
           test -f System_files/scripts/build/copy-tools.cjs
           test -f System_files/scripts/build/build-trust-page.cjs
 
-          # NEW: posts-index updater (content/posts SSOT -> dist/ai/posts-index.json)
           test -f System_files/scripts/build/update-posts-index.cjs
 
       - name: Build queue (scheduler)
