@@ -1,78 +1,105 @@
+// System_files/scripts/build/ai-meta.js
+// 역할: content/posts SSOT를 기반으로 AIO/SEO 보조 메타를 생성·보강한다.
+// 주의: OG/Twitter 최종 값은 render-posts.cjs + lib/meta.cjs가 책임진다.
+//       본 파일은 임의 URL/이미지를 생성하지 않는다.
 
-// scripts/build/ai-meta.js
-// 각 post JSON에 AIO + SEO 메타 필드를 자동 삽입합니다.
+'use strict';
 
-import fs from "fs";
-import path from "path";
-import fg from "fast-glob";
+import fs from 'fs';
+import path from 'path';
+import fg from 'fast-glob';
 
-const POSTS_DIR = "content/posts";
+const ROOT = path.resolve(process.cwd(), 'System_files');
+const POSTS_DIR = path.join(ROOT, 'content', 'posts');
 
-function generateMeta(post) {
-  const title = post.title || "Untitled";
-  const summary = post.summary || post.content?.slice(0, 80) || "";
-  const slug = post.slug || title.toLowerCase().replace(/\s+/g, "-");
+function readJson(p) {
+  return JSON.parse(fs.readFileSync(p, 'utf8'));
+}
 
-  const tldr = post.tldr || [title, "핵심 요약", "핵심 포인트"];
-  const keyFacts = [
-    `${title}는(은) 주요 기능을 쉽게 다룰 수 있는 방법을 제공합니다.`,
-    "공식 문서와 지원 페이지 링크를 포함합니다."
-  ];
+function writeJson(p, obj) {
+  fs.writeFileSync(p, JSON.stringify(obj, null, 2), 'utf8');
+}
 
-  const sources = post.sources || [
-    { name: "공식 문서", url: "https://example.com" }
-  ];
+/**
+ * What: AIO 보조 메타 생성
+ * Why : TL;DR / KeyFacts / FAQ / Sources를 SSOT에 정규화 저장
+ * I/O : READ post JSON, WRITE post JSON(meta.aio)
+ * Invariants:
+ *  - OG/Twitter URL/이미지 생성 금지(render/meta 모듈 책임)
+ *  - slug/canonical/pageId 생성 금지
+ */
+function buildAio(post) {
+  const title = post.title || '';
+  const desc =
+    post.description ||
+    post.summary ||
+    '';
 
-  const faq = post.faq || [
-    { q: `${title} 관련 자주 묻는 질문`, a: "본문에서 답변을 확인하세요." }
-  ];
+  const tldr = post.tldr || post.aio?.tldr || [];
+  const keyfacts = post.keyfacts || post.aio?.keyfacts || [];
+  const faq = post.faq || post.aio?.faq || [];
+  const sources = post.sources || post.aio?.sources || [];
 
   return {
-    title: `${title} - Ongs Blog`,
-    description: summary,
-    aio: {
-      tldr,
-      keyFacts,
-      sources,
-      faq
-    },
-    og: {
-      type: "article",
-      image: `https://cdn.ongsblog.com/images/${slug}_cover.jpg`
-    },
-    schema: {
-      "@context": "https://schema.org",
-      "@type": "Article",
-      "headline": title,
-      "description": summary,
-      "author": { "@type": "Person", "name": "Ongs" },
-      "datePublished": post.updated_at || new Date().toISOString(),
-      "mainEntityOfPage": `https://ongsblog.com/${slug}`
-    }
+    tldr,
+    keyfacts,
+    faq,
+    sources,
+    _note: 'AIO blocks only. OG/Twitter handled by render-posts/meta.cjs'
+  };
+}
+
+/**
+ * What: SEO 보조 필드 정리
+ * Why : description/headline 등 텍스트 SSOT 확보
+ * I/O : READ post JSON, WRITE post JSON(meta.seo)
+ * Invariants:
+ *  - canonical/og:image/url 생성 금지
+ */
+function buildSeo(post) {
+  return {
+    title: post.title || '',
+    description: post.description || post.summary || '',
   };
 }
 
 async function main() {
-  const files = await fg([`${POSTS_DIR}/**/*.json`]);
+  if (!fs.existsSync(POSTS_DIR)) {
+    console.log('[ai-meta] POSTS_DIR 없음 → 종료');
+    return;
+  }
+
+  const files = await fg([`${POSTS_DIR}/*.json`]);
   let updated = 0;
 
   for (const file of files) {
-    const raw = await fs.promises.readFile(file, "utf8");
-    const post = JSON.parse(raw);
-    if (!post.meta) post.meta = {};
+    const post = readJson(file);
 
-    const newMeta = generateMeta(post);
-    post.meta = { ...post.meta, ...newMeta };
+    post.meta = post.meta || {};
 
-    await fs.promises.writeFile(file, JSON.stringify(post, null, 2), "utf8");
-    console.log(`✔️ meta inserted → ${path.basename(file)}`);
+    // AIO 보조 메타
+    post.meta.aio = buildAio(post);
+
+    // SEO 보조 텍스트
+    post.meta.seo = buildSeo(post);
+
+    // 안전 표식
+    post.meta._generatedBy = 'ai-meta.js';
+    post.meta._policy = {
+      og: 'handled-by-render-posts+meta.cjs',
+      twitter: 'handled-by-render-posts+meta.cjs',
+      canonical: 'handled-by-render-posts+meta.cjs'
+    };
+
+    writeJson(file, post);
+    console.log(`✔️ ai-meta updated → ${path.basename(file)}`);
     updated++;
   }
 
-  console.log(`✅ AIO+SEO meta complete. (${updated} files updated)`);
+  console.log(`✅ ai-meta 완료 (${updated} files)`);
 }
 
-main().catch((err) => {
-  console.error("❌ Error:", err);
+main().catch((e) => {
+  console.error('[ai-meta] FAIL:', e);
   process.exit(1);
 });
