@@ -29,7 +29,8 @@ if (!loaded) {
   dotenv.config();
 }
 
-// DRY_RUN 단일 파서(규칙: false/0만 live, 그 외 전부 dry-run)
+// ✅ DRY_RUN 단일 파서(SSOT)
+// 규칙: "false" 또는 "0"만 live(false), 그 외 전부 dry-run(true)
 function parseDryRun(v) {
   const s = String(v ?? '').trim().toLowerCase();
   return !(s === 'false' || s === '0');
