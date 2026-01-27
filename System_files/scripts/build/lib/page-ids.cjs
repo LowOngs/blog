@@ -33,6 +33,9 @@
 const fs = require('fs');
 const path = require('path');
 
+// ✅ DRY_RUN 판정 SSOT: env.cjs의 parseDryRun만 사용
+const { parseDryRun } = require(path.join(__dirname, 'env.cjs'));
+
 const ROOT = path.resolve(__dirname, '..', '..', '..'); // System_files
 const MANIFESTS_DIR = path.join(ROOT, 'manifests');
 
@@ -89,8 +92,9 @@ function isPublishEnabled() {
   return PUBLISH_MODE === 'enable';
 }
 
+// ✅ 문자열 비교 금지: parseDryRun 기준으로 통일
 function isDryRun() {
-  return String(process.env.DRY_RUN || '').toLowerCase() === 'true';
+  return parseDryRun(process.env.DRY_RUN);
 }
 
 function loadLedgerInfo() {
