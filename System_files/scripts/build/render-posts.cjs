@@ -256,64 +256,6 @@ function injectBodyImageCssOnce(html) {
   return html;
 }
 
-/* ───────────────────── meta head ───────────────────── */
-
-function buildSchemaScript(schemaTags) {
-  if (!Array.isArray(schemaTags) || schemaTags.length === 0) return '';
-  const json = JSON.stringify(schemaTags.length === 1 ? schemaTags[0] : schemaTags);
-  return `<script type="application/ld+json">${json}</script>`;
-}
-
-function buildHeadFromMeta(meta) {
-  const og = (meta && meta.metaTags && meta.metaTags.og) ? meta.metaTags.og : {};
-  const tw = (meta && meta.metaTags && meta.metaTags.twitter) ? meta.metaTags.twitter : {};
-  const tm = (meta && meta.metaTags && meta.metaTags.timeMeta) ? meta.metaTags.timeMeta : {};
-
-  const canonical = meta.canonicalUrl || og.url || '';
-  const title = og.title || '';
-  const desc = og.description || '';
-  const ogImage = og.image || meta.ogImage || '';
-  const ogAlt = og.imageAlt || meta.ogAlt || desc || title;
-
-  const lines = [];
-
-  // canonical은 template에도 있지만, meta 모듈 결과를 우선으로 보강
-  if (canonical) lines.push(`<link rel="canonical" href="${escapeAttr(canonical)}">`);
-
-  lines.push(`<meta property="og:type" content="article">`);
-  if (canonical) lines.push(`<meta property="og:url" content="${escapeAttr(canonical)}">`);
-  if (title) lines.push(`<meta property="og:title" content="${escapeAttr(title)}">`);
-  if (desc) lines.push(`<meta property="og:description" content="${escapeAttr(desc)}">`);
-
-  if (ogImage) {
-    lines.push(`<meta property="og:image" content="${escapeAttr(ogImage)}">`);
-    lines.push(`<meta property="og:image:alt" content="${escapeAttr(ogAlt)}">`);
-    lines.push(`<meta property="og:image:width" content="1200">`);
-    lines.push(`<meta property="og:image:height" content="630">`);
-  }
-
-  lines.push(`<meta name="twitter:card" content="${escapeAttr(tw.card || 'summary_large_image')}">`);
-  if (tw.title || title) lines.push(`<meta name="twitter:title" content="${escapeAttr(tw.title || title)}">`);
-  if (tw.description || desc) lines.push(`<meta name="twitter:description" content="${escapeAttr(tw.description || desc)}">`);
-  if (tw.image || ogImage) {
-    lines.push(`<meta name="twitter:image" content="${escapeAttr(tw.image || ogImage)}">`);
-    lines.push(`<meta name="twitter:image:alt" content="${escapeAttr(tw.imageAlt || ogAlt)}">`);
-  }
-
-  if (tm.publishedTime) lines.push(`<meta property="article:published_time" content="${escapeAttr(tm.publishedTime)}">`);
-  if (tm.modifiedTime) {
-    lines.push(`<meta property="article:modified_time" content="${escapeAttr(tm.modifiedTime)}">`);
-    lines.push(`<meta property="og:updated_time" content="${escapeAttr(tm.modifiedTime)}">`);
-  }
-
-  // LCP 최적화: og:image preload
-  if (ogImage) lines.push(`<link rel="preload" as="image" href="${escapeAttr(ogImage)}" fetchpriority="high">`);
-
-  lines.push(buildSchemaScript(meta.schemaTags));
-
-  return lines.filter(Boolean).join('\n');
-}
-
 /* ───────────────────── pageId policy ───────────────────── */
 
 /**
@@ -458,9 +400,6 @@ function renderOne(template, postJson, jsonPath, bodyImgCtx, idsCtx) {
   html = replaceAllSafe(html, '{{body}}', bodyHtml);
 
   // ✅ FAQ/Sources는 템플릿 섹션 뼈대가 SSOT
-  //    - render는 "주입"이 아니라 {{faq}}/{{sources}} 치환만 수행한다.
-  //    - blocks.renderFAQ/renderSources는 입력이 비면 ''(빈 문자열)로 내려가도록 설계되어 있어
-  //      시각적으로 빈칸 노출을 최소화(템플릿/CSS 정책과 결합).
   html = replaceAllSafe(html, '{{faq}}', faqHtml);
   html = replaceAllSafe(html, '{{sources}}', sourcesHtml);
 
@@ -480,8 +419,11 @@ function renderOne(template, postJson, jsonPath, bodyImgCtx, idsCtx) {
   // updated 배지 치환(템플릿 구조 유지)
   if (updatedDate) html = html.replace('Updated {{updated}}', `Updated ${escapeHtml(updatedDate)}`);
 
-  // head meta 슬롯 치환
-  html = html.replace('<!--META-->', buildHeadFromMeta(meta));
+  // ✅ head meta는 meta.cjs 단일 공장 결과만 사용(중복 빌더 제거)
+  if (!meta.headHtml || typeof meta.headHtml !== 'string') {
+    throw new Error('meta.headHtml 누락: head 생성 책임은 meta.cjs 단일 공장이어야 함');
+  }
+  html = html.replace('<!--META-->', meta.headHtml);
 
   // body image CSS는 실제 사용 시에만 1회 주입
   if (bodyHtml.includes('class="post-body-image"')) html = injectBodyImageCssOnce(html);
