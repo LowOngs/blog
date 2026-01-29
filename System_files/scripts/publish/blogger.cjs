@@ -9,10 +9,14 @@
  */
 
 const path = require('path');
+
+// ✅ 공통 규칙: env 로더 최우선(형태 고정)
+const envMod = require(path.join(__dirname, '..', 'build', 'lib', 'env.cjs'));
+const { parseDryRun } = envMod;
+
 const fs = require('fs');
 const fg = require('fast-glob');
 
-const { parseDryRun } = require(path.join(__dirname, '..', 'build', 'lib', 'env.cjs'));
 const { upsert: upsertSeedLedger } = require(path.join(__dirname, '..', 'build', 'lib', 'seed-ledger.cjs'));
 
 // ────────────────────────────────────
