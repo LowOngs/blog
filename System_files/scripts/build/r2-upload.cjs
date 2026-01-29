@@ -5,11 +5,13 @@
 // DRY_RUN 파서 통일 + dist/images → R2 업로드(og/body)
 
 const path = require('path');
+
+// ✅ 공통 규칙: env 로더 최우선(형태 고정)
+const envMod = require(path.join(__dirname, 'lib', 'env.cjs'));
+const { parseDryRun } = envMod;
+
 const fs = require('fs');
 const crypto = require('crypto');
-
-// ✅ 단일 env 로더 + DRY_RUN 파서 재사용
-const { parseDryRun } = require(path.join(__dirname, 'lib', 'env.cjs'));
 
 let S3Client, PutObjectCommand;
 try {
