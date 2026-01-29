@@ -34,7 +34,8 @@ const fs = require('fs');
 const path = require('path');
 
 // ✅ DRY_RUN 판정 SSOT: env.cjs의 parseDryRun만 사용
-const { parseDryRun } = require(path.join(__dirname, 'env.cjs'));
+// (초소형 정리) 같은 폴더이므로 상대경로 고정이 더 명확함
+const { parseDryRun } = require('./env.cjs');
 
 const ROOT = path.resolve(__dirname, '..', '..', '..'); // System_files
 const MANIFESTS_DIR = path.join(ROOT, 'manifests');
