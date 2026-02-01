@@ -20,6 +20,7 @@ const LOGS_DIR = path.join(ROOT, 'logs');
 // Invariants:
 //   - id="sources"는 최종 HTML에 정확히 1개만 존재해야 함(중복 생성 금지)
 //   - SSOT가 비어도 <section id="sources"> 자체는 유지(계약 보장)
+//   - ✅ "없으면 삽입"은 하지 않는다(템플릿 SSOT 전제). 중복(2개 이상)만 정리한다.
 //   - review/faq 등 다른 섹션은 건드리지 않음(수정 범위 최소화)
 
 const { parseDryRun } = require('./lib/env.cjs'); // env.cjs에 있으면 재사용(없어도 아래 fallback으로 안전)
@@ -180,20 +181,9 @@ function replaceSourcesSection(html, newSectionHtml) {
   return { html, changed: false, mode: 'missing' };
 }
 
-/** SLOT 마커 뒤에 삽입 */
-function injectAfterSlot(html, slotMarker, insertHtml) {
-  const idx = html.indexOf(slotMarker);
-  if (idx === -1) return { html, changed: false, injected: false };
-  const after = idx + slotMarker.length;
-  return { html: html.slice(0, after) + '\n' + insertHtml + html.slice(after), changed: true, injected: true };
-}
-
-/** sources id 중복 감지(최종 가드) */
-function countSourcesId(html) {
-  const re = /\bid=["']sources["']/gi;
-  let n = 0;
-  while (re.exec(String(html || ''))) n++;
-  return n;
+/** ✅ 최종 sources 섹션 개수(실제 section만 카운트) */
+function countSourcesSections(html) {
+  return findSourcesSections(html).length;
 }
 
 function main() {
@@ -239,16 +229,13 @@ function main() {
   log('HTML files(target)=', targetFiles.length);
 
   let updated = 0;
-  let inserted = 0;
   let replaced = 0;
-  let slotMissing = 0;
   let postMissing = 0;
 
   // ✅ 이번에 바뀐 핵심 통계
   let deduped = 0;
   let dupGuarded = 0;
-
-  const slotMarker = '<!--SLOT:SOURCES_WRAPPER-->';
+  let missingSection = 0; // 템플릿 SSOT 전제 위반(관측용)
 
   for (const f of targetFiles) {
     const slug = path.basename(f, '.html');
@@ -273,39 +260,30 @@ function main() {
     baseHtml = d0.html;
     if (d0.removed > 0) deduped += 1;
 
-    // 1) 기존 <section id="sources">가 있으면 교체
+    // ✅ 1) 기존 <section id="sources">가 있으면 교체 (없으면 아무것도 하지 않음)
     let html = baseHtml;
     const r1 = replaceSourcesSection(html, newSection);
     html = r1.html;
 
-    let changed = false;
-
-    if (r1.changed) {
-      changed = true;
-      replaced += 1;
-    } else {
-      // 2) 없으면 SLOT 뒤로 삽입
-      const r2 = injectAfterSlot(html, slotMarker, newSection);
-      if (r2.injected) {
-        html = r2.html;
-        changed = true;
-        inserted += 1;
-      } else {
-        slotMissing += 1;
-      }
-    }
-
-    // 3) 최종 중복 id 가드: 그래도 2개 이상이면 write 금지(구조 오염 방지)
-    const cnt = countSourcesId(html);
-    if (cnt !== 1) {
-      dupGuarded += 1;
-      warn(`sources id guarded: slug=${slug} count=${cnt} (write skipped)`);
+    if (!r1.changed) {
+      // 템플릿 SSOT 전제 위반: 여기서 "삽입"하지 않고 관측만 남김
+      missingSection += 1;
       continue;
     }
 
-    if (changed || d0.removed > 0) {
+    // ✅ 2) 최종 가드: 실제 sources 섹션이 정확히 1개여야 함
+    const cnt = countSourcesSections(html);
+    if (cnt !== 1) {
+      dupGuarded += 1;
+      warn(`sources section guarded: slug=${slug} count=${cnt} (write skipped)`);
+      continue;
+    }
+
+    // 변경이 있거나(교체), dedupe가 있었으면 write
+    if (r1.changed || d0.removed > 0) {
       fs.writeFileSync(htmlPath, html, 'utf8');
       updated += 1;
+      replaced += 1;
     }
   }
 
@@ -318,12 +296,11 @@ function main() {
       htmlAll: allHtmlFiles.length,
       htmlTarget: targetFiles.length,
       updated,
-      inserted,
       replaced,
-      slotMissing,
       postMissing,
       deduped,
       dupGuarded,
+      missingSection,
     },
   };
 
@@ -338,12 +315,11 @@ function main() {
 
   log('done:',
     `updated=${updated}`,
-    `inserted=${inserted}`,
     `replaced=${replaced}`,
-    `slotMissing=${slotMissing}`,
     `postMissing=${postMissing}`,
     `deduped=${deduped}`,
-    `dupGuarded=${dupGuarded}`
+    `dupGuarded=${dupGuarded}`,
+    `missingSection=${missingSection}`
   );
 }
 
