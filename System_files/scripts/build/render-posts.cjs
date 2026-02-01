@@ -33,7 +33,7 @@ const blocks = require('./lib/blocks.cjs');
  *  - 템플릿에 이미 존재하는 id를 render에서 중복 생성하지 않는다.
  *  - Review는 render 단계에서 절대 주입/생성/치환하지 않는다(후속 injector 책임).
  *  - ✅ FAQ/Sources는 템플릿에 <section id="faq|sources">가 존재한다는 전제(SSOT).
- *    render는 {{faq}} / {{sources}}만 치환한다.
+ *    render는 {{faq}} / {{sources}}에 "내용 조각"만 치환한다.
  * ───────────────────────────────────────────── */
 
 /* ───────────────────── file/json ───────────────────── */
@@ -84,6 +84,25 @@ function tryReadJsonFile(p) {
   } catch {
     return null;
   }
+}
+
+/* ───────────────────── fragment normalizer ───────────────────── */
+
+/**
+ * What: blocks가 <section id="sources">...</section>까지 만들어도, render는 "내용만" 쓰도록 래퍼 제거
+ * Why : post.html 템플릿이 sources 섹션 뼈대를 SSOT로 갖고 있으므로 중복 생성 방지
+ * I/O : READ fragment HTML, WRITE fragment HTML
+ * Invariants:
+ *  - <section id="sources"> 래퍼가 있으면 내부만 추출
+ *  - 내부 추출 실패 시 원본을 그대로 반환(보수적)
+ */
+function stripOuterSourcesSection(fragmentHtml) {
+  const s = String(fragmentHtml || '').trim();
+  if (!s) return '';
+  const re = /^\s*<section\b[^>]*\bid=["']sources["'][^>]*>([\s\S]*?)<\/section>\s*$/i;
+  const m = s.match(re);
+  if (!m) return s;
+  return String(m[1] || '').trim();
 }
 
 /* ───────────────────── hidden toggle helper ───────────────────── */
@@ -343,7 +362,10 @@ function renderOne(template, postJson, jsonPath, bodyImgCtx, idsCtx) {
   const tldrHtml    = blocks.renderTLDR(asArray(aio.tldr));
   const kfHtml      = blocks.renderKeyFacts(asArray(aio.keyfacts));
   const faqHtml     = blocks.renderFAQ(asArray(aio.faq));         // ✅ {{faq}} 치환용
-  const sourcesHtml = blocks.renderSources(asArray(aio.sources)); // ✅ {{sources}} 치환용
+
+  // ✅ Sources는 "섹션 래퍼 생성 금지": <section id="sources">가 나오면 내부만 사용
+  const rawSources  = blocks.renderSources(asArray(aio.sources)); // (blocks가 섹션을 만들 수도 있음)
+  const sourcesHtml = stripOuterSourcesSection(rawSources);       // ✅ {{sources}} 치환용(내용만)
 
   // 본문은 sanitize 후 사용
   let bodyHtml = blocks.sanitizeBodyHTML(postJson.body || '');
