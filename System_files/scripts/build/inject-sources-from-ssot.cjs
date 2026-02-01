@@ -14,8 +14,7 @@ const POSTS_DIR = path.join(ROOT, 'content', 'posts');
 const LOGS_DIR = path.join(ROOT, 'logs');
 
 // What: dist/posts/*.html에 <section id="sources">...</section>을 "항상" 존재시키고, SSOT로 채움
-// Why : 템플릿 뼈대는 템플릿이 담당하지만(원칙), 현 상태에서 sources가 통째로 비어 QA에서 CRIT 가능
-//       → 최소패치로 pipeline 무결성(핵심 블록 계약)을 보장하기 위해, dist 단계에서 sources를 보정한다.
+// Why : 현재 sources가 중복 id로 생성되는 케이스가 있어, dist 단계에서 "1개로 정리 + 교체"로 무결성 보장
 // I/O : READ content/posts/{slug}.json, dist/posts/{slug}.html
 //       WRITE dist/posts/{slug}.html (in-place overwrite), logs/inject-sources-report-YYYY-MM-DD.json
 // Invariants:
@@ -23,39 +22,36 @@ const LOGS_DIR = path.join(ROOT, 'logs');
 //   - SSOT가 비어도 <section id="sources"> 자체는 유지(계약 보장)
 //   - review/faq 등 다른 섹션은 건드리지 않음(수정 범위 최소화)
 
-const { parseDryRun } = require('./lib/env.cjs'); // ✅ DRY_RUN 파서는 env.cjs 단일 SSOT
+const { parseDryRun } = require('./lib/env.cjs'); // env.cjs에 있으면 재사용(없어도 아래 fallback으로 안전)
 const blocks = require('./lib/blocks.cjs');
 
-const DRY_RUN = parseDryRun(process.env.DRY_RUN);
+function safeParseDryRun(v) {
+  try {
+    if (typeof parseDryRun === 'function') return parseDryRun(v);
+  } catch {}
+  const s = String(v ?? '').trim().toLowerCase();
+  return !(s === 'false' || s === '0');
+}
+
+const DRY_RUN = safeParseDryRun(process.env.DRY_RUN);
 const LIVE_MODE = !DRY_RUN;
 
-// 기본 스코프 정책:
-// - live(운영): today.json publishable만 처리하는 게 안전하지만,
-//   이 스크립트는 "dist/posts"를 보정하는 성격이라, 기본은 all 유지.
-// - 필요 시: TARGET_SCOPE=today 로 좁힐 수 있음.
+// 로컬 확인/출력 성격이므로 기본 all 유지(스코프 추가로 복잡도 올리지 않음)
 const TARGET_SCOPE = String(process.env.TARGET_SCOPE || 'all').trim().toLowerCase() === 'today'
   ? 'today'
   : 'all';
 
 const TODAY_PATH = path.join(ROOT, 'dist', 'queue', 'today.json');
 
-function log(...a) {
-  console.log('[inject-sources]', ...a);
-}
-function warn(...a) {
-  console.warn('[inject-sources][WARN]', ...a);
-}
+function log(...a) { console.log('[inject-sources]', ...a); }
+function warn(...a) { console.warn('[inject-sources][WARN]', ...a); }
 
 function ensureDir(dir) {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 }
 
 function readTextSafe(p) {
-  try {
-    return fs.readFileSync(p, 'utf8');
-  } catch (e) {
-    return null;
-  }
+  try { return fs.readFileSync(p, 'utf8'); } catch { return null; }
 }
 
 function readJsonSafe(p, fallback) {
@@ -115,11 +111,10 @@ function extractSourcesFromPostJson(postJson) {
   const aio = (postJson && postJson.aio && typeof postJson.aio === 'object') ? postJson.aio : {};
   const s1 = aio.sources;
   const s2 = postJson.sources;
-  const sources = []
+  return []
     .concat(asArray(s1))
     .concat(asArray(s2))
     .filter(Boolean);
-  return sources;
 }
 
 /** <section id="sources">...</section>을 "단일 섹션"으로 재구성 */
@@ -131,15 +126,11 @@ function buildSourcesSectionHtml(sourcesArr) {
     inner = '';
   }
 
+  // blocks.renderSources가 이미 <section id="sources"...>까지 포함하는 경우 그대로 사용
   const looksLikeSection = /<section\b[^>]*\bid=["']sources["']/i.test(inner);
+  if (looksLikeSection) return inner.trim();
 
-  if (looksLikeSection) {
-    return inner.trim();
-  }
-
-  if (!inner.trim()) {
-    inner = '<!-- sources: empty -->';
-  }
+  if (!inner.trim()) inner = '<!-- sources: empty -->';
 
   return [
     '<section id="sources" class="sources">',
@@ -149,15 +140,43 @@ function buildSourcesSectionHtml(sourcesArr) {
   ].join('\n');
 }
 
+/** HTML에서 sources 섹션(들) 찾기 */
+function findSourcesSections(html) {
+  const re = /<section\b[^>]*\bid=["']sources["'][^>]*>[\s\S]*?<\/section>/gi;
+  const matches = [];
+  let m;
+  while ((m = re.exec(String(html || '')))) {
+    matches.push({ start: m.index, end: m.index + m[0].length, text: m[0] });
+  }
+  return matches;
+}
+
+/**
+ * ✅ 중복 sources 섹션 복구
+ * - sources 섹션이 2개 이상이면: 첫 번째만 남기고 나머지 섹션은 삭제
+ * - 목적: 이후 replace가 "정상적으로 1개"만 유지되게 만들기
+ */
+function removeDuplicateSourcesSections(html) {
+  const secs = findSourcesSections(html);
+  if (secs.length <= 1) return { html, removed: 0 };
+
+  // 첫 번째는 보존, 나머지는 뒤에서부터 제거(인덱스 보존)
+  let out = String(html);
+  let removed = 0;
+
+  for (let i = secs.length - 1; i >= 1; i--) {
+    out = out.slice(0, secs[i].start) + out.slice(secs[i].end);
+    removed += 1;
+  }
+  return { html: out, removed };
+}
+
 /** HTML에서 기존 sources 섹션을 교체(있으면) */
 function replaceSourcesSection(html, newSectionHtml) {
   const sectionRe = /<section\b[^>]*\bid=["']sources["'][^>]*>[\s\S]*?<\/section>/i;
-
   if (sectionRe.test(html)) {
-    const replaced = html.replace(sectionRe, newSectionHtml);
-    return { html: replaced, changed: true, mode: 'replaced' };
+    return { html: html.replace(sectionRe, newSectionHtml), changed: true, mode: 'replaced' };
   }
-
   return { html, changed: false, mode: 'missing' };
 }
 
@@ -166,11 +185,10 @@ function injectAfterSlot(html, slotMarker, insertHtml) {
   const idx = html.indexOf(slotMarker);
   if (idx === -1) return { html, changed: false, injected: false };
   const after = idx + slotMarker.length;
-  const out = html.slice(0, after) + '\n' + insertHtml + html.slice(after);
-  return { html: out, changed: true, injected: true };
+  return { html: html.slice(0, after) + '\n' + insertHtml + html.slice(after), changed: true, injected: true };
 }
 
-/** sources id 중복 감지(안전가드) */
+/** sources id 중복 감지(최종 가드) */
 function countSourcesId(html) {
   const re = /\bid=["']sources["']/gi;
   let n = 0;
@@ -225,6 +243,9 @@ function main() {
   let replaced = 0;
   let slotMissing = 0;
   let postMissing = 0;
+
+  // ✅ 이번에 바뀐 핵심 통계
+  let deduped = 0;
   let dupGuarded = 0;
 
   const slotMarker = '<!--SLOT:SOURCES_WRAPPER-->';
@@ -246,7 +267,14 @@ function main() {
     const sourcesArr = extractSourcesFromPostJson(postJson);
     const newSection = buildSourcesSectionHtml(sourcesArr);
 
-    let html = html0;
+    // ✅ 0) 먼저 “중복 섹션(2개 이상)”이면 1개로 정리
+    let baseHtml = html0;
+    const d0 = removeDuplicateSourcesSections(baseHtml);
+    baseHtml = d0.html;
+    if (d0.removed > 0) deduped += 1;
+
+    // 1) 기존 <section id="sources">가 있으면 교체
+    let html = baseHtml;
     const r1 = replaceSourcesSection(html, newSection);
     html = r1.html;
 
@@ -256,6 +284,7 @@ function main() {
       changed = true;
       replaced += 1;
     } else {
+      // 2) 없으면 SLOT 뒤로 삽입
       const r2 = injectAfterSlot(html, slotMarker, newSection);
       if (r2.injected) {
         html = r2.html;
@@ -266,14 +295,15 @@ function main() {
       }
     }
 
+    // 3) 최종 중복 id 가드: 그래도 2개 이상이면 write 금지(구조 오염 방지)
     const cnt = countSourcesId(html);
-    if (cnt > 1) {
+    if (cnt !== 1) {
       dupGuarded += 1;
-      warn(`dup sources id guarded: slug=${slug} count=${cnt} (write skipped)`);
+      warn(`sources id guarded: slug=${slug} count=${cnt} (write skipped)`);
       continue;
     }
 
-    if (changed) {
+    if (changed || d0.removed > 0) {
       fs.writeFileSync(htmlPath, html, 'utf8');
       updated += 1;
     }
@@ -292,6 +322,7 @@ function main() {
       replaced,
       slotMissing,
       postMissing,
+      deduped,
       dupGuarded,
     },
   };
@@ -311,6 +342,7 @@ function main() {
     `replaced=${replaced}`,
     `slotMissing=${slotMissing}`,
     `postMissing=${postMissing}`,
+    `deduped=${deduped}`,
     `dupGuarded=${dupGuarded}`
   );
 }
