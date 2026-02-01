@@ -1,6 +1,9 @@
 // scripts/build/lib/blocks.cjs
 // HTML block render helpers (TLDR / KeyFacts / FAQ / Sources / Review blocks)
-// - render-posts.cjs가 post.reviewData(SSOT) 를 그대로 넘기므로, 여기서 구조를 확정 렌더합니다.
+// ✅ Policy(SSOT):
+//  - FAQ/Sources의 "섹션 뼈대(id/section)"는 templates/post.html이 담당한다.
+//  - blocks는 {{faq}}/{{sources}}에 들어갈 "내용 조각"만 생성한다.
+//  - Review 블록은 기존대로 blocks가 만들 수 있으나, render 단계에서 주입/생성 금지 정책은 render가 지킨다.
 
 function escapeHtml(s = '') {
   return String(s)
@@ -25,10 +28,9 @@ function renderKeyFacts(keyfacts = []) {
 }
 
 /**
- * FAQ 렌더 규칙(중요)
- * - 템플릿(post.html)이 <section id="faq"> 뼈대를 SSOT로 가진다.
- * - 따라서 여기서는 id="faq"를 절대 만들지 않는다. (중복 id 방지)
- * - 반환값은 {{faq}} 슬롯에 들어갈 "내부 컨텐츠"만 담당한다.
+ * ✅ FAQ: 템플릿이 <section id="faq"> 뼈대를 갖는다.
+ * - blocks는 내부 컨텐츠만 만든다.
+ * - id="faq" / <section ...> / <details id="faq"> 생성 금지
  */
 function renderFAQ(faq = []) {
   if (!Array.isArray(faq) || faq.length === 0) return '';
@@ -45,7 +47,7 @@ function renderFAQ(faq = []) {
 
   if (items.length === 0) return '';
 
-  // ✅ id="faq" 제거(템플릿 섹션과 충돌 방지)
+  // ✅ id="faq" 금지(중복 방지). 템플릿이 섹션 id를 보유한다.
   return `<details class="collapsible">
   <summary>FAQ</summary>
   <div class="panel">
@@ -57,10 +59,10 @@ ${items.join('\n')}
 }
 
 /**
- * Sources 렌더 규칙(중요)
- * - 템플릿(post.html)이 <section id="sources"> 뼈대를 SSOT로 가진다.
- * - 따라서 여기서는 id="sources" 또는 <section id="sources"> 래퍼를 만들지 않는다.
- * - 반환값은 {{sources}} 슬롯에 들어갈 "내부 컨텐츠"만 담당한다.
+ * ✅ Sources: 템플릿이 <section id="sources"> 뼈대를 갖는다.
+ * - blocks는 내부 컨텐츠(ul)만 만든다.
+ * - id="sources" / <section ...> 생성 금지
+ * - h3 헤더도 템플릿이 갖는 구조를 기본으로 한다(중복 방지)
  */
 function renderSources(sources = []) {
   if (!Array.isArray(sources) || sources.length === 0) return '';
@@ -71,22 +73,18 @@ function renderSources(sources = []) {
       if (!u) return '';
       return `<li><a href="${escapeHtml(u)}" rel="nofollow noopener" target="_blank">${escapeHtml(u)}</a></li>`;
     }
-
     const label = (src?.label || src?.name || '').trim();
     const url = (src?.url || '').trim();
     if (!url) return '';
     const text = label || url;
-
     return `<li><a href="${escapeHtml(url)}" rel="nofollow noopener" target="_blank">${escapeHtml(text)}</a></li>`;
   }).filter(Boolean);
 
   if (items.length === 0) return '';
 
-  // ✅ 템플릿이 Sources 섹션 뼈대를 갖고 있으므로, 여기서는 내부만 반환
-  return `<h3>Sources</h3>
-<ul>
-  ${items.join('\n  ')}
-</ul>`;
+  return `<ul>
+    ${items.join('\n    ')}
+  </ul>`;
 }
 
 /* ---------------- Review blocks ---------------- */
