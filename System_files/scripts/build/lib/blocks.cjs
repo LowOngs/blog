@@ -7,7 +7,8 @@ function escapeHtml(s = '') {
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 function renderList(items = []) {
@@ -23,8 +24,15 @@ function renderKeyFacts(keyfacts = []) {
   return renderList(keyfacts);
 }
 
+/**
+ * FAQ 렌더 규칙(중요)
+ * - 템플릿(post.html)이 <section id="faq"> 뼈대를 SSOT로 가진다.
+ * - 따라서 여기서는 id="faq"를 절대 만들지 않는다. (중복 id 방지)
+ * - 반환값은 {{faq}} 슬롯에 들어갈 "내부 컨텐츠"만 담당한다.
+ */
 function renderFAQ(faq = []) {
   if (!Array.isArray(faq) || faq.length === 0) return '';
+
   const items = faq.map(it => {
     const q = escapeHtml(it?.question || it?.q || '');
     const a = escapeHtml(it?.answer || it?.a || '');
@@ -36,7 +44,9 @@ function renderFAQ(faq = []) {
   }).filter(Boolean);
 
   if (items.length === 0) return '';
-  return `<details class="collapsible" id="faq">
+
+  // ✅ id="faq" 제거(템플릿 섹션과 충돌 방지)
+  return `<details class="collapsible">
   <summary>FAQ</summary>
   <div class="panel">
     <section class="faq">
@@ -46,28 +56,37 @@ ${items.join('\n')}
 </details>`;
 }
 
+/**
+ * Sources 렌더 규칙(중요)
+ * - 템플릿(post.html)이 <section id="sources"> 뼈대를 SSOT로 가진다.
+ * - 따라서 여기서는 id="sources" 또는 <section id="sources"> 래퍼를 만들지 않는다.
+ * - 반환값은 {{sources}} 슬롯에 들어갈 "내부 컨텐츠"만 담당한다.
+ */
 function renderSources(sources = []) {
   if (!Array.isArray(sources) || sources.length === 0) return '';
+
   const items = sources.map(src => {
     if (typeof src === 'string') {
       const u = src.trim();
       if (!u) return '';
       return `<li><a href="${escapeHtml(u)}" rel="nofollow noopener" target="_blank">${escapeHtml(u)}</a></li>`;
     }
+
     const label = (src?.label || src?.name || '').trim();
     const url = (src?.url || '').trim();
     if (!url) return '';
     const text = label || url;
+
     return `<li><a href="${escapeHtml(url)}" rel="nofollow noopener" target="_blank">${escapeHtml(text)}</a></li>`;
   }).filter(Boolean);
 
   if (items.length === 0) return '';
-  return `<section id="sources" class="sources">
-  <h3>Sources</h3>
-  <ul>
-    ${items.join('\n    ')}
-  </ul>
-</section>`;
+
+  // ✅ 템플릿이 Sources 섹션 뼈대를 갖고 있으므로, 여기서는 내부만 반환
+  return `<h3>Sources</h3>
+<ul>
+  ${items.join('\n  ')}
+</ul>`;
 }
 
 /* ---------------- Review blocks ---------------- */
