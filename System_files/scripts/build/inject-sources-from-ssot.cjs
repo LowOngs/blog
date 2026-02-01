@@ -23,18 +23,10 @@ const LOGS_DIR = path.join(ROOT, 'logs');
 //   - SSOT가 비어도 <section id="sources"> 자체는 유지(계약 보장)
 //   - review/faq 등 다른 섹션은 건드리지 않음(수정 범위 최소화)
 
-const { parseDryRun } = require('./lib/env.cjs'); // env.cjs에 있으면 재사용(없어도 아래 fallback으로 안전)
+const { parseDryRun } = require('./lib/env.cjs'); // ✅ DRY_RUN 파서는 env.cjs 단일 SSOT
 const blocks = require('./lib/blocks.cjs');
 
-function safeParseDryRun(v) {
-  try {
-    if (typeof parseDryRun === 'function') return parseDryRun(v);
-  } catch {}
-  const s = String(v ?? '').trim().toLowerCase();
-  return !(s === 'false' || s === '0');
-}
-
-const DRY_RUN = safeParseDryRun(process.env.DRY_RUN);
+const DRY_RUN = parseDryRun(process.env.DRY_RUN);
 const LIVE_MODE = !DRY_RUN;
 
 // 기본 스코프 정책:
@@ -132,9 +124,6 @@ function extractSourcesFromPostJson(postJson) {
 
 /** <section id="sources">...</section>을 "단일 섹션"으로 재구성 */
 function buildSourcesSectionHtml(sourcesArr) {
-  // blocks.renderSources가 이미 <section id="sources"> 를 만들 수도 있고(구현에 따라),
-  // ul만 만들 수도 있음. 여기서는 "섹션 외형"을 우리가 확정해서 중복/누락을 막는다.
-  // -> 내부는 blocks.renderSources를 최대한 활용.
   let inner = '';
   try {
     inner = blocks.renderSources(asArray(sourcesArr)) || '';
@@ -142,16 +131,12 @@ function buildSourcesSectionHtml(sourcesArr) {
     inner = '';
   }
 
-  // blocks.renderSources가 <section id="sources"...>까지 포함해버리는 경우를 대비해 "섹션 한 번 더 감싸기" 방지
-  // - 이미 section을 반환하면, 그걸 그대로 사용하되, 최종적으로 id="sources" 1개만 유지하도록 replace 단계에서 정규화
   const looksLikeSection = /<section\b[^>]*\bid=["']sources["']/i.test(inner);
 
   if (looksLikeSection) {
-    // 그대로 반환(이후 replace/insert에서 section 단위로 처리)
     return inner.trim();
   }
 
-  // SSOT가 비어도 섹션 자체는 존재해야 함(핵심 블록 계약)
   if (!inner.trim()) {
     inner = '<!-- sources: empty -->';
   }
@@ -254,7 +239,6 @@ function main() {
 
     const postJson = readJsonSafe(postPath, null);
     if (!postJson) {
-      // dist는 있는데 post json이 없으면 "삽입을 시도"해도 근거가 없어 위험
       postMissing += 1;
       continue;
     }
@@ -262,7 +246,6 @@ function main() {
     const sourcesArr = extractSourcesFromPostJson(postJson);
     const newSection = buildSourcesSectionHtml(sourcesArr);
 
-    // 1) 기존 <section id="sources">가 있으면 교체
     let html = html0;
     const r1 = replaceSourcesSection(html, newSection);
     html = r1.html;
@@ -273,7 +256,6 @@ function main() {
       changed = true;
       replaced += 1;
     } else {
-      // 2) 없으면 SLOT 뒤로 삽입
       const r2 = injectAfterSlot(html, slotMarker, newSection);
       if (r2.injected) {
         html = r2.html;
@@ -284,7 +266,6 @@ function main() {
       }
     }
 
-    // 3) 중복 id 가드: id="sources"가 2개 이상이면 변경 적용 금지(오염 방지)
     const cnt = countSourcesId(html);
     if (cnt > 1) {
       dupGuarded += 1;
