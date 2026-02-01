@@ -89,7 +89,7 @@ function tryReadJsonFile(p) {
 /* ───────────────────── fragment normalizer ───────────────────── */
 
 /**
- * What: blocks가 <section id="sources">...</section>까지 만들어도, render는 "내용만" 쓰도록 래퍼 제거
+ * What: sources가 래퍼(<section id="sources">)까지 들어오면 내부만 사용
  * Why : post.html 템플릿이 sources 섹션 뼈대를 SSOT로 갖고 있으므로 중복 생성 방지
  * I/O : READ fragment HTML, WRITE fragment HTML
  * Invariants:
@@ -105,15 +105,22 @@ function stripOuterSourcesSection(fragmentHtml) {
   return String(m[1] || '').trim();
 }
 
-/* ───────────────────── hidden toggle helper ───────────────────── */
+/* ───────────────────── canonical dedupe (핵심) ───────────────────── */
 
 /**
- * What: HTML 조각이 "실질적으로 비어있는지" 판정
- * Why : FAQ/Sources 데이터 없을 때 화면에 빈칸/박스가 보이는 것을 방지(hidden 토글)
- * I/O : READ html fragment string
+ * What: 템플릿에 이미 존재하는 canonical <link>를 제거한다.
+ * Why : meta.headHtml이 canonical을 생성하므로, dist head에서 canonical은 1개만 남겨야 한다.
+ * I/O : READ/WRITE dist HTML 문자열
  * Invariants:
- *  - 태그/공백/&nbsp; 제거 후 텍스트가 0이면 blank로 간주
+ *  - <link rel="canonical" ...>는 head에 1개만 존재
+ *  - SSOT canonical은 meta.cjs(buildHeadFromMetaResult) 결과를 따른다.
  */
+function stripAllCanonicalLinks(html) {
+  return String(html || '').replace(/<link\b[^>]*\brel=["']canonical["'][^>]*>\s*/gi, '');
+}
+
+/* ───────────────────── hidden toggle helper ───────────────────── */
+
 function isBlankHtmlFragment(s) {
   const t = String(s || '')
     .replace(/<[^>]*>/g, '')
@@ -122,14 +129,6 @@ function isBlankHtmlFragment(s) {
   return t.length === 0;
 }
 
-/**
- * What: <section id="...">에 hidden 속성을 추가/제거
- * Why : 코어블록(id)은 유지하면서, 내용 없을 때만 시각적으로 숨김
- * I/O : READ/WRITE dist HTML 문자열
- * Invariants:
- *  - id="faq"/"sources" 섹션은 템플릿 SSOT로 이미 존재해야 함
- *  - 중복 hidden 추가 금지, 존재 시 제거만 수행
- */
 function toggleSectionHidden(html, sectionId, shouldHide) {
   const reOpen = new RegExp(`(<section[^>]*id=["']${sectionId}["'][^>]*)(>)`, 'i');
   const reHidden = new RegExp(`(<section[^>]*id=["']${sectionId}["'][^>]*?)\\s+hidden\\b`, 'i');
@@ -142,14 +141,6 @@ function toggleSectionHidden(html, sectionId, shouldHide) {
 
 /* ───────────────────── ids rerun ───────────────────── */
 
-/**
- * What: pageId 누락 시 ids.cjs를 "최대 1회" 재실행한다.
- * Why : render가 pageId 발급을 담당하지 않지만, dist 산출물은 pageId가 필요하다.
- * I/O : READ/WRITE는 ids.cjs가 담당(render는 spawn만)
- * Invariants:
- *  - ids.cjs는 내부 가드(BODY_WRITE_MODE/ today publishable 스코프 등)를 따른다.
- *  - render는 ids를 반복 실행하지 않는다(1회만).
- */
 function runIdsOnce() {
   const idsPath = path.join(__dirname, 'ids.cjs');
   const r = spawnSync(process.execPath, [idsPath], {
@@ -169,14 +160,6 @@ function loadBodyImageManifestOnce() {
   return { data: obj, source: BODY_IMAGE_MANIFEST_PATH };
 }
 
-/**
- * What: BODY_IMAGE_ALLOW_DOMAINS 파서(보안 가드)
- * Why : 본문 이미지 URL 허용 도메인을 제한해 악성/오염 링크 방지
- * I/O : READ env + siteBase/cdnBase
- * Invariants:
- *  - https만 허용
- *  - 기본 허용: siteBase/cdnBase host
- */
 function parseAllowedDomainsFromEnv(siteBase, cdnBase) {
   const list = (process.env.BODY_IMAGE_ALLOW_DOMAINS || '').trim();
 
@@ -248,13 +231,6 @@ function buildBodyImageFigure(img, fallbackAlt) {
   ].filter(Boolean).join('\n');
 }
 
-/**
- * What: 본문 이미지용 CSS 1회 주입
- * Why : 템플릿 변경 없이 body-image 렌더 품질을 맞추기 위함
- * I/O : READ/WRITE dist HTML 문자열
- * Invariants:
- *  - 마커("body-image-css")가 있으면 중복 주입 금지
- */
 function injectBodyImageCssOnce(html) {
   if (html.includes('/* body-image-css */')) return html;
 
@@ -277,14 +253,6 @@ function injectBodyImageCssOnce(html) {
 
 /* ───────────────────── pageId policy ───────────────────── */
 
-/**
- * What: post JSON에 pageId가 없으면 ids.cjs를 1회 돌린 뒤 다시 읽는다.
- * Why : dist 산출물은 pageId가 필요(무결성 #3), 발급은 ids.cjs만 담당.
- * I/O : READ content/posts/{slug}.json, (필요 시) ids.cjs 실행
- * Invariants:
- *  - pageId 포맷은 page\d{6}로만 인정
- *  - ids 재실행 후에도 없으면 FAIL(스코프/모드 문제 가능성)
- */
 function ensurePageIdForPost(postJson, slug, jsonPath, idsCtx) {
   const existing = firstNonEmpty(
     postJson.pageId,
@@ -317,13 +285,6 @@ function ensurePageIdForPost(postJson, slug, jsonPath, idsCtx) {
   return { pageId: pid, wroteJson: false, via: 'ids.cjs' };
 }
 
-/**
- * What: AIO 블록(tldr/keyfacts/faq/sources) 입력을 통합
- * Why : postJson.aio / 최상위 키 혼재를 흡수
- * I/O : READ postJson
- * Invariants:
- *  - 없다면 빈 배열로 처리(템플릿/blocks가 책임)
- */
 function resolveAio(postJson) {
   const aio = postJson.aio && typeof postJson.aio === 'object' ? postJson.aio : {};
   return {
@@ -358,28 +319,15 @@ function renderOne(template, postJson, jsonPath, bodyImgCtx, idsCtx) {
 
   const aio = resolveAio(postJson);
 
-  // ✅ 템플릿(뼈대) + 치환만: blocks는 HTML "조각"만 생성
   const tldrHtml    = blocks.renderTLDR(asArray(aio.tldr));
   const kfHtml      = blocks.renderKeyFacts(asArray(aio.keyfacts));
-  const faqHtml     = blocks.renderFAQ(asArray(aio.faq));         // ✅ {{faq}} 치환용
+  const faqHtml     = blocks.renderFAQ(asArray(aio.faq));          // ✅ {{faq}} = "내용 조각"
 
-  // ✅ Sources는 "섹션 래퍼 생성 금지": <section id="sources">가 나오면 내부만 사용
-  const rawSources  = blocks.renderSources(asArray(aio.sources)); // (blocks가 섹션을 만들 수도 있음)
-  const sourcesHtml = stripOuterSourcesSection(rawSources);       // ✅ {{sources}} 치환용(내용만)
+  const rawSources  = blocks.renderSources(asArray(aio.sources));  // ✅ {{sources}} = "내용 조각"
+  const sourcesHtml = stripOuterSourcesSection(rawSources);
 
-  // 본문은 sanitize 후 사용
   let bodyHtml = blocks.sanitizeBodyHTML(postJson.body || '');
 
-  /* ─────────────────────────────────────────────
-   * 본문 이미지(선택) — manifest 기반 prepend
-   *
-   * What: body 이미지 1장을 본문 앞에 추가(허용 도메인만)
-   * Why : 글의 시각적 품질/체류시간/SEO 보강
-   * I/O : READ manifests/images-body-manifest.json
-   * Invariants:
-   *  - https + allowDomains 통과만
-   *  - entry.safe===false면 스킵
-   * ───────────────────────────────────────────── */
   if (bodyImgCtx && bodyImgCtx.manifestObj) {
     const entry = pickBodyImageEntry(bodyImgCtx.manifestObj, slug, pageId);
     const img = normalizeBodyImage(entry);
@@ -394,21 +342,8 @@ function renderOne(template, postJson, jsonPath, bodyImgCtx, idsCtx) {
     }
   }
 
-  /* ─────────────────────────────────────────────
-   * REVIEW POLICY (중요/강제)
-   *
-   * What: render 단계에서 review 섹션을 추가 생성/주입/치환하지 않는다.
-   * Why : 템플릿(post.html)에 review placeholder 섹션이 존재하는 구조이며,
-   *       render가 추가 생성하면 동일 id가 2개가 되어 무결성(#DOM) 파손.
-   * I/O : READ templates/post.html, WRITE dist/posts/*.html
-   * Invariants:
-   *  - id="review-rating-block", id="review-insights-block"는 dist에서 최대 1개
-   *  - 실데이터 치환은 inject-reviews-from-ssot.cjs / review-meta-block.cjs가 담당
-   * ───────────────────────────────────────────── */
-
   let html = template;
 
-  // 기본 placeholder 치환(템플릿이 뼈대, render는 채우기)
   html = replaceAllSafe(html, '{{title}}', escapeHtml(title));
   html = replaceAllSafe(html, '{{description}}', escapeAttr(description));
   html = replaceAllSafe(html, '{{pageId}}', escapeHtml(pageId));
@@ -421,36 +356,24 @@ function renderOne(template, postJson, jsonPath, bodyImgCtx, idsCtx) {
   html = replaceAllSafe(html, '{{keyfacts}}', kfHtml);
   html = replaceAllSafe(html, '{{body}}', bodyHtml);
 
-  // ✅ FAQ/Sources는 템플릿 섹션 뼈대가 SSOT
   html = replaceAllSafe(html, '{{faq}}', faqHtml);
   html = replaceAllSafe(html, '{{sources}}', sourcesHtml);
 
-  /* ─────────────────────────────────────────────
-   * FAQ/SOURCES hidden 토글 (요청 구현)
-   *
-   * What: 데이터가 없으면 해당 섹션을 hidden 처리하고, 있으면 hidden 제거
-   * Why : 화면에 빈칸/박스가 덜렁 보이는 문제를 제거(원래 기능 복원)
-   * I/O : READ faqHtml/sourcesHtml, WRITE dist HTML 문자열
-   * Invariants:
-   *  - id="faq"/"sources" 섹션 자체는 항상 존재(qa-check I2 계약 유지)
-   *  - 다른 구현물(blocks/meta/injector/qa)은 수정하지 않음
-   * ───────────────────────────────────────────── */
   html = toggleSectionHidden(html, 'faq', isBlankHtmlFragment(faqHtml));
   html = toggleSectionHidden(html, 'sources', isBlankHtmlFragment(sourcesHtml));
 
-  // updated 배지 치환(템플릿 구조 유지)
   if (updatedDate) html = html.replace('Updated {{updated}}', `Updated ${escapeHtml(updatedDate)}`);
 
-  // ✅ head meta는 meta.cjs 단일 공장 결과만 사용(중복 빌더 제거)
   if (!meta.headHtml || typeof meta.headHtml !== 'string') {
     throw new Error('meta.headHtml 누락: head 생성 책임은 meta.cjs 단일 공장이어야 함');
   }
+
+  // ✅ canonical 중복 제거: 템플릿 canonical은 제거하고 meta.headHtml만 남긴다.
+  html = stripAllCanonicalLinks(html);
   html = html.replace('<!--META-->', meta.headHtml);
 
-  // body image CSS는 실제 사용 시에만 1회 주입
   if (bodyHtml.includes('class="post-body-image"')) html = injectBodyImageCssOnce(html);
 
-  // 디버그용 주석(산출물에 1줄) — 안전/가벼움
   html = html.replace(
     '</head>',
     `<!-- render-posts: pageId=${escapeHtml(pageId)} via=${escapeHtml(pidRes.via)} bodyImage=${bodyImgCtx && bodyImgCtx.manifestLoaded ? 'on' : 'off'} -->\n</head>`
