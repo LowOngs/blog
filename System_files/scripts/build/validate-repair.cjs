@@ -1,86 +1,46 @@
-// FILE: System_files/scripts/build/validate-repair.cjs
 #!/usr/bin/env node
 'use strict';
 
-require('./lib/env.cjs'); // ✅ 공통 규칙: env 로더 최우선
-
 /**
  * System_files/scripts/build/validate-repair.cjs
- * 역할:
- *  - dist/posts/*.html 순회
- *  - pageId 회수(발급 금지) + OG/Twitter image meta 교정
- *  - [PATCH v2] 이미지 overflow 방지: hero figure/img + 모든 img 반응형 보정
  *
- * 핵심 원칙(옹스 룰):
- *  - validate 단계에서 "새 pageId 발급/할당(ids 실행)" 금지.
- *  - pageId 정답은 content/posts/*.json 이다.
- *  - validate는 render 실수를 100% 커버(회수/삽입)해야 한다.
- *  - 끝까지 못 찾으면 빌드 통과 금지(생명).
+ * 역할(응급처치/최후 안전망):
+ *  - dist/posts/*.html을 순회하며
+ *    1) pageId 회수(발급 금지) → badge(data-page-id) 동기화
+ *    2) og:image / twitter:image 를 “정확히 1개”로 정규화(멱등)
+ *  - 끝까지 pageId 회수 실패 시 빌드 통과 금지(생명)
+ *
+ * 원칙(옹스 룰):
+ *  - validate 단계에서 ids.cjs 실행(발급/생성) 금지
+ *  - pageId SSOT: content/posts/*.json
+ *  - journal은 “이미 발급된 흔적” 회수 보조(없으면 무시)
+ *  - HTML 비대화 유발 요소(전 img 인라인 주입 등) 제거
  */
+
+require('./lib/env.cjs'); // ✅ 공통 규칙: env 로더 최우선
 
 const fs = require('fs');
 const path = require('path');
 
-const ROOT = path.resolve(__dirname, '..', '..'); // System_files
-const DIST_DIR = path.join(ROOT, 'dist', 'posts');
+const ROOT      = path.resolve(__dirname, '..', '..'); // System_files
+const DIST_DIR  = path.join(ROOT, 'dist', 'posts');
 const POSTS_DIR = path.join(ROOT, 'content', 'posts');
 
 const MANIFESTS_DIR = path.join(ROOT, 'manifests');
 const JOURNAL_FILE  = path.join(MANIFESTS_DIR, 'pageid-journal.jsonl');
 
-const SITE_BASE = process.env.SITE_BASE || 'https://ongsblog.com';
-const CDN_BASE = (process.env.CDN_BASE || 'https://ongsblog.com/images').replace(/\/+$/, '');
-
-function listHtmlFiles(dir) {
-  if (!fs.existsSync(dir)) return [];
-  return fs
-    .readdirSync(dir)
-    .filter((f) => f.toLowerCase().endsWith('.html'))
-    .map((f) => path.join(dir, f));
-}
-
-function escapeReg(s) {
-  return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
+const SITE_BASE = (process.env.SITE_BASE || process.env.CANONICAL_BASE || 'https://ongsblog.com').replace(/\/+$/, '');
+const CDN_BASE  = (process.env.CDN_BASE || (SITE_BASE + '/images')).replace(/\/+$/, '');
 
 function isValidPageId(v) {
   return typeof v === 'string' && /^page\d{6}$/.test(v);
 }
 
-/**
- * 1) data-page-id="page000123" 우선
- * 2) page badge 텍스트 "page000123" 차선
- * 3) og:image URL에서 "page000123_" 역추출
- */
-function extractPageIdFromHtml(html) {
-  const m1 = html.match(/data-page-id=["'](page\d{6})["']/i);
-  if (m1 && m1[1]) return m1[1];
-
-  const m2 = html.match(/id=["']pageId["'][\s\S]*?>(page\d{6})<\/a>/i);
-  if (m2 && m2[1]) return m2[1];
-
-  const m3 = html.match(/\/og\/(page\d{6})_/i);
-  if (m3 && m3[1]) return m3[1];
-
-  return '';
-}
-
-function readJsonSafe(filePath, fallback) {
-  try {
-    if (!fs.existsSync(filePath)) return fallback;
-    const raw = fs.readFileSync(filePath, 'utf8');
-    return JSON.parse(raw);
-  } catch {
-    return fallback;
-  }
-}
-
-function getPageIdFromPostJson(slugBase) {
-  const file = path.join(POSTS_DIR, `${slugBase}.json`);
-  const doc = readJsonSafe(file, null);
-  if (!doc || typeof doc !== 'object') return '';
-  const pid = doc.pageId;
-  return isValidPageId(pid) ? pid : '';
+function listHtmlFiles(dir) {
+  if (!fs.existsSync(dir)) return [];
+  return fs.readdirSync(dir)
+    .filter(f => f.toLowerCase().endsWith('.html'))
+    .map(f => path.join(dir, f));
 }
 
 function readFileSafe(p) {
@@ -90,6 +50,42 @@ function readFileSafe(p) {
   } catch {
     return '';
   }
+}
+
+function readJsonSafe(filePath, fallback = null) {
+  try {
+    if (!fs.existsSync(filePath)) return fallback;
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  } catch {
+    return fallback;
+  }
+}
+
+/**
+ * 1) data-page-id="page000123" 우선
+ * 2) page badge 텍스트 "page000123" 차선
+ * 3) og:image URL에서 "page000123_" 역추출(보조)
+ */
+function extractPageIdFromHtml(html) {
+  const h = String(html || '');
+  let m = h.match(/data-page-id=["'](page\d{6})["']/i);
+  if (m && m[1]) return m[1];
+
+  m = h.match(/id=["']pageId["'][\s\S]*?>(page\d{6})<\/a>/i);
+  if (m && m[1]) return m[1];
+
+  m = h.match(/\/og\/(page\d{6})_/i);
+  if (m && m[1]) return m[1];
+
+  return '';
+}
+
+function getPageIdFromPostJson(slugBase) {
+  const file = path.join(POSTS_DIR, `${slugBase}.json`);
+  const doc = readJsonSafe(file, null);
+  if (!doc || typeof doc !== 'object') return '';
+  const pid = doc.pageId;
+  return isValidPageId(pid) ? pid : '';
 }
 
 function recoverPageIdFromJournal(slug) {
@@ -112,169 +108,129 @@ function recoverPageIdFromJournal(slug) {
  * pageId 회수 로직(발급 금지)
  * 0) HTML에서 이미 있으면 사용
  * 1) posts JSON에서 회수(정답)
- * 2) 그래도 없으면 journal 회수(이미 발급된 흔적)
+ * 2) journal에서 회수(이미 발급된 흔적)
  * 3) 최종 실패: 통과 금지
  */
 function ensurePageIdRecovered(slugBase, html) {
   const fromHtml = extractPageIdFromHtml(html);
-  if (isValidPageId(fromHtml)) return fromHtml;
+  if (isValidPageId(fromHtml)) return { pageId: fromHtml, via: 'html' };
 
-  let pid = getPageIdFromPostJson(slugBase);
-  if (pid) return pid;
+  const fromJson = getPageIdFromPostJson(slugBase);
+  if (isValidPageId(fromJson)) return { pageId: fromJson, via: 'json' };
 
-  pid = recoverPageIdFromJournal(slugBase);
-  if (pid) return pid;
+  const fromJournal = recoverPageIdFromJournal(slugBase);
+  if (isValidPageId(fromJournal)) return { pageId: fromJournal, via: 'journal' };
 
   throw new Error(`pageId 회수 실패: slug=${slugBase} (HTML/JSON/journal 모두 실패)`);
 }
 
 /**
- * meta upsert(속성 순서/추가속성 무관 매칭)
- * - 기존 meta가 있으면 해당 태그를 교체
- * - 없으면 </head> 직전에 삽입
+ * page badge(<a id="pageId" ...>)의 data-page-id를 “정답 pageId”로 동기화
+ * - 없으면 삽입까지는 하지 않고 FAIL 처리(계약 파손으로 간주)
  */
-function upsertMetaTag(html, kind, nameOrProp, content) {
-  const attr = kind === 'property' ? 'property' : 'name';
-  const key = escapeReg(nameOrProp);
-
-  // ✅ 속성 순서 무관 + 다른 속성 있어도 매칭되게
-  const rx = new RegExp(
-    `<meta\\b(?=[^>]*\\b${attr}=["']${key}["'])(?=[^>]*\\bcontent=["'][^"']*["'])[^>]*\\/?>`,
-    'i'
-  );
-
-  const tag = `<meta ${attr}="${nameOrProp}" content="${content}">`;
-
-  if (rx.test(html)) {
-    return { html: html.replace(rx, tag), changed: true };
+function syncBadgePageId(html, pageId) {
+  const h = String(html || '');
+  const re = /<a\b([^>]*\bid=["']pageId["'][^>]*)>([\s\S]*?)<\/a>/i;
+  const m = h.match(re);
+  if (!m) {
+    return { html: h, changed: false, ok: false, reason: 'page badge missing' };
   }
 
-  const headCloseIdx = html.toLowerCase().indexOf('</head>');
-  if (headCloseIdx !== -1) {
-    const insert = `  ${tag}\n`;
-    return { html: html.slice(0, headCloseIdx) + insert + html.slice(headCloseIdx), changed: true };
-  }
+  const full = m[0];
+  const attrs = m[1];
+  const inner = m[2];
 
-  return { html, changed: false };
-}
-
-function upsertBadgeDataPageId(html, pageId) {
-  let changed = false;
-
-  const rx = /(<a\b[^>]*\bid=["']pageId["'][^>]*)(>)/i;
-  const m = html.match(rx);
-  if (!m) return { html, changed: false };
-
-  const aOpen = m[1];
-  const restStart = m.index + aOpen.length;
-
-  if (/data-page-id=["']page\d{6}["']/i.test(aOpen)) {
-    const next = aOpen.replace(/data-page-id=["']page\d{6}["']/i, `data-page-id="${pageId}"`);
-    html = html.slice(0, m.index) + next + html.slice(restStart);
-    changed = true;
-  } else if (/data-page-id=["'][^"']*["']/i.test(aOpen)) {
-    const next = aOpen.replace(/data-page-id=["'][^"']*["']/i, `data-page-id="${pageId}"`);
-    html = html.slice(0, m.index) + next + html.slice(restStart);
-    changed = true;
+  // 1) data-page-id 속성 교체/추가
+  let newAttrs = attrs;
+  if (/data-page-id\s*=\s*["'][^"']*["']/i.test(newAttrs)) {
+    newAttrs = newAttrs.replace(/data-page-id\s*=\s*["'][^"']*["']/i, `data-page-id="${pageId}"`);
   } else {
-    const next = aOpen + ` data-page-id="${pageId}"`;
-    html = html.slice(0, m.index) + next + html.slice(restStart);
-    changed = true;
+    newAttrs = newAttrs + ` data-page-id="${pageId}"`;
   }
 
-  return { html, changed };
+  // 2) inner 텍스트에 pageId가 있으면 교체(없어도 강제 삽입은 안 함)
+  let newInner = inner;
+  if (/\bpage\d{6}\b/i.test(newInner)) {
+    newInner = newInner.replace(/\bpage\d{6}\b/i, pageId);
+  }
+
+  const replaced = `<a${newAttrs}>${newInner}</a>`;
+  if (replaced === full) {
+    return { html: h, changed: false, ok: true };
+  }
+  return { html: h.replace(full, replaced), changed: true, ok: true };
 }
 
-function updateOgAndTwitterImage(html, slugBase) {
+/**
+ * 메타 태그를 “정확히 1개”로 정규화(멱등)
+ * - 기존에 몇 개가 있든 전부 제거 후, head 닫기 직전에 1개만 삽입
+ */
+function setSingleMeta(html, kind, key, content) {
+  const h = String(html || '');
+  const attr = kind === 'property' ? 'property' : 'name';
+
+  // 다양한 속성 순서/공백/추가 속성까지 전부 제거(멱등)
+  const removeRe = new RegExp(
+    `<meta\\b[^>]*\\b${attr}=["']${escapeReg(key)}["'][^>]*>\\s*`,
+    'gi'
+  );
+  let out = h.replace(removeRe, '');
+  const tag = `<meta ${attr}="${key}" content="${escapeAttr(content)}">`;
+
+  const headCloseIdx = out.toLowerCase().indexOf('</head>');
+  if (headCloseIdx === -1) return { html: out, changed: (out !== h), inserted: false };
+
+  // 동일 tag가 이미 “정확히 같은 형태로” 남아있을 가능성은 위 제거로 거의 없음.
+  const insert = `  ${tag}\n`;
+  out = out.slice(0, headCloseIdx) + insert + out.slice(headCloseIdx);
+
+  return { html: out, changed: true, inserted: true };
+}
+
+function escapeReg(s) {
+  return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function escapeAttr(str) {
+  return String(str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/\n/g, ' ');
+}
+
+function buildOgUrl(pageId, slugBase) {
+  return `${CDN_BASE}/og/${pageId}_${slugBase}_1200x630.jpg`;
+}
+
+/**
+ * og:image & twitter:image 응급 교정(멱등)
+ */
+function repairOgAndTwitter(html, pageId, slugBase) {
+  const ogUrl = buildOgUrl(pageId, slugBase);
+
   let changed = false;
 
-  const pageId = ensurePageIdRecovered(slugBase, html);
-  const ogUrl = `${CDN_BASE}/og/${pageId}_${slugBase}_1200x630.jpg`;
-
-  const b = upsertBadgeDataPageId(html, pageId);
-  html = b.html;
-  changed = changed || b.changed;
-
-  const r1 = upsertMetaTag(html, 'property', 'og:image', ogUrl);
+  const r1 = setSingleMeta(html, 'property', 'og:image', ogUrl);
   html = r1.html; changed = changed || r1.changed;
 
-  const r2 = upsertMetaTag(html, 'name', 'twitter:image', ogUrl);
+  const r2 = setSingleMeta(html, 'name', 'twitter:image', ogUrl);
   html = r2.html; changed = changed || r2.changed;
 
-  return { html, changed, pageId, ogUrl };
-}
-
-/* ───────────────────── [PATCH v2] 이미지 뚫고 나옴 방지 ───────────────────── */
-
-function ensureHeroFigureOverflowHidden(html) {
-  let changed = false;
-  html = html.replace(/<figure\b([^>]*\bclass=["'][^"']*\bpost-hero\b[^"']*["'][^>]*)>/gi, (m, attrs) => {
-    if (/style\s*=/.test(attrs)) {
-      const out = m.replace(/style\s*=\s*["']([^"']*)["']/i, (mm, css) => {
-        if (/overflow\s*:\s*hidden/i.test(css)) return mm;
-        const base = (css || '').trim();
-        const next = (base ? (base.endsWith(';') ? base : base + ';') : '') + 'overflow:hidden;';
-        changed = true;
-        return `style="${next}"`;
-      });
-      return out;
-    }
-    changed = true;
-    return `<figure${attrs} style="overflow:hidden;">`;
-  });
-  return { html, changed };
-}
-
-function ensureAllImagesResponsive(html) {
-  let changed = false;
-
-  html = html.replace(/<img\b([^>]*?)>/gi, (m, attrs) => {
-    if (/style\s*=/.test(attrs)) {
-      let did = false;
-      const out = m.replace(/style\s*=\s*["']([^"']*)["']/i, (mm, css) => {
-        let nextCss = css || '';
-        const needSemi = () => (nextCss.trim() === '' || nextCss.trim().endsWith(';')) ? '' : ';';
-        if (!/max-width\s*:\s*100%/i.test(nextCss)) { nextCss += needSemi() + 'max-width:100%;'; did = true; }
-        if (!/height\s*:\s*auto/i.test(nextCss))    { nextCss += needSemi() + 'height:auto;'; did = true; }
-        if (!did) return mm;
-        changed = true;
-        return `style="${nextCss}"`;
-      });
-      return out;
-    }
-
-    changed = true;
-    return `<img${attrs} style="max-width:100%;height:auto;">`;
-  });
-
-  return { html, changed };
-}
-
-function applyImageOverflowFix(html) {
-  let changed = false;
-
-  const a = ensureHeroFigureOverflowHidden(html);
-  html = a.html; changed = changed || a.changed;
-
-  const b = ensureAllImagesResponsive(html);
-  html = b.html; changed = changed || b.changed;
-
-  return { html, changed };
+  return { html, changed, ogUrl };
 }
 
 /* ───────────────────── main ───────────────────── */
 
 function main() {
   console.log('────────────────────────────────────────────');
-  console.log('[validate] DIST      =', DIST_DIR);
-  console.log('[validate] POSTS_DIR =', POSTS_DIR);
-  console.log('[validate] JOURNAL   =', JOURNAL_FILE);
-  console.log('[validate] SITE_BASE =', SITE_BASE);
-  console.log('[validate] CDN_BASE  =', CDN_BASE);
+  console.log('[validate-repair] ROOT      =', ROOT);
+  console.log('[validate-repair] DIST      =', DIST_DIR);
+  console.log('[validate-repair] POSTS_DIR =', POSTS_DIR);
+  console.log('[validate-repair] JOURNAL   =', JOURNAL_FILE);
+  console.log('[validate-repair] SITE_BASE =', SITE_BASE);
+  console.log('[validate-repair] CDN_BASE  =', CDN_BASE);
+  console.log('────────────────────────────────────────────');
 
   const files = listHtmlFiles(DIST_DIR);
   if (!files.length) {
-    console.log('[validate] 대상 HTML 없음 → 종료');
+    console.log('[validate-repair] 대상 HTML 없음 → 종료');
     return;
   }
 
@@ -285,37 +241,52 @@ function main() {
     const filename = path.basename(file);
     const slugBase = filename.replace(/\.html$/i, '');
 
-    const html0 = fs.readFileSync(file, 'utf8');
+    const html0 = readFileSafe(file);
+    if (!html0) {
+      console.error(`[validate-repair][FAIL] ${filename} → HTML 읽기 실패`);
+      failCount++;
+      continue;
+    }
+
     let html = html0;
     let changed = false;
 
     try {
-      // 1) OG/twitter/pageId 교정(발급 금지: 회수만)
-      const out = updateOgAndTwitterImage(html, slugBase);
-      html = out.html;
-      changed = changed || out.changed;
+      // 1) pageId 회수(발급 금지)
+      const rec = ensurePageIdRecovered(slugBase, html);
+      const pageId = rec.pageId;
 
-      // 2) ✅ [PATCH v2] 이미지 overflow 방지(최종 안전망)
-      const imgFix = applyImageOverflowFix(html);
-      html = imgFix.html;
-      changed = changed || imgFix.changed;
+      // 2) badge 동기화(없으면 계약 파손 → FAIL)
+      const b = syncBadgePageId(html, pageId);
+      html = b.html;
+      changed = changed || b.changed;
+
+      if (!b.ok) {
+        throw new Error(`page badge(id="pageId") 누락 → 계약 파손(응급처치 불가)`);
+      }
+
+      // 3) og/twitter 메타를 “정확히 1개”로 정규화(멱등)
+      const m = repairOgAndTwitter(html, pageId, slugBase);
+      html = m.html;
+      changed = changed || m.changed;
 
       if (changed) {
         fs.writeFileSync(file, html, 'utf8');
-        fixedCount += 1;
-        const pid = extractPageIdFromHtml(html) || '(unknown)';
-        console.log(`FIX ${filename} → pageId=${pid}`);
+        fixedCount++;
+        console.log(`FIX ${filename} → pageId=${pageId} via=${rec.via}`);
       }
     } catch (e) {
-      failCount += 1;
-      console.error(`[validate][FAIL] ${filename} →`, e.message || e);
+      failCount++;
+      console.error(`[validate-repair][FAIL] ${filename} →`, e && e.message ? e.message : String(e));
     }
   }
 
+  console.log('────────────────────────────────────────────');
   console.log(`✨ validate-repair 완료 — 수정: ${fixedCount}/${files.length}`);
+  console.log(`✨ validate-repair 완료 — 실패: ${failCount}/${files.length}`);
+  console.log('────────────────────────────────────────────');
 
   if (failCount > 0) {
-    console.error(`[validate][FAIL] pageId 회수 실패 ${failCount}건 → 빌드 중단`);
     process.exit(1);
   }
 }
