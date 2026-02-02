@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* qa-check.cjs
+/* System_files/scripts/build/qa-check.cjs
  * dist/posts/*.html 대상으로 "무결성 5" 중 QA가 책임지는 3개를 CRIT로 판정한다.
  *
  * [무결성 5 (확정)]
