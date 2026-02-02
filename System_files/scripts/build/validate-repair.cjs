@@ -1,25 +1,25 @@
+// FILE: System_files/scripts/build/validate-repair.cjs
 #!/usr/bin/env node
 'use strict';
+
+require('./lib/env.cjs'); // ✅ 공통 규칙: env 로더 최우선
 
 /**
  * System_files/scripts/build/validate-repair.cjs
  * 역할:
- *  - dist/posts/*.html을 돌면서
- *  - pageId 누락/불일치/OG 이미지 메타 누락을 자동 교정
+ *  - dist/posts/*.html 순회
+ *  - pageId 회수(발급 금지) + OG/Twitter image meta 교정
+ *  - [PATCH v2] 이미지 overflow 방지: hero figure/img + 모든 img 반응형 보정
  *
  * 핵심 원칙(옹스 룰):
- *  - validate 단계에서 "새 pageId 발급"은 금지.
+ *  - validate 단계에서 "새 pageId 발급/할당(ids 실행)" 금지.
  *  - pageId 정답은 content/posts/*.json 이다.
  *  - validate는 render 실수를 100% 커버(회수/삽입)해야 한다.
  *  - 끝까지 못 찾으면 빌드 통과 금지(생명).
- *
- * [PATCH v2]
- *  - "이미지 본문 뚫고 나옴" 방지: hero figure/img + 모든 img에 max-width/height 보정
  */
 
 const fs = require('fs');
 const path = require('path');
-const { spawnSync } = require('child_process');
 
 const ROOT = path.resolve(__dirname, '..', '..'); // System_files
 const DIST_DIR = path.join(ROOT, 'dist', 'posts');
@@ -108,25 +108,12 @@ function recoverPageIdFromJournal(slug) {
   return '';
 }
 
-function runIdsOnceOrFail() {
-  // validate 안에서 무한 재시도 금지(과열). 1회만 시도.
-  const script = path.join(ROOT, 'scripts', 'build', 'ids.cjs');
-  const r = spawnSync('node', [script], {
-    stdio: 'inherit',
-    env: process.env,
-  });
-  if (r.status !== 0) {
-    throw new Error('ids.cjs 실행 실패(복구 시도 실패)');
-  }
-}
-
 /**
  * pageId 회수 로직(발급 금지)
  * 0) HTML에서 이미 있으면 사용
  * 1) posts JSON에서 회수(정답)
- * 2) 그래도 없으면 ids 1회 복구 시도 후 JSON 재조회
- * 3) 그래도 없으면 journal 회수(이미 발급된 흔적)
- * 4) 최종 실패: 통과 금지
+ * 2) 그래도 없으면 journal 회수(이미 발급된 흔적)
+ * 3) 최종 실패: 통과 금지
  */
 function ensurePageIdRecovered(slugBase, html) {
   const fromHtml = extractPageIdFromHtml(html);
@@ -135,20 +122,24 @@ function ensurePageIdRecovered(slugBase, html) {
   let pid = getPageIdFromPostJson(slugBase);
   if (pid) return pid;
 
-  runIdsOnceOrFail();
-  pid = getPageIdFromPostJson(slugBase);
-  if (pid) return pid;
-
   pid = recoverPageIdFromJournal(slugBase);
   if (pid) return pid;
 
-  throw new Error(`pageId 회수 실패: slug=${slugBase} (HTML/JSON/ids/journal 모두 실패)`);
+  throw new Error(`pageId 회수 실패: slug=${slugBase} (HTML/JSON/journal 모두 실패)`);
 }
 
+/**
+ * meta upsert(속성 순서/추가속성 무관 매칭)
+ * - 기존 meta가 있으면 해당 태그를 교체
+ * - 없으면 </head> 직전에 삽입
+ */
 function upsertMetaTag(html, kind, nameOrProp, content) {
   const attr = kind === 'property' ? 'property' : 'name';
+  const key = escapeReg(nameOrProp);
+
+  // ✅ 속성 순서 무관 + 다른 속성 있어도 매칭되게
   const rx = new RegExp(
-    `<meta\\s+${attr}=["']${escapeReg(nameOrProp)}["']\\s+content=["'][^"']*["']\\s*\\/?>`,
+    `<meta\\b(?=[^>]*\\b${attr}=["']${key}["'])(?=[^>]*\\bcontent=["'][^"']*["'])[^>]*\\/?>`,
     'i'
   );
 
@@ -216,14 +207,13 @@ function updateOgAndTwitterImage(html, slugBase) {
 /* ───────────────────── [PATCH v2] 이미지 뚫고 나옴 방지 ───────────────────── */
 
 function ensureHeroFigureOverflowHidden(html) {
-  // figure.post-hero가 있으면 overflow:hidden을 인라인으로 강제(중복 삽입 방지)
   let changed = false;
   html = html.replace(/<figure\b([^>]*\bclass=["'][^"']*\bpost-hero\b[^"']*["'][^>]*)>/gi, (m, attrs) => {
     if (/style\s*=/.test(attrs)) {
-      // style이 있으면 overflow:hidden만 합치기
       const out = m.replace(/style\s*=\s*["']([^"']*)["']/i, (mm, css) => {
         if (/overflow\s*:\s*hidden/i.test(css)) return mm;
-        const next = (css.trim().endsWith(';') ? css.trim() : (css.trim() ? css.trim() + ';' : '')) + 'overflow:hidden;';
+        const base = (css || '').trim();
+        const next = (base ? (base.endsWith(';') ? base : base + ';') : '') + 'overflow:hidden;';
         changed = true;
         return `style="${next}"`;
       });
@@ -236,17 +226,16 @@ function ensureHeroFigureOverflowHidden(html) {
 }
 
 function ensureAllImagesResponsive(html) {
-  // 모든 img에 max-width:100%;height:auto;를 인라인으로 강제(이미 있으면 합침)
   let changed = false;
 
   html = html.replace(/<img\b([^>]*?)>/gi, (m, attrs) => {
-    // style 있으면 합치기
     if (/style\s*=/.test(attrs)) {
       let did = false;
       const out = m.replace(/style\s*=\s*["']([^"']*)["']/i, (mm, css) => {
         let nextCss = css || '';
-        if (!/max-width\s*:\s*100%/i.test(nextCss)) { nextCss += (nextCss.trim().endsWith(';') || nextCss.trim()==='' ? '' : ';') + 'max-width:100%;'; did = true; }
-        if (!/height\s*:\s*auto/i.test(nextCss))    { nextCss += (nextCss.trim().endsWith(';') || nextCss.trim()==='' ? '' : ';') + 'height:auto;'; did = true; }
+        const needSemi = () => (nextCss.trim() === '' || nextCss.trim().endsWith(';')) ? '' : ';';
+        if (!/max-width\s*:\s*100%/i.test(nextCss)) { nextCss += needSemi() + 'max-width:100%;'; did = true; }
+        if (!/height\s*:\s*auto/i.test(nextCss))    { nextCss += needSemi() + 'height:auto;'; did = true; }
         if (!did) return mm;
         changed = true;
         return `style="${nextCss}"`;
@@ -254,7 +243,6 @@ function ensureAllImagesResponsive(html) {
       return out;
     }
 
-    // style 없으면 새로 추가
     changed = true;
     return `<img${attrs} style="max-width:100%;height:auto;">`;
   });
@@ -302,7 +290,7 @@ function main() {
     let changed = false;
 
     try {
-      // 1) 기존 OG/twitter/pageId 교정
+      // 1) OG/twitter/pageId 교정(발급 금지: 회수만)
       const out = updateOgAndTwitterImage(html, slugBase);
       html = out.html;
       changed = changed || out.changed;
@@ -315,7 +303,6 @@ function main() {
       if (changed) {
         fs.writeFileSync(file, html, 'utf8');
         fixedCount += 1;
-        // out.pageId/out.ogUrl은 out.changed가 false일 수도 있으니 안전하게 표시
         const pid = extractPageIdFromHtml(html) || '(unknown)';
         console.log(`FIX ${filename} → pageId=${pid}`);
       }
