@@ -5,13 +5,17 @@
  * System_files/scripts/build/queue-to-posts.cjs
  * dist/queue/today.json → content/posts/*.json 자동 생성기
  *
- * ✅ 업데이트: postId(전 포스트), reviewId(리뷰 포스트) 발급/주입
- * - postId: 영구 ULID (모든 포스트에 1회 발급, 이후 유지)
- * - reviewId: 영구 ULID (리뷰 포스트에만 1회 발급, 이후 유지)
- * - pageId와는 역할 분리: pageId는 ids.cjs에서만 발급/관리(여기서 절대 건드리지 않음)
+ * ✅ 핵심 변경(2-a-3/2-a-4 대응):
+ * - today.json의 label은 “슬롯/통계 기준”으로 유지
+ * - 실제 posts 생성 기준 라벨은 seedLabel을 사용
+ *   (fallback으로 다른 창고에서 seed를 가져와도 슬롯 라벨 오염 방지)
+ *
+ * 불변:
+ * - today.json 원본 수정 금지
+ * - pageId는 ids.cjs에서만 관리(여기서 절대 건드리지 않음)
  */
 
-// ✅ 로컬/CI 공통: .env 로드(필수)
+// .env 로드
 require('./lib/env.cjs');
 
 const fs = require('fs');
@@ -19,10 +23,7 @@ const path = require('path');
 const crypto = require('crypto');
 
 // ────────────────────────────────────
-//  What: 경로 설정
-//  Why : SSOT/산출물 경로를 단일화
-//  I/O : R(dist/queue/today.json), W(content/posts/*.json, dist/queue/today.expanded.json)
-//  Invariants: System_files 가 ROOT, today.json 원본 수정 금지
+// 경로
 // ────────────────────────────────────
 const ROOT = path.resolve(__dirname, '..', '..'); // System_files
 const QUEUE_DIR = path.join(ROOT, 'dist', 'queue');
@@ -33,10 +34,7 @@ const CONTENT_DIR = path.join(ROOT, 'content', 'posts');
 fs.mkdirSync(CONTENT_DIR, { recursive: true });
 
 // ────────────────────────────────────
-//  What: 로그/중단 유틸
-//  Why : CI에서 원인 즉시 노출
-//  I/O : 없음
-//  Invariants: 오염 발견 시 즉시 exit(1)
+// 로그/중단
 // ────────────────────────────────────
 function log(...a) {
   console.log('[seed→post]', ...a);
@@ -47,10 +45,7 @@ function fatal(msg) {
 }
 
 // ────────────────────────────────────
-//  What: 라벨(SSOT) 고정
-//  Why : 라벨 오염(오타/누락) 방지
-//  I/O : 없음
-//  Invariants: 6개 라벨만 허용
+// 라벨(SSOT)
 // ────────────────────────────────────
 const ALLOWED_LABELS = new Set([
   'app-reviews',
@@ -62,10 +57,7 @@ const ALLOWED_LABELS = new Set([
 ]);
 
 // ────────────────────────────────────
-//  What: 리뷰 라벨 판정
-//  Why : reviewId는 리뷰 포스트만 대상
-//  I/O : 없음
-//  Invariants: app/device/subscription 3종만 리뷰
+// 리뷰 라벨 판정(실제 posts 기준 = seedLabel)
 // ────────────────────────────────────
 function isReviewLabel(label) {
   return (
@@ -76,10 +68,7 @@ function isReviewLabel(label) {
 }
 
 // ────────────────────────────────────
-//  What: 프로필 로딩(라벨 → profileId)
-//  Why : profileId 누락은 생성 자체를 막아야 함
-//  I/O : R(seedpool/profiles/labels.json)
-//  Invariants: 매핑 없으면 즉시 FATAL
+// 프로필 매핑(실제 posts 기준 = seedLabel)
 // ────────────────────────────────────
 const SEEDPOOL_DIR = path.join(ROOT, 'seedpool');
 const PROFILES_DIR = path.join(SEEDPOOL_DIR, 'profiles');
@@ -87,14 +76,9 @@ const LABELS_FILE = path.join(PROFILES_DIR, 'labels.json');
 
 function safeReadJson(file, fallback) {
   try {
-    if (!fs.existsSync(file)) {
-      log(`경고: ${path.basename(file)} 없음, 기본값 사용.`);
-      return fallback;
-    }
-    const raw = fs.readFileSync(file, 'utf8');
-    return JSON.parse(raw);
-  } catch (e) {
-    console.warn('[seed→post]', path.basename(file), '읽기/파싱 실패:', e.message || e);
+    if (!fs.existsSync(file)) return fallback;
+    return JSON.parse(fs.readFileSync(file, 'utf8'));
+  } catch {
     return fallback;
   }
 }
@@ -106,37 +90,30 @@ function getProfileIdForLabel(label) {
 }
 
 // ────────────────────────────────────
-//  What: today.json 로드
-//  Why : 실행 스코프 입력(Plan SSOT)
-//  I/O : R(dist/queue/today.json)
-//  Invariants: 파싱 실패/오염 시 즉시 중단
+// today.json 로드
 // ────────────────────────────────────
 if (!fs.existsSync(QUEUE_FILE)) {
-  log('today.json 없음. 생성할 포스트가 없어 건너뜀.');
+  log('today.json 없음 → 종료');
   process.exit(0);
 }
 
 let queue;
 try {
-  const raw = fs.readFileSync(QUEUE_FILE, 'utf8');
-  queue = JSON.parse(raw);
+  queue = JSON.parse(fs.readFileSync(QUEUE_FILE, 'utf8'));
 } catch (e) {
   fatal(`today.json 파싱 실패: ${e.message || e}`);
 }
 
-log(`today.json 로드 완료 → date=${queue.date || 'N/A'}`);
+log(`today.json 로드 → date=${queue.date || 'N/A'} tz=${queue.timezone || 'N/A'} cutoff=${queue.cutoff || 'N/A'}`);
 
 const items = Array.isArray(queue.items) ? queue.items : [];
 if (!items.length) {
-  log('today.json 안에 items가 비어 있음. 건너뜀.');
+  log('items 비어 있음 → 종료');
   process.exit(0);
 }
 
 // ────────────────────────────────────
-//  What: 라벨 → prefix 매핑
-//  Why : slug 규칙 고정(후속 파이프라인/발행 안정)
-//  I/O : 없음
-//  Invariants: blogger.cjs가 인식하는 prefix로 고정
+// 라벨 → prefix (posts 기준 = seedLabel)
 // ────────────────────────────────────
 const LABEL_TO_PREFIX = {
   'app-reviews': 'app',
@@ -147,21 +124,20 @@ const LABEL_TO_PREFIX = {
   'templates-checklists': 'template',
 };
 
-const counters = {}; // label별 일련번호
+// label별 일련번호(실제 posts 기준)
+const counters = {};
 
 // ────────────────────────────────────
-//  What: slug 날짜/번호 유틸
-//  Why : 파일명/슬러그 충돌 방지
-//  I/O : 없음
-//  Invariants: YYYYMMDD + 001.. 로 고정
+// 날짜 유틸(큐의 날짜를 신뢰)
 // ────────────────────────────────────
 function pad3(n) {
   return String(n).padStart(3, '0');
 }
 
 function getDateString(item) {
-  const base = item.date || queue.date || new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
-  return String(base).slice(0, 10).replace(/-/g, ''); // "YYYYMMDD"
+  const base = item.date || queue.date;
+  if (!base) return new Date().toISOString().slice(0, 10).replace(/-/g, '');
+  return String(base).slice(0, 10).replace(/-/g, '');
 }
 
 function isoUtcMidnight(dateYYYYMMDD) {
@@ -172,28 +148,19 @@ function isoUtcMidnight(dateYYYYMMDD) {
 }
 
 // ────────────────────────────────────
-//  What: 본문 프롬프트 생성
-//  Why : body 생성기는 여기 프롬프트에 의존
-//  I/O : 없음
-//  Invariants: TLDR/FAQ/Sources는 작성 금지(주입 전제)
+// 본문 프롬프트
 // ────────────────────────────────────
-function buildBodyPrompt(item, label) {
-  const title = (item.title || '').trim();
-  const angle = (item.angle || '').trim();
-  const audience = (item.audience || '').trim();
-  const intent = (item.intent || '').trim();
-  const notes = (item.notes || '').trim();
-
+function buildBodyPrompt(item, effectiveLabel) {
   const lines = [
     'Write a complete blog post in English for an English-speaking audience.',
     'Use clear headings, short paragraphs, and practical examples.',
     '',
-    `Title: ${title || '(Untitled)'}`,
-    `Label: ${label}`,
-    intent ? `Intent: ${intent}` : '',
-    angle ? `Angle: ${angle}` : '',
-    audience ? `Audience: ${audience}` : 'Audience: general readers who want clear, simple guidance',
-    notes ? `Notes: ${notes}` : '',
+    `Title: ${(item.title || '').trim() || '(Untitled)'}`,
+    `Label: ${effectiveLabel}`,
+    item.intent ? `Intent: ${item.intent}` : '',
+    item.angle ? `Angle: ${item.angle}` : '',
+    item.audience ? `Audience: ${item.audience}` : 'Audience: general readers',
+    item.notes ? `Notes: ${item.notes}` : '',
     '',
     'Include:',
     '- Do NOT write TL;DR, Key Facts, FAQ, or Sources (they are injected separately).',
@@ -206,37 +173,29 @@ function buildBodyPrompt(item, label) {
 }
 
 // ────────────────────────────────────
-//  What: 입력 검증(라벨/타이틀)
-//  Why : 오염된 큐는 조용히 진행하면 후폭풍이 큼
-//  I/O : 없음
-//  Invariants: label/title 누락은 즉시 중단
+// 검증
 // ────────────────────────────────────
-function requireValidLabel(label, idx) {
+function requireValidLabel(label, idx, name) {
   const v = String(label || '').trim();
-  if (!v) fatal(`items[${idx}] label 누락 (today.json 오염)`);
+  if (!v) fatal(`items[${idx}] ${name} 누락`);
   if (!ALLOWED_LABELS.has(v)) {
-    fatal(`items[${idx}] label 비정상: "${v}" (허용: ${Array.from(ALLOWED_LABELS).join(', ')})`);
+    fatal(`items[${idx}] ${name} 비정상: "${v}"`);
   }
   return v;
 }
 
 function requireValidTitle(title, idx) {
   const t = String(title || '').trim();
-  if (!t) fatal(`items[${idx}] title 누락 (label은 정상이어도 title 없으면 생성 금지)`);
+  if (!t) fatal(`items[${idx}] title 누락`);
   return t;
 }
 
 // ────────────────────────────────────
-//  What: ULID 생성기(의존성 없이 구현)
-//  Why : postId/reviewId를 영구 랜덤으로(Provider 변경/slug 변경에도 안전)
-//  I/O : 없음
-//  Invariants: 문자열 26자, 충돌확률 극저
+// ULID
 // ────────────────────────────────────
 const ULID_ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
 function encodeBase32Crockford(buf) {
-  let bits = 0;
-  let value = 0;
-  let out = '';
+  let bits = 0, value = 0, out = '';
   for (const b of buf) {
     value = (value << 8) | b;
     bits += 8;
@@ -251,70 +210,60 @@ function encodeBase32Crockford(buf) {
 function ulidNow() {
   const time = Date.now();
   const timeBuf = Buffer.alloc(6);
-  // 48-bit time
   timeBuf[0] = (time / 2 ** 40) & 255;
   timeBuf[1] = (time / 2 ** 32) & 255;
   timeBuf[2] = (time / 2 ** 24) & 255;
   timeBuf[3] = (time / 2 ** 16) & 255;
   timeBuf[4] = (time / 2 ** 8) & 255;
   timeBuf[5] = time & 255;
-
-  const randBuf = crypto.randomBytes(10); // 80-bit random
-  const timeStr = encodeBase32Crockford(timeBuf).padStart(10, '0').slice(0, 10);
-  const randStr = encodeBase32Crockford(randBuf).padStart(16, '0').slice(0, 16);
-  return (timeStr + randStr).slice(0, 26);
+  const randBuf = crypto.randomBytes(10);
+  return (
+    encodeBase32Crockford(timeBuf).padStart(10, '0').slice(0, 10) +
+    encodeBase32Crockford(randBuf).padStart(16, '0').slice(0, 16)
+  ).slice(0, 26);
 }
 
-// ────────────────────────────────────
-//  What: postId/reviewId 발급 규칙
-//  Why : “없을 때만” 발급하여 영구성 확보
-//  I/O : 없음
-//  Invariants: 재실행해도 동일 파일은 생성 스킵(멱등), 기존 값은 유지
-// ────────────────────────────────────
 function resolvePostId(item) {
-  const v = String(item.postId || '').trim();
-  return v ? v : ulidNow();
+  return item.postId ? String(item.postId) : ulidNow();
 }
 function resolveReviewId(item, label) {
   if (!isReviewLabel(label)) return null;
-  const v = String(item.reviewId || '').trim();
-  return v ? v : ulidNow();
+  return item.reviewId ? String(item.reviewId) : ulidNow();
 }
 
+// ────────────────────────────────────
+// 처리
+// ────────────────────────────────────
 let created = 0;
 let skipped = 0;
 
-// ────────────────────────────────────
-//  What: today.expanded.json 생성 준비
-//  Why : item ↔ slug(+id) 매칭키를 실행 스코프에 남김
-//  I/O : W(dist/queue/today.expanded.json)
-//  Invariants: today.json 원본 수정 금지
-// ────────────────────────────────────
 const expandedItems = items.map((it) => (it && typeof it === 'object' ? { ...it } : it));
 
 for (let i = 0; i < items.length; i++) {
   const item = items[i] || {};
-  const outItem = expandedItems[i] && typeof expandedItems[i] === 'object' ? expandedItems[i] : null;
+  const outItem = expandedItems[i];
 
-  const label = requireValidLabel(item.label, i);
+  // 슬롯 라벨(검증용)
+  const slotLabel = requireValidLabel(item.label, i, 'label');
+
+  // 실제 posts 기준 라벨
+  const seedLabel = requireValidLabel(item.seedLabel || item.label, i, 'seedLabel');
+
   const title = requireValidTitle(item.title, i);
 
-  const prefix = LABEL_TO_PREFIX[label];
-  if (!prefix) fatal(`라벨 prefix 매핑 누락: label="${label}"`);
+  const prefix = LABEL_TO_PREFIX[seedLabel];
+  if (!prefix) fatal(`prefix 매핑 누락: seedLabel="${seedLabel}"`);
 
   const ymd = getDateString(item);
 
-  if (!counters[label]) counters[label] = 1;
-  else counters[label]++;
+  if (!counters[seedLabel]) counters[seedLabel] = 1;
+  else counters[seedLabel]++;
 
-  const idx = pad3(counters[label]);
-  const slug = `${prefix}-${ymd}-${idx}`;
+  const slug = `${prefix}-${ymd}-${pad3(counters[seedLabel])}`;
 
-  // ✅ id 발급(없을 때만)
   const postId = resolvePostId(item);
-  const reviewId = resolveReviewId(item, label);
+  const reviewId = resolveReviewId(item, seedLabel);
 
-  // ✅ expanded item에 매칭키 주입(항상)
   if (outItem) {
     outItem.generatedSlug = slug;
     outItem.postId = postId;
@@ -322,43 +271,30 @@ for (let i = 0; i < items.length; i++) {
   }
 
   const targetPath = path.join(CONTENT_DIR, `${slug}.json`);
-
-  // ────────────────────────────────────
-  //  What: SSOT posts 생성(없을 때만)
-  //  Why : content/posts는 SSOT, 덮어쓰기는 정책상 금지
-  //  I/O : W(content/posts/{slug}.json)
-  //  Invariants: 이미 존재하면 절대 수정하지 않음
-  // ────────────────────────────────────
   if (fs.existsSync(targetPath)) {
-    log(`이미 존재 → ${path.basename(targetPath)} , 건너뜀.`);
+    log(`exists → ${slug}.json , skip`);
     skipped++;
     continue;
   }
 
-  const queueDate = String(item.date || queue.date || new Date().toISOString().slice(0, 10)).slice(0, 10);
-  const ymdISO = queueDate.replace(/-/g, '');
-  const updatedISO = isoUtcMidnight(ymdISO);
+  const queueDate = String(item.date || queue.date).slice(0, 10);
+  const updatedISO = isoUtcMidnight(queueDate.replace(/-/g, ''));
 
-  const profileId = getProfileIdForLabel(label);
-  if (!profileId) {
-    fatal(`profileId 없음: label="${label}" (seedpool/profiles/labels.json 매핑 확인 필요)`);
-  }
+  const profileId = getProfileIdForLabel(seedLabel);
+  if (!profileId) fatal(`profileId 없음: seedLabel="${seedLabel}"`);
 
   const doc = {
-    // ✅ 신규: 영구 postId
     postId,
-
-    // ✅ 신규: 리뷰 포스트만 reviewId (없으면 null)
     reviewId: reviewId || null,
 
     slug,
     title,
     description: (item.angle || item.title || '').trim(),
-    labels: [label],
-    intent: (item.intent || '').trim() || (isReviewLabel(label) ? 'review' : 'general'),
+    labels: [seedLabel],
+    intent: item.intent || (isReviewLabel(seedLabel) ? 'review' : 'general'),
     updated: updatedISO,
 
-    bodyPrompt: buildBodyPrompt(item, label),
+    bodyPrompt: buildBodyPrompt(item, seedLabel),
     body: '',
 
     aio: {
@@ -371,7 +307,8 @@ for (let i = 0; i < items.length; i++) {
 
     seedMeta: {
       queueDate,
-      label,
+      slotLabel,     // 슬롯 기준 라벨(통계/스코프)
+      seedLabel,     // 실제 시드 출처 라벨
       profileId,
       id: item.id || null,
       angle: item.angle || null,
@@ -379,33 +316,24 @@ for (let i = 0; i < items.length; i++) {
       intent: item.intent || null,
       priority: item.priority ?? null,
       notes: item.notes || null,
-
-      // ✅ 신규: 추적 편의(중복보험) — SSOT 키는 postId/reviewId, 사람이 보는 키는 slug
       postId,
       reviewId: reviewId || null,
     },
   };
 
   fs.writeFileSync(targetPath, JSON.stringify(doc, null, 2), 'utf8');
-  log(`created ${path.basename(targetPath)} postId=${postId} reviewId=${reviewId || '(n/a)'} seed=${item.id || '(no-id)'}`);
+  log(`created ${slug}.json (slot=${slotLabel}, seed=${seedLabel})`);
   created++;
 }
 
-// ────────────────────────────────────
-//  What: today.expanded.json 저장
-//  Why : 실행 스코프(매칭키 포함) 고정
-//  I/O : W(dist/queue/today.expanded.json)
-//  Invariants: today.json 원본은 절대 수정하지 않음
-// ────────────────────────────────────
+// expanded 저장
 try {
-  const expanded = {
-    ...queue,
-    expandedAt: new Date().toISOString(),
-    items: expandedItems,
-  };
-
-  fs.writeFileSync(QUEUE_EXPANDED_FILE, JSON.stringify(expanded, null, 2), 'utf8');
-  log(`expanded queue written → ${QUEUE_EXPANDED_FILE}`);
+  fs.writeFileSync(
+    QUEUE_EXPANDED_FILE,
+    JSON.stringify({ ...queue, expandedAt: new Date().toISOString(), items: expandedItems }, null, 2),
+    'utf8'
+  );
+  log(`expanded queue → ${QUEUE_EXPANDED_FILE}`);
 } catch (e) {
   fatal(`today.expanded.json 저장 실패: ${e.message || e}`);
 }
