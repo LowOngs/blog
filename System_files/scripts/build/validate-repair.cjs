@@ -161,38 +161,75 @@ function syncBadgePageId(html, pageId) {
   return { html: h.replace(full, replaced), changed: true, ok: true };
 }
 
-/**
- * 메타 태그를 “정확히 1개”로 정규화(멱등)
- * - 기존에 몇 개가 있든 전부 제거 후, head 닫기 직전에 1개만 삽입
- */
-function setSingleMeta(html, kind, key, content) {
-  const h = String(html || '');
-  const attr = kind === 'property' ? 'property' : 'name';
-
-  // 다양한 속성 순서/공백/추가 속성까지 전부 제거(멱등)
-  const removeRe = new RegExp(
-    `<meta\\b[^>]*\\b${attr}=["']${escapeReg(key)}["'][^>]*>\\s*`,
-    'gi'
-  );
-  let out = h.replace(removeRe, '');
-  const tag = `<meta ${attr}="${key}" content="${escapeAttr(content)}">`;
-
-  const headCloseIdx = out.toLowerCase().indexOf('</head>');
-  if (headCloseIdx === -1) return { html: out, changed: (out !== h), inserted: false };
-
-  // 동일 tag가 이미 “정확히 같은 형태로” 남아있을 가능성은 위 제거로 거의 없음.
-  const insert = `  ${tag}\n`;
-  out = out.slice(0, headCloseIdx) + insert + out.slice(headCloseIdx);
-
-  return { html: out, changed: true, inserted: true };
-}
+/* ───────────────────── 멱등 메타 정규화 ───────────────────── */
 
 function escapeReg(s) {
   return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 function escapeAttr(str) {
-  return String(str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/\n/g, ' ');
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/\n/g, ' ');
+}
+
+function normalizeAttrValue(s) {
+  return String(s || '').trim();
+}
+
+/**
+ * 메타 태그를 “정확히 1개”로 정규화(멱등)
+ * - 이미 1개이고 content가 동일하면 변경하지 않음(=write 안 함)
+ * - 그 외(0개/복수/값 불일치)는 전부 제거 후 head 닫기 직전에 1개 삽입
+ */
+function setSingleMeta(html, kind, key, content) {
+  const original = String(html || '');
+  const attr = kind === 'property' ? 'property' : 'name';
+  const desired = normalizeAttrValue(content);
+
+  // 1) 현재 존재하는 동일 key 메타들의 content 수집
+  const findRe = new RegExp(
+    `<meta\\b[^>]*\\b${attr}\\s*=\\s*["']${escapeReg(key)}["'][^>]*>`,
+    'gi'
+  );
+  const contentRe = /\bcontent\s*=\s*["']([^"']*)["']/i;
+
+  const found = [];
+  let m;
+  while ((m = findRe.exec(original))) {
+    const tag = m[0];
+    const cm = tag.match(contentRe);
+    const v = cm && cm[1] ? normalizeAttrValue(cm[1]) : '';
+    found.push({ tag, content: v });
+  }
+
+  // ✅ 멱등 fast-path:
+  // - 정확히 1개 존재
+  // - 그 content가 desired와 동일
+  // - 그 경우 아무 것도 하지 않음
+  if (found.length === 1 && found[0].content === desired) {
+    return { html: original, changed: false, inserted: false };
+  }
+
+  // 2) 제거(멱등) 후 1개 삽입
+  const removeRe = new RegExp(
+    `<meta\\b[^>]*\\b${attr}\\s*=\\s*["']${escapeReg(key)}["'][^>]*>\\s*`,
+    'gi'
+  );
+  let out = original.replace(removeRe, '');
+
+  const headCloseIdx = out.toLowerCase().indexOf('</head>');
+  if (headCloseIdx === -1) {
+    // head가 없으면 삽입 자체 불가. 제거만 수행될 수도 있으니 diff로 판단.
+    return { html: out, changed: (out !== original), inserted: false };
+  }
+
+  const tag = `<meta ${attr}="${key}" content="${escapeAttr(desired)}">`;
+  const insert = `  ${tag}\n`;
+  out = out.slice(0, headCloseIdx) + insert + out.slice(headCloseIdx);
+
+  return { html: out, changed: (out !== original), inserted: true };
 }
 
 function buildOgUrl(pageId, slugBase) {
@@ -286,9 +323,7 @@ function main() {
   console.log(`✨ validate-repair 완료 — 실패: ${failCount}/${files.length}`);
   console.log('────────────────────────────────────────────');
 
-  if (failCount > 0) {
-    process.exit(1);
-  }
+  if (failCount > 0) process.exit(1);
 }
 
 main();
