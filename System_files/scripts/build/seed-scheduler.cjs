@@ -3,8 +3,13 @@
 
 /**
  * System_files/scripts/build/seed-scheduler.cjs
- * 시드풀 → 오늘 발행할 큐(dist/queue/today.json) 생성 + fallback 라벨 지원
- * ✅ SCHEDULE_MODE 제거: 큐 생성은 환경과 무관하게 항상 수행
+ * 시드풀 → 오늘 발행할 큐(dist/queue/today.json) 생성
+ *
+ * ✅ 핵심 변경(2-a-3/2-a-4 대응):
+ * - slotLabel(스케줄 슬롯 라벨)과 seedLabel(실제 시드 출처 라벨)을 분리
+ * - fallback은 "seedLabel만" 대체하며, today.json의 label(=slotLabel)은 절대 바꾸지 않음
+ * - 결과: 요일 슬롯 분배(통계/스코프)는 label(slotLabel)로 안정 유지
+ *         posts 생성은 seedLabel 기준으로 하도록 후속 파일에서 사용
  */
 
 // ✅ 로컬/CI 공통: .env 로드(필수)
@@ -13,32 +18,20 @@ require('./lib/env.cjs');
 const fs = require('fs');
 const path = require('path');
 
-/**
- * AOIA FLOW MAP REFERENCE
- * --------------------------------------------------
- * Flow Map: System_files/docs/aoia-flow-map.md
- *
- * Role:
- *   - seedpool/*.json에서 오늘 발행할 seed를 골라 dist/queue/today.json(SSOT)를 생성
- *   - 부족하면 FALLBACK_LABELS에서 대체(seed만 대체, 라벨은 대체 라벨로 기록)
- *
- * Output:
- *   - dist/queue/today.json
- *
- * Invariants:
- *   - label은 6개 중 1개만 허용(오염/오타 즉시 차단)
- *   - expiresAt(YYYY-MM-DD...) 지난 시드는 제외
- *   - 동일 id 중복 선택 금지(usedIds)
- */
-
 // ────────────────────────────────────
-// 기본 경로 설정
+// 기본 경로
 // ────────────────────────────────────
 const ROOT = path.resolve(__dirname, '..', '..'); // System_files
 const SEEDDIR = path.join(ROOT, 'seedpool');
 const OUTDIR = path.join(ROOT, 'dist', 'queue');
 
 fs.mkdirSync(OUTDIR, { recursive: true });
+
+// ────────────────────────────────────
+// today.json 상단 메타(스키마 확정분)
+// ────────────────────────────────────
+const QUEUE_TIMEZONE = 'Asia/Seoul';
+const QUEUE_CUTOFF = '10:00';
 
 // ────────────────────────────────────
 // 라벨(SSOT) 고정
@@ -60,33 +53,95 @@ function fatal(msg) {
 function assertAllowedLabel(label, context) {
   const v = String(label || '').trim();
   if (!v) fatal(`label missing (${context})`);
-  if (!ALLOWED_LABELS.has(v)) {
-    fatal(`label not allowed: "${v}" (${context})`);
-  }
+  if (!ALLOWED_LABELS.has(v)) fatal(`label not allowed: "${v}" (${context})`);
   return v;
 }
 
 // ────────────────────────────────────
-// 날짜/요일 유틸 (ISO: 월=1 … 일=7)
+// 날짜/요일 유틸 (KST + cutoff 기반 “운영일” 계산)
+// - 운영일: KST cutoff(10:00) 이전이면 전날로 간주
+// - weekday: 운영일 기준 ISO(월=1 … 일=7)
 // ────────────────────────────────────
+function parseCutoffHHMM(hhmm) {
+  const s = String(hhmm || '').trim();
+  const m = s.match(/^(\d{1,2}):(\d{2})$/);
+  if (!m) return { hh: 10, mm: 0 }; // 안전 기본
+  const hh = Math.min(23, Math.max(0, Number(m[1])));
+  const mm = Math.min(59, Math.max(0, Number(m[2])));
+  return { hh, mm };
+}
+
+function kstPartsFromUtcDate(d) {
+  // KST = UTC+9
+  const t = new Date(d.getTime() + 9 * 60 * 60 * 1000);
+  return {
+    y: t.getUTCFullYear(),
+    m: t.getUTCMonth() + 1,
+    d: t.getUTCDate(),
+    hh: t.getUTCHours(),
+    mm: t.getUTCMinutes(),
+    // weekday: 0=일..6=토 (UTC getter로 OK; t는 “KST 시각을 UTC로 담은 객체”)
+    w: t.getUTCDay(),
+  };
+}
+
+function ymdStr(y, m, d) {
+  const mm = String(m).padStart(2, '0');
+  const dd = String(d).padStart(2, '0');
+  return `${y}-${mm}-${dd}`;
+}
+
+function addDaysYMD(y, m, d, deltaDays) {
+  // 안전: UTC 기준 Date로 계산
+  const base = new Date(Date.UTC(y, m - 1, d, 0, 0, 0));
+  base.setUTCDate(base.getUTCDate() + deltaDays);
+  return {
+    y: base.getUTCFullYear(),
+    m: base.getUTCMonth() + 1,
+    d: base.getUTCDate(),
+  };
+}
+
+function isoWeekdayFromKstDow(dow0Sun) {
+  // dow0Sun: 0=일..6=토 → ISO: 1=월..7=일
+  if (dow0Sun === 0) return 7;
+  return dow0Sun; // 1..6는 월..토 그대로
+}
+
 function getTodayInfo() {
-  const now = new Date();
+  const nowUtc = new Date();
 
-  // ISO 요일 (1=월 … 7=일)
-  let weekday = now.getUTCDay();
-  if (weekday === 0) weekday = 7;
+  const { hh: cutHH, mm: cutMM } = parseCutoffHHMM(QUEUE_CUTOFF);
+  const kst = kstPartsFromUtcDate(nowUtc);
 
-  // ISO 주차(대략적)
-  const oneJan = new Date(Date.UTC(now.getUTCFullYear(), 0, 1));
-  const diff = (now - oneJan) / 86400000;
-  const isoWeek = Math.floor((diff + oneJan.getUTCDay() + 1) / 7);
+  // cutoff 이전이면 운영일을 "전날"로
+  const beforeCutoff = (kst.hh < cutHH) || (kst.hh === cutHH && kst.mm < cutMM);
+  const op = beforeCutoff ? addDaysYMD(kst.y, kst.m, kst.d, -1) : { y: kst.y, m: kst.m, d: kst.d };
 
-  const dateStr = now.toISOString().slice(0, 10); // YYYY-MM-DD
-  return { now, dateStr, weekday, isoWeek };
+  // 운영일 KST 요일 계산: 운영일 00:00(KST)을 UTC로 환산해 요일 계산
+  const opUtc = new Date(Date.UTC(op.y, op.m - 1, op.d, 0, 0, 0) - 9 * 60 * 60 * 1000);
+  const kstDow0Sun = new Date(opUtc.getTime() + 9 * 60 * 60 * 1000).getUTCDay();
+  const weekday = isoWeekdayFromKstDow(kstDow0Sun);
+
+  // ISO 주차(대략): 운영일 기반(엄밀 ISO는 아니나 기존 수준 유지)
+  const oneJanUtc = new Date(Date.UTC(op.y, 0, 1, 0, 0, 0) - 9 * 60 * 60 * 1000);
+  const opStartUtc = new Date(Date.UTC(op.y, op.m - 1, op.d, 0, 0, 0) - 9 * 60 * 60 * 1000);
+  const diffDays = Math.floor((opStartUtc - oneJanUtc) / 86400000);
+  const isoWeek = Math.floor((diffDays + oneJanUtc.getUTCDay() + 1) / 7);
+
+  const dateStr = ymdStr(op.y, op.m, op.d); // 운영일 YYYY-MM-DD
+  return {
+    nowUtc,
+    dateStr,
+    weekday,
+    isoWeek,
+    kstNow: { y: kst.y, m: kst.m, d: kst.d, hh: kst.hh, mm: kst.mm },
+    beforeCutoff,
+  };
 }
 
 // ────────────────────────────────────
-// 오늘 요일에 따른 기본 발행 라벨/모드 계획
+// 오늘 요일에 따른 기본 발행 슬롯 계획(라벨=slotLabel)
 // ────────────────────────────────────
 function planForWeekday(weekday) {
   switch (weekday) {
@@ -122,11 +177,10 @@ function planForWeekday(weekday) {
   }
 }
 
-/**
- * Fallback 라벨 설정
- * - “원래 슬롯 라벨”에서 seed가 없으면,
- *   이 목록에서 seed를 가져오고 label도 그 라벨로 기록합니다.
- */
+// ────────────────────────────────────
+// Fallback 설정(“대체 seedLabel 후보 목록”)
+// - slotLabel은 유지, seedLabel만 대체
+// ────────────────────────────────────
 const FALLBACK_LABELS = [
   'how-to-playbooks',
   'app-reviews',
@@ -156,6 +210,9 @@ function loadSeedConfig(label) {
     json = {};
   }
 
+  // ✅ seedpool 파일의 json.label이 있어도, “파일명 기반 safeLabel”과 다르면 오염으로 판단할 수 있음
+  // 지금 단계에선 강제 FATAL 대신 “허용 라벨인지”만 체크하고, cfg.label은 safeLabel로 고정
+  // (오염 FATAL 정책은 옹스님이 원하시면 다음 파일에서 강화/완화 선택)
   const cfg = {
     label: assertAllowedLabel(json.label || safeLabel, `seed file label (${safeLabel}.json)`),
     trendLimit: json.trendLimit ?? 0,
@@ -176,7 +233,7 @@ function getCandidates(cfg, mode, usedIds, todayStr) {
     if (!item.id) return false;
     if (usedIds.has(item.id)) return false;
 
-    // expiresAt이 있으면 YYYY-MM-DD만 비교(문자열 비교 가능)
+    // expiresAt이 있으면 YYYY-MM-DD만 비교
     if (item.expiresAt && typeof item.expiresAt === 'string') {
       const exp = item.expiresAt.slice(0, 10);
       if (exp < todayISO) return false;
@@ -219,77 +276,82 @@ function pickOne(candidates, effectiveMode, usedIds) {
   return { seed: picked, mode: effectiveMode };
 }
 
-function pickSeedForLabel(label, preferredMode, usedIds, todayStr) {
-  const safeLabel = assertAllowedLabel(label, 'pickSeedForLabel(label)');
+function pickSeedForLabel(seedLabel, preferredMode, usedIds, todayStr) {
+  const safeLabel = assertAllowedLabel(seedLabel, 'pickSeedForLabel(seedLabel)');
   const cfg = loadSeedConfig(safeLabel);
   const { list, effectiveMode } = getCandidates(cfg, preferredMode, usedIds, todayStr);
   if (!list.length) return null;
   return pickOne(list, effectiveMode, usedIds);
 }
 
+// ────────────────────────────────────
+// main
+// ────────────────────────────────────
 (function main() {
-  const { dateStr, weekday, isoWeek } = getTodayInfo();
+  const { dateStr, weekday, isoWeek, kstNow, beforeCutoff } = getTodayInfo();
 
   console.log('────────────────────────────────────────────');
   console.log('[seed-scheduler] ROOT   =', ROOT);
   console.log('[seed-scheduler] SEED   =', SEEDDIR);
   console.log('[seed-scheduler] OUTDIR =', OUTDIR);
   console.log('[seed-scheduler] DATE   =', dateStr, 'weekday=', weekday, 'isoWeek=', isoWeek);
+  console.log('[seed-scheduler] META   =', `tz=${QUEUE_TIMEZONE}`, `cutoff=${QUEUE_CUTOFF}`, `kstNow=${kstNow.hh}:${String(kstNow.mm).padStart(2, '0')}`, `beforeCutoff=${beforeCutoff}`);
 
   const plan = planForWeekday(weekday).map((p, i) => {
-    const label = assertAllowedLabel(p.label, `planForWeekday slot[${i}]`);
+    const slotLabel = assertAllowedLabel(p.label, `planForWeekday slot[${i}]`);
     const mode = String(p.mode || 'trend').trim() || 'trend';
-    return { label, mode };
+    return { slotLabel, mode };
   });
 
-  console.log('[seed-scheduler] planned labels =', plan.map((p) => p.label).join(', '));
+  console.log('[seed-scheduler] planned slot labels =', plan.map((p) => p.slotLabel).join(', '));
 
   const usedIds = new Set();
   const items = [];
 
   for (const slot of plan) {
-    const primaryLabel = slot.label;
+    const slotLabel = slot.slotLabel;        // ✅ 슬롯 라벨(고정)
     const preferredMode = slot.mode || 'trend';
 
-    let picked = pickSeedForLabel(primaryLabel, preferredMode, usedIds, dateStr);
-    let finalLabel = primaryLabel;
+    // 1) 우선: slotLabel에서 seed 선택
+    let picked = pickSeedForLabel(slotLabel, preferredMode, usedIds, dateStr);
+    let seedLabel = slotLabel;               // ✅ 실제 seed 출처 라벨(기본=slotLabel)
     let fallbackFrom = null;
 
+    // 2) 부족하면: fallback 라벨들에서 seed만 가져오고, slotLabel은 유지
     if (!picked) {
       for (const fb of FALLBACK_LABELS) {
-        if (fb === primaryLabel) continue;
+        if (fb === slotLabel) continue;
         const alt = pickSeedForLabel(fb, preferredMode, usedIds, dateStr);
         if (alt) {
           picked = alt;
-          finalLabel = fb;
-          fallbackFrom = primaryLabel;
+          seedLabel = fb;
+          fallbackFrom = slotLabel;
           break;
         }
       }
     }
 
     if (!picked) {
-      console.warn(
-        `[seed-scheduler][WARN] ${primaryLabel} 슬롯에서 사용 가능한 시드를 찾지 못했습니다. (fallback 포함)`
-      );
+      console.warn(`[seed-scheduler][WARN] slot=${slotLabel} 에서 사용 가능한 시드를 찾지 못했습니다. (fallback 포함)`);
       continue;
     }
 
     const { seed, mode } = picked;
 
     if (fallbackFrom) {
-      console.log(
-        `[seed-scheduler][PICK] ${finalLabel} (fallback from ${fallbackFrom}) → ${mode} ${seed.id} | ${seed.title}`
-      );
+      console.log(`[seed-scheduler][PICK] slot=${slotLabel} seed=${seedLabel} (fallback) → ${mode} ${seed.id} | ${seed.title}`);
     } else {
-      console.log(
-        `[seed-scheduler][PICK] ${finalLabel} → ${mode} ${seed.id} | ${seed.title}`
-      );
+      console.log(`[seed-scheduler][PICK] slot=${slotLabel} → ${mode} ${seed.id} | ${seed.title}`);
     }
 
+    // ✅ today.json item
+    // - label: slotLabel (스케줄 분배/통계/스코프의 기준)
+    // - seedLabel: 실제 seed를 읽어온 출처 라벨 (posts 생성 기준으로 사용)
     const item = {
       date: dateStr,
-      label: finalLabel,
+      label: slotLabel,
+      seedLabel,
+
       mode,
       id: seed.id,
       title: seed.title,
@@ -300,12 +362,17 @@ function pickSeedForLabel(label, preferredMode, usedIds, todayStr) {
       notes: seed.notes || '',
     };
 
-    if (fallbackFrom) item.fallbackFrom = fallbackFrom;
+    if (fallbackFrom) item.fallbackFrom = fallbackFrom; // 디버그/감사 목적(선택)
     items.push(item);
   }
 
   const outFile = path.join(OUTDIR, 'today.json');
-  const outJson = { date: dateStr, items };
+  const outJson = {
+    date: dateStr,
+    timezone: QUEUE_TIMEZONE,
+    cutoff: QUEUE_CUTOFF,
+    items,
+  };
 
   fs.writeFileSync(outFile, JSON.stringify(outJson, null, 2), 'utf8');
   console.log('[seed-scheduler] queue written →', outFile);
