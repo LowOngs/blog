@@ -15,6 +15,7 @@
  * 2) posts가 없을 때만 생성한다 (멱등성 보장)
  * 3) 날짜/slug/updated 는 today.json 기준을 100% 신뢰한다
  * 4) pageId 발급에는 관여하지 않는다 (ids.cjs 전담)
+ * 5) 실행 스냅샷(dist/queue/today.expanded.json)에 generatedSlug/postId/reviewId를 기록한다
  *
  * 절대 하지 말아야 할 것:
  * - 기존 posts 덮어쓰기
@@ -43,10 +44,10 @@ const crypto = require('crypto');
  */
 const ROOT = path.resolve(__dirname, '..', '..'); // System_files
 const QUEUE_DIR = path.join(ROOT, 'dist', 'queue');
-const QUEUE_FILE = path.join(QUEUE_DIR, 'today.json');            // 입력 SSOT
-const QUEUE_EXPANDED_FILE = path.join(QUEUE_DIR, 'today.expanded.json'); // 실행 스냅샷
+const QUEUE_FILE = path.join(QUEUE_DIR, 'today.json'); // 입력 SSOT
+const QUEUE_EXPANDED_FILE = path.join(QUEUE_DIR, 'today.expanded.json'); // 실행 스냅샷(SSOT 아님)
 
-const CONTENT_DIR = path.join(ROOT, 'content', 'posts');          // 출력 SSOT
+const CONTENT_DIR = path.join(ROOT, 'content', 'posts'); // 출력 SSOT
 fs.mkdirSync(CONTENT_DIR, { recursive: true });
 
 /* ============================================================
@@ -170,7 +171,7 @@ function resolveQueueDate(item, queueObj) {
   const d = String(item?.date || queueObj?.date || '').slice(0, 10);
   if (/^\d{4}-\d{2}-\d{2}$/.test(d)) return d;
 
-  // 안전망: KST 기준 오늘
+  // 안전망: KST 기준 오늘(입력이 비정상일 때만)
   const now = new Date(Date.now() + 9 * 60 * 60 * 1000);
   return now.toISOString().slice(0, 10);
 }
@@ -234,6 +235,26 @@ function ulidNow() {
 }
 
 /* ============================================================
+ * today.expanded.json (실행 스냅샷)
+ * ============================================================
+ * - today.json 원본은 절대 수정하지 않음
+ * - 아이템별 생성 결과(슬러그/ID)를 남겨 ids.cjs(active)의 publishable SSOT로 사용
+ */
+function writeExpandedSnapshot(queueObj, expandedItems) {
+  try {
+    const expanded = {
+      ...queueObj,
+      expandedAt: new Date().toISOString(),
+      items: expandedItems,
+    };
+    fs.writeFileSync(QUEUE_EXPANDED_FILE, JSON.stringify(expanded, null, 2) + '\n', 'utf8');
+    log(`expanded queue written → ${QUEUE_EXPANDED_FILE}`);
+  } catch (e) {
+    fatal(`today.expanded.json 저장 실패: ${e.message || e}`);
+  }
+}
+
+/* ============================================================
  * 메인 처리
  * ============================================================ */
 const counters = {};
@@ -242,8 +263,12 @@ let skipped = 0;
 
 const queueCutoff = normalizeCutoff(queue.cutoff || '10:00');
 
+// snapshot 용: 원본 item 복제 후 결과 주입
+const expandedItems = items.map((it) => (it && typeof it === 'object' ? { ...it } : it));
+
 for (let i = 0; i < items.length; i++) {
-  const item = items[i];
+  const item = items[i] || {};
+  const outItem = expandedItems[i] && typeof expandedItems[i] === 'object' ? expandedItems[i] : null;
 
   const label = requireValidLabel(item.label, i);
   const title = requireValidTitle(item.title, i);
@@ -258,13 +283,25 @@ for (let i = 0; i < items.length; i++) {
   const slug = `${prefix}-${ymd}-${pad3(counters[label])}`;
 
   const targetPath = path.join(CONTENT_DIR, `${slug}.json`);
+
+  // ✅ ULID: 없을 때만 발급(멱등)
+  const postId = String(item.postId || '').trim() ? String(item.postId).trim() : ulidNow();
+  const reviewId = isReviewLabel(label)
+    ? (String(item.reviewId || '').trim() ? String(item.reviewId).trim() : ulidNow())
+    : null;
+
+  // ✅ expanded 스냅샷에 “항상” 주입 (생성되든/스킵되든 실행 스코프를 남김)
+  if (outItem) {
+    outItem.generatedSlug = slug;
+    outItem.postId = postId;
+    if (reviewId) outItem.reviewId = reviewId;
+  }
+
+  // 이미 존재하면 스킵(덮어쓰기 금지)
   if (fs.existsSync(targetPath)) {
     skipped++;
     continue;
   }
-
-  const postId = item.postId || ulidNow();
-  const reviewId = isReviewLabel(label) ? (item.reviewId || ulidNow()) : null;
 
   const profileId = getProfileIdForLabel(label);
   if (!profileId) fatal(`profileId 없음: ${label}`);
@@ -276,21 +313,29 @@ for (let i = 0; i < items.length; i++) {
     title,
     labels: [label],
     updated: resolveUpdatedIsoKst(queueDate, queueCutoff),
+
+    // 본문 생성은 별도 단계에서 채움(여기서는 SSOT 뼈대만)
     bodyPrompt: '',
     body: '',
+
     seedMeta: {
       queueDate,
       cutoff: queueCutoff,
       label,
       profileId,
       id: item.id || null,
+
+      // 추적 키(사람이 읽기 쉬움)
       postId,
       reviewId,
     },
   };
 
-  fs.writeFileSync(targetPath, JSON.stringify(doc, null, 2), 'utf8');
+  fs.writeFileSync(targetPath, JSON.stringify(doc, null, 2) + '\n', 'utf8');
   created++;
 }
+
+// ✅ 실행 스냅샷 저장(SSOT 입력 불변)
+writeExpandedSnapshot(queue, expandedItems);
 
 log(`완료: created=${created}, skipped=${skipped}`);
