@@ -4,7 +4,7 @@
 require('./lib/env.cjs'); // ✅ .env 로드(필수)
 
 /**
- * ids.cjs
+ * System_files/scripts/build/ids.cjs
  * 목적:
  * - content/posts/*.json 중 pageId 없는 문서들에 pageId를 "발급(=할당)"하여 기록
  *
