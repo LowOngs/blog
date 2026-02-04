@@ -42,6 +42,11 @@ const ROOT = path.resolve(__dirname, '..', '..');
 const DIST = path.join(ROOT, 'dist', 'posts');
 const LOGS = path.join(ROOT, 'logs');
 
+// ✅ (연관성 진단용) queue 파일 위치: 무결성 판정엔 영향 없음
+const QUEUE_DIR = path.join(ROOT, 'dist', 'queue');
+const TODAY_JSON = path.join(QUEUE_DIR, 'today.json');
+const TODAY_EXPANDED_JSON = path.join(QUEUE_DIR, 'today.expanded.json');
+
 const CDN_BASE_RAW = process.env.CDN_BASE || 'https://ongsblog.com/images';
 const CDN_BASE = CDN_BASE_RAW.replace(/\/+$/, '');
 
@@ -62,6 +67,41 @@ function readHtml(filePath) {
     console.warn(`[qa-check] HTML 읽기 실패: ${filePath} → ${e.message}`);
     return null;
   }
+}
+
+// ✅ (연관성 진단용) JSON 안전 로더: qa-check 무결성 판정 로직과 독립
+function readJsonSafe(p, fallback) {
+  try {
+    if (!fs.existsSync(p)) return fallback;
+    return JSON.parse(fs.readFileSync(p, 'utf8'));
+  } catch {
+    return fallback;
+  }
+}
+
+// ✅ (연관성 진단용) today.expanded.json의 generatedSlug 생성 여부 요약
+function getQueueDebugInfo() {
+  const out = {
+    todayJsonExists: fs.existsSync(TODAY_JSON),
+    expandedExists: fs.existsSync(TODAY_EXPANDED_JSON),
+    expandedItems: 0,
+    expandedGeneratedSlugCount: 0,
+  };
+
+  const ex = readJsonSafe(TODAY_EXPANDED_JSON, null);
+  if (ex && typeof ex === 'object') {
+    const items = Array.isArray(ex.items) ? ex.items : [];
+    out.expandedItems = items.length;
+    out.expandedGeneratedSlugCount = items.filter(
+      (it) =>
+        it &&
+        typeof it === 'object' &&
+        typeof it.generatedSlug === 'string' &&
+        it.generatedSlug.trim()
+    ).length;
+  }
+
+  return out;
 }
 
 // ─────────────────────────────────────────────
@@ -370,6 +410,14 @@ async function main() {
     process.exit(0);
   }
 
+  // ✅ 연관성 진단(INFO): 무결성 판정과 무관, 원인 역추적 편의
+  const queueDbg = getQueueDebugInfo();
+  if (!queueDbg.expandedExists) {
+    console.log(`[qa-check][INFO] today.expanded.json 없음 → active publishable SSOT 미존재 상태일 수 있음 (${TODAY_EXPANDED_JSON})`);
+  } else {
+    console.log(`[qa-check][INFO] today.expanded.json 감지: items=${queueDbg.expandedItems}, generatedSlug=${queueDbg.expandedGeneratedSlugCount}`);
+  }
+
   const files = fs
     .readdirSync(DIST)
     .filter((f) => f.toLowerCase().endsWith('.html'))
@@ -416,6 +464,15 @@ async function main() {
   const report = {
     generatedAt: new Date().toISOString(),
     cdnBase: CDN_BASE,
+
+    // ✅ 연관성 진단(보고서에 같이 남김): 무결성 정책과 독립
+    queueDebug: {
+      todayJson: TODAY_JSON,
+      todayExpanded: TODAY_EXPANDED_JSON,
+      ...queueDbg,
+      note: 'qa-check는 dist/posts HTML만 검사하며, queueDebug는 연관성 진단(INFO)용이다.',
+    },
+
     integrityPolicy: {
       // 기존 3개
       I1_reviewMissingSsot_isCRIT: true,
