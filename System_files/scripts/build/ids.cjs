@@ -4,14 +4,14 @@
 require('./lib/env.cjs'); // ✅ .env 로드(필수)
 
 /**
- * ids.cjs — DRY_RUN 파싱 규칙 통일 반영
+ * ids.cjs
  * 목적:
  * - content/posts/*.json 중 pageId 없는 문서들에 pageId를 "발급(=할당)"하여 기록
  *
  * ✅ 구조 고정(핵심):
- * - BODY_WRITE_MODE=active 일 때는 "publishable(=today queue)" slug만 발급한다.
- * - publishable 목록은 dist/queue/today.json 기반(SSOT).
- * - today.json에 없으면 active 발급은 0회(즉시 종료) → 번호 폭주 방지.
+ * - BODY_WRITE_MODE=active 일 때는 "publishable(=오늘 생성된 queue 결과)" slug만 발급한다.
+ * - publishable 목록은 dist/queue/today.expanded.json 기반(실행 스냅샷, queue 결과 SSOT 관문).
+ * - expanded가 없거나 비어있으면 active 발급은 0회(즉시 종료) → 번호 폭주/오발급 방지.
  *
  * ✅ Seed Ledger(Min v1):
  * - pageId 발급/할당 시 logs/seed-ledger.jsonl 에 assigned 상태로 upsert 기록
@@ -22,7 +22,11 @@ const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..', '..'); // System_files
 const POSTS_DIR = path.join(ROOT, 'content', 'posts');
-const DIST_QUEUE_TODAY = path.join(ROOT, 'dist', 'queue', 'today.json');
+
+const DIST_QUEUE_DIR = path.join(ROOT, 'dist', 'queue');
+const DIST_QUEUE_TODAY = path.join(DIST_QUEUE_DIR, 'today.json'); // 참고(하위호환/진단용)
+const DIST_QUEUE_EXPANDED = path.join(DIST_QUEUE_DIR, 'today.expanded.json'); // ✅ active publishable SSOT
+
 const MANIFESTS_DIR = path.join(ROOT, 'manifests');
 
 const PUBLISH_MODE = (process.env.PUBLISH_MODE || 'disable').toLowerCase(); // enable|disable
@@ -68,11 +72,31 @@ function asArray(v) {
 }
 
 /**
- * today.json에서 publishable slug 집합을 "유연하게" 뽑습니다.
+ * active 모드 publishable slug 집합 로더(SSOT)
+ * - 우선순위: today.expanded.json(items[].generatedSlug) → (하위호환) today.json(items[].slug 등)
  */
-function loadPublishableSlugsFromToday() {
+function loadPublishableSlugs() {
+  // 1) expanded 우선(정답 경로)
+  const ex = readJsonSafe(DIST_QUEUE_EXPANDED, null);
+  if (ex && typeof ex === 'object') {
+    const out = new Set();
+    const items = asArray(ex.items);
+    for (const it of items) {
+      if (!it) continue;
+      if (typeof it === 'string' && it.trim()) out.add(it.trim());
+      if (typeof it === 'object') {
+        const gs = typeof it.generatedSlug === 'string' ? it.generatedSlug.trim() : '';
+        const sl = typeof it.slug === 'string' ? it.slug.trim() : '';
+        if (gs) out.add(gs);
+        else if (sl) out.add(sl);
+      }
+    }
+    return { slugs: out, source: DIST_QUEUE_EXPANDED, loaded: true };
+  }
+
+  // 2) today.json 하위호환(진단/구버전 대응)
   const raw = readJsonSafe(DIST_QUEUE_TODAY, null);
-  if (!raw) return { slugs: new Set(), source: DIST_QUEUE_TODAY, loaded: false };
+  if (!raw) return { slugs: new Set(), source: DIST_QUEUE_EXPANDED, loaded: false };
 
   const out = new Set();
 
@@ -85,7 +109,6 @@ function loadPublishableSlugsFromToday() {
     return { slugs: out, source: DIST_QUEUE_TODAY, loaded: true };
   }
 
-  // case: object root with candidates
   const candidates = []
     .concat(asArray(raw.items))
     .concat(asArray(raw.posts))
@@ -103,8 +126,8 @@ function loadPublishableSlugsFromToday() {
 
 /**
  * ids.cjs 실행 대상(발급 후보) 결정
- * - local: 전체 posts/*.json
- * - active: today publishable에 포함된 slug만
+ * - local : 전체 posts/*.json
+ * - active: publishable(오늘 큐 결과 slug)만
  */
 function isTargetDoc(slug, publishableSet) {
   if (BODY_WRITE_MODE !== 'active') return true;
@@ -126,7 +149,8 @@ function main() {
   console.log('[ids] ROOT            =', ROOT);
   console.log('[ids] POSTS_DIR       =', POSTS_DIR);
   console.log('[ids] MANIFESTS_DIR   =', MANIFESTS_DIR);
-  console.log('[ids] TODAY_QUEUE     =', DIST_QUEUE_TODAY);
+  console.log('[ids] QUEUE_TODAY     =', DIST_QUEUE_TODAY);
+  console.log('[ids] QUEUE_EXPANDED  =', DIST_QUEUE_EXPANDED);
   console.log('[ids] PUBLISH_MODE    =', PUBLISH_MODE);
   console.log('[ids] BODY_WRITE_MODE =', BODY_WRITE_MODE);
   console.log('[ids] DRY_RUN         =', DRY_RUN); // ✅ bool 고정 출력
@@ -145,16 +169,17 @@ function main() {
   }
 
   // ✅ publishable 로딩(active에서만 강제)
-  const pub = loadPublishableSlugsFromToday();
+  const pub = loadPublishableSlugs();
   const publishableSet = pub.slugs;
 
   if (BODY_WRITE_MODE === 'active') {
+    console.log('[ids] publishable source =', pub.source);
     console.log('[ids] publishable loaded =', pub.loaded);
     console.log('[ids] publishable count  =', publishableSet.size);
 
-    // ✅ 핵심 고정: today publishable이 비어있으면 "0회 발급"
+    // ✅ 핵심 고정: publishable 비어있으면 "0회 발급"
     if (!pub.loaded || publishableSet.size === 0) {
-      console.log('[ids] PAUSE: today.json publishable 비어있음 → active 발급 0회(번호 폭주 방지) → 종료');
+      console.log('[ids] PAUSE: publishable 비어있음 → active 발급 0회(번호 폭주 방지) → 종료');
       return;
     }
   }
@@ -218,7 +243,7 @@ function main() {
           label: sm.label,
           seedId: sm.seedId,
           source: sm.source,
-          dryRun: DRY_RUN, // ✅ bool 그대로
+          dryRun: DRY_RUN,
         });
         ledgerLogged++;
       } catch (e) {
