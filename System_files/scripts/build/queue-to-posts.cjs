@@ -19,7 +19,7 @@
  *
  * 추가(2-a-7 대응: B안 카운터 정책):
  * - 같은 날짜/같은 라벨로 재실행해도 slug가 001로 되감기지 않도록
- *   manifests/slug-counters.json(신규)로 라벨별 발행번호를 영속 관리한다.
+ *   manifests/issue-seq.json(신규)로 라벨별 발행번호를 영속 관리한다.
  * - 또한, 같은 seed(id)가 이미 content/posts에 존재하면 해당 slug/postId/reviewId를 “재사용”하여
  *   today.expanded 실행 스코프와 실제 SSOT가 어긋나는 상황을 최소화한다.
  *
@@ -47,7 +47,7 @@ const CONTENT_DIR = path.join(ROOT, 'content', 'posts'); // 출력 SSOT
 fs.mkdirSync(CONTENT_DIR, { recursive: true });
 
 const MANIFESTS_DIR = path.join(ROOT, 'manifests');
-const SLUG_COUNTERS_FILE = path.join(MANIFESTS_DIR, 'slug-counters.json'); // ✅ 신규(영속 카운터)
+const ISSUE_SEQ_FILE = path.join(MANIFESTS_DIR, 'issue-seq.json'); // ✅ SSOT(영속 카운터)
 
 /* ============================================================
  * 공통 로그 / 중단 유틸
@@ -228,11 +228,11 @@ function writeExpandedSnapshot(queueObj, expandedItems) {
 }
 
 /* ============================================================
- * (B안) slug 카운터(영속) 로드/세이브
+ * (B안) issue 시퀀스(영속) 로드/세이브
  * ============================================================ */
-function loadSlugCounters() {
+function loadIssueSeq() {
   const base = { version: 1, updatedAt: null, byDate: {} };
-  const raw = readJsonSafe(SLUG_COUNTERS_FILE, null);
+  const raw = readJsonSafe(ISSUE_SEQ_FILE, null);
   if (!raw || typeof raw !== 'object') return base;
 
   const byDate = raw.byDate && typeof raw.byDate === 'object' ? raw.byDate : {};
@@ -243,25 +243,25 @@ function loadSlugCounters() {
   };
 }
 
-function saveSlugCounters(counters) {
+function saveIssueSeq(seq) {
   ensureDir(MANIFESTS_DIR);
   const out = {
-    version: counters.version || 1,
+    version: seq.version || 1,
     updatedAt: new Date().toISOString(),
-    byDate: counters.byDate || {},
+    byDate: seq.byDate || {},
   };
-  fs.writeFileSync(SLUG_COUNTERS_FILE, JSON.stringify(out, null, 2) + '\n', 'utf8');
+  fs.writeFileSync(ISSUE_SEQ_FILE, JSON.stringify(out, null, 2) + '\n', 'utf8');
 }
 
-function nextIndexFor(dateYYYYMMDD, label, counters) {
+function nextIndexFor(dateYYYYMMDD, label, seq) {
   const d = String(dateYYYYMMDD || '').slice(0, 10);
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) fatal(`slug counter date invalid: ${d}`);
-  if (!ALLOWED_LABELS.has(label)) fatal(`slug counter label invalid: ${label}`);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) fatal(`issue-seq date invalid: ${d}`);
+  if (!ALLOWED_LABELS.has(label)) fatal(`issue-seq label invalid: ${label}`);
 
-  if (!counters.byDate[d]) counters.byDate[d] = {};
-  const n = Number(counters.byDate[d][label] || 0);
+  if (!seq.byDate[d]) seq.byDate[d] = {};
+  const n = Number(seq.byDate[d][label] || 0);
   const next = n + 1;
-  counters.byDate[d][label] = next;
+  seq.byDate[d][label] = next;
   return next;
 }
 
@@ -315,7 +315,7 @@ function findExistingPostBySeed(queueDate, label, seedId) {
 const queueCutoff = normalizeCutoff(queue.cutoff || '10:00');
 const expandedItems = items.map((it) => (it && typeof it === 'object' ? { ...it } : it));
 
-const slugCounters = loadSlugCounters();
+const issueSeq = loadIssueSeq();
 
 let created = 0;
 let skipped = 0;
@@ -348,7 +348,7 @@ for (let i = 0; i < items.length; i++) {
   } else {
     // 2) 신규 발급: 영속 카운터 기반으로 “되감기 없는” 번호 할당
     while (true) {
-      const idx = nextIndexFor(queueDate, label, slugCounters);
+      const idx = nextIndexFor(queueDate, label, issueSeq);
       slug = `${prefix}-${ymd}-${pad3(idx)}`;
 
       const targetPath = path.join(CONTENT_DIR, `${slug}.json`);
@@ -420,7 +420,7 @@ for (let i = 0; i < items.length; i++) {
 // ✅ 실행 스냅샷 저장(SSOT 입력 불변)
 writeExpandedSnapshot(queue, expandedItems);
 
-// ✅ (B안) 영속 카운터 저장
-saveSlugCounters(slugCounters);
+// ✅ (B안) 영속 시퀀스 저장
+saveIssueSeq(issueSeq);
 
 log(`완료: created=${created}, skipped=${skipped}, reused=${reused}`);
