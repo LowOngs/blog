@@ -31,6 +31,11 @@ const CODE_TO_LABEL = {
   'templates-checklists':     'Templates & Checklists'
 };
 
+// ────────────────────────────────────
+//  ✅ prefix → labelCode (단일 표준 강제)
+//  - templates-checklists는 반드시 "templates-"만 허용
+//  - template/tpl/tmpl 별칭 삭제
+// ────────────────────────────────────
 const PREFIX_TO_CODE = {
   app:          'app-reviews',
   device:       'device-reviews',
@@ -41,9 +46,7 @@ const PREFIX_TO_CODE = {
   'how-to':     'how-to-playbooks',
   smart:        'smart-savings',
   save:         'smart-savings',
-  tpl:          'templates-checklists',
-  tmpl:         'templates-checklists',
-  template:     'templates-checklists'
+  templates:    'templates-checklists'
 };
 
 // ────────────────────────────────────
@@ -486,7 +489,7 @@ async function publishWithTokenRefresh(tokenHolder, payload, labelForLog) {
           pageId,
           label: labelCode || '',
           source: slug.startsWith('firstgate-') ? 'firstgate' : '',
-          dryRun: true, // “발행 안 함” 의미(외부 API 호출 없음)
+          dryRun: true,
           notes: note,
         });
       } catch (e) {
@@ -602,7 +605,7 @@ async function publishWithTokenRefresh(tokenHolder, payload, labelForLog) {
     }
   }
 
-  // ✅ CRIT 스킵 결과 sidecar 저장(오늘 큐에 잔류한 이유를 파일로 남김)
+  // ✅ CRIT 스킵 결과 sidecar 저장
   try {
     const sidecar = path.join(ROOT, 'dist', 'queue', 'today.qa-skip.json');
     fs.mkdirSync(path.dirname(sidecar), { recursive: true });
