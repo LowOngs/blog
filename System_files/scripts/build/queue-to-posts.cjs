@@ -35,6 +35,15 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
+// ✅ slug policy SSOT
+const slugPolicy = require('./lib/slug-policy.cjs');
+const {
+  ALLOWED_LABEL_SET,
+  assertAllowedLabel,
+  getCanonicalPrefixByLabel,
+  buildSlug,
+} = slugPolicy;
+
 /* ============================================================
  * 경로 정의
  * ============================================================ */
@@ -48,12 +57,6 @@ fs.mkdirSync(CONTENT_DIR, { recursive: true });
 
 const MANIFESTS_DIR = path.join(ROOT, 'manifests');
 const ISSUE_SEQ_FILE = path.join(MANIFESTS_DIR, 'issue-seq.json'); // ✅ SSOT(영속 카운터)
-
-/* ============================================================
- * ✅ slug/prefix/label 정책 SSOT
- * ============================================================ */
-const slugPolicy = require('./lib/slug-policy.cjs');
-const { ALLOWED_LABELS, LABEL_TO_PREFIX } = slugPolicy;
 
 /* ============================================================
  * 공통 로그 / 중단 유틸
@@ -76,6 +79,11 @@ function readJsonSafe(file, fallback) {
     return fallback;
   }
 }
+
+/* ============================================================
+ * 라벨 SSOT (slug-policy로 단일화)
+ * ============================================================ */
+const ALLOWED_LABELS = ALLOWED_LABEL_SET || new Set();
 
 /* ============================================================
  * 리뷰 라벨 판정
@@ -128,7 +136,8 @@ if (!items.length) {
 function requireValidLabel(label, idx) {
   const v = String(label || '').trim();
   if (!v) fatal(`items[${idx}] label 누락`);
-  if (!ALLOWED_LABELS.includes(v)) fatal(`items[${idx}] label 비정상: ${v}`);
+  if (!ALLOWED_LABELS.has(v)) fatal(`items[${idx}] label 비정상: ${v}`);
+  try { assertAllowedLabel(v, `items[${idx}].label`); } catch (e) { fatal(e.message || String(e)); }
   return v;
 }
 function requireValidTitle(title, idx) {
@@ -157,7 +166,7 @@ function resolveUpdatedIsoKst(queueDate, cutoffHHMM) {
 }
 
 /* ============================================================
- * slug 규칙
+ * slug 보조
  * ============================================================ */
 function pad3(n) {
   return String(n).padStart(3, '0');
@@ -241,7 +250,7 @@ function saveIssueSeq(seq) {
 function nextIndexFor(dateYYYYMMDD, label, seq) {
   const d = String(dateYYYYMMDD || '').slice(0, 10);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) fatal(`issue-seq date invalid: ${d}`);
-  if (!ALLOWED_LABELS.includes(label)) fatal(`issue-seq label invalid: ${label}`);
+  if (!ALLOWED_LABELS.has(label)) fatal(`issue-seq label invalid: ${label}`);
 
   if (!seq.byDate[d]) seq.byDate[d] = {};
   const n = Number(seq.byDate[d][label] || 0);
@@ -304,7 +313,7 @@ const issueSeq = loadIssueSeq();
 
 let created = 0;
 let skipped = 0;
-let reused = 0; // ✅ 기존 post 재사용 케이스(재실행 안정)
+let reused = 0;
 
 for (let i = 0; i < items.length; i++) {
   const item = items[i] || {};
@@ -313,14 +322,12 @@ for (let i = 0; i < items.length; i++) {
   const label = requireValidLabel(item.label, i);
   requireValidTitle(item.title, i);
 
-  // ✅ SSOT에서 prefix 가져옴
-  const prefix = LABEL_TO_PREFIX[label];
-  if (!prefix) fatal(`prefix 매핑 누락: ${label}`);
+  const canonicalPrefix = getCanonicalPrefixByLabel(label);
+  if (!canonicalPrefix) fatal(`prefix 매핑 누락: ${label}`);
 
   const queueDate = resolveQueueDate(item, queue);
   const ymd = queueDate.replace(/-/g, '');
 
-  // 1) 같은 seed가 이미 존재하면 slug/ids 재사용(재실행 안정화)
   const existing = findExistingPostBySeed(queueDate, label, item.id);
 
   let slug = '';
@@ -332,32 +339,31 @@ for (let i = 0; i < items.length; i++) {
     postId = existing.postId || null;
     reviewId = existing.reviewId || null;
   } else {
-    // 2) 신규 발급: 영속 카운터 기반으로 “되감기 없는” 번호 할당
     while (true) {
       const idx = nextIndexFor(queueDate, label, issueSeq);
-      slug = `${prefix}-${ymd}-${pad3(idx)}`;
+
+      try {
+        slug = buildSlug(label, queueDate, idx);
+      } catch {
+        slug = `${canonicalPrefix}-${ymd}-${pad3(idx)}`;
+      }
 
       const targetPath = path.join(CONTENT_DIR, `${slug}.json`);
       if (!fs.existsSync(targetPath)) break;
-
-      // 이미 존재하면(외부 생성/과거 발행 등) 다음 번호로 계속 진행
     }
 
-    // ✅ ULID: 없을 때만 발급(멱등)
     postId = String(item.postId || '').trim() ? String(item.postId).trim() : ulidNow();
     reviewId = isReviewLabel(label)
       ? (String(item.reviewId || '').trim() ? String(item.reviewId).trim() : ulidNow())
       : null;
   }
 
-  // ✅ expanded 스냅샷에 “항상” 주입
   if (outItem) {
     outItem.generatedSlug = slug;
     outItem.postId = postId || outItem.postId || null;
     if (isReviewLabel(label)) outItem.reviewId = reviewId || outItem.reviewId || null;
   }
 
-  // 기존 post 재사용이면 생성 스킵(SSOT 덮어쓰기 금지)
   if (existing) {
     reused++;
     skipped++;
@@ -366,7 +372,6 @@ for (let i = 0; i < items.length; i++) {
 
   const targetPath = path.join(CONTENT_DIR, `${slug}.json`);
   if (fs.existsSync(targetPath)) {
-    // 위 while에서 회피되지만, 방어적으로 유지
     skipped++;
     continue;
   }
@@ -382,7 +387,6 @@ for (let i = 0; i < items.length; i++) {
     labels: [label],
     updated: resolveUpdatedIsoKst(queueDate, queueCutoff),
 
-    // 본문 생성은 별도 단계에서 채움(여기서는 SSOT 뼈대만)
     bodyPrompt: '',
     body: '',
 
@@ -393,7 +397,6 @@ for (let i = 0; i < items.length; i++) {
       profileId,
       id: item.id || null,
 
-      // 추적 키(사람이 읽기 쉬움)
       postId,
       reviewId,
     },
@@ -403,10 +406,7 @@ for (let i = 0; i < items.length; i++) {
   created++;
 }
 
-// ✅ 실행 스냅샷 저장(SSOT 입력 불변)
 writeExpandedSnapshot(queue, expandedItems);
-
-// ✅ (B안) 영속 시퀀스 저장
 saveIssueSeq(issueSeq);
 
 log(`완료: created=${created}, skipped=${skipped}, reused=${reused}`);
