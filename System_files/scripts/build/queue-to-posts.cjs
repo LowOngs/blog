@@ -343,7 +343,7 @@ for (let i = 0; i < items.length; i++) {
       const idx = nextIndexFor(queueDate, label, issueSeq);
 
       try {
-        slug = buildSlug(label, queueDate, idx);
+        slug = buildSlug({label, yyyymmdd: ymd, index3: pad3(idx),});
       } catch {
         slug = `${canonicalPrefix}-${ymd}-${pad3(idx)}`;
       }
