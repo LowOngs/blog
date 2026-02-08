@@ -16,14 +16,8 @@ const path = require("path");
 const ROOT = path.resolve(__dirname, "..", ".."); // System_files
 const POSTS_DIR = path.join(ROOT, "content", "posts");
 
-const LABEL_MAP = [
-  { prefix: "app-", label: "app-reviews" },
-  { prefix: "device-", label: "device-reviews" },
-  { prefix: "subscription-", label: "subscription-services" },
-  { prefix: "howto-", label: "how-to-playbooks" },
-  { prefix: "smartsavings-", label: "smart-savings" },
-  { prefix: "templates-", label: "templates-checklists" }, // ✅ 표준
-];
+// ✅ SSOT slug policy
+const { labelFromSlug, normalizeSlug } = require(path.join(__dirname, "lib", "slug-policy.cjs"));
 
 let scanned = 0;
 let patched = 0;
@@ -53,7 +47,7 @@ for (const file of fs.readdirSync(POSTS_DIR)) {
 
   scanned++;
 
-  const slug = (json.slug || file.replace(/\.json$/, "")).toLowerCase();
+  const slug = normalizeSlug(json.slug || file.replace(/\.json$/, ""));
   const labels = json.labels;
 
   // 이미 라벨 있으면 스킵
@@ -62,18 +56,18 @@ for (const file of fs.readdirSync(POSTS_DIR)) {
     continue;
   }
 
-  // ✅ 별칭 불허: template- 같은 건 unmatched로 남김(교정은 별도 스크립트에서)
-  const rule = LABEL_MAP.find(r => slug.startsWith(r.prefix));
-  if (!rule) {
+  // ✅ 별칭 불허: template- 같은 건 labelFromSlug()가 null로 반환 → unmatched 처리
+  const label = labelFromSlug(slug);
+  if (!label) {
     console.warn("[patch-labels] UNMATCHED:", slug);
     unmatched++;
     continue;
   }
 
-  json.labels = [rule.label];
+  json.labels = [label];
   fs.writeFileSync(full, JSON.stringify(json, null, 2) + "\n", "utf8");
 
-  console.log("[patch-labels] PATCHED:", slug, "→", rule.label);
+  console.log("[patch-labels] PATCHED:", slug, "→", label);
   patched++;
 }
 
