@@ -50,6 +50,12 @@ const MANIFESTS_DIR = path.join(ROOT, 'manifests');
 const ISSUE_SEQ_FILE = path.join(MANIFESTS_DIR, 'issue-seq.json'); // ✅ SSOT(영속 카운터)
 
 /* ============================================================
+ * ✅ slug/prefix/label 정책 SSOT
+ * ============================================================ */
+const slugPolicy = require('./lib/slug-policy.cjs');
+const { ALLOWED_LABELS, LABEL_TO_PREFIX } = slugPolicy;
+
+/* ============================================================
  * 공통 로그 / 중단 유틸
  * ============================================================ */
 function log(...a) {
@@ -70,18 +76,6 @@ function readJsonSafe(file, fallback) {
     return fallback;
   }
 }
-
-/* ============================================================
- * 라벨 SSOT
- * ============================================================ */
-const ALLOWED_LABELS = new Set([
-  'app-reviews',
-  'device-reviews',
-  'subscription-services',
-  'how-to-playbooks',
-  'smart-savings',
-  'templates-checklists',
-]);
 
 /* ============================================================
  * 리뷰 라벨 판정
@@ -134,7 +128,7 @@ if (!items.length) {
 function requireValidLabel(label, idx) {
   const v = String(label || '').trim();
   if (!v) fatal(`items[${idx}] label 누락`);
-  if (!ALLOWED_LABELS.has(v)) fatal(`items[${idx}] label 비정상: ${v}`);
+  if (!ALLOWED_LABELS.includes(v)) fatal(`items[${idx}] label 비정상: ${v}`);
   return v;
 }
 function requireValidTitle(title, idx) {
@@ -165,15 +159,6 @@ function resolveUpdatedIsoKst(queueDate, cutoffHHMM) {
 /* ============================================================
  * slug 규칙
  * ============================================================ */
-const LABEL_TO_PREFIX = {
-  'app-reviews': 'app',
-  'device-reviews': 'device',
-  'subscription-services': 'subscription',
-  'how-to-playbooks': 'howto',
-  'smart-savings': 'smartsavings',
-  'templates-checklists': 'templates',
-};
-
 function pad3(n) {
   return String(n).padStart(3, '0');
 }
@@ -256,7 +241,7 @@ function saveIssueSeq(seq) {
 function nextIndexFor(dateYYYYMMDD, label, seq) {
   const d = String(dateYYYYMMDD || '').slice(0, 10);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) fatal(`issue-seq date invalid: ${d}`);
-  if (!ALLOWED_LABELS.has(label)) fatal(`issue-seq label invalid: ${label}`);
+  if (!ALLOWED_LABELS.includes(label)) fatal(`issue-seq label invalid: ${label}`);
 
   if (!seq.byDate[d]) seq.byDate[d] = {};
   const n = Number(seq.byDate[d][label] || 0);
@@ -328,6 +313,7 @@ for (let i = 0; i < items.length; i++) {
   const label = requireValidLabel(item.label, i);
   requireValidTitle(item.title, i);
 
+  // ✅ SSOT에서 prefix 가져옴
   const prefix = LABEL_TO_PREFIX[label];
   if (!prefix) fatal(`prefix 매핑 누락: ${label}`);
 
