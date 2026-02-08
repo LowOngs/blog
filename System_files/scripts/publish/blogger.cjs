@@ -19,8 +19,9 @@ const fg = require('fast-glob');
 
 const { upsert: upsertSeedLedger } = require(path.join(__dirname, '..', 'build', 'lib', 'seed-ledger.cjs'));
 
-// ✅ slug policy SSOT (prefix 정규화/매핑)
+// ✅ slug policy SSOT
 const slugPolicy = require(path.join(__dirname, '..', 'build', 'lib', 'slug-policy.cjs'));
+const { normalizePrefix, inferLabelFromSlugOrFilename } = slugPolicy;
 
 // ────────────────────────────────────
 //  라벨 매핑: 내부 코드 → Blogger 라벨
@@ -32,6 +33,24 @@ const CODE_TO_LABEL = {
   'how-to-playbooks':         'How to Playbooks',
   'smart-savings':            'Smart Savings',
   'templates-checklists':     'Templates & Checklists'
+};
+
+// ────────────────────────────────────
+//  ✅ prefix → labelCode (단일 표준 강제)
+//  - templates-checklists는 반드시 "templates-"만 허용
+//  - template/tpl/tmpl 별칭 삭제
+// ────────────────────────────────────
+const PREFIX_TO_CODE = {
+  app:          'app-reviews',
+  device:       'device-reviews',
+  sub:          'subscription-services',
+  subs:         'subscription-services',
+  subscription: 'subscription-services',
+  howto:        'how-to-playbooks',
+  'how-to':     'how-to-playbooks',
+  smart:        'smart-savings',
+  save:         'smart-savings',
+  templates:    'templates-checklists'
 };
 
 // ────────────────────────────────────
@@ -178,43 +197,6 @@ function extractPageId(html) {
   return '';
 }
 
-/**
- * ✅ 변경점(핵심):
- * - 파일명에서 prefix를 뽑아 slug-policy로 "정규 prefix"로 정규화
- * - 정규 prefix → labelCode 변환도 slug-policy에 위임
- *
- * 기대 API(둘 중 하나만 있어도 동작):
- * 1) slugPolicy.labelCodeFromSlug(slug)  // slug 전체로 labelCode 반환
- * 2) slugPolicy.normalizePrefix(prefix) + slugPolicy.labelCodeFromPrefix(prefix)
- */
-function inferLabelCodeFromFilename(name) {
-  const base = name.replace(/\.html$/i, '').toLowerCase();
-
-  if (base.startsWith('firstgate-')) {
-    const rest = base.slice('firstgate-'.length);
-    const m = rest.match(/^(app-reviews|device-reviews|subscription-services|how-to-playbooks|smart-savings|templates-checklists)\b/);
-    if (m && m[1]) return m[1];
-  }
-
-  // 1) slug 전체 기반 API가 있으면 최우선
-  if (slugPolicy && typeof slugPolicy.labelCodeFromSlug === 'function') {
-    return slugPolicy.labelCodeFromSlug(base) || null;
-  }
-
-  // 2) prefix 기반 정규화 + 매핑
-  const rawPrefix = base.split(/[-_]/)[0];
-  const normPrefix = (slugPolicy && typeof slugPolicy.normalizePrefix === 'function')
-    ? slugPolicy.normalizePrefix(rawPrefix)
-    : rawPrefix;
-
-  if (slugPolicy && typeof slugPolicy.labelCodeFromPrefix === 'function') {
-    return slugPolicy.labelCodeFromPrefix(normPrefix) || null;
-  }
-
-  // slug-policy API가 기대와 다르면 여기서 null → 라벨 추론 실패(발행 라벨 미부여)
-  return null;
-}
-
 function safeReadJson(filePath, fallback = null) {
   try {
     if (!fs.existsSync(filePath)) return fallback;
@@ -273,6 +255,33 @@ function loadQaCritMap() {
     crit.set(slug, msgs);
   }
   return { loaded: true, reportPath, crit };
+}
+
+/* ============================================================
+ * labelCode 추론 (slug-policy 우선 + strict prefix fallback)
+ * ============================================================ */
+function inferLabelCodeFromFilename(name) {
+  const base = name.replace(/\.html$/i, '').toLowerCase();
+
+  if (base.startsWith('firstgate-')) {
+    const rest = base.slice('firstgate-'.length);
+    const m = rest.match(/^(app-reviews|device-reviews|subscription-services|how-to-playbooks|smart-savings|templates-checklists)\b/);
+    if (m && m[1]) return m[1];
+  }
+
+  // ✅ slug-policy 우선 (별칭도 정책대로만 정규화)
+  try {
+    const inferred = inferLabelFromSlugOrFilename(base);
+    if (inferred) return inferred;
+  } catch {}
+
+  // fallback: prefix만 뽑아서 normalize 후 매핑
+  const rawPrefix = base.split(/[-_]/)[0];
+  const norm = (() => {
+    try { return normalizePrefix(rawPrefix); } catch { return String(rawPrefix || '').toLowerCase(); }
+  })();
+
+  return PREFIX_TO_CODE[norm] || null;
 }
 
 // ────────────────────────────────────
@@ -391,7 +400,6 @@ async function publishWithTokenRefresh(tokenHolder, payload, labelForLog) {
   log('[blogger] QA report loaded     =', qa.loaded, 'path=', qa.reportPath);
   log('[blogger] QA CRIT count        =', qa.crit.size);
 
-  // ✅ DRY_RUN이면 항상 “외부 API 호출 0%”
   if (!canPublish) {
     if (DRY_RUN) {
       log('[blogger] DRY_RUN 모드 — Blogger API 호출 없이 로그/seed-ledger(dryrun)만 남깁니다.');
@@ -407,7 +415,6 @@ async function publishWithTokenRefresh(tokenHolder, payload, labelForLog) {
     return;
   }
 
-  // ✅ 발행 대상 SSOT: today.json
   let publishableSet = null;
   if (PUBLISH_SCOPE !== 'all') {
     const pub = loadPublishableSlugs();
@@ -424,7 +431,6 @@ async function publishWithTokenRefresh(tokenHolder, payload, labelForLog) {
     log('[blogger] WARN: PUBLISH_SCOPE=all (manual 위험 옵션) — dist/posts 전체를 대상으로 합니다.');
   }
 
-  // 파일 목록(기본은 today.json slug만)
   let files = fg.sync('*.html', { cwd: OUTDIR }).sort();
   if (!files.length) {
     warn('게시할 HTML 없음');
@@ -442,7 +448,6 @@ async function publishWithTokenRefresh(tokenHolder, payload, labelForLog) {
     return;
   }
 
-  // ✅ canPublish=true일 때만 토큰 발급/POST 수행
   const tokenHolder = { token: null };
   if (canPublish) {
     tokenHolder.token = await backoff(getAccessToken, {
@@ -454,7 +459,6 @@ async function publishWithTokenRefresh(tokenHolder, payload, labelForLog) {
     });
   }
 
-  // ✅ CRIT 스킵 기록(sidecar)
   const qaSkip = [];
 
   let ok = 0;
@@ -479,7 +483,6 @@ async function publishWithTokenRefresh(tokenHolder, payload, labelForLog) {
       continue;
     }
 
-    // ✅ 7단계 핵심: QA CRIT면 발행 스킵 + ledger에 근거 남김
     if (qa.crit.has(slug)) {
       const msgs = qa.crit.get(slug) || [];
       const note = `QA CRIT → auto-skip: ${msgs.join(' | ')}`.slice(0, 2000);
@@ -487,7 +490,6 @@ async function publishWithTokenRefresh(tokenHolder, payload, labelForLog) {
       log(`[SKIP_CRIT] ${name} → ${note}`);
       qaSkip.push({ slug, file: name, status: 'CRIT', messages: msgs });
 
-      // ledger 기록(재시도/원인 추적 SSOT)
       try {
         const html = fs.existsSync(p) ? fs.readFileSync(p, 'utf8') : '';
         const pageId = html ? extractPageId(html) : '';
@@ -614,7 +616,6 @@ async function publishWithTokenRefresh(tokenHolder, payload, labelForLog) {
     }
   }
 
-  // ✅ CRIT 스킵 결과 sidecar 저장
   try {
     const sidecar = path.join(ROOT, 'dist', 'queue', 'today.qa-skip.json');
     fs.mkdirSync(path.dirname(sidecar), { recursive: true });
