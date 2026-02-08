@@ -19,6 +19,9 @@ const fg = require('fast-glob');
 
 const { upsert: upsertSeedLedger } = require(path.join(__dirname, '..', 'build', 'lib', 'seed-ledger.cjs'));
 
+// ✅ slug policy SSOT (prefix 정규화/매핑)
+const slugPolicy = require(path.join(__dirname, '..', 'build', 'lib', 'slug-policy.cjs'));
+
 // ────────────────────────────────────
 //  라벨 매핑: 내부 코드 → Blogger 라벨
 // ────────────────────────────────────
@@ -29,24 +32,6 @@ const CODE_TO_LABEL = {
   'how-to-playbooks':         'How to Playbooks',
   'smart-savings':            'Smart Savings',
   'templates-checklists':     'Templates & Checklists'
-};
-
-// ────────────────────────────────────
-//  ✅ prefix → labelCode (단일 표준 강제)
-//  - templates-checklists는 반드시 "templates-"만 허용
-//  - template/tpl/tmpl 별칭 삭제
-// ────────────────────────────────────
-const PREFIX_TO_CODE = {
-  app:          'app-reviews',
-  device:       'device-reviews',
-  sub:          'subscription-services',
-  subs:         'subscription-services',
-  subscription: 'subscription-services',
-  howto:        'how-to-playbooks',
-  'how-to':     'how-to-playbooks',
-  smart:        'smart-savings',
-  save:         'smart-savings',
-  templates:    'templates-checklists'
 };
 
 // ────────────────────────────────────
@@ -193,6 +178,15 @@ function extractPageId(html) {
   return '';
 }
 
+/**
+ * ✅ 변경점(핵심):
+ * - 파일명에서 prefix를 뽑아 slug-policy로 "정규 prefix"로 정규화
+ * - 정규 prefix → labelCode 변환도 slug-policy에 위임
+ *
+ * 기대 API(둘 중 하나만 있어도 동작):
+ * 1) slugPolicy.labelCodeFromSlug(slug)  // slug 전체로 labelCode 반환
+ * 2) slugPolicy.normalizePrefix(prefix) + slugPolicy.labelCodeFromPrefix(prefix)
+ */
 function inferLabelCodeFromFilename(name) {
   const base = name.replace(/\.html$/i, '').toLowerCase();
 
@@ -202,8 +196,23 @@ function inferLabelCodeFromFilename(name) {
     if (m && m[1]) return m[1];
   }
 
-  const prefix = base.split(/[-_]/)[0];
-  return PREFIX_TO_CODE[prefix] || null;
+  // 1) slug 전체 기반 API가 있으면 최우선
+  if (slugPolicy && typeof slugPolicy.labelCodeFromSlug === 'function') {
+    return slugPolicy.labelCodeFromSlug(base) || null;
+  }
+
+  // 2) prefix 기반 정규화 + 매핑
+  const rawPrefix = base.split(/[-_]/)[0];
+  const normPrefix = (slugPolicy && typeof slugPolicy.normalizePrefix === 'function')
+    ? slugPolicy.normalizePrefix(rawPrefix)
+    : rawPrefix;
+
+  if (slugPolicy && typeof slugPolicy.labelCodeFromPrefix === 'function') {
+    return slugPolicy.labelCodeFromPrefix(normPrefix) || null;
+  }
+
+  // slug-policy API가 기대와 다르면 여기서 null → 라벨 추론 실패(발행 라벨 미부여)
+  return null;
 }
 
 function safeReadJson(filePath, fallback = null) {
