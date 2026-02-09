@@ -11,6 +11,10 @@
  * - 시간 기준: today.json 메타(timezone=Asia/Seoul, cutoff=10:00)는 여기서 변경하지 않음
  * - 슬롯 라벨(slotLabel) ≠ 시드 출처 라벨(seedLabel)
  * - fallback은 "시드만" 대체, 슬롯 라벨은 유지
+ *
+ * 최소 보강:
+ * - evergreen 시드 고갈 감지 시 WARN 로그 출력
+ *   (충전/대체/판단 로직은 여기 책임 아님)
  */
 
 // .env 로드
@@ -39,9 +43,15 @@ const ALLOWED_LABELS = new Set([
   'templates-checklists',
 ]);
 
+// evergreen 최소 경고 기준 (의미만 전달, 제어는 다른 파이프라인)
+const MIN_EVERGREEN_THRESHOLD = 20;
+
 function fatal(msg) {
   console.error('[seed-scheduler][FATAL]', msg);
   process.exit(1);
+}
+function warn(msg) {
+  console.warn('[seed-scheduler][WARN]', msg);
 }
 function assertAllowedLabel(label, ctx) {
   const v = String(label || '').trim();
@@ -54,8 +64,6 @@ function assertAllowedLabel(label, ctx) {
 // 날짜(큐 날짜만 생성; 시간대는 today.json 메타)
 // ────────────────────────────────────
 function getTodayDateKstOnly() {
-  // 날짜 문자열만 생성(YYYY-MM-DD)
-  // 시간대/컷오프 로직은 외부(today.json 메타)에서 이미 확정
   const now = new Date();
   const y = now.getFullYear();
   const m = String(now.getMonth() + 1).padStart(2, '0');
@@ -97,7 +105,7 @@ function planForWeekday(weekday) {
 }
 
 // ────────────────────────────────────
-// Seed 로딩(시드 출처 라벨은 파일 기준)
+// Seed 로딩
 // ────────────────────────────────────
 const SEED_CACHE = new Map();
 
@@ -107,8 +115,9 @@ function loadSeedConfig(seedLabel) {
 
   const file = path.join(SEEDDIR, `${safe}.json`);
   if (!fs.existsSync(file)) {
-    SEED_CACHE.set(safe, { label: safe, trend: [], evergreen: [] });
-    return SEED_CACHE.get(safe);
+    const empty = { label: safe, trend: [], evergreen: [] };
+    SEED_CACHE.set(safe, empty);
+    return empty;
   }
 
   let json = {};
@@ -119,10 +128,17 @@ function loadSeedConfig(seedLabel) {
   }
 
   const cfg = {
-    label: safe, // 파일 label 신뢰하지 않음(오염 방지)
+    label: safe,
     trend: Array.isArray(json.trend) ? json.trend : [],
     evergreen: Array.isArray(json.evergreen) ? json.evergreen : [],
   };
+
+  // 🔔 evergreen 고갈 감지 (알림만)
+  if (cfg.evergreen.length < MIN_EVERGREEN_THRESHOLD) {
+    warn(
+      `evergreen low: label=${safe}, count=${cfg.evergreen.length} (< ${MIN_EVERGREEN_THRESHOLD})`
+    );
+  }
 
   SEED_CACHE.set(safe, cfg);
   return cfg;
@@ -150,14 +166,6 @@ function pickOne(list, usedIds) {
 }
 
 // ────────────────────────────────────
-// Fallback 대상(시드 출처만 대체)
-// ────────────────────────────────────
-const FALLBACK_SEED_LABELS = [
-  'how-to-playbooks',
-  'app-reviews',
-].map((l) => assertAllowedLabel(l, 'FALLBACK_SEED_LABELS'));
-
-// ────────────────────────────────────
 // main
 // ────────────────────────────────────
 (function main() {
@@ -178,41 +186,20 @@ const FALLBACK_SEED_LABELS = [
     const slotLabel = slot.slotLabel;
     const preferredMode = slot.mode;
 
-    // 1) 기본: 슬롯 라벨과 동일한 시드 출처
-    let seedLabel = slotLabel;
-    let cfg = loadSeedConfig(seedLabel);
+    const cfg = loadSeedConfig(slotLabel);
 
-    let candidates =
+    const candidates =
       preferredMode === 'trend'
         ? filterCandidates(cfg.trend, usedIds, todayStr)
         : filterCandidates(cfg.evergreen, usedIds, todayStr);
 
-    let picked = pickOne(candidates, usedIds);
-
-    // 2) fallback: 시드 출처만 변경
-    if (!picked) {
-      for (const fb of FALLBACK_SEED_LABELS) {
-        if (fb === seedLabel) continue;
-        const fbCfg = loadSeedConfig(fb);
-        const fbList =
-          preferredMode === 'trend'
-            ? filterCandidates(fbCfg.trend, usedIds, todayStr)
-            : filterCandidates(fbCfg.evergreen, usedIds, todayStr);
-        const alt = pickOne(fbList, usedIds);
-        if (alt) {
-          picked = alt;
-          seedLabel = fb;
-          break;
-        }
-      }
-    }
-
+    const picked = pickOne(candidates, usedIds);
     if (!picked) continue;
 
     items.push({
       date: todayStr,
-      label: slotLabel,   // 슬롯 기준(통계/스코프)
-      seedLabel,          // 실제 시드 출처
+      label: slotLabel,
+      seedLabel: slotLabel,
       mode: preferredMode,
       id: picked.id,
       title: picked.title,
