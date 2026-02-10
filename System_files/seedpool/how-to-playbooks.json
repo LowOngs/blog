@@ -1,7 +1,7 @@
 {
   "label": "how-to-playbooks",
   "trendLimit": 200,
-  "evergreenLimit": 200,
+  "evergreenLimit": 1000,
   "trend": [
     {
       "id": "howto-trend-001",
