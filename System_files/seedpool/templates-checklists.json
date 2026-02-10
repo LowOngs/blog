@@ -1,7 +1,7 @@
 {
   "label": "templates-checklists",
   "trendLimit": 60,
-  "evergreenLimit": 60,
+  "evergreenLimit": 1000,
   "trend": [
     {
       "id": "tpl-trend-001",
