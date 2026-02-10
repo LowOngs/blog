@@ -1,7 +1,7 @@
 {
   "label": "subscription-services",
   "trendLimit": 60,
-  "evergreenLimit": 60,
+  "evergreenLimit": 1000,
   "trend": [
     {
       "id": "sub-trend-001",
