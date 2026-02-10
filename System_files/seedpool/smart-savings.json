@@ -1,7 +1,7 @@
 {
   "label": "smart-savings",
   "trendLimit": 80,
-  "evergreenLimit": 80,
+  "evergreenLimit": 1000,
   "trend": [
     {
       "id": "save-trend-001",
