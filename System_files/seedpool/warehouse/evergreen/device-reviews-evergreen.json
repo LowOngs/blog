@@ -1,4 +1,7 @@
-[
+{
+  "label": "device-reviews",
+  "limits": { "evergreen": 1000 },
+  "evergreen": [
   {
     "id": "dr-eg-001",
     "title": "How to Evaluate Long-Term Device Durability",
@@ -1013,3 +1016,4 @@
     "goal": "identify devices that stay reliable"
   }
 ]
+}
