@@ -1,6 +1,6 @@
 {
   "label": "app-reviews",
-  "Limits": { "trend": 200,
+  "limits": { "trend": 200,
   "evergreen": 1000 },
   "trend": [
     {
