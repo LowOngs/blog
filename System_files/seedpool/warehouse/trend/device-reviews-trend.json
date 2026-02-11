@@ -1,6 +1,6 @@
 {
-  "label": "device-reviews",
-  "trendLimit": 200,
+  label": "device-reviews",
+  "limits": { "trend": 60 },
   "trend": [
   {
     "id": "dr-tr-001",
