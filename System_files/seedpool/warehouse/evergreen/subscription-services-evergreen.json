@@ -102,7 +102,6 @@
     "timing": "long-term study",
     "goal": "predict future value"
   },
-
   {
     "id": "ss-eg-011",
     "title": "How to Judge Real Productivity Benefits in SaaS Tools",
@@ -202,9 +201,7 @@
     "environment": "streaming/productivity/cloud",
     "timing": "evaluation",
     "goal": "ensure smooth experience on all devices"
-  }
-]
-[
+  },
   {
     "id": "ss-eg-021",
     "title": "How to Compare Long-Term Value Between Annual and Monthly Plans",
@@ -305,7 +302,6 @@
     "timing": "first day",
     "goal": "avoid misleading trials"
   },
-
   {
     "id": "ss-eg-031",
     "title": "Why Support Response Time Matters More Than Rating",
@@ -405,9 +401,7 @@
     "environment": "podcast apps",
     "timing": "sub renewal",
     "goal": "judge long-term worth"
-  }
-]
-[
+  },
   {
     "id": "ss-eg-041",
     "title": "How to Identify Sustainable Pricing Models in Subscriptions",
@@ -508,7 +502,6 @@
     "timing": "pre-purchase",
     "goal": "avoid unexpected restrictions"
   },
-
   {
     "id": "ss-eg-051",
     "title": "How to Compare AI Text Tools Without Falling for Hype",
@@ -608,9 +601,7 @@
     "environment": "video streaming",
     "timing": "evaluation",
     "goal": "ensure smooth usage anywhere"
-  }
-]
-[
+  },
   {
     "id": "ss-eg-061",
     "title": "How to Evaluate Whether a Subscription's AI Features Are Practical",
@@ -711,7 +702,6 @@
     "timing": "annual review",
     "goal": "predict future catalog health"
   },
-
   {
     "id": "ss-eg-071",
     "title": "How to Identify Reliable Cloud App Providers",
@@ -811,9 +801,7 @@
     "environment": "cloud document tools",
     "timing": "evaluation",
     "goal": "avoid irreversible document loss"
-  }
-]
-[
+  },
   {
     "id": "ss-eg-081",
     "title": "How to Evaluate the True Learning Depth of Subscription Courses",
@@ -914,7 +902,6 @@
     "timing": "seasonal",
     "goal": "ensure reliable alert delivery"
   },
-
   {
     "id": "ss-eg-091",
     "title": "How to Evaluate Collaboration Quality in Cloud Tools",
