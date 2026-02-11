@@ -1,6 +1,6 @@
 {
   "label": "how-to-playbooks",
-  "trendLimit": 200,
+  "limits": { "trend": 200 },
   "trend": [
     {
       "id": "ht-tr-001",
