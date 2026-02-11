@@ -1,4 +1,7 @@
-[
+{
+  "label": "how-to-playbooks",
+  "limits": { "evergreen": 1000 },
+  "evergreen": [
   {
     "id": "ht-ever-001",
     "title": "Universal Troubleshooting Checklist for Any Smartphone",
@@ -823,3 +826,4 @@
     "priority": 1
   }
 ]
+}
