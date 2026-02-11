@@ -1,7 +1,7 @@
 {
   "label": "device-reviews",
-  "trendLimit": 60,
-  "evergreenLimit": 1000,
+  "limits": { "trend": 200,
+  "evergreen": 1000 },
   "trend": [
     {
       "id": "device-trend-001",
