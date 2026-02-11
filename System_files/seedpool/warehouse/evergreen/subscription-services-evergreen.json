@@ -1,4 +1,7 @@
-[
+{
+  "label": "subscription-services",
+  "limits": { "evergreen": 1000 },
+  "evergreen": [
   {
     "id": "ss-eg-001",
     "title": "How to Evaluate the True Monthly Value of Any Subscription",
@@ -1013,3 +1016,4 @@
     "goal": "focus on sustainable value"
   }
 ]
+}
