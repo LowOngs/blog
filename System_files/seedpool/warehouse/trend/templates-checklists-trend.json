@@ -1,6 +1,6 @@
 {
   "label": "templates-checklists",
-  "trendLimit": 200,
+  "limits": { "trend": 60 },
   "trend": [
     {
       "id": "tc-tr-001",
