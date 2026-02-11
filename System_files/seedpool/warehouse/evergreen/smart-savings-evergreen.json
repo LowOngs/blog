@@ -102,7 +102,6 @@
     "createdAt": "2025-12-12T00:00:00+09:00",
     "notes": "Evergreen; works on any platform."
   },
-
   {
     "id": "ss-ever-011",
     "title": "Annual Subscription Cleanup Template",
@@ -202,9 +201,7 @@
     "priority": 1,
     "createdAt": "2025-12-12T00:00:00+09:00",
     "notes": "Applies to any banking platform."
-  }
-]
-[
+  },
   {
     "id": "ss-ever-021",
     "title": "Annual Cost-of-Living Adjustment Template",
@@ -255,7 +252,6 @@
     "createdAt": "2025-12-12T00:00:00+09:00",
     "notes": "Supports anti-impulse strategies."
   },
-
   {
     "id": "ss-ever-026",
     "title": "Simple Home Budget Categories Template",
@@ -306,7 +302,6 @@
     "createdAt": "2025-12-12T00:00:00+09:00",
     "notes": "Evergreen for both domestic and international trips."
   },
-
   {
     "id": "ss-ever-031",
     "title": "Simple Car Maintenance Cost Log",
@@ -357,7 +352,6 @@
     "createdAt": "2025-12-12T00:00:00+09:00",
     "notes": "Evergreen for all regions."
   },
-
   {
     "id": "ss-ever-036",
     "title": "Simple Personal Spending Limit Template",
@@ -407,9 +401,7 @@
     "priority": 1,
     "createdAt": "2025-12-12T00:00:00+09:00",
     "notes": "Prevents renewal traps and hidden fees."
-  }
-]
-[
+  },
   {
     "id": "ss-ever-041",
     "title": "Weekly Essentials-Only Spending Template",
@@ -460,7 +452,6 @@
     "createdAt": "2025-12-12T00:00:00+09:00",
     "notes": "Evergreen; supports all transport modes."
   },
-
   {
     "id": "ss-ever-046",
     "title": "Annual Recurring Fee Forecast Template",
@@ -511,7 +502,6 @@
     "createdAt": "2025-12-12T00:00:00+09:00",
     "notes": "Prevents expensive long-term problems."
   },
-
   {
     "id": "ss-ever-051",
     "title": "Simple Emergency Shopping Kit Template",
@@ -562,7 +552,6 @@
     "createdAt": "2025-12-12T00:00:00+09:00",
     "notes": "Supports long-term food budget control."
   },
-
   {
     "id": "ss-ever-056",
     "title": "Digital Purchase Log Template",
@@ -612,9 +601,7 @@
     "priority": 1,
     "createdAt": "2025-12-12T00:00:00+09:00",
     "notes": "Evergreen; scales with budget."
-  }
-]
-[
+  },
   {
     "id": "ss-ever-061",
     "title": "Simple Home Insurance Comparison Template",
@@ -665,7 +652,6 @@
     "createdAt": "2025-12-12T00:00:00+09:00",
     "notes": "Region-agnostic structure."
   },
-
   {
     "id": "ss-ever-066",
     "title": "Simple Emergency Expense Buffer Plan",
@@ -716,7 +702,6 @@
     "createdAt": "2025-12-12T00:00:00+09:00",
     "notes": "Evergreen for all app ecosystems."
   },
-
   {
     "id": "ss-ever-071",
     "title": "Universal Cloud Storage Cost Comparison Template",
@@ -767,7 +752,6 @@
     "createdAt": "2025-12-12T00:00:00+09:00",
     "notes": "Evergreen; works for any pet type."
   },
-
   {
     "id": "ss-ever-076",
     "title": "Universal Family Finance Council Template",
@@ -817,9 +801,7 @@
     "priority": 1,
     "createdAt": "2025-12-12T00:00:00+09:00",
     "notes": "Pairs with a household reset."
-  }
-]
-[
+  },
   {
     "id": "ss-ever-081",
     "title": "Universal Home Appliance Replacement Planner",
@@ -870,7 +852,6 @@
     "createdAt": "2025-12-12T00:00:00+09:00",
     "notes": "Future-proof for changing SaaS markets."
   },
-
   {
     "id": "ss-ever-086",
     "title": "Simple Retirement Savings Framework",
@@ -921,7 +902,6 @@
     "createdAt": "2025-12-12T00:00:00+09:00",
     "notes": "Evergreen budgeting principle."
   },
-
   {
     "id": "ss-ever-091",
     "title": "Annual Family Travel Budget Sheet",
@@ -972,7 +952,6 @@
     "createdAt": "2025-12-12T00:00:00+09:00",
     "notes": "Evergreen cognitive tool."
   },
-
   {
     "id": "ss-ever-096",
     "title": "Universal Annual Saving Challenge Template",
