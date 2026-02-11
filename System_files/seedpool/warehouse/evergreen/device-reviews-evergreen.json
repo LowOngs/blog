@@ -202,9 +202,7 @@
     "environment": "any device",
     "timing": "early impressions",
     "goal": "measure perceived responsiveness"
-  }
-]
-[
+  },
   {
     "id": "dr-eg-021",
     "title": "How to Evaluate Long-Term Software Support",
@@ -305,7 +303,6 @@
     "timing": "evaluation",
     "goal": "avoid dangerous chargers"
   },
-
   {
     "id": "dr-eg-031",
     "title": "How to Judge Flashlight Quality on Phones",
@@ -405,9 +402,7 @@
     "environment": "phones",
     "timing": "sensor test",
     "goal": "ensure smooth brightness transitions"
-  }
-]
-[
+  },
   {
     "id": "dr-eg-041",
     "title": "How to Evaluate the Real Sharpness of Any Display",
@@ -508,7 +503,6 @@
     "timing": "camera test",
     "goal": "avoid unreliable focus systems"
   },
-
   {
     "id": "dr-eg-051",
     "title": "How to Evaluate the Real Value of Device Storage Options",
@@ -608,9 +602,7 @@
     "environment": "phones/tablets",
     "timing": "charging test",
     "goal": "ensure cool, safe charging"
-  }
-]
-[
+  },
   {
     "id": "dr-eg-061",
     "title": "How to Evaluate Device Responsiveness with Heavy Apps",
@@ -711,7 +703,6 @@
     "timing": "evaluation",
     "goal": "select the optimal portability profile"
   },
-
   {
     "id": "dr-eg-071",
     "title": "How to Evaluate Noise Cancellation on Laptops",
@@ -811,9 +802,7 @@
     "environment": "phones/tablets",
     "timing": "observation",
     "goal": "protect long-term battery health"
-  }
-]
-[
+  },
   {
     "id": "dr-eg-081",
     "title": "How to Evaluate Real-World Charging Efficiency",
@@ -914,7 +903,6 @@
     "timing": "camera comparison",
     "goal": "judge wide-angle lens quality"
   },
-
   {
     "id": "dr-eg-091",
     "title": "How to Evaluate Speaker Loudness Without Distortion",
