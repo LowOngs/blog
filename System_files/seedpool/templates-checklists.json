@@ -1,6 +1,6 @@
 {
   "label": "templates-checklists",
-  "limits": { "trend": 200,
+  "limits": { "trend": 60,
   "evergreen": 1000 },
   "trend": [
     {
