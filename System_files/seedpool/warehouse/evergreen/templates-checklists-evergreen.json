@@ -102,7 +102,6 @@
     "createdAt": "2025-12-10T00:00:00+09:00",
     "notes": "Printable or digital; intentionally low-friction."
   },
-
   {
     "id": "tc-ever-011",
     "title": "Deep Work Session Checklist",
@@ -202,9 +201,7 @@
     "priority": 1,
     "createdAt": "2025-12-10T00:00:00+09:00",
     "notes": "Focuses on triage, boundaries, and one small win."
-  }
-]
-[
+  },
   {
     "id": "tc-ever-021",
     "title": "Universal App Onboarding Checklist",
@@ -305,7 +302,6 @@
     "createdAt": "2025-12-10T00:00:00+09:00",
     "notes": "Applies to any industry."
   },
-
   {
     "id": "tc-ever-031",
     "title": "Simple Home Inventory Checklist",
@@ -405,9 +401,7 @@
     "priority": 1,
     "createdAt": "2025-12-10T00:00:00+09:00",
     "notes": "Works for any router or ISP."
-  }
-]
-[
+  },
   {
     "id": "tc-ever-041",
     "title": "Simple Home Maintenance Seasonal Checklist",
@@ -508,7 +502,6 @@
     "createdAt": "2025-12-10T00:00:00+09:00",
     "notes": "Evergreen; focuses on clarity and immediate steps."
   },
-
   {
     "id": "tc-ever-051",
     "title": "Universal Tech Support Checklist for Family Members",
@@ -608,9 +601,7 @@
     "priority": 1,
     "createdAt": "2025-12-10T00:00:00+09:00",
     "notes": "Applies to any desk setup."
-  }
-]
-[
+  },
   {
     "id": "tc-ever-061",
     "title": "Simple Expense Logging Template",
@@ -711,7 +702,6 @@
     "createdAt": "2025-12-10T00:00:00+09:00",
     "notes": "Universal reset structure used across productivity systems."
   },
-
   {
     "id": "tc-ever-071",
     "title": "Universal Packing List for Emergencies",
@@ -811,9 +801,7 @@
     "priority": 1,
     "createdAt": "2025-12-10T00:00:00+09:00",
     "notes": "Works for domestic or overseas travel."
-  }
-]
-[
+  },
   {
     "id": "tc-ever-081",
     "title": "Universal Password Update Routine",
@@ -914,7 +902,6 @@
     "createdAt": "2025-12-10T00:00:00+09:00",
     "notes": "Pairs well with AI summarization tools."
   },
-
   {
     "id": "tc-ever-091",
     "title": "Universal Student Assignment Workflow",
