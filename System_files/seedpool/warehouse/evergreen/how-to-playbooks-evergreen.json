@@ -42,7 +42,6 @@
     "intent": "howto",
     "priority": 1
   },
-
   {
     "id": "ht-ever-006",
     "title": "How to Fix Bluetooth Connection Problems",
@@ -83,7 +82,6 @@
     "intent": "howto",
     "priority": 1
   },
-
   {
     "id": "ht-ever-011",
     "title": "How to Fix Apps Not Opening on Any Device",
@@ -124,7 +122,6 @@
     "intent": "howto",
     "priority": 1
   },
-
   {
     "id": "ht-ever-016",
     "title": "How to Install Apps Safely Without Malware Risks",
@@ -164,9 +161,7 @@
     "audience": "Mobile users worldwide",
     "intent": "howto",
     "priority": 1
-  }
-]
-[
+  },
   {
     "id": "ht-ever-021",
     "title": "How to Fix Touchscreen Not Responding Issues",
@@ -207,7 +202,6 @@
     "intent": "howto",
     "priority": 1
   },
-
   {
     "id": "ht-ever-026",
     "title": "How to Connect Bluetooth Earbuds to Any Device",
@@ -248,7 +242,6 @@
     "intent": "howto",
     "priority": 1
   },
-
   {
     "id": "ht-ever-031",
     "title": "How to Fix Laptop Not Charging Problems",
@@ -289,7 +282,6 @@
     "intent": "howto",
     "priority": 1
   },
-
   {
     "id": "ht-ever-036",
     "title": "How to Fix Mouse Not Working (Bluetooth/USB)",
@@ -329,9 +321,7 @@
     "audience": "Global smartphone users",
     "intent": "howto",
     "priority": 1
-  }
-]
-[
+  },
   {
     "id": "ht-ever-041",
     "title": "How to Fix Phone Overheating Issues",
@@ -372,7 +362,6 @@
     "intent": "howto",
     "priority": 1
   },
-
   {
     "id": "ht-ever-046",
     "title": "How to Fix GPS Not Working Accurately",
@@ -413,7 +402,6 @@
     "intent": "howto",
     "priority": 1
   },
-
   {
     "id": "ht-ever-051",
     "title": "How to Fix Phone Not Turning On",
@@ -454,7 +442,6 @@
     "intent": "howto",
     "priority": 1
   },
-
   {
     "id": "ht-ever-056",
     "title": "How to Fix Notification Delays or Missing Alerts",
@@ -494,9 +481,7 @@
     "audience": "Users with unstable devices",
     "intent": "howto",
     "priority": 1
-  }
-]
-[
+  },
   {
     "id": "ht-ever-061",
     "title": "How to Fix Bluetooth Pairing Failures on Any Device",
@@ -537,7 +522,6 @@
     "intent": "howto",
     "priority": 1
   },
-
   {
     "id": "ht-ever-066",
     "title": "How to Protect Yourself From Phishing and Scam Messages",
@@ -578,7 +562,6 @@
     "intent": "howto",
     "priority": 1
   },
-
   {
     "id": "ht-ever-071",
     "title": "How to Fix ‘Device Not Detected’ on USB",
@@ -619,7 +602,6 @@
     "intent": "howto",
     "priority": 1
   },
-
   {
     "id": "ht-ever-076",
     "title": "How to Fix Download Stuck or Paused Errors",
@@ -659,9 +641,7 @@
     "audience": "Streaming users worldwide",
     "intent": "howto",
     "priority": 1
-  }
-]
-[
+  },
   {
     "id": "ht-ever-081",
     "title": "How to Fix Laptop Wi-Fi Not Turning On",
@@ -702,7 +682,6 @@
     "intent": "howto",
     "priority": 1
   },
-
   {
     "id": "ht-ever-086",
     "title": "How to Fix HDMI Not Working on Any PC or TV",
@@ -743,7 +722,6 @@
     "intent": "howto",
     "priority": 1
   },
-
   {
     "id": "ht-ever-091",
     "title": "How to Fix External SSD Not Showing Up",
@@ -784,7 +762,6 @@
     "intent": "howto",
     "priority": 1
   },
-
   {
     "id": "ht-ever-096",
     "title": "How to Fix iMessage or RCS Not Sending",
