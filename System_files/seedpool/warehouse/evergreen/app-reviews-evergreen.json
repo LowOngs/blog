@@ -1,6 +1,8 @@
-[
-  {
-    "id": "ar-eg-001",
+{
+  "label": "app-reviews",
+  "limits": { "evergreen": 1000 },
+  "evergreen": [
+  {"id": "ar-eg-001",
     "title": "How to Evaluate Any App in Under 2 Minutes",
     "angle": "Check onboarding flow, latency, and export options",
     "audience": "General users",
@@ -1012,3 +1014,4 @@
     "goal": "keep only apps with consistent quality signals"
   }
 ]
+}
