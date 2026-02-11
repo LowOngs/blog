@@ -1,6 +1,6 @@
 {
   "label": "smart-savings",
-  "limits": { "trend": 200,
+  "limits": { "trend": 80,
   "evergreen": 1000 },
   "trend": [
     {
