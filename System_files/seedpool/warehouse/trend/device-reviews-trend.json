@@ -1,5 +1,5 @@
 {
-  label": "device-reviews",
+  "label": "device-reviews",
   "limits": { "trend": 60 },
   "trend": [
   {
