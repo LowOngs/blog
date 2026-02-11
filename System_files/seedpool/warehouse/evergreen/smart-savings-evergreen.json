@@ -1,4 +1,7 @@
-[
+{
+  "label": "smart-savings",
+  "limits": { "evergreen": 1000 },
+  "evergreen": [
   {
     "id": "ss-ever-001",
     "title": "Universal Monthly Budget Template for Stable Finances",
@@ -1021,3 +1024,4 @@
     "notes": "Finishes the evergreen master set."
   }
 ]
+}
