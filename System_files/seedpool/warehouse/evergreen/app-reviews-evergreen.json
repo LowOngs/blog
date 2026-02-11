@@ -200,9 +200,7 @@
     "environment": "any app",
     "timing": "before long-term use",
     "goal": "avoid apps with slow or nonexistent support"
-  }
-]
-[
+  },
   {
     "id": "ar-eg-021",
     "title": "How to Check If an App Handles Data Ethically",
@@ -303,7 +301,6 @@
     "timing": "testing",
     "goal": "avoid apps that break offline"
   },
-
   {
     "id": "ar-eg-031",
     "title": "What Makes an App Feel ‘Heavy’?",
@@ -403,9 +400,7 @@
     "environment": "any app",
     "timing": "first 24 hours",
     "goal": "predict long-term cost before committing"
-  }
-]
-[
+  },
   {
     "id": "ar-eg-041",
     "title": "How to Check If an App Has Hidden CPU Spikes",
@@ -506,7 +501,6 @@
     "timing": "first test",
     "goal": "detect weak audio engines"
   },
-
   {
     "id": "ar-eg-051",
     "title": "How to Review an App With AI Features",
@@ -606,9 +600,7 @@
     "environment": "cloud-based apps",
     "timing": "evaluation stage",
     "goal": "predict performance before committing"
-  }
-]
-[
+  },
   {
     "id": "ar-eg-061",
     "title": "Why Keyboard Shortcuts Reveal an App’s Depth",
@@ -709,7 +701,6 @@
     "timing": "review stage",
     "goal": "ensure scalable workflows"
   },
-
   {
     "id": "ar-eg-071",
     "title": "Why Offline Search Makes Apps More Valuable",
@@ -809,9 +800,7 @@
     "environment": "mobile apps",
     "timing": "pre-adoption",
     "goal": "avoid version-specific bugs"
-  }
-]
-[
+  },
   {
     "id": "ar-eg-081",
     "title": "How to Check If an App Handles Large Files Gracefully",
@@ -912,7 +901,6 @@
     "timing": "usage test",
     "goal": "detect weak compression engines"
   },
-
   {
     "id": "ar-eg-091",
     "title": "How to Check Text Rendering Quality in Apps",
