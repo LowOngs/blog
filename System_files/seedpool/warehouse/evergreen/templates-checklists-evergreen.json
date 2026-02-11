@@ -1,4 +1,7 @@
-[
+{
+  "label": "templates-checklists",
+  "limits": { "evergreen": 1000 },
+  "evergreen": [
   {
     "id": "tc-ever-001",
     "title": "Daily Planning Checklist for High-Productivity Workflows",
@@ -1013,3 +1016,4 @@
     "notes": "Evergreen; powerful January or mid-year reset."
   }
 ]
+}
