@@ -1,7 +1,7 @@
 {
   "label": "app-reviews",
-  "trendLimit": 200,
-  "evergreenLimit": 1000,
+  "Limits": { "trend": 200,
+  "evergreen": 1000 },
   "trend": [
     {
       "id": "app-trend-001",
