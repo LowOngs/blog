@@ -1,6 +1,6 @@
 {
   "label": "smart-savings",
-  "trendLimit": 200,
+  "limits": { "trend": 80 },
   "trend": [
     {
       "id": "ss-tr-001",
