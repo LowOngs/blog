@@ -1,6 +1,6 @@
 {
   "label": "device-reviews",
-  "firstGateLimit": 30,
+  "limits": { "firstGate": 30 },
   "firstGate": [
   {
     "id": "dr-fg-001",
