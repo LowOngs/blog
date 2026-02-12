@@ -1,7 +1,7 @@
 {
   "label": "first-gate",
-  "limit": 10,
-  "seeds": [
+  "limits": { "firstGate": 10 },
+  "firstGate": [ 
     {
       "id": "firstgate-001",
       "title": "Best essential apps for Apple Vision Pro in 2025",
