@@ -1,6 +1,6 @@
 {
   "label": "how-to-playbooks",
-  "firstGateLimit": 30,
+  "limits": { "firstGate": 30 },
   "firstGate": [
     {
       "id": "ht-fg-001",
