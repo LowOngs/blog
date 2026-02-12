@@ -1,5 +1,4 @@
 {
-  {
   "label": "app-reviews",
   "limits": { "firstGate": 30 },
   "firstGate": [
