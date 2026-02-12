@@ -1,6 +1,7 @@
 {
+  {
   "label": "app-reviews",
-  "firstGateLimit": 30,
+  "limits": { "firstGate": 30 },
   "firstGate": [
   {
     "id": "ar-fg-001",
