@@ -1,6 +1,6 @@
 {
   "label": "templates-checklists",
-  "firstGateLimit": 30,
+  "limits": { "firstGate": 30 },
   "firstGate": [
   {
     "id": "tc-fg-001",
