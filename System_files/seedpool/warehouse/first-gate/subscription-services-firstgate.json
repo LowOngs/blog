@@ -1,6 +1,6 @@
 {
   "label": "subscription-services",
-  "firstGateLimit": 30,
+  "limits": { "firstGate": 30 },
   "firstGate": [
   {
     "id": "ss-fg-001",
