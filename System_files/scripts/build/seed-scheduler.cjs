@@ -5,29 +5,43 @@
  * System_files/scripts/build/seed-scheduler.cjs
  *
  * 역할:
- * - seedpool에서 "오늘 발행 큐"(dist/queue/today.json) 생성
+ * - warehouse에서 "오늘 발행 큐"(dist/queue/today.json) 생성
  *
  * 핵심 규칙(확정):
  * - 시간 기준: today.json 메타(timezone=Asia/Seoul, cutoff=10:00)는 여기서 변경하지 않음
  * - 슬롯 라벨(slotLabel) ≠ 시드 출처 라벨(seedLabel)
  * - fallback은 "시드만" 대체, 슬롯 라벨은 유지
  *
+ * 소비 규칙(확정):
+ * - warehouse 배열은 FIFO 큐로 취급한다.
+ * - scheduler는 항상 앞에서 꺼내고(shift), 꺼낸 건 창고에서 제거한다.
+ * - 제거 전에 사용(소비) 기록을 seed-ledger에 남긴다.
+ *
  * 최소 보강:
  * - evergreen 시드 고갈 감지 시 WARN 로그 출력
- *   (충전/대체/판단 로직은 여기 책임 아님)
+ *   (충전/대체/판단 로직은 refill 책임)
  */
 
-// .env 로드
 require('./lib/env.cjs');
 
 const fs = require('fs');
 const path = require('path');
 
-// ────────────────────────────────────
-// 경로
-// ────────────────────────────────────
+// seed-ledger (존재 시 사용)
+let seedLedger = null;
+try {
+  // seed-ledger.cjs는 upsert(patch) API를 제공한다고 가정(이미 바이오 정책에 기록됨)
+  seedLedger = require('./lib/seed-ledger.cjs');
+} catch {
+  seedLedger = null;
+}
+
 const ROOT = path.resolve(__dirname, '..', '..'); // System_files
-const SEEDDIR = path.join(ROOT, 'seedpool');
+const SEEDPOOL_DIR = path.join(ROOT, 'seedpool');
+const WAREHOUSE_DIR = path.join(SEEDPOOL_DIR, 'warehouse');
+const WAREHOUSE_TREND_DIR = path.join(WAREHOUSE_DIR, 'trend');
+const WAREHOUSE_EVERGREEN_DIR = path.join(WAREHOUSE_DIR, 'evergreen');
+
 const OUTDIR = path.join(ROOT, 'dist', 'queue');
 fs.mkdirSync(OUTDIR, { recursive: true });
 
@@ -43,7 +57,7 @@ const ALLOWED_LABELS = new Set([
   'templates-checklists',
 ]);
 
-// evergreen 최소 경고 기준 (의미만 전달, 제어는 다른 파이프라인)
+// evergreen 최소 경고 기준 (의미만 전달, 제어는 refill 책임)
 const MIN_EVERGREEN_THRESHOLD = 20;
 
 function fatal(msg) {
@@ -105,64 +119,135 @@ function planForWeekday(weekday) {
 }
 
 // ────────────────────────────────────
-// Seed 로딩
+// IO helpers
 // ────────────────────────────────────
-const SEED_CACHE = new Map();
-
-function loadSeedConfig(seedLabel) {
-  const safe = assertAllowedLabel(seedLabel, 'loadSeedConfig(seedLabel)');
-  if (SEED_CACHE.has(safe)) return SEED_CACHE.get(safe);
-
-  const file = path.join(SEEDDIR, `${safe}.json`);
-  if (!fs.existsSync(file)) {
-    const empty = { label: safe, trend: [], evergreen: [] };
-    SEED_CACHE.set(safe, empty);
-    return empty;
-  }
-
-  let json = {};
+function readJsonSafe(filePath, fallbackObj) {
+  if (!fs.existsSync(filePath)) return fallbackObj;
   try {
-    json = JSON.parse(fs.readFileSync(file, 'utf8'));
-  } catch {
-    json = {};
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  } catch (e) {
+    warn(`JSON parse failed: ${filePath} :: ${e.message}`);
+    return fallbackObj;
   }
+}
 
-  const cfg = {
-    label: safe,
-    trend: Array.isArray(json.trend) ? json.trend : [],
-    evergreen: Array.isArray(json.evergreen) ? json.evergreen : [],
-  };
+function writeJsonAtomic(filePath, obj) {
+  const tmp = `${filePath}.tmp`;
+  fs.writeFileSync(tmp, JSON.stringify(obj, null, 2), 'utf8');
+  fs.renameSync(tmp, filePath);
+}
 
-  // 🔔 evergreen 고갈 감지 (알림만)
-  if (cfg.evergreen.length < MIN_EVERGREEN_THRESHOLD) {
+function warehouseFilePath(label, mode) {
+  if (mode === 'trend') {
+    return path.join(WAREHOUSE_TREND_DIR, `${label}-trend.json`);
+  }
+  if (mode === 'evergreen') {
+    return path.join(WAREHOUSE_EVERGREEN_DIR, `${label}-evergreen.json`);
+  }
+  fatal(`unsupported mode: ${mode}`);
+  return null;
+}
+
+// ────────────────────────────────────
+// FIFO pop from warehouse (with expired/invalid purge on head)
+// ────────────────────────────────────
+function isExpired(it, todayStr) {
+  if (!it || !it.expiresAt) return false;
+  const exp = String(it.expiresAt).slice(0, 10);
+  return exp < todayStr;
+}
+
+function isValidSeed(it) {
+  return !!(it && typeof it === 'object' && it.id && it.title);
+}
+
+/**
+ * FIFO 소비:
+ * - 배열 맨 앞부터 유효한 1개를 찾는다.
+ * - 선두에 "만료/무효"가 걸려 있으면 shift로 제거(창고가 막히지 않게).
+ * - picked는 ledger 기록 후 제거(shift)한다.
+ */
+function popNextFromWarehouse(label, mode, usedIds, todayStr) {
+  const file = warehouseFilePath(label, mode);
+  const empty = { label, limits: { [mode]: 0 }, [mode]: [] };
+
+  const data = readJsonSafe(file, empty);
+  const arrName = mode; // trend or evergreen
+  const arr = Array.isArray(data[arrName]) ? data[arrName] : [];
+
+  // evergreen 고갈 경고(알림만)
+  if (mode === 'evergreen' && arr.length < MIN_EVERGREEN_THRESHOLD) {
     warn(
-      `evergreen low: label=${safe}, count=${cfg.evergreen.length} (< ${MIN_EVERGREEN_THRESHOLD})`
+      `evergreen low: label=${label}, count=${arr.length} (< ${MIN_EVERGREEN_THRESHOLD})`
     );
   }
 
-  SEED_CACHE.set(safe, cfg);
-  return cfg;
-}
+  // head purge + pick
+  while (arr.length > 0) {
+    const head = arr[0];
 
-function filterCandidates(list, usedIds, todayStr) {
-  return list.filter((it) => {
-    if (!it || !it.id) return false;
-    if (usedIds.has(it.id)) return false;
-    if (it.expiresAt && String(it.expiresAt).slice(0, 10) < todayStr) return false;
-    return true;
-  });
-}
+    // 무효/만료는 제거(막힘 방지)
+    if (!isValidSeed(head)) {
+      warn(`[warehouse] drop invalid head: label=${label}, mode=${mode}`);
+      arr.shift();
+      continue;
+    }
+    if (isExpired(head, todayStr)) {
+      warn(
+        `[warehouse] drop expired head: label=${label}, mode=${mode}, id=${head.id}`
+      );
+      arr.shift();
+      continue;
+    }
+    if (usedIds.has(head.id)) {
+      // 같은 실행에서 이미 쓴 id가 선두에 걸리면 제거(실행 내 중복 방지)
+      warn(
+        `[warehouse] drop duplicate head in-run: label=${label}, mode=${mode}, id=${head.id}`
+      );
+      arr.shift();
+      continue;
+    }
 
-function pickOne(list, usedIds) {
-  if (!list.length) return null;
-  const sorted = [...list].sort(
-    (a, b) => (a.priority ?? 999) - (b.priority ?? 999)
-  );
-  const topP = sorted[0].priority ?? 999;
-  const top = sorted.filter((s) => (s.priority ?? 999) === topP);
-  const picked = top[Math.floor(Math.random() * top.length)];
-  usedIds.add(picked.id);
-  return picked;
+    // 여기까지 왔으면 head를 사용한다.
+    const picked = head;
+
+    // ledger 기록(제거 전에)
+    if (seedLedger && typeof seedLedger.upsert === 'function') {
+      try {
+        seedLedger.upsert({
+          label,
+          mode,
+          seedId: picked.id,
+          title: picked.title || '',
+          intent: picked.intent || '',
+          fingerprint: picked.fingerprint || undefined,
+          status: 'used',
+          stage: 'consume',
+          usedAt: new Date().toISOString(),
+        });
+      } catch (e) {
+        // ledger는 SSOT지만, 여기서 기록 실패로 소비 자체를 막을지 여부는 정책 선택.
+        // 옹스님 정책상 "기록 후 제거"가 원칙이므로, 실패 시 소비를 중단한다.
+        fatal(`[ledger] upsert failed: ${e.message}`);
+      }
+    } else {
+      // ledger 모듈이 없으면 정책 위반이므로 중단
+      fatal('seed-ledger.cjs not available: cannot record before consuming.');
+    }
+
+    // 제거(shift)
+    arr.shift();
+
+    // 저장(원본 객체에 반영)
+    data[arrName] = arr;
+    writeJsonAtomic(file, data);
+
+    usedIds.add(picked.id);
+    return picked;
+  }
+
+  // 비었음
+  return null;
 }
 
 // ────────────────────────────────────
@@ -184,29 +269,22 @@ function pickOne(list, usedIds) {
 
   for (const slot of plan) {
     const slotLabel = slot.slotLabel;
-    const preferredMode = slot.mode;
+    const preferredMode = slot.mode === 'evergreen' ? 'evergreen' : 'trend';
 
-    const cfg = loadSeedConfig(slotLabel);
-
-    const candidates =
-      preferredMode === 'trend'
-        ? filterCandidates(cfg.trend, usedIds, todayStr)
-        : filterCandidates(cfg.evergreen, usedIds, todayStr);
-
-    const picked = pickOne(candidates, usedIds);
+    const picked = popNextFromWarehouse(slotLabel, preferredMode, usedIds, todayStr);
     if (!picked) continue;
 
     items.push({
       date: todayStr,
-      label: slotLabel,
-      seedLabel: slotLabel,
+      label: slotLabel,      // 슬롯 라벨 유지
+      seedLabel: slotLabel,  // 현재는 동일(확장 여지 유지)
       mode: preferredMode,
       id: picked.id,
       title: picked.title,
       angle: picked.angle || '',
       audience: picked.audience || '',
       intent: picked.intent || '',
-      priority: picked.priority ?? 0,
+      priority: picked.priority ?? 0, // 기존 출력 필드 유지 (FIFO라도 필드 삭제 금지)
       notes: picked.notes || '',
     });
   }
