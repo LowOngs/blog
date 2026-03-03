@@ -177,9 +177,7 @@ function generateSeedsDummy(label, mode, count, fpSet) {
     };
 
     // fingerprint SSOT 유틸 사용
-    const fp = fpUtil.fingerprint
-      ? fpUtil.fingerprint(seed.title, seed.angle, seed.audience, seed.intent)
-      : fpUtil(seed.title, seed.angle, seed.audience, seed.intent);
+    const fp = fpUtil.buildFingerprintFromSeed(seed);
 
     if (fpSet.has(fp)) continue;
     fpSet.add(fp);
