@@ -24,6 +24,12 @@
  *
  * 중복 차단:
  * - fingerprint 기반 중복 금지 (seed-ledger 기준)
+ *
+ * [중요 수정(이번 패치)]
+ * - 더미 생성기(generateSeedsDummy)가 매번 동일한 title/angle/audience/intent로 생성되어
+ *   fingerprint가 동일해져 1개만 채워지는 문제가 있었음.
+ * - 해결: title/angle에 idx(변동값)를 포함해 fingerprint가 서로 달라지게 함.
+ *   (id는 fingerprint에 쓰지 않는 정책이므로 title/angle 변동으로 해결)
  */
 
 require('./lib/env.cjs');
@@ -155,6 +161,11 @@ function computeTarget(floor, used7) {
  * LLM 생성 자리:
  * - 지금은 더미 생성기(형태/필드만 맞춘다)
  * - 실제 생성 로직으로 교체해도 fingerprint 중복 차단과 push 규칙은 유지
+ *
+ * [중요]
+ * - fingerprint는 title/angle/audience/intent로 만들어짐.
+ * - 더미 생성에서 이 4개가 고정이면 fp가 매번 동일 → 1개만 채워짐.
+ * - 따라서 title/angle에 idx(변동값)를 포함해 fp가 달라지도록 한다.
  */
 function generateSeedsDummy(label, mode, count, fpSet) {
   const out = [];
@@ -162,19 +173,16 @@ function generateSeedsDummy(label, mode, count, fpSet) {
 
   while (out.length < count) {
     guard++;
-    if (guard > count * 50) break; // 무한루프 방지(정책상 band-aid가 아니라 안전장치)
+    if (guard > count * 50) break; // 무한루프 방지(안전장치)
 
     const idx = String(Date.now()) + '-' + String(Math.floor(Math.random() * 1e9));
-
-    // ✅ [PATCH] fingerprint 입력 4필드(title/angle/audience/intent) 중
-    //          최소 1개는 매번 달라야 중복 스킵이 발생하지 않습니다.
-    //          원본 구조/정책은 유지하고 문자열만 유니크하게 만듭니다.
-    const seq = out.length + 1;
-
     const seed = {
       id: `${label}-${mode}-${idx}`,
-      title: `AUTO GENERATED: ${label} (${mode}) #${seq}`,
-      angle: `Auto angle (${mode}) #${seq}`,
+
+      // ✅ 변경: title/angle에 idx를 포함해 fingerprint 중복을 방지
+      title: `AUTO GENERATED: ${label} (${mode}) #${idx}`,
+      angle: `Auto angle (${mode}) var=${idx}`,
+
       audience: 'General',
       intent: mode === 'trend' ? 'trend' : 'evergreen',
       priority: 5,
@@ -218,12 +226,16 @@ function refillOne(label, mode, fpSet) {
   const target = computeTarget(floor, used7);
 
   if (current >= target) {
-    console.log(`[refill] ${label} ${mode}: OK (current=${current}, target=${target}, used7=${used7}, floor=${floor})`);
+    console.log(
+      `[refill] ${label} ${mode}: OK (current=${current}, target=${target}, used7=${used7}, floor=${floor})`
+    );
     return;
   }
 
   const need = target - current;
-  console.log(`[refill] ${label} ${mode}: need=${need} (current=${current}, target=${target}, used7=${used7}, floor=${floor})`);
+  console.log(
+    `[refill] ${label} ${mode}: need=${need} (current=${current}, target=${target}, used7=${used7}, floor=${floor})`
+  );
 
   const gen = generateSeedsDummy(label, mode, need, fpSet);
 
