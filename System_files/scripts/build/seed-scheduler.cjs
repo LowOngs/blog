@@ -20,6 +20,11 @@
  * 최소 보강:
  * - evergreen 시드 고갈 감지 시 WARN 로그 출력
  *   (충전/대체/판단 로직은 refill 책임)
+ *
+ * [중요 수정(이번 패치)]
+ * - consume 레코드에 fingerprint를 반드시 기록한다.
+ *   - warehouse seed에 fingerprint가 있으면 그대로 사용
+ *   - 없으면 lib/fingerprint.cjs로 title/angle/audience/intent 기반 생성해서 기록
  */
 
 require('./lib/env.cjs');
@@ -34,6 +39,14 @@ try {
   seedLedger = require('./lib/seed-ledger.cjs');
 } catch {
   seedLedger = null;
+}
+
+// fingerprint 유틸(없어도 되지만, fingerprint 빈값 방지를 위해 사용)
+let fpUtil = null;
+try {
+  fpUtil = require('./lib/fingerprint.cjs');
+} catch {
+  fpUtil = null;
 }
 
 const ROOT = path.resolve(__dirname, '..', '..'); // System_files
@@ -161,6 +174,27 @@ function isValidSeed(it) {
   return !!(it && typeof it === 'object' && it.id && it.title);
 }
 
+// fingerprint 보정(warehouse에 없을 때 생성)
+function ensureFingerprint(seed) {
+  if (!seed || typeof seed !== 'object') return '';
+  const have = String(seed.fingerprint || '').trim();
+  if (have) return have;
+
+  if (fpUtil && typeof fpUtil.buildFingerprintFromSeed === 'function') {
+    try {
+      const fp = fpUtil.buildFingerprintFromSeed(seed);
+      return String(fp || '').trim();
+    } catch (e) {
+      warn(`[fingerprint] build failed: ${e.message}`);
+      return '';
+    }
+  }
+
+  // 유틸이 없으면 빈값(단, 이후 refill 중복차단에는 불리함)
+  warn('[fingerprint] fp util missing; consume record will have empty fingerprint');
+  return '';
+}
+
 /**
  * FIFO 소비:
  * - 배열 맨 앞부터 유효한 1개를 찾는다.
@@ -211,6 +245,9 @@ function popNextFromWarehouse(label, mode, usedIds, todayStr) {
     // 여기까지 왔으면 head를 사용한다.
     const picked = head;
 
+    // ✅ fingerprint 확보(warehouse에 없으면 생성)
+    const fp = ensureFingerprint(picked);
+
     // ledger 기록(제거 전에)
     if (seedLedger && typeof seedLedger.upsert === 'function') {
       try {
@@ -220,13 +257,12 @@ function popNextFromWarehouse(label, mode, usedIds, todayStr) {
           seedId: picked.id,
           title: picked.title || '',
           intent: picked.intent || '',
-          fingerprint: picked.fingerprint || undefined,
+          fingerprint: fp || undefined,
           status: 'used',
           stage: 'consume',
           usedAt: new Date().toISOString(),
         });
       } catch (e) {
-        // ledger는 SSOT지만, 여기서 기록 실패로 소비 자체를 막을지 여부는 정책 선택.
         // 옹스님 정책상 "기록 후 제거"가 원칙이므로, 실패 시 소비를 중단한다.
         fatal(`[ledger] upsert failed: ${e.message}`);
       }
@@ -243,6 +279,10 @@ function popNextFromWarehouse(label, mode, usedIds, todayStr) {
     writeJsonAtomic(file, data);
 
     usedIds.add(picked.id);
+
+    // picked 객체에도 fingerprint를 채워서(출력/후속 사용 대비) 반환
+    if (fp && !picked.fingerprint) picked.fingerprint = fp;
+
     return picked;
   }
 
