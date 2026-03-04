@@ -24,7 +24,11 @@
  * [중요 수정(이번 패치)]
  * - consume 레코드에 fingerprint를 반드시 기록한다.
  *   - warehouse seed에 fingerprint가 있으면 그대로 사용
- *   - 없으면 lib/fingerprint.cjs로 title/angle/audience/intent 기반 생성해서 기록
+ *   - 없으면 lib/fingerprint.cjs의 buildFingerprintFromSeed()로 생성해서 기록
+ * - fingerprint가 끝내 생성되지 않으면:
+ *   - ledger 기록도 안 함
+ *   - shift도 안 함
+ *   - 해당 슬롯만 스킵(전체 파이프라인 중단 방지)
  */
 
 require('./lib/env.cjs');
@@ -35,7 +39,6 @@ const path = require('path');
 // seed-ledger (존재 시 사용)
 let seedLedger = null;
 try {
-  // seed-ledger.cjs는 upsert(patch) API를 제공한다고 가정(이미 바이오 정책에 기록됨)
   seedLedger = require('./lib/seed-ledger.cjs');
 } catch {
   seedLedger = null;
@@ -180,6 +183,7 @@ function ensureFingerprint(seed) {
   const have = String(seed.fingerprint || '').trim();
   if (have) return have;
 
+  // ✅ 옹스님이 제공한 fingerprint.cjs 기준: buildFingerprintFromSeed 가 정답 export
   if (fpUtil && typeof fpUtil.buildFingerprintFromSeed === 'function') {
     try {
       const fp = fpUtil.buildFingerprintFromSeed(seed);
@@ -190,8 +194,7 @@ function ensureFingerprint(seed) {
     }
   }
 
-  // 유틸이 없으면 빈값(단, 이후 refill 중복차단에는 불리함)
-  warn('[fingerprint] fp util missing; consume record will have empty fingerprint');
+  warn('[fingerprint] fp util missing or invalid export; cannot build fingerprint');
   return '';
 }
 
@@ -211,12 +214,9 @@ function popNextFromWarehouse(label, mode, usedIds, todayStr) {
 
   // evergreen 고갈 경고(알림만)
   if (mode === 'evergreen' && arr.length < MIN_EVERGREEN_THRESHOLD) {
-    warn(
-      `evergreen low: label=${label}, count=${arr.length} (< ${MIN_EVERGREEN_THRESHOLD})`
-    );
+    warn(`evergreen low: label=${label}, count=${arr.length} (< ${MIN_EVERGREEN_THRESHOLD})`);
   }
 
-  // head purge + pick
   while (arr.length > 0) {
     const head = arr[0];
 
@@ -227,26 +227,31 @@ function popNextFromWarehouse(label, mode, usedIds, todayStr) {
       continue;
     }
     if (isExpired(head, todayStr)) {
-      warn(
-        `[warehouse] drop expired head: label=${label}, mode=${mode}, id=${head.id}`
-      );
+      warn(`[warehouse] drop expired head: label=${label}, mode=${mode}, id=${head.id}`);
       arr.shift();
       continue;
     }
     if (usedIds.has(head.id)) {
-      // 같은 실행에서 이미 쓴 id가 선두에 걸리면 제거(실행 내 중복 방지)
-      warn(
-        `[warehouse] drop duplicate head in-run: label=${label}, mode=${mode}, id=${head.id}`
-      );
+      warn(`[warehouse] drop duplicate head in-run: label=${label}, mode=${mode}, id=${head.id}`);
       arr.shift();
       continue;
     }
 
-    // 여기까지 왔으면 head를 사용한다.
     const picked = head;
 
     // ✅ fingerprint 확보(warehouse에 없으면 생성)
     const fp = ensureFingerprint(picked);
+
+    // ✅ fp가 끝내 비면: "소비 자체를 중단"이 아니라, "해당 슬롯만 스킵"
+    // - ledger 기록 X
+    // - shift X
+    // - today.json에서도 이 슬롯은 빠짐
+    if (!fp) {
+      warn(
+        `[fingerprint] empty -> skip slot (no ledger, no shift): label=${label}, mode=${mode}, id=${picked.id}`
+      );
+      return null;
+    }
 
     // ledger 기록(제거 전에)
     if (seedLedger && typeof seedLedger.upsert === 'function') {
@@ -257,36 +262,34 @@ function popNextFromWarehouse(label, mode, usedIds, todayStr) {
           seedId: picked.id,
           title: picked.title || '',
           intent: picked.intent || '',
-          fingerprint: fp || undefined,
+          fingerprint: fp,
           status: 'used',
           stage: 'consume',
           usedAt: new Date().toISOString(),
         });
       } catch (e) {
-        // 옹스님 정책상 "기록 후 제거"가 원칙이므로, 실패 시 소비를 중단한다.
+        // 옹스님 원칙: 기록 후 제거. 기록 실패 시 제거하면 안 됨 → 여기서 중단.
         fatal(`[ledger] upsert failed: ${e.message}`);
       }
     } else {
-      // ledger 모듈이 없으면 정책 위반이므로 중단
       fatal('seed-ledger.cjs not available: cannot record before consuming.');
     }
 
     // 제거(shift)
     arr.shift();
 
-    // 저장(원본 객체에 반영)
+    // 저장
     data[arrName] = arr;
     writeJsonAtomic(file, data);
 
     usedIds.add(picked.id);
 
-    // picked 객체에도 fingerprint를 채워서(출력/후속 사용 대비) 반환
-    if (fp && !picked.fingerprint) picked.fingerprint = fp;
+    // 반환 객체에도 fingerprint 채움
+    if (!picked.fingerprint) picked.fingerprint = fp;
 
     return picked;
   }
 
-  // 비었음
   return null;
 }
 
@@ -324,7 +327,7 @@ function popNextFromWarehouse(label, mode, usedIds, todayStr) {
       angle: picked.angle || '',
       audience: picked.audience || '',
       intent: picked.intent || '',
-      priority: picked.priority ?? 0, // 기존 출력 필드 유지 (FIFO라도 필드 삭제 금지)
+      priority: picked.priority ?? 0, // 기존 출력 필드 유지 (필드 삭제 금지)
       notes: picked.notes || '',
     });
   }
