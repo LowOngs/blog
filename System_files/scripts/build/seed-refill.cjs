@@ -165,10 +165,16 @@ function generateSeedsDummy(label, mode, count, fpSet) {
     if (guard > count * 50) break; // 무한루프 방지(정책상 band-aid가 아니라 안전장치)
 
     const idx = String(Date.now()) + '-' + String(Math.floor(Math.random() * 1e9));
+
+    // ✅ [PATCH] fingerprint 입력 4필드(title/angle/audience/intent) 중
+    //          최소 1개는 매번 달라야 중복 스킵이 발생하지 않습니다.
+    //          원본 구조/정책은 유지하고 문자열만 유니크하게 만듭니다.
+    const seq = out.length + 1;
+
     const seed = {
       id: `${label}-${mode}-${idx}`,
-      title: `AUTO GENERATED: ${label} (${mode})`,
-      angle: `Auto angle (${mode})`,
+      title: `AUTO GENERATED: ${label} (${mode}) #${seq}`,
+      angle: `Auto angle (${mode}) #${seq}`,
       audience: 'General',
       intent: mode === 'trend' ? 'trend' : 'evergreen',
       priority: 5,
