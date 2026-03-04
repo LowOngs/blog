@@ -30,6 +30,10 @@
  *   fingerprint가 동일해져 1개만 채워지는 문제가 있었음.
  * - 해결: title/angle에 idx(변동값)를 포함해 fingerprint가 서로 달라지게 함.
  *   (id는 fingerprint에 쓰지 않는 정책이므로 title/angle 변동으로 해결)
+ *
+ * [추가 중요 수정(이번 답변)]
+ * - need 만큼 "반드시" 채워야 하므로,
+ *   부분 생성(guard로 중간 종료) 시 조용히 넘어가지 않고 FATAL로 중단한다.
  */
 
 require('./lib/env.cjs');
@@ -37,7 +41,7 @@ require('./lib/env.cjs');
 const fs = require('fs');
 const path = require('path');
 
-// fingerprint SSOT 유틸(이미 바이오에 존재한다고 기록됨)
+// fingerprint SSOT 유틸
 const fpUtil = require('./lib/fingerprint.cjs');
 
 const ROOT = path.resolve(__dirname, '..', '..'); // System_files
@@ -146,11 +150,6 @@ function warehousePath(label, mode) {
 /**
  * 목표 재고 계산:
  * target = max(floor, ceil(used7 * 1.5))
- *
- * 여기서 floor는 warehouse 파일의 limits 값(라벨별 권장량).
- * upper cap은 "강제하지 않음":
- * - warehouse가 이미 더 많으면 건드리지 않는다(삭제/재배치 금지).
- * - 부족할 때만 채운다.
  */
 function computeTarget(floor, used7) {
   const needByUsage = Math.ceil(used7 * MULTIPLIER);
@@ -158,28 +157,31 @@ function computeTarget(floor, used7) {
 }
 
 /**
- * LLM 생성 자리:
- * - 지금은 더미 생성기(형태/필드만 맞춘다)
- * - 실제 생성 로직으로 교체해도 fingerprint 중복 차단과 push 규칙은 유지
- *
- * [중요]
- * - fingerprint는 title/angle/audience/intent로 만들어짐.
- * - 더미 생성에서 이 4개가 고정이면 fp가 매번 동일 → 1개만 채워짐.
- * - 따라서 title/angle에 idx(변동값)를 포함해 fp가 달라지도록 한다.
+ * 더미 생성기:
+ * - title/angle에 idx 포함 → fingerprint 고유화
+ * - need 만큼 못 채우면 FATAL (부분 충전 금지)
  */
 function generateSeedsDummy(label, mode, count, fpSet) {
   const out = [];
   let guard = 0;
 
+  // ✅ "부분생성 방지"를 위해 상한을 크게 잡고, 상한 도달 시 즉시 실패 처리
+  const MAX_ATTEMPTS = Math.max(1000, count * 500);
+
   while (out.length < count) {
     guard++;
-    if (guard > count * 50) break; // 무한루프 방지(안전장치)
+    if (guard > MAX_ATTEMPTS) {
+      fatal(
+        `dummy generation exhausted: label=${label}, mode=${mode}, want=${count}, got=${out.length}, attempts=${guard}. ` +
+        `Likely fingerprint collisions due to non-varying fields or fpSet already saturated.`
+      );
+    }
 
     const idx = String(Date.now()) + '-' + String(Math.floor(Math.random() * 1e9));
     const seed = {
       id: `${label}-${mode}-${idx}`,
 
-      // ✅ 변경: title/angle에 idx를 포함해 fingerprint 중복을 방지
+      // ✅ 변경(핵심): title/angle에 idx 포함 → fp 중복 방지
       title: `AUTO GENERATED: ${label} (${mode}) #${idx}`,
       angle: `Auto angle (${mode}) var=${idx}`,
 
@@ -190,15 +192,18 @@ function generateSeedsDummy(label, mode, count, fpSet) {
       notes: 'Replace with real LLM generation.',
     };
 
-    // fingerprint SSOT 유틸 사용
     const fp = fpUtil.buildFingerprintFromSeed(seed);
 
     if (fpSet.has(fp)) continue;
     fpSet.add(fp);
 
-    // warehouse 아이템에 fingerprint 포함(후속 중복차단/감사에 유리)
     seed.fingerprint = fp;
     out.push(seed);
+  }
+
+  // ✅ 방어: 이 케이스는 사실상 위 while이 보장하지만, 정책상 "부분생성"을 절대 허용하지 않기 위해 유지
+  if (out.length !== count) {
+    fatal(`dummy generation shortfall: label=${label}, mode=${mode}, want=${count}, got=${out.length}`);
   }
 
   return out;
@@ -239,7 +244,7 @@ function refillOne(label, mode, fpSet) {
 
   const gen = generateSeedsDummy(label, mode, need, fpSet);
 
-  // push only (재배치 없음)
+  // push only
   data[mode] = arr.concat(gen);
 
   writeJsonAtomic(file, data);
@@ -251,7 +256,6 @@ function refillOne(label, mode, fpSet) {
 
   const fpSet = collectExistingFingerprints();
 
-  // trend/evergreen만 대상
   for (const label of LABELS) {
     refillOne(label, 'trend', fpSet);
     refillOne(label, 'evergreen', fpSet);
