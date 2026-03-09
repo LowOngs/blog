@@ -3,22 +3,24 @@
 /**
  * System_files/scripts/build/lib/seed-ledger.cjs
  *
- * Seed Ledger (Scalable v3: append-only + index + fingerprint)
+ * Seed Ledger (Scalable v4: append-only + index)
  *
- * ✅ SSOT(ledger): System_files/logs/seed-ledger.jsonl              (append-only)
- * ✅ Index:        System_files/logs/seed-ledger.index.json         (recordKey -> byteOffset + alias + usedFingerprints)
+ * ✅ SSOT(ledger): System_files/logs/seed-ledger.jsonl      (append-only)
+ * ✅ Index:        System_files/logs/seed-ledger.index.json (recordKey -> byteOffset + alias)
  *
  * 목표:
  * - 대용량에서도 upsert O(1)에 가깝게 유지
  * - recordKey 기준 "멱등 upsert" (기존 레코드 읽어서 병합 후 새 줄 append)
  * - slug 임시키 → pid 확정키 승격(merge) + slugKey alias 유지
  *
- * (추가) Fingerprint 기반 "내용 중복 방지"
- * - 같은 fingerprint(내용 지문)는 재사용 금지
- * - index.usedFingerprints 를 SSOT로 사용(빠른 조회)
+ * 변경:
+ * - fingerprint 대량 조회/차단 책임은 fp-cache 계층으로 분리
+ * - seed-ledger.index.json 에서는 usedFingerprints 책임 제거
  *
  * 호환성:
- * - 기존 ids.cjs / blogger.cjs는 그대로 upsert() 호출만 하면 됨
+ * - 기존 ids.cjs / blogger.cjs / scheduler는 그대로 upsert() 호출 가능
+ * - hasFingerprint() 는 하위 호환용으로 남기되, ledger 직접 조회 방식으로만 동작
+ *   (빠른 조회는 fp-cache 사용 권장)
  */
 
 const fs = require('fs');
@@ -27,8 +29,8 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..', '..', '..'); // System_files
 const LOGS_DIR = path.join(ROOT, 'logs');
 
-const LEDGER_FILE = path.join(LOGS_DIR, 'seed-ledger.jsonl');              // append-only
-const INDEX_FILE = path.join(LOGS_DIR, 'seed-ledger.index.json');          // small json (map+alias+fingerprint)
+const LEDGER_FILE = path.join(LOGS_DIR, 'seed-ledger.jsonl');      // append-only
+const INDEX_FILE = path.join(LOGS_DIR, 'seed-ledger.index.json');  // small json (map+alias)
 const TMP_INDEX_FILE = path.join(LOGS_DIR, 'seed-ledger.index.tmp.json');
 
 function ensureDir(dir) {
@@ -50,8 +52,6 @@ function isValidPageId(v) {
 function normalizeFingerprint(v) {
   const s = safeStr(v).trim();
   if (!s) return '';
-  // 최소 방어: "fpX:" 형태면 그대로, 아니면 허용(향후 포맷 바뀔 수 있음)
-  // 권장 포맷: fp1:<hex>
   return s;
 }
 
@@ -59,7 +59,7 @@ function normalizeMode(v) {
   const s = safeStr(v).trim().toLowerCase();
   if (!s) return '';
   if (s === 'trend' || s === 'evergreen' || s === 'firstgate') return s;
-  return s; // 확장 가능(최소 개입)
+  return s;
 }
 
 function safeIsoOrNow(v) {
@@ -91,22 +91,20 @@ function makeRecordKey({ pageId, slug, fingerprint, seedId }) {
 /**
  * Index 구조(경량)
  * {
- *   "version": 3,
+ *   "version": 4,
  *   "updatedAt": "ISO",
- *   "offsetByKey": { "pid:page000123": 12345, "slug:abc": 67890, "fp:fp1:...": 111, ... },
- *   "alias": { "slug:abc": "pid:page000123", ... },
- *   "usedFingerprints": { "fp1:....": true, ... }   // ✅ 빠른 중복 조회
+ *   "offsetByKey": { "pid:page000123": 12345, "slug:abc": 67890, ... },
+ *   "alias": { "slug:abc": "pid:page000123", ... }
  * }
  */
 function loadIndex() {
   try {
     if (!fs.existsSync(INDEX_FILE)) {
       return {
-        version: 3,
+        version: 4,
         updatedAt: null,
         offsetByKey: {},
         alias: {},
-        usedFingerprints: {}
       };
     }
     const raw = fs.readFileSync(INDEX_FILE, 'utf8');
@@ -115,12 +113,13 @@ function loadIndex() {
 
     if (!json.offsetByKey || typeof json.offsetByKey !== 'object') json.offsetByKey = {};
     if (!json.alias || typeof json.alias !== 'object') json.alias = {};
-    if (!json.usedFingerprints || typeof json.usedFingerprints !== 'object') json.usedFingerprints = {};
 
-    json.version = 3;
+    // 구버전 호환: usedFingerprints 필드는 무시
+    delete json.usedFingerprints;
+
+    json.version = 4;
     return json;
   } catch {
-    // 인덱스가 깨졌으면 재구축(안전)
     return rebuildIndex();
   }
 }
@@ -128,8 +127,9 @@ function loadIndex() {
 function saveIndex(index) {
   ensureDir(LOGS_DIR);
   index.updatedAt = nowIso();
+  index.version = 4;
+  delete index.usedFingerprints;
   fs.writeFileSync(TMP_INDEX_FILE, JSON.stringify(index, null, 2) + '\n', 'utf8');
-  // atomic-ish replace
   fs.renameSync(TMP_INDEX_FILE, INDEX_FILE);
 }
 
@@ -142,7 +142,7 @@ function readLineAtOffset(filePath, offset) {
     const stat = fs.fstatSync(fd);
     if (offset < 0 || offset >= stat.size) return null;
 
-    const CHUNK = 64 * 1024; // 64KB
+    const CHUNK = 64 * 1024;
     const buf = Buffer.alloc(CHUNK);
 
     let pos = offset;
@@ -161,8 +161,7 @@ function readLineAtOffset(filePath, offset) {
       acc += s;
       pos += n;
 
-      // 안전: 1줄이 비정상적으로 길어지는 경우 방어
-      if (acc.length > 2 * 1024 * 1024) break; // 2MB
+      if (acc.length > 2 * 1024 * 1024) break;
     }
 
     const line = acc.trim();
@@ -197,14 +196,24 @@ function getLatestByKey(recordKey, index) {
 }
 
 /**
- * Fingerprint 사용 여부(빠른 조회)
- * - index.usedFingerprints 기반
+ * 하위 호환용 fingerprint 조회
+ * - 더 이상 index.usedFingerprints 를 쓰지 않음
+ * - ledger를 뒤에서부터 훑는 느린 방식
+ * - 빠른 조회/중복 판정은 fp-cache 사용 권장
  */
 function hasFingerprint(fingerprint) {
   const fp = normalizeFingerprint(fingerprint);
   if (!fp) return false;
-  const index = loadIndex();
-  return !!(index.usedFingerprints && index.usedFingerprints[fp]);
+  if (!fs.existsSync(LEDGER_FILE)) return false;
+
+  const lines = fs.readFileSync(LEDGER_FILE, 'utf8').split('\n').filter(Boolean);
+  for (let i = lines.length - 1; i >= 0; i--) {
+    try {
+      const obj = JSON.parse(lines[i]);
+      if (normalizeFingerprint(obj && obj.fingerprint) === fp) return true;
+    } catch {}
+  }
+  return false;
 }
 
 /**
@@ -223,17 +232,17 @@ function appendRecord(obj) {
 /**
  * 인덱스 재구축(최후 수단)
  * - ledger 전체 스캔하여 recordKey별 마지막 offset 저장
- * - fingerprint 사용 여부도 함께 재구축
+ * - alias만 재구축
+ * - fingerprint 대량 인덱싱 책임은 여기서 제거
  */
 function rebuildIndex() {
   ensureDir(LOGS_DIR);
 
   const index = {
-    version: 3,
+    version: 4,
     updatedAt: nowIso(),
     offsetByKey: {},
     alias: {},
-    usedFingerprints: {}
   };
 
   if (!fs.existsSync(LEDGER_FILE)) {
@@ -258,7 +267,6 @@ function rebuildIndex() {
       const parts = text.split('\n');
       carry = parts.pop() || '';
 
-      // 라인 시작 offset 추적
       let byteCursor = offset;
       for (let i = 0; i < parts.length; i++) {
         const rawLine = parts[i];
@@ -269,27 +277,15 @@ function rebuildIndex() {
           try {
             const obj = JSON.parse(line);
             if (obj && typeof obj === 'object') {
-              // recordKey 기준 offset 저장
               if (typeof obj.recordKey === 'string' && obj.recordKey) {
                 index.offsetByKey[obj.recordKey] = byteCursor;
               }
 
-              // alias 흡수
               if (obj.alias && typeof obj.alias === 'object') {
                 Object.assign(index.alias, obj.alias);
               }
-
-              // fingerprint 사용 여부 흡수
-              const fp = normalizeFingerprint(obj.fingerprint);
-              if (fp) {
-                index.usedFingerprints[fp] = true;
-                // fpKey가 있다면 최신 offset도 저장(디버깅/추적에 유용)
-                index.offsetByKey[`fp:${fp}`] = byteCursor;
-              }
             }
-          } catch {
-            // ignore broken line
-          }
+          } catch {}
         }
 
         byteCursor += lineBytes;
@@ -298,7 +294,6 @@ function rebuildIndex() {
       offset += n;
     }
 
-    // carry(마지막 줄) 처리
     const last = carry.trim();
     if (last) {
       try {
@@ -308,12 +303,8 @@ function rebuildIndex() {
           if (typeof obj.recordKey === 'string' && obj.recordKey) {
             index.offsetByKey[obj.recordKey] = approxOff;
           }
-          if (obj.alias && typeof obj.alias === 'object') Object.assign(index.alias, obj.alias);
-
-          const fp = normalizeFingerprint(obj.fingerprint);
-          if (fp) {
-            index.usedFingerprints[fp] = true;
-            index.offsetByKey[`fp:${fp}`] = approxOff;
+          if (obj.alias && typeof obj.alias === 'object') {
+            Object.assign(index.alias, obj.alias);
           }
         }
       } catch {}
@@ -333,7 +324,7 @@ function rebuildIndex() {
  *
  * 확장:
  * - fingerprint/mode/usedAt 저장 가능
- * - recordKey는 pid/slug/fp/seed 우선순위로 생성(기존 호출 영향 없음)
+ * - recordKey는 pid/slug/fp/seed 우선순위로 생성
  */
 function upsert(patch) {
   if (!patch || typeof patch !== 'object') throw new Error('upsert: patch object 필요');
@@ -343,26 +334,20 @@ function upsert(patch) {
   const seedId = safeStr(patch.seedId).trim();
   const fingerprint = normalizeFingerprint(patch.fingerprint);
 
-  // recordKey 생성(확장)
   const rk = makeRecordKey({ pageId, slug, fingerprint, seedId });
 
-  // 인덱스 로드
   const index = loadIndex();
 
-  // alias 처리(기존 규칙 유지): slugKey가 pidKey로 승격되면 slugKey를 pidKey로 연결
   const slugKey = slug ? `slug:${slug}` : '';
   if (rk.startsWith('pid:') && slugKey) {
     index.alias[slugKey] = rk;
   }
 
-  // base 로드(현재 최신 상태)
-  // - rk가 pid라면, 기존 slug 임시 레코드도 읽어서 병합 후보로 사용
   const baseFromRk = getLatestByKey(rk, index) || {};
   const baseFromSlug = (rk.startsWith('pid:') && slugKey)
     ? (getLatestByKey(slugKey, index) || {})
     : {};
 
-  // 둘 중 더 정보 많은 쪽을 기반으로(간단 기준: updatedAt 비교)
   const base = (() => {
     const ta = Date.parse(baseFromRk.updatedAt || '') || 0;
     const tb = Date.parse(baseFromSlug.updatedAt || '') || 0;
@@ -370,7 +355,6 @@ function upsert(patch) {
   })();
 
   const merged = {
-    // 고정 필드
     recordKey: rk,
     slug: slug || base.slug || '',
     pageId: isValidPageId(pageId) ? pageId : (base.pageId || ''),
@@ -378,52 +362,38 @@ function upsert(patch) {
     seedId: seedId || base.seedId || '',
     source: patch.source || base.source || '',
 
-    // ✅ 내용 중복 방지 필드
     fingerprint: fingerprint || normalizeFingerprint(base.fingerprint) || '',
     mode: normalizeMode(patch.mode) || normalizeMode(base.mode) || '',
     usedAt: patch.usedAt
       ? safeIsoOrNow(patch.usedAt)
       : (base.usedAt ? safeIsoOrNow(base.usedAt) : ''),
 
-    // 상태/단계
     status: patch.status || base.status || '',
     stage: patch.stage || base.stage || '',
     dryRun: (typeof patch.dryRun === 'boolean')
       ? patch.dryRun
       : (typeof base.dryRun === 'boolean' ? base.dryRun : false),
 
-    // publish 결과
     postId: patch.postId || base.postId || '',
     url: patch.url || base.url || '',
 
-    // 타임
     createdAt: base.createdAt || patch.createdAt || nowIso(),
     updatedAt: nowIso(),
 
-    // 기타
     notes: patch.notes || base.notes || ''
   };
 
-  // alias를 레코드에 “참고 정보”로도 넣어둠(재구축 시 흡수 가능)
   if (rk.startsWith('pid:') && slugKey) {
     merged.alias = merged.alias && typeof merged.alias === 'object' ? merged.alias : {};
     merged.alias[slugKey] = rk;
   }
 
-  // append + index update
   const off = appendRecord(merged);
   index.offsetByKey[rk] = off;
 
-  // slugKey 자체도 “현재 레코드 위치”로 매핑(기존 유지)
   if (slugKey) {
     index.offsetByKey[slugKey] = off;
     if (rk.startsWith('pid:')) index.alias[slugKey] = rk;
-  }
-
-  // ✅ fingerprint 인덱스 업데이트(즉시 반영)
-  if (merged.fingerprint) {
-    index.usedFingerprints[merged.fingerprint] = true;
-    index.offsetByKey[`fp:${merged.fingerprint}`] = off;
   }
 
   saveIndex(index);
@@ -433,8 +403,8 @@ function upsert(patch) {
 
 /**
  * fingerprint 사용 처리(편의 함수)
- * - pageId/slug 없이도 기록 가능 (recordKey = fp:... 또는 seed:...)
- * - 이 호출이 "내용 사용 SSOT"의 표준 엔트리포인트가 될 수 있음
+ * - pageId/slug 없이도 기록 가능
+ * - 실제 빠른 중복 조회 책임은 fp-cache 사용 권장
  */
 function markFingerprintUsed({ fingerprint, seedId, label, mode, usedAt, notes = '' }) {
   const fp = normalizeFingerprint(fingerprint);
@@ -443,16 +413,13 @@ function markFingerprintUsed({ fingerprint, seedId, label, mode, usedAt, notes =
   const sid = safeStr(seedId).trim();
 
   return upsert({
-    // recordKey 생성용(확장)
     fingerprint: fp,
     seedId: sid,
 
-    // 저장 필드
     label: safeStr(label).trim(),
     mode: normalizeMode(mode),
     usedAt: usedAt ? safeIsoOrNow(usedAt) : nowIso(),
 
-    // stage/status는 seed 소비 기록으로 고정(원하면 호출자가 덮어쓸 수 있음)
     stage: 'seed',
     status: 'used',
     dryRun: true,
