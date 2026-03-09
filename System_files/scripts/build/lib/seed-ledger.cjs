@@ -19,8 +19,6 @@
  *
  * 호환성:
  * - 기존 ids.cjs / blogger.cjs / scheduler는 그대로 upsert() 호출 가능
- * - hasFingerprint() 는 하위 호환용으로 남기되, ledger 직접 조회 방식으로만 동작
- *   (빠른 조회는 fp-cache 사용 권장)
  */
 
 const fs = require('fs');
@@ -69,11 +67,7 @@ function safeIsoOrNow(v) {
 }
 
 /**
- * recordKey 규칙(확장, 기존 호환)
- * 1) pageId 있으면 pid 기반
- * 2) 없으면 slug 기반(임시)
- * 3) 둘 다 없으면 fingerprint 기반(내용 사용 SSOT)
- * 4) 그래도 없으면 seedId 기반(창고별 사용 추적용)
+ * recordKey 규칙
  */
 function makeRecordKey({ pageId, slug, fingerprint, seedId }) {
   const s = safeStr(slug).trim();
@@ -88,15 +82,6 @@ function makeRecordKey({ pageId, slug, fingerprint, seedId }) {
   throw new Error('makeRecordKey: pageId/slug/fingerprint/seedId 모두 없음');
 }
 
-/**
- * Index 구조(경량)
- * {
- *   "version": 4,
- *   "updatedAt": "ISO",
- *   "offsetByKey": { "pid:page000123": 12345, "slug:abc": 67890, ... },
- *   "alias": { "slug:abc": "pid:page000123", ... }
- * }
- */
 function loadIndex() {
   try {
     if (!fs.existsSync(INDEX_FILE)) {
@@ -107,17 +92,16 @@ function loadIndex() {
         alias: {},
       };
     }
+
     const raw = fs.readFileSync(INDEX_FILE, 'utf8');
     const json = JSON.parse(raw);
-    if (!json || typeof json !== 'object') throw new Error('bad index json');
 
     if (!json.offsetByKey || typeof json.offsetByKey !== 'object') json.offsetByKey = {};
     if (!json.alias || typeof json.alias !== 'object') json.alias = {};
 
-    // 구버전 호환: usedFingerprints 필드는 무시
     delete json.usedFingerprints;
-
     json.version = 4;
+
     return json;
   } catch {
     return rebuildIndex();
@@ -129,13 +113,11 @@ function saveIndex(index) {
   index.updatedAt = nowIso();
   index.version = 4;
   delete index.usedFingerprints;
+
   fs.writeFileSync(TMP_INDEX_FILE, JSON.stringify(index, null, 2) + '\n', 'utf8');
   fs.renameSync(TMP_INDEX_FILE, INDEX_FILE);
 }
 
-/**
- * 특정 offset에서 "한 줄" 읽기 (JSONL)
- */
 function readLineAtOffset(filePath, offset) {
   const fd = fs.openSync(filePath, 'r');
   try {
@@ -147,6 +129,7 @@ function readLineAtOffset(filePath, offset) {
 
     let pos = offset;
     let acc = '';
+
     while (pos < stat.size) {
       const toRead = Math.min(CHUNK, stat.size - pos);
       const n = fs.readSync(fd, buf, 0, toRead, pos);
@@ -154,10 +137,12 @@ function readLineAtOffset(filePath, offset) {
 
       const s = buf.toString('utf8', 0, n);
       const idx = s.indexOf('\n');
+
       if (idx >= 0) {
         acc += s.slice(0, idx);
         break;
       }
+
       acc += s;
       pos += n;
 
@@ -172,70 +157,41 @@ function readLineAtOffset(filePath, offset) {
     } catch {
       return null;
     }
+
   } finally {
     fs.closeSync(fd);
   }
 }
 
-/**
- * recordKey로 "현재 최신 상태" 읽기
- * - alias 처리: slugKey가 pidKey로 연결되면 pidKey 우선
- */
 function getLatestByKey(recordKey, index) {
   if (!recordKey) return null;
+
   const aliasTo = index.alias && index.alias[recordKey] ? index.alias[recordKey] : null;
   const rk = aliasTo || recordKey;
 
   const off = index.offsetByKey && typeof index.offsetByKey[rk] === 'number'
     ? index.offsetByKey[rk]
     : null;
+
   if (off === null) return null;
   if (!fs.existsSync(LEDGER_FILE)) return null;
 
   return readLineAtOffset(LEDGER_FILE, off);
 }
 
-/**
- * 하위 호환용 fingerprint 조회
- * - 더 이상 index.usedFingerprints 를 쓰지 않음
- * - ledger를 뒤에서부터 훑는 느린 방식
- * - 빠른 조회/중복 판정은 fp-cache 사용 권장
- */
-function hasFingerprint(fingerprint) {
-  const fp = normalizeFingerprint(fingerprint);
-  if (!fp) return false;
-  if (!fs.existsSync(LEDGER_FILE)) return false;
-
-  const lines = fs.readFileSync(LEDGER_FILE, 'utf8').split('\n').filter(Boolean);
-  for (let i = lines.length - 1; i >= 0; i--) {
-    try {
-      const obj = JSON.parse(lines[i]);
-      if (normalizeFingerprint(obj && obj.fingerprint) === fp) return true;
-    } catch {}
-  }
-  return false;
-}
-
-/**
- * Ledger append (1줄)
- * - return: appended offset
- */
 function appendRecord(obj) {
   ensureDir(LOGS_DIR);
 
   const line = JSON.stringify(obj) + '\n';
   const offset = fs.existsSync(LEDGER_FILE) ? fs.statSync(LEDGER_FILE).size : 0;
+
   fs.appendFileSync(LEDGER_FILE, line, 'utf8');
+
   return offset;
 }
 
-/**
- * 인덱스 재구축(최후 수단)
- * - ledger 전체 스캔하여 recordKey별 마지막 offset 저장
- * - alias만 재구축
- * - fingerprint 대량 인덱싱 책임은 여기서 제거
- */
 function rebuildIndex() {
+
   ensureDir(LOGS_DIR);
 
   const index = {
@@ -251,7 +207,9 @@ function rebuildIndex() {
   }
 
   const fd = fs.openSync(LEDGER_FILE, 'r');
+
   try {
+
     const stat = fs.fstatSync(fd);
     const CHUNK = 256 * 1024;
     const buf = Buffer.alloc(CHUNK);
@@ -260,6 +218,7 @@ function rebuildIndex() {
     let carry = '';
 
     while (offset < stat.size) {
+
       const n = fs.readSync(fd, buf, 0, Math.min(CHUNK, stat.size - offset), offset);
       if (n <= 0) break;
 
@@ -268,15 +227,21 @@ function rebuildIndex() {
       carry = parts.pop() || '';
 
       let byteCursor = offset;
+
       for (let i = 0; i < parts.length; i++) {
+
         const rawLine = parts[i];
         const line = rawLine.trim();
         const lineBytes = Buffer.byteLength(rawLine + '\n', 'utf8');
 
         if (line) {
+
           try {
+
             const obj = JSON.parse(line);
+
             if (obj && typeof obj === 'object') {
+
               if (typeof obj.recordKey === 'string' && obj.recordKey) {
                 index.offsetByKey[obj.recordKey] = byteCursor;
               }
@@ -284,31 +249,21 @@ function rebuildIndex() {
               if (obj.alias && typeof obj.alias === 'object') {
                 Object.assign(index.alias, obj.alias);
               }
+
             }
+
           } catch {}
+
         }
 
         byteCursor += lineBytes;
+
       }
 
       offset += n;
+
     }
 
-    const last = carry.trim();
-    if (last) {
-      try {
-        const obj = JSON.parse(last);
-        if (obj && typeof obj === 'object') {
-          const approxOff = Math.max(0, stat.size - Buffer.byteLength(last, 'utf8'));
-          if (typeof obj.recordKey === 'string' && obj.recordKey) {
-            index.offsetByKey[obj.recordKey] = approxOff;
-          }
-          if (obj.alias && typeof obj.alias === 'object') {
-            Object.assign(index.alias, obj.alias);
-          }
-        }
-      } catch {}
-    }
   } finally {
     fs.closeSync(fd);
   }
@@ -317,16 +272,8 @@ function rebuildIndex() {
   return index;
 }
 
-/**
- * 업서트(멱등)
- * - 기존 record를 index로 O(1) 읽고, 병합한 "최신 상태"를 append
- * - slugKey -> pidKey 승격 시: alias(slugKey -> pidKey) 저장
- *
- * 확장:
- * - fingerprint/mode/usedAt 저장 가능
- * - recordKey는 pid/slug/fp/seed 우선순위로 생성
- */
 function upsert(patch) {
+
   if (!patch || typeof patch !== 'object') throw new Error('upsert: patch object 필요');
 
   const slug = safeStr(patch.slug).trim();
@@ -339,6 +286,7 @@ function upsert(patch) {
   const index = loadIndex();
 
   const slugKey = slug ? `slug:${slug}` : '';
+
   if (rk.startsWith('pid:') && slugKey) {
     index.alias[slugKey] = rk;
   }
@@ -383,12 +331,8 @@ function upsert(patch) {
     notes: patch.notes || base.notes || ''
   };
 
-  if (rk.startsWith('pid:') && slugKey) {
-    merged.alias = merged.alias && typeof merged.alias === 'object' ? merged.alias : {};
-    merged.alias[slugKey] = rk;
-  }
-
   const off = appendRecord(merged);
+
   index.offsetByKey[rk] = off;
 
   if (slugKey) {
@@ -399,14 +343,11 @@ function upsert(patch) {
   saveIndex(index);
 
   return { ledgerFile: LEDGER_FILE, indexFile: INDEX_FILE, recordKey: rk, offset: off };
+
 }
 
-/**
- * fingerprint 사용 처리(편의 함수)
- * - pageId/slug 없이도 기록 가능
- * - 실제 빠른 중복 조회 책임은 fp-cache 사용 권장
- */
 function markFingerprintUsed({ fingerprint, seedId, label, mode, usedAt, notes = '' }) {
+
   const fp = normalizeFingerprint(fingerprint);
   if (!fp) throw new Error('markFingerprintUsed: fingerprint missing');
 
@@ -415,23 +356,20 @@ function markFingerprintUsed({ fingerprint, seedId, label, mode, usedAt, notes =
   return upsert({
     fingerprint: fp,
     seedId: sid,
-
     label: safeStr(label).trim(),
     mode: normalizeMode(mode),
     usedAt: usedAt ? safeIsoOrNow(usedAt) : nowIso(),
-
     stage: 'seed',
     status: 'used',
     dryRun: true,
-
     notes: safeStr(notes).trim()
   });
+
 }
 
 module.exports = {
   upsert,
   makeRecordKey,
-  hasFingerprint,
   markFingerprintUsed,
   rebuildIndex,
   _paths: { ROOT, LOGS_DIR, LEDGER_FILE, INDEX_FILE }
