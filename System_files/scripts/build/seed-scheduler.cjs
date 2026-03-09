@@ -21,7 +21,7 @@
  * - evergreen 시드 고갈 감지 시 WARN 로그 출력
  *   (충전/대체/판단 로직은 refill 책임)
  *
- * [중요 수정(이번 패치)]
+ * [중요 수정(기존)]
  * - consume 레코드에 fingerprint를 반드시 기록한다.
  *   - warehouse seed에 fingerprint가 있으면 그대로 사용
  *   - 없으면 lib/fingerprint.cjs의 buildFingerprintFromSeed()로 생성해서 기록
@@ -29,6 +29,11 @@
  *   - ledger 기록도 안 함
  *   - shift도 안 함
  *   - 해당 슬롯만 스킵(전체 파이프라인 중단 방지)
+ *
+ * [이번 수정]
+ * - consume 성공 후 fp-cache에 used/map를 함께 기록한다.
+ * - seed-ledger는 장기 원장
+ * - fp-cache는 빠른 차단/추적 cache
  */
 
 require('./lib/env.cjs');
@@ -44,12 +49,20 @@ try {
   seedLedger = null;
 }
 
-// fingerprint 유틸(없어도 되지만, fingerprint 빈값 방지를 위해 사용)
+// fingerprint 유틸
 let fpUtil = null;
 try {
   fpUtil = require('./lib/fingerprint.cjs');
 } catch {
   fpUtil = null;
+}
+
+// fp-cache 유틸
+let fpCache = null;
+try {
+  fpCache = require('./lib/fp-cache.cjs');
+} catch {
+  fpCache = null;
 }
 
 const ROOT = path.resolve(__dirname, '..', '..'); // System_files
@@ -183,7 +196,6 @@ function ensureFingerprint(seed) {
   const have = String(seed.fingerprint || '').trim();
   if (have) return have;
 
-  // ✅ 옹스님이 제공한 fingerprint.cjs 기준: buildFingerprintFromSeed 가 정답 export
   if (fpUtil && typeof fpUtil.buildFingerprintFromSeed === 'function') {
     try {
       const fp = fpUtil.buildFingerprintFromSeed(seed);
@@ -239,13 +251,10 @@ function popNextFromWarehouse(label, mode, usedIds, todayStr) {
 
     const picked = head;
 
-    // ✅ fingerprint 확보(warehouse에 없으면 생성)
+    // fingerprint 확보
     const fp = ensureFingerprint(picked);
 
-    // ✅ fp가 끝내 비면: "소비 자체를 중단"이 아니라, "해당 슬롯만 스킵"
-    // - ledger 기록 X
-    // - shift X
-    // - today.json에서도 이 슬롯은 빠짐
+    // fp가 비면 이 슬롯만 스킵
     if (!fp) {
       warn(
         `[fingerprint] empty -> skip slot (no ledger, no shift): label=${label}, mode=${mode}, id=${picked.id}`
@@ -253,10 +262,11 @@ function popNextFromWarehouse(label, mode, usedIds, todayStr) {
       return null;
     }
 
-    // ledger 기록(제거 전에)
+    // 1) seed-ledger 기록(제거 전에)
+    let ledgerResult = null;
     if (seedLedger && typeof seedLedger.upsert === 'function') {
       try {
-        seedLedger.upsert({
+        ledgerResult = seedLedger.upsert({
           label,
           mode,
           seedId: picked.id,
@@ -268,17 +278,36 @@ function popNextFromWarehouse(label, mode, usedIds, todayStr) {
           usedAt: new Date().toISOString(),
         });
       } catch (e) {
-        // 옹스님 원칙: 기록 후 제거. 기록 실패 시 제거하면 안 됨 → 여기서 중단.
         fatal(`[ledger] upsert failed: ${e.message}`);
       }
     } else {
       fatal('seed-ledger.cjs not available: cannot record before consuming.');
     }
 
-    // 제거(shift)
+    // 2) fp-cache 기록(제거 전에)
+    if (fpCache && typeof fpCache.markUsedAndMap === 'function') {
+      try {
+        fpCache.markUsedAndMap({
+          fingerprint: fp,
+          recordKey: ledgerResult && ledgerResult.recordKey ? ledgerResult.recordKey : `seed:${picked.id}`,
+          label,
+          mode,
+          seedId: picked.id,
+          usedAt: new Date().toISOString(),
+          offset: ledgerResult && typeof ledgerResult.offset === 'number' ? ledgerResult.offset : null,
+        });
+      } catch (e) {
+        // 원칙상 기록 후 제거이므로 cache 기록 실패도 제거 전 중단
+        fatal(`[fp-cache] markUsedAndMap failed: ${e.message}`);
+      }
+    } else {
+      fatal('fp-cache.cjs not available: cannot record fingerprint cache before consuming.');
+    }
+
+    // 3) 제거(shift)
     arr.shift();
 
-    // 저장
+    // 4) 저장
     data[arrName] = arr;
     writeJsonAtomic(file, data);
 
@@ -319,15 +348,15 @@ function popNextFromWarehouse(label, mode, usedIds, todayStr) {
 
     items.push({
       date: todayStr,
-      label: slotLabel,      // 슬롯 라벨 유지
-      seedLabel: slotLabel,  // 현재는 동일(확장 여지 유지)
+      label: slotLabel,
+      seedLabel: slotLabel,
       mode: preferredMode,
       id: picked.id,
       title: picked.title,
       angle: picked.angle || '',
       audience: picked.audience || '',
       intent: picked.intent || '',
-      priority: picked.priority ?? 0, // 기존 출력 필드 유지 (필드 삭제 금지)
+      priority: picked.priority ?? 0,
       notes: picked.notes || '',
     });
   }
