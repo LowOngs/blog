@@ -465,14 +465,6 @@ function main() {
       continue;
     }
 
-    // 1) bodyPrompt 없으면 스킵(현 구조상 프롬프트 없는 글은 생성 대상 아님)
-    //    단, 옹스님 정책에 따라 향후 "프롬프트 없이도 H2만 생성"으로 바꿀 수 있음.
-    if (!post.bodyPrompt) {
-      console.log(`[SKIP] ${slug} — bodyPrompt 없음`);
-      skipped++;
-      continue;
-    }
-
     // 2) label이 없으면 STRICT에서 실패(중제목 정책이 라벨 기반이기 때문)
     if (!label) {
       const msg = `label 누락: slug=${slug} (post.label 또는 post.labels 또는 seedMeta.label 필요)`;
