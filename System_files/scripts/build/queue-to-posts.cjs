@@ -98,12 +98,53 @@ function isReviewLabel(label) {
 
 /* ============================================================
  * profileId 매핑
+ * [2-b-5] labels.json 고정 의존 완화
+ * - labels.json 직접 매핑 지원
+ * - label-profiles.json 의 appliesTo 구조도 흡수
  * ============================================================ */
 const SEEDPOOL_DIR = path.join(ROOT, 'seedpool');
 const PROFILES_DIR = path.join(SEEDPOOL_DIR, 'profiles');
 const LABELS_FILE = path.join(PROFILES_DIR, 'labels.json');
+const LABEL_PROFILES_FILE = path.join(PROFILES_DIR, 'label-profiles.json');
 
-const LABEL_TO_PROFILE_ID = readJsonSafe(LABELS_FILE, {});
+function buildLabelToProfileMap() {
+  const out = {};
+
+  // 1) direct mapping: { "app-reviews": "app_reviews_v1", ... }
+  const direct = readJsonSafe(LABELS_FILE, null);
+  if (direct && typeof direct === 'object' && !Array.isArray(direct)) {
+    for (const [k, v] of Object.entries(direct)) {
+      const label = String(k || '').trim();
+      const profileId = String(v || '').trim();
+      if (!label || !profileId) continue;
+      out[label] = profileId;
+    }
+  }
+
+  // 2) profile definition mapping:
+  // {
+  //   "review-common": { "appliesTo": ["app-reviews", ...], ... }
+  // }
+  const profileDefs = readJsonSafe(LABEL_PROFILES_FILE, null);
+  if (profileDefs && typeof profileDefs === 'object' && !Array.isArray(profileDefs)) {
+    for (const [profileId, def] of Object.entries(profileDefs)) {
+      const pid = String(profileId || '').trim();
+      if (!pid || !def || typeof def !== 'object') continue;
+
+      const appliesTo = Array.isArray(def.appliesTo) ? def.appliesTo : [];
+      for (const rawLabel of appliesTo) {
+        const label = String(rawLabel || '').trim();
+        if (!label) continue;
+        if (!out[label]) out[label] = pid; // direct mapping 우선
+      }
+    }
+  }
+
+  return out;
+}
+
+const LABEL_TO_PROFILE_ID = buildLabelToProfileMap();
+
 function getProfileIdForLabel(label) {
   const pid = LABEL_TO_PROFILE_ID[label];
   return pid ? String(pid) : null;
@@ -343,7 +384,7 @@ for (let i = 0; i < items.length; i++) {
       const idx = nextIndexFor(queueDate, label, issueSeq);
 
       try {
-        slug = buildSlug({label, yyyymmdd: ymd, index3: pad3(idx),});
+        slug = buildSlug({ label, yyyymmdd: ymd, index3: pad3(idx) });
       } catch {
         slug = `${canonicalPrefix}-${ymd}-${pad3(idx)}`;
       }
@@ -396,6 +437,11 @@ for (let i = 0; i < items.length; i++) {
       label,
       profileId,
       id: item.id || null,
+
+      // [2-b-6] scheduler 의 intent 의미 보존
+      intent: Object.prototype.hasOwnProperty.call(item, 'intent')
+        ? (item.intent == null ? null : String(item.intent).trim() || null)
+        : null,
 
       postId,
       reviewId,
