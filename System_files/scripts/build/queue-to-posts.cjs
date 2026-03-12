@@ -98,52 +98,46 @@ function isReviewLabel(label) {
 
 /* ============================================================
  * profileId 매핑
- * [2-b-5] labels.json 고정 의존 완화
- * - labels.json 직접 매핑 지원
- * - label-profiles.json 의 appliesTo 구조도 흡수
+ * [2-b-5] labels.json 단일 SSOT 확정
+ * - labels.json 만 신뢰한다.
+ * - label-profiles.json 은 프로필 정의 파일이며 매핑 대체재가 아니다.
+ * - labels.json 이 없거나 구조가 비정상이면 즉시 FATAL.
  * ============================================================ */
 const SEEDPOOL_DIR = path.join(ROOT, 'seedpool');
 const PROFILES_DIR = path.join(SEEDPOOL_DIR, 'profiles');
 const LABELS_FILE = path.join(PROFILES_DIR, 'labels.json');
-const LABEL_PROFILES_FILE = path.join(PROFILES_DIR, 'label-profiles.json');
 
-function buildLabelToProfileMap() {
-  const out = {};
-
-  // 1) direct mapping: { "app-reviews": "app_reviews_v1", ... }
-  const direct = readJsonSafe(LABELS_FILE, null);
-  if (direct && typeof direct === 'object' && !Array.isArray(direct)) {
-    for (const [k, v] of Object.entries(direct)) {
-      const label = String(k || '').trim();
-      const profileId = String(v || '').trim();
-      if (!label || !profileId) continue;
-      out[label] = profileId;
-    }
+function loadLabelToProfileMapStrict() {
+  if (!fs.existsSync(LABELS_FILE)) {
+    fatal(`profile 매핑 SSOT 없음: ${LABELS_FILE}`);
   }
 
-  // 2) profile definition mapping:
-  // {
-  //   "review-common": { "appliesTo": ["app-reviews", ...], ... }
-  // }
-  const profileDefs = readJsonSafe(LABEL_PROFILES_FILE, null);
-  if (profileDefs && typeof profileDefs === 'object' && !Array.isArray(profileDefs)) {
-    for (const [profileId, def] of Object.entries(profileDefs)) {
-      const pid = String(profileId || '').trim();
-      if (!pid || !def || typeof def !== 'object') continue;
+  let raw;
+  try {
+    raw = JSON.parse(fs.readFileSync(LABELS_FILE, 'utf8'));
+  } catch (e) {
+    fatal(`labels.json 파싱 실패: ${e.message || e}`);
+  }
 
-      const appliesTo = Array.isArray(def.appliesTo) ? def.appliesTo : [];
-      for (const rawLabel of appliesTo) {
-        const label = String(rawLabel || '').trim();
-        if (!label) continue;
-        if (!out[label]) out[label] = pid; // direct mapping 우선
-      }
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+    fatal(`labels.json 구조 비정상: object mapping 필요 (${LABELS_FILE})`);
+  }
+
+  const out = {};
+  for (const [k, v] of Object.entries(raw)) {
+    const label = String(k || '').trim();
+    const profileId = String(v || '').trim();
+    if (!label) continue;
+    if (!profileId) {
+      fatal(`labels.json profileId 비정상: label=${label}`);
     }
+    out[label] = profileId;
   }
 
   return out;
 }
 
-const LABEL_TO_PROFILE_ID = buildLabelToProfileMap();
+const LABEL_TO_PROFILE_ID = loadLabelToProfileMapStrict();
 
 function getProfileIdForLabel(label) {
   const pid = LABEL_TO_PROFILE_ID[label];
@@ -302,7 +296,7 @@ function nextIndexFor(dateYYYYMMDD, label, seq) {
 
 /* ============================================================
  * (재실행 안정화) 기존 post 재사용 탐색
- * - 같은 seed(id) + queueDate + label 이 이미 있으면 slug/postId/reviewId를 그대로 사용
+ * - 같은 seed(id) + queueDate + label 이 이미 content/posts에 존재하면 slug/postId/reviewId를 그대로 사용
  * ============================================================ */
 function findExistingPostBySeed(queueDate, label, seedId) {
   const qd = String(queueDate || '').slice(0, 10);
@@ -384,7 +378,7 @@ for (let i = 0; i < items.length; i++) {
       const idx = nextIndexFor(queueDate, label, issueSeq);
 
       try {
-        slug = buildSlug({ label, yyyymmdd: ymd, index3: pad3(idx) });
+        slug = buildSlug({label, yyyymmdd: ymd, index3: pad3(idx),});
       } catch {
         slug = `${canonicalPrefix}-${ymd}-${pad3(idx)}`;
       }
@@ -418,7 +412,7 @@ for (let i = 0; i < items.length; i++) {
   }
 
   const profileId = getProfileIdForLabel(label);
-  if (!profileId) fatal(`profileId 없음: ${label}`);
+  if (!profileId) fatal(`profileId 없음: ${label} (labels.json SSOT 확인 필요)`);
 
   const doc = {
     postId,
@@ -438,7 +432,7 @@ for (let i = 0; i < items.length; i++) {
       profileId,
       id: item.id || null,
 
-      // [2-b-6] scheduler 의 intent 의미 보존
+      // [2-b-6] scheduler intent 의미 보존
       intent: Object.prototype.hasOwnProperty.call(item, 'intent')
         ? (item.intent == null ? null : String(item.intent).trim() || null)
         : null,
