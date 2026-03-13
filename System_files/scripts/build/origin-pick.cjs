@@ -8,7 +8,7 @@ const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..', '..'); // System_files
 const POOL_PATH = path.join(ROOT, 'seedpool', 'origin', 'origin-pool.json');
-const USED_PATH = path.join(ROOT, 'logs', 'origin-used.json');
+const USED_PATH = path.join(ROOT, 'seedpool', 'origin', 'origin-used.json');
 const OUT_DIR = path.join(ROOT, 'dist', 'queue');
 const OUT_PATH = path.join(OUT_DIR, 'origin-today.json');
 
