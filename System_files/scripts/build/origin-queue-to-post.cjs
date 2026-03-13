@@ -9,7 +9,7 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..', '..'); // System_files
 const QUEUE_PATH = path.join(ROOT, 'dist', 'queue', 'origin-today.json');
 const POSTS_DIR = path.join(ROOT, 'content', 'posts');
-const USED_PATH = path.join(ROOT, 'logs', 'origin-used.json');
+const USED_PATH = path.join(ROOT, 'seedpool', 'origin', 'origin-used.json');
 
 function ensureDir(dir) {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
@@ -27,6 +27,14 @@ function readJsonSafe(p, fallback) {
 function writeJson(p, obj) {
   ensureDir(path.dirname(p));
   fs.writeFileSync(p, JSON.stringify(obj, null, 2) + '\n', 'utf8');
+}
+
+function resolveUpdatedIsoKst() {
+  const now = new Date(Date.now() + 9 * 60 * 60 * 1000);
+  const yyyy = now.getUTCFullYear();
+  const mm = String(now.getUTCMonth() + 1).padStart(2, '0');
+  const dd = String(now.getUTCDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}T10:00:00+09:00`;
 }
 
 function main() {
@@ -48,23 +56,33 @@ function main() {
   const slug = String(q.seed.slug).trim();
   const outPath = path.join(POSTS_DIR, `${slug}.json`);
 
-  // ✅ 최소 필드만 생성 (과기능 제거)
-  // - body는 generate-body.cjs가 채우는 전제
+  // ✅ main posts 축에 최대한 맞춘 최소 구조
+  // - labels 배열 사용
+  // - bodyPrompt 추가
+  // - updated 추가
+  // - pageId는 여전히 ids.cjs 책임이므로 여기서 넣지 않음
   const post = {
     slug,
     title: q.seed.title,
-    label: 'firstgate', // 명함전략 고정 (라벨 힌트는 seedMeta로 보관)
-    description: '',
+    labels: ['firstgate'],
+    updated: resolveUpdatedIsoKst(),
+
+    bodyPrompt: '',
     body: '',
+
+    description: '',
     aio: {
       tldr: q.seed.tldrHints || [],
       keyfacts: [],
       faq: [],
       sources: []
     },
+
     seedMeta: {
       kind: 'origin',
+      label: 'firstgate',
       seedId: q.seed.seedId,
+      id: q.seed.seedId,
       labelHint: q.seed.labelHint || '',
       intent: q.seed.intent || '',
       trustClaims: q.seed.trustClaims || [],
@@ -82,7 +100,7 @@ function main() {
     console.log('[origin-queue-to-post] ✓ created ->', outPath);
   }
 
-  // 사용 처리(재선정 방지) - "생성 성공/이미 존재" 모두 used 처리(오리진은 고정자산이므로)
+  // 사용 처리(재선정 방지) - "생성 성공/이미 존재" 모두 used 처리
   const used = readJsonSafe(USED_PATH, { usedSeedIds: [] });
   const arr = Array.isArray(used.usedSeedIds) ? used.usedSeedIds : [];
   if (!arr.includes(q.seed.seedId)) arr.push(q.seed.seedId);
