@@ -246,7 +246,7 @@ function writeExpandedSnapshot(queueObj, expandedItems) {
   try {
     const expanded = {
       ...queueObj,
-      expandedAt: new Date().toISOString(),
+      expandedAt: new Date().toISOString(),  // 운영시간(KST), 시스템 기록시간(UTC) 각각 사용
       items: expandedItems,
     };
     fs.writeFileSync(QUEUE_EXPANDED_FILE, JSON.stringify(expanded, null, 2) + '\n', 'utf8');
