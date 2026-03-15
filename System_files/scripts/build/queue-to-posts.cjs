@@ -240,13 +240,13 @@ function ulidNow() {
 }
 
 /* ============================================================
- * today.expanded.json (실행 스냅샷)
+ * today.expanded.json (실행 스냅샷), 운영시간(KST), 시스템 기록시간(UTC) 각각 사용
  * ============================================================ */
 function writeExpandedSnapshot(queueObj, expandedItems) {
   try {
     const expanded = {
       ...queueObj,
-      expandedAt: new Date().toISOString(),  // 운영시간(KST), 시스템 기록시간(UTC) 각각 사용
+      expandedAt: new Date().toISOString(),  
       items: expandedItems,
     };
     fs.writeFileSync(QUEUE_EXPANDED_FILE, JSON.stringify(expanded, null, 2) + '\n', 'utf8');
