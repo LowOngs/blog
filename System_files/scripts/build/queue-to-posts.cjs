@@ -50,7 +50,7 @@ const {
 const ROOT = path.resolve(__dirname, '..', '..'); // System_files
 const QUEUE_DIR = path.join(ROOT, 'dist', 'queue');
 const QUEUE_FILE = path.join(QUEUE_DIR, 'today.json'); // 입력 SSOT
-const QUEUE_EXPANDED_FILE = path.join(QUEUE_DIR, 'today.expanded.json'); // 실행 스냅샷(SSOT 아님)
+const QUEUE_EXPANDED_FILE = path.join(QUEUE_DIR, 'today.expanded.json'); // 실행 스냅샷(SSOT 관문)
 
 const CONTENT_DIR = path.join(ROOT, 'content', 'posts'); // 출력 SSOT
 fs.mkdirSync(CONTENT_DIR, { recursive: true });
