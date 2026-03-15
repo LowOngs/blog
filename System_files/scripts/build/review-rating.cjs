@@ -112,7 +112,7 @@ function main() {
 
     const existed = bySlug[slug] && typeof bySlug[slug] === 'object' ? bySlug[slug] : {};
 
-    // ✅ 기존 histogram/insights 보존
+    // 기존 histogram/insights 보존
     const next = {
       ...existed,
       lastChecked: toIso(latest.date),
@@ -128,7 +128,6 @@ function main() {
       ratingDiff,
       votesDiff,
 
-      // histogram/insights는 기존 값 유지(없으면 그대로 없음)
       histogram: existed.histogram || null,
       insights: Array.isArray(existed.insights) ? existed.insights : [],
       source: item.source || existed.source || 'manual',
@@ -143,11 +142,10 @@ function main() {
     }
   }
 
+  // 🔧 SSOT 상단 구조 통일 (meta 제거 → root updatedAt)
   const out = {
-    meta: {
-      updatedAt: new Date().toISOString(),
-      source: 'review-rating.cjs',
-    },
+    updatedAt: new Date().toISOString(),
+    source: 'review-rating.cjs',
     bySlug,
   };
 
