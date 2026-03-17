@@ -55,6 +55,89 @@ function uniq(arr) {
   return Array.from(new Set((arr || []).filter(Boolean)));
 }
 
+function inferBucketFromSlug(slug) {
+  const s = String(slug || '').trim().toLowerCase();
+  if (!s) return '';
+  if (s.startsWith('app-')) return 'app';
+  if (s.startsWith('device-')) return 'device';
+  if (s.startsWith('subscription-')) return 'subscription';
+  return '';
+}
+
+function normalizeBucket(v) {
+  const s = String(v || '').trim().toLowerCase();
+  if (s === 'app' || s === 'device' || s === 'subscription') return s;
+  return '';
+}
+
+function normalizeClass(v) {
+  const s = String(v || '').trim();
+  if (!s) return '';
+  return s;
+}
+
+function collectDueItems(due) {
+  const items = [];
+
+  // 케이스1: { items:[...] }
+  if (Array.isArray(due.items)) {
+    for (const it of due.items) {
+      if (it && typeof it === 'object') items.push({ ...it });
+    }
+  }
+
+  // 케이스2: { byBucket:{ app:[...], device:[...], subscription:[...] } }
+  if (due.byBucket && typeof due.byBucket === 'object') {
+    for (const b of Object.keys(due.byBucket)) {
+      const arr = due.byBucket[b];
+      if (!Array.isArray(arr)) continue;
+      for (const x of arr) {
+        if (x && typeof x === 'object') {
+          items.push({ ...x, bucket: x.bucket || b });
+        }
+      }
+    }
+  }
+
+  // 케이스3: { flat:{ overdue:[...], dueSoon:[...], ok:[...], unknown:[...] } }
+  if (due.flat && typeof due.flat === 'object') {
+    for (const cls of ['overdue', 'dueSoon', 'ok', 'unknown']) {
+      const arr = due.flat[cls];
+      if (!Array.isArray(arr)) continue;
+      for (const x of arr) {
+        if (x && typeof x === 'object') {
+          items.push({ ...x, class: x.class || cls });
+        }
+      }
+    }
+  }
+
+  // 케이스4: { buckets:{ app:{ overdue:[...], dueSoon:[...] ... }, ... } }
+  if (due.buckets && typeof due.buckets === 'object') {
+    for (const b of Object.keys(due.buckets)) {
+      const group = due.buckets[b];
+      if (!group || typeof group !== 'object') continue;
+
+      for (const cls of ['overdue', 'dueSoon', 'ok', 'unknown']) {
+        const arr = group[cls];
+        if (!Array.isArray(arr)) continue;
+
+        for (const x of arr) {
+          if (x && typeof x === 'object') {
+            items.push({
+              ...x,
+              bucket: x.bucket || b,
+              class: x.class || cls,
+            });
+          }
+        }
+      }
+    }
+  }
+
+  return items;
+}
+
 function main() {
   console.log('────────────────────────────────────────────');
   console.log('[review-next] ROOT       =', ROOT);
@@ -73,60 +156,37 @@ function main() {
     process.exit(0);
   }
 
-  // 🔧 수정: due 구조 확장 지원 (flat / buckets 포함)
-  const items = [];
-
-  // 기존 케이스 유지
-  if (Array.isArray(due.items)) {
-    for (const it of due.items) items.push(it);
-  } else if (due.byBucket && typeof due.byBucket === 'object') {
-    for (const b of Object.keys(due.byBucket)) {
-      const arr = due.byBucket[b];
-      if (Array.isArray(arr)) {
-        for (const x of arr) items.push({ ...x, bucket: x.bucket || b });
-      }
-    }
-  }
-
-  // 🔧 추가: flat 구조 지원
-  if (due.flat && typeof due.flat === 'object') {
-    for (const cls of ['overdue', 'dueSoon']) {
-      const arr = due.flat[cls];
-      if (Array.isArray(arr)) {
-        for (const x of arr) items.push({ ...x, class: cls });
-      }
-    }
-  }
-
-  // 🔧 추가: buckets 구조 지원
-  if (due.buckets && typeof due.buckets === 'object') {
-    for (const b of Object.keys(due.buckets)) {
-      const group = due.buckets[b];
-      if (!group) continue;
-      for (const cls of ['overdue', 'dueSoon']) {
-        const arr = group[cls];
-        if (Array.isArray(arr)) {
-          for (const x of arr) {
-            items.push({ ...x, bucket: x.bucket || b, class: cls });
-          }
-        }
-      }
-    }
-  }
+  const rawItems = collectDueItems(due);
+  console.log(`[review-next] collected items = ${rawItems.length}`);
 
   const picked = { app: [], device: [], subscription: [] };
 
-  for (const it of items) {
-    const bucket = String(it.bucket || '').trim();
-    const slug = String(it.slug || '').trim();
-    if (!bucket || !slug) continue;
-    if (!picked[bucket]) continue;
+  let ignoredNoSlug = 0;
+  let ignoredNoBucket = 0;
+  let ignoredClass = 0;
 
-    // 🔧 수정: class 기준으로 필터링
-    const cls = String(it.class || '').trim();
+  for (const it of rawItems) {
+    const slug = String(it && it.slug ? it.slug : '').trim();
+    if (!slug) {
+      ignoredNoSlug++;
+      continue;
+    }
 
+    let bucket = normalizeBucket(it.bucket);
+    if (!bucket) bucket = inferBucketFromSlug(slug);
+    if (!bucket || !picked[bucket]) {
+      ignoredNoBucket++;
+      continue;
+    }
+
+    // 우선 class 사용, 없으면 status도 보조 허용
+    const cls = normalizeClass(it.class || it.status);
+
+    // overdue / dueSoon / due 만 next 큐에 올림
     if (cls === 'overdue' || cls === 'dueSoon' || cls === 'due') {
       picked[bucket].push(slug);
+    } else {
+      ignoredClass++;
     }
   }
 
@@ -144,11 +204,16 @@ function main() {
     let next = ensureBySlug(readJsonSafe(nextPath, { bySlug: {} }));
 
     let wrote = 0;
+    let missingBaseline = 0;
 
     for (const slug of slugs) {
       const baseRec = baseline.bySlug[slug];
-      if (!baseRec || typeof baseRec !== 'object') continue;
+      if (!baseRec || typeof baseRec !== 'object') {
+        missingBaseline++;
+        continue;
+      }
 
+      // next에 넣을 레코드 (baseline 복제 + status 보정)
       const cloned = JSON.parse(JSON.stringify(baseRec));
       if (!cloned.status) cloned.status = 'due';
 
@@ -164,13 +229,14 @@ function main() {
     if (wrote > 0) {
       writeJsonPretty(nextPath, next);
       totalWritten += wrote;
-      console.log(`[review-next] (${bucket}) next 갱신: ${nextPath} wrote=${wrote}`);
+      console.log(`[review-next] (${bucket}) next 갱신: ${nextPath} wrote=${wrote} missingBaseline=${missingBaseline}`);
     } else {
-      console.log(`[review-next] (${bucket}) 변경 없음 (queued=${slugs.length})`);
+      console.log(`[review-next] (${bucket}) 변경 없음 (queued=${slugs.length}, missingBaseline=${missingBaseline})`);
     }
   }
 
   console.log('────────────────────────────────────────────');
+  console.log(`[review-next] ignored(noSlug)=${ignoredNoSlug} ignored(noBucket)=${ignoredNoBucket} ignored(class)=${ignoredClass}`);
   console.log(`[review-next] queued(total)=${totalQueued} | wrote(total)=${totalWritten}`);
   console.log('[review-next] 다음 순서: review-diff-update.cjs → review-resolver.cjs → render-posts.cjs');
   console.log('────────────────────────────────────────────');
