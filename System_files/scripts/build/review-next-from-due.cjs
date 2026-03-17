@@ -73,10 +73,10 @@ function main() {
     process.exit(0);
   }
 
-  // due 파일 포맷 유연 처리
-  // - 케이스1: { items:[{bucket,slug,status,...}] }
-  // - 케이스2: { byBucket:{ app:[...], device:[...], subscription:[...] } }
+  // 🔧 수정: due 구조 확장 지원 (flat / buckets 포함)
   const items = [];
+
+  // 기존 케이스 유지
   if (Array.isArray(due.items)) {
     for (const it of due.items) items.push(it);
   } else if (due.byBucket && typeof due.byBucket === 'object') {
@@ -88,15 +88,44 @@ function main() {
     }
   }
 
+  // 🔧 추가: flat 구조 지원
+  if (due.flat && typeof due.flat === 'object') {
+    for (const cls of ['overdue', 'dueSoon']) {
+      const arr = due.flat[cls];
+      if (Array.isArray(arr)) {
+        for (const x of arr) items.push({ ...x, class: cls });
+      }
+    }
+  }
+
+  // 🔧 추가: buckets 구조 지원
+  if (due.buckets && typeof due.buckets === 'object') {
+    for (const b of Object.keys(due.buckets)) {
+      const group = due.buckets[b];
+      if (!group) continue;
+      for (const cls of ['overdue', 'dueSoon']) {
+        const arr = group[cls];
+        if (Array.isArray(arr)) {
+          for (const x of arr) {
+            items.push({ ...x, bucket: x.bucket || b, class: cls });
+          }
+        }
+      }
+    }
+  }
+
   const picked = { app: [], device: [], subscription: [] };
+
   for (const it of items) {
     const bucket = String(it.bucket || '').trim();
     const slug = String(it.slug || '').trim();
     if (!bucket || !slug) continue;
     if (!picked[bucket]) continue;
-    // overdue 또는 dueSoon만 next로 올림 (ok는 제외)
-    const status = String(it.status || '').trim();
-    if (status === 'overdue' || status === 'dueSoon' || status === 'due') {
+
+    // 🔧 수정: class 기준으로 필터링
+    const cls = String(it.class || '').trim();
+
+    if (cls === 'overdue' || cls === 'dueSoon' || cls === 'due') {
       picked[bucket].push(slug);
     }
   }
@@ -120,7 +149,6 @@ function main() {
       const baseRec = baseline.bySlug[slug];
       if (!baseRec || typeof baseRec !== 'object') continue;
 
-      // next에 넣을 레코드 (baseline 복제 + status 보정)
       const cloned = JSON.parse(JSON.stringify(baseRec));
       if (!cloned.status) cloned.status = 'due';
 
