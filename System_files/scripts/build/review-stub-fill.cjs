@@ -14,6 +14,11 @@
  * - slug 우선 매칭 유지
  * - slug가 달라져도 reviewId가 같으면 기존 엔트리를 찾아 재사용
  * - 실제 생성/보강이 발생했을 때만 updatedAt 갱신
+ *
+ * ✅ orphan 정리:
+ * - posts SSOT에 없는 리뷰 slug는 이 파일이 직접 관리하는 reviews 파일 범위에서 제거
+ * - 삭제 대상: app/device/subscription ratings/next/insights + review-sources
+ * - 최종 병합 산출물(review-ratings*.json)은 이 파일 책임 범위 밖이라 건드리지 않음
  */
 
 // ✅ 로컬/CI 공통: .env 로드(필수)
@@ -112,6 +117,23 @@ function findExistingSlugByReviewId(bySlug, reviewId) {
     }
   }
   return null;
+}
+
+// ────────────────────────────────────
+//  What: bySlug 내 orphan review slug 제거
+//  Why : posts SSOT에 없는 잔존 엔트리를 정리해 로그 오염과 구조 혼선을 방지
+//  I/O : W(content/reviews/*.json)
+//  Invariants: review slug만 제거, 비리뷰 키는 유지
+// ────────────────────────────────────
+function pruneOrphanReviewEntries(bySlug, keepSlugSet) {
+  let removed = 0;
+  for (const slug of Object.keys(bySlug || {})) {
+    if (!isReviewSlug(slug)) continue;
+    if (keepSlugSet.has(slug)) continue;
+    delete bySlug[slug];
+    removed++;
+  }
+  return removed;
 }
 
 // ────────────────────────────────────
@@ -289,6 +311,7 @@ function listReviewPosts() {
 function main() {
   const ymd = nowYmdKst();
   const reviewPosts = listReviewPosts();
+  const keepSlugSet = new Set(reviewPosts.map((x) => x.slug));
 
   // ────────────────────────────────────
   //  What: 대상 파일 경로 고정
@@ -331,6 +354,34 @@ function main() {
 
   let created = 0;
   let changedAny = false;
+  let pruned = 0;
+
+  // ────────────────────────────────────
+  //  What: orphan 리뷰 엔트리 정리
+  //  Why : posts SSOT 기준으로 고립 엔트리를 제거해 로그 오염 방지
+  //  I/O : W(content/reviews/*.json)
+  //  Invariants: 직접 관리하는 파일 범위에서만 제거
+  // ────────────────────────────────────
+  const pruneTargets = [
+    appRatings.bySlug,
+    appRatingsNext.bySlug,
+    appInsights.bySlug,
+    deviceRatings.bySlug,
+    deviceRatingsNext.bySlug,
+    deviceInsights.bySlug,
+    subscriptionRatings.bySlug,
+    subscriptionRatingsNext.bySlug,
+    subscriptionInsights.bySlug,
+    reviewSources.bySlug,
+  ];
+
+  for (const map of pruneTargets) {
+    const removed = pruneOrphanReviewEntries(map, keepSlugSet);
+    if (removed > 0) {
+      pruned += removed;
+      changedAny = true;
+    }
+  }
 
   // ────────────────────────────────────
   //  What: 리뷰 포스트별 stub 업서트
@@ -416,7 +467,7 @@ function main() {
 
   writeJson(paths.reviewSources, reviewSources);
 
-  console.log(`[review-stub-fill] slugs=${reviewPosts.length} createdOrFilled=${created} changed=${changedAny ? 1 : 0}`);
+  console.log(`[review-stub-fill] slugs=${reviewPosts.length} createdOrFilled=${created} pruned=${pruned} changed=${changedAny ? 1 : 0}`);
 }
 
 main();
