@@ -9,6 +9,11 @@
  * ✅ 업데이트: posts의 reviewId/postId를 읽어 stub에 함께 기록
  * - bySlug 엔트리는 유지(기존 파이프라인 호환)
  * - 각 엔트리에 reviewId/postId를 함께 저장(추후 “id 기반 매칭” 옵션 확대용)
+ *
+ * ✅ 안정형 보강:
+ * - slug 우선 매칭 유지
+ * - slug가 달라져도 reviewId가 같으면 기존 엔트리를 찾아 재사용
+ * - 실제 생성/보강이 발생했을 때만 updatedAt 갱신
  */
 
 // ✅ 로컬/CI 공통: .env 로드(필수)
@@ -92,21 +97,57 @@ function ensureMaps(obj) {
 }
 
 // ────────────────────────────────────
+//  What: reviewId 기반 기존 엔트리 탐색
+//  Why : slug 변경 시에도 기존 리뷰 엔트리를 재사용해 데이터 단절 방지
+//  I/O : 없음
+//  Invariants: reviewId 없으면 null 반환
+// ────────────────────────────────────
+function findExistingSlugByReviewId(bySlug, reviewId) {
+  const rid = reviewId ? String(reviewId) : '';
+  if (!rid) return null;
+
+  for (const [slug, entry] of Object.entries(bySlug || {})) {
+    if (entry && typeof entry === 'object' && String(entry.reviewId || '') === rid) {
+      return slug;
+    }
+  }
+  return null;
+}
+
+// ────────────────────────────────────
 //  What: Rating stub 업서트(없을 때만)
 //  Why : 히스토그램/인사이트 슬롯이 최소한의 구조를 항상 갖게 함
 //  I/O : W(content/reviews/*-ratings*.json)
 //  Invariants: 기존 엔트리는 절대 덮어쓰지 않음(필드 주입은 “없을 때만”)
 // ────────────────────────────────────
 function ensureRatingEntry(bySlug, slug, ids) {
-  const existing = bySlug[slug];
-  if (existing && typeof existing === 'object') {
-    // ✅ 기존 엔트리에 id 필드가 비어있으면 채움(내용 데이터는 유지)
-    if (!existing.reviewId && ids.reviewId) existing.reviewId = ids.reviewId;
-    if (!existing.postId && ids.postId) existing.postId = ids.postId;
-    return false;
+  let targetSlug = slug;
+  let existing = bySlug[targetSlug];
+
+  // ✅ slug 매칭 실패 시 reviewId 기반 fallback
+  if ((!existing || typeof existing !== 'object') && ids.reviewId) {
+    const matchedSlug = findExistingSlugByReviewId(bySlug, ids.reviewId);
+    if (matchedSlug) {
+      targetSlug = matchedSlug;
+      existing = bySlug[targetSlug];
+    }
   }
 
-  bySlug[slug] = {
+  if (existing && typeof existing === 'object') {
+    let changed = false;
+    // ✅ 기존 엔트리에 id 필드가 비어있으면 채움(내용 데이터는 유지)
+    if (!existing.reviewId && ids.reviewId) {
+      existing.reviewId = ids.reviewId;
+      changed = true;
+    }
+    if (!existing.postId && ids.postId) {
+      existing.postId = ids.postId;
+      changed = true;
+    }
+    return { created: false, changed };
+  }
+
+  bySlug[targetSlug] = {
     // ✅ 신규: 매칭키(중복보험)
     reviewId: ids.reviewId || null,
     postId: ids.postId || null,
@@ -127,7 +168,7 @@ function ensureRatingEntry(bySlug, slug, ids) {
     // ✅ 호환: 기존 review-meta-block가 읽는 insights 필드 유지
     insights: [],
   };
-  return true;
+  return { created: true, changed: true };
 }
 
 // ────────────────────────────────────
@@ -137,20 +178,40 @@ function ensureRatingEntry(bySlug, slug, ids) {
 //  Invariants: 기존 엔트리는 덮어쓰지 않음, id만 비면 채움
 // ────────────────────────────────────
 function ensureInsightsEntry(bySlug, slug, ids) {
-  const existing = bySlug[slug];
-  if (existing && typeof existing === 'object') {
-    if (!existing.reviewId && ids.reviewId) existing.reviewId = ids.reviewId;
-    if (!existing.postId && ids.postId) existing.postId = ids.postId;
-    if (!Array.isArray(existing.insights)) existing.insights = [];
-    return false;
+  let targetSlug = slug;
+  let existing = bySlug[targetSlug];
+
+  if ((!existing || typeof existing !== 'object') && ids.reviewId) {
+    const matchedSlug = findExistingSlugByReviewId(bySlug, ids.reviewId);
+    if (matchedSlug) {
+      targetSlug = matchedSlug;
+      existing = bySlug[targetSlug];
+    }
   }
 
-  bySlug[slug] = {
+  if (existing && typeof existing === 'object') {
+    let changed = false;
+    if (!existing.reviewId && ids.reviewId) {
+      existing.reviewId = ids.reviewId;
+      changed = true;
+    }
+    if (!existing.postId && ids.postId) {
+      existing.postId = ids.postId;
+      changed = true;
+    }
+    if (!Array.isArray(existing.insights)) {
+      existing.insights = [];
+      changed = true;
+    }
+    return { created: false, changed };
+  }
+
+  bySlug[targetSlug] = {
     reviewId: ids.reviewId || null,
     postId: ids.postId || null,
     insights: [],
   };
-  return true;
+  return { created: true, changed: true };
 }
 
 // ────────────────────────────────────
@@ -160,20 +221,40 @@ function ensureInsightsEntry(bySlug, slug, ids) {
 //  Invariants: 배열 유지, 메타는 객체로 감싸서 확장 가능하게
 // ────────────────────────────────────
 function ensureSourcesEntry(bySlug, slug, ids) {
-  const existing = bySlug[slug];
-  if (existing && typeof existing === 'object') {
-    if (!existing.reviewId && ids.reviewId) existing.reviewId = ids.reviewId;
-    if (!existing.postId && ids.postId) existing.postId = ids.postId;
-    if (!Array.isArray(existing.items)) existing.items = [];
-    return false;
+  let targetSlug = slug;
+  let existing = bySlug[targetSlug];
+
+  if ((!existing || typeof existing !== 'object') && ids.reviewId) {
+    const matchedSlug = findExistingSlugByReviewId(bySlug, ids.reviewId);
+    if (matchedSlug) {
+      targetSlug = matchedSlug;
+      existing = bySlug[targetSlug];
+    }
   }
 
-  bySlug[slug] = {
+  if (existing && typeof existing === 'object') {
+    let changed = false;
+    if (!existing.reviewId && ids.reviewId) {
+      existing.reviewId = ids.reviewId;
+      changed = true;
+    }
+    if (!existing.postId && ids.postId) {
+      existing.postId = ids.postId;
+      changed = true;
+    }
+    if (!Array.isArray(existing.items)) {
+      existing.items = [];
+      changed = true;
+    }
+    return { created: false, changed };
+  }
+
+  bySlug[targetSlug] = {
     reviewId: ids.reviewId || null,
     postId: ids.postId || null,
     items: [],
   };
-  return true;
+  return { created: true, changed: true };
 }
 
 // ────────────────────────────────────
@@ -249,6 +330,7 @@ function main() {
   const reviewSources = ensureMaps(readJson(paths.reviewSources, null));
 
   let created = 0;
+  let changedAny = false;
 
   // ────────────────────────────────────
   //  What: 리뷰 포스트별 stub 업서트
@@ -262,27 +344,41 @@ function main() {
     const b = bucketOf(slug);
 
     if (b === 'app') {
-      if (ensureRatingEntry(appRatings.bySlug, slug, ids)) created++;
-      if (ensureRatingEntry(appRatingsNext.bySlug, slug, ids)) created++;
-      if (ensureInsightsEntry(appInsights.bySlug, slug, ids)) created++;
+      const r1 = ensureRatingEntry(appRatings.bySlug, slug, ids);
+      const r2 = ensureRatingEntry(appRatingsNext.bySlug, slug, ids);
+      const r3 = ensureInsightsEntry(appInsights.bySlug, slug, ids);
+      if (r1.created) created++;
+      if (r2.created) created++;
+      if (r3.created) created++;
+      if (r1.changed || r2.changed || r3.changed) changedAny = true;
     } else if (b === 'device') {
-      if (ensureRatingEntry(deviceRatings.bySlug, slug, ids)) created++;
-      if (ensureRatingEntry(deviceRatingsNext.bySlug, slug, ids)) created++;
-      if (ensureInsightsEntry(deviceInsights.bySlug, slug, ids)) created++;
+      const r1 = ensureRatingEntry(deviceRatings.bySlug, slug, ids);
+      const r2 = ensureRatingEntry(deviceRatingsNext.bySlug, slug, ids);
+      const r3 = ensureInsightsEntry(deviceInsights.bySlug, slug, ids);
+      if (r1.created) created++;
+      if (r2.created) created++;
+      if (r3.created) created++;
+      if (r1.changed || r2.changed || r3.changed) changedAny = true;
     } else {
-      if (ensureRatingEntry(subscriptionRatings.bySlug, slug, ids)) created++;
-      if (ensureRatingEntry(subscriptionRatingsNext.bySlug, slug, ids)) created++;
-      if (ensureInsightsEntry(subscriptionInsights.bySlug, slug, ids)) created++;
+      const r1 = ensureRatingEntry(subscriptionRatings.bySlug, slug, ids);
+      const r2 = ensureRatingEntry(subscriptionRatingsNext.bySlug, slug, ids);
+      const r3 = ensureInsightsEntry(subscriptionInsights.bySlug, slug, ids);
+      if (r1.created) created++;
+      if (r2.created) created++;
+      if (r3.created) created++;
+      if (r1.changed || r2.changed || r3.changed) changedAny = true;
     }
 
-    if (ensureSourcesEntry(reviewSources.bySlug, slug, ids)) created++;
+    const rs = ensureSourcesEntry(reviewSources.bySlug, slug, ids);
+    if (rs.created) created++;
+    if (rs.changed) changedAny = true;
   }
 
   // ────────────────────────────────────
   //  What: updatedAt 갱신
-  //  Why : “이 스크립트 실행 시점” 기록
+  //  Why : 실제 변경이 있었을 때만 갱신하여 freshness 왜곡 방지
   //  I/O : W(content/reviews/*.json)
-  //  Invariants: 날짜만 갱신(데이터 내용은 보존)
+  //  Invariants: 데이터 변경 없으면 updatedAt도 유지
   // ────────────────────────────────────
   const allObjs = [
     appRatings,
@@ -296,7 +392,9 @@ function main() {
     subscriptionInsights,
     reviewSources,
   ];
-  for (const obj of allObjs) obj.updatedAt = ymd;
+  if (changedAny) {
+    for (const obj of allObjs) obj.updatedAt = ymd;
+  }
 
   // ────────────────────────────────────
   //  What: 파일 저장
@@ -318,7 +416,7 @@ function main() {
 
   writeJson(paths.reviewSources, reviewSources);
 
-  console.log(`[review-stub-fill] slugs=${reviewPosts.length} createdOrFilled=${created}`);
+  console.log(`[review-stub-fill] slugs=${reviewPosts.length} createdOrFilled=${created} changed=${changedAny ? 1 : 0}`);
 }
 
 main();
