@@ -16,6 +16,11 @@
  *    - posts SSOT(content/posts/{slug}.json)에서 reviewId를 읽음
  *    - SSOT(review-ratings.json)에 byReviewId가 있으면 먼저 찾고,
  *      없으면 기존 bySlug[slug]로 처리
+ *
+ * ✅ 구조 안정화(최소 수정)
+ * D) review-meta는 "빈 placeholder(review-block--empty)"일 때만 채운다.
+ *    - 이미 내용이 있는 review block은 절대 덮어쓰지 않음
+ *    - 후처리 우회 경로를 최소화하고 템플릿 뼈대 무결성을 지킨다
  */
 
 require('./lib/env.cjs'); // ✅ 공통 규칙: env 로더 최우선
@@ -25,7 +30,7 @@ const path = require('path');
 
 const ROOT = path.resolve(__dirname, '../..');
 const DIST_DIR = path.join(ROOT, 'dist', 'posts');
-const POSTS_DIR = path.join(ROOT, 'content', 'posts');          // ✅ 추가
+const POSTS_DIR = path.join(ROOT, 'content', 'posts');
 const DATA_DIR = path.join(ROOT, 'content', 'reviews');
 const RATINGS_PATH = path.join(DATA_DIR, 'review-ratings.json');
 
@@ -271,6 +276,15 @@ function getReviewIdForSlug(slug) {
   return rid ? String(rid) : null;
 }
 
+// ✅ 추가: 템플릿 기본 empty placeholder인지 판별
+function hasEmptyReviewPlaceholder(html, sectionId) {
+  const pattern = new RegExp(
+    `<section\\s+id="${sectionId}"[^>]*class="[^"]*review-block--empty[^"]*"[^>]*>[\\s\\S]*?<\\/section>`,
+    'i'
+  );
+  return pattern.test(html);
+}
+
 function main() {
   log('────────────────────────────────────────────');
   log('[review-meta] start');
@@ -281,7 +295,7 @@ function main() {
 
   const ratings = loadRatings();
   const bySlug = ratings.bySlug || {};
-  const byReviewId = ratings.byReviewId || {}; // ✅ 추가(없으면 {})
+  const byReviewId = ratings.byReviewId || {};
 
   if (!fs.existsSync(DIST_DIR)) {
     log('[review-meta] dist/posts does not exist. exit.');
@@ -295,8 +309,8 @@ function main() {
   let ratingMissing = 0;
   let slotMissing = 0;
   let skippedNonReview = 0;
+  let skippedFilled = 0;
 
-  // ✅ 추가 통계(선택)
   let matchedById = 0;
   let matchedBySlug = 0;
 
@@ -308,7 +322,6 @@ function main() {
       continue;
     }
 
-    // ✅ 1순위: reviewId 기반
     const reviewId = getReviewIdForSlug(slug);
     let ratingData = null;
 
@@ -337,16 +350,24 @@ function main() {
       continue;
     }
 
+    const canFillRating = hasRatingSlot && hasEmptyReviewPlaceholder(html, 'review-rating-block');
+    const canFillInsights = hasInsightsSlot && hasEmptyReviewPlaceholder(html, 'review-insights-block');
+
+    if (!canFillRating && !canFillInsights) {
+      skippedFilled += 1;
+      continue;
+    }
+
     let changed = false;
 
-    if (hasRatingSlot) {
+    if (canFillRating) {
       const ratingBlockHtml = buildRatingBlock(ratingData);
       const r1 = replaceSection(html, 'review-rating-block', ratingBlockHtml);
       html = r1.html;
       if (r1.changed) changed = true;
     }
 
-    if (hasInsightsSlot) {
+    if (canFillInsights) {
       const insightsBlockHtml = buildInsightsBlock(ratingData);
       const r2 = replaceSection(html, 'review-insights-block', insightsBlockHtml);
       html = r2.html;
@@ -360,7 +381,7 @@ function main() {
   }
 
   log('────────────────────────────────────────────');
-  log(`[review-meta] done: updated=${updatedCount}, ssot-missing=${ratingMissing}, slot-missing=${slotMissing}, skipped-non-review=${skippedNonReview}`);
+  log(`[review-meta] done: updated=${updatedCount}, ssot-missing=${ratingMissing}, slot-missing=${slotMissing}, skipped-filled=${skippedFilled}, skipped-non-review=${skippedNonReview}`);
   log(`[review-meta] match: byId=${matchedById}, bySlug=${matchedBySlug}`);
   log('────────────────────────────────────────────');
 }
