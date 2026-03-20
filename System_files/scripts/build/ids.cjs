@@ -15,6 +15,11 @@ require('./lib/env.cjs'); // ✅ .env 로드(필수)
  *
  * ✅ Seed Ledger(Min v1):
  * - pageId 발급/할당 시 logs/seed-ledger.jsonl 에 assigned 상태로 upsert 기록
+ *
+ * ✅ 이번 수정(정합성 보강):
+ * - "이미 pageId가 있으면 무조건 스킵"하지 않는다.
+ * - ledger(map/bySlug) 기준 canonical pageId와 현재 문서 pageId를 매 실행마다 대조/보정한다.
+ * - 중복/오염된 pageId가 들어 있어도 ids.cjs 재실행으로 복구 가능하게 한다.
  */
 
 const fs = require('fs');
@@ -46,7 +51,10 @@ const {
   ensureDir,
   isValidPageId,
   ensurePageId,
-  loadLedgerInfo
+  loadLedgerInfo,
+  getCanonicalPageId,
+  getOwnerSlugByPageId,
+  syncPageIdForSlug,
 } = require('./lib/page-ids.cjs');
 
 const { upsert: upsertSeedLedger } = require('./lib/seed-ledger.cjs');
@@ -191,6 +199,7 @@ function main() {
   console.log('[ids] LEDGER_FILE =', ledgerInfo.ledgerFile);
 
   let assigned = 0;
+  let corrected = 0;
   let skipped = 0;
   let filteredOut = 0;
   let failed = 0;
@@ -218,39 +227,51 @@ function main() {
       continue;
     }
 
-    // 이미 pageId 있으면 스킵
-    if (isValidPageId(doc.pageId)) {
-      skipped++;
-      continue;
-    }
+    const currentPid = isValidPageId(doc.pageId) ? String(doc.pageId).trim() : null;
 
     try {
-      const pid = ensurePageId(slug);
-      if (!isValidPageId(pid)) throw new Error('ensurePageId()가 유효한 pageId를 반환하지 않음');
+      const canonicalPid = getCanonicalPageId(slug);
+      const currentOwner = currentPid ? getOwnerSlugByPageId(currentPid) : null;
 
-      doc.pageId = pid;
-      writeJson(p, doc);
-      assigned++;
+      const pid = syncPageIdForSlug(slug, currentPid);
+      if (!isValidPageId(pid)) throw new Error('syncPageIdForSlug()가 유효한 pageId를 반환하지 않음');
 
-      // ✅ Seed Ledger 기록(최소버전)
-      try {
-        const sm = inferSeedMeta(doc);
-        upsertSeedLedger({
-          stage: 'ids',
-          status: 'assigned',
-          slug,
-          pageId: pid,
-          label: sm.label,
-          seedId: sm.seedId,
-          source: sm.source,
-          dryRun: DRY_RUN,
-        });
-        ledgerLogged++;
-      } catch (e) {
-        console.error('[ids][WARN] seed-ledger upsert fail:', e.message || e);
+      const isNew = !currentPid;
+      const isChanged = currentPid !== pid;
+
+      if (isNew || isChanged) {
+        doc.pageId = pid;
+        writeJson(p, doc);
+
+        if (isNew) {
+          assigned++;
+          console.log(`[ids][OK] ${slug} → ${pid}`);
+        } else {
+          corrected++;
+          const ownerNote = currentOwner && currentOwner !== slug ? ` owner=${currentOwner}` : '';
+          const canonicalNote = canonicalPid && canonicalPid !== currentPid ? ` canonical=${canonicalPid}` : '';
+          console.log(`[ids][FIX] ${slug} ${currentPid} → ${pid}${ownerNote}${canonicalNote}`);
+        }
+
+        try {
+          const sm = inferSeedMeta(doc);
+          upsertSeedLedger({
+            stage: 'ids',
+            status: isNew ? 'assigned' : 'corrected',
+            slug,
+            pageId: pid,
+            label: sm.label,
+            seedId: sm.seedId,
+            source: sm.source,
+            dryRun: DRY_RUN,
+          });
+          ledgerLogged++;
+        } catch (e) {
+          console.error('[ids][WARN] seed-ledger upsert fail:', e.message || e);
+        }
+      } else {
+        skipped++;
       }
-
-      console.log(`[ids][OK] ${slug} → ${pid}`);
     } catch (e) {
       failed++;
       console.error(`[ids][FAIL] ${slug} →`, e.message || e);
@@ -260,7 +281,8 @@ function main() {
   console.log('────────────────────────────────────────────');
   console.log('[ids] 요약');
   console.log('  할당(신규)      =', assigned);
-  console.log('  SKIP(기존존재)  =', skipped);
+  console.log('  보정(기존수정)  =', corrected);
+  console.log('  SKIP(정상유지)  =', skipped);
   console.log('  FILTERED(비대상)=', filteredOut);
   console.log('  FAIL            =', failed);
   console.log('  LEDGER_LOGGED   =', ledgerLogged);
