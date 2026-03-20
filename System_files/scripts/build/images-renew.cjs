@@ -19,6 +19,7 @@
 // - 기존 manifest의 same-slug pageId를 fallback으로 사용
 // - 마지막 수단으로만 og:image URL에서 pageId를 추론
 // - 완전 재생성은 유지하되, 잘못된 HTML이 manifest를 오염시키는 위험을 줄임
+// - ✅ 추가: 동일 pageId가 여러 slug에 매핑되면 경고 로그로 표면화
 
 const fs = require('fs');
 const path = require('path');
@@ -213,6 +214,22 @@ function buildRecordFromHtml(file, pageIdHints) {
   };
 }
 
+function findDuplicatePageIds(records) {
+  const map = new Map();
+
+  for (const rec of records) {
+    if (!rec || !isValidPageId(rec.pageId)) continue;
+    if (!map.has(rec.pageId)) map.set(rec.pageId, []);
+    map.get(rec.pageId).push(rec.slug);
+  }
+
+  const out = [];
+  for (const [pageId, slugs] of map.entries()) {
+    if (slugs.length > 1) out.push({ pageId, slugs });
+  }
+  return out;
+}
+
 function main() {
   log('────────────────────────────────────────────');
   log('[images-renew] 시작');
@@ -268,8 +285,19 @@ function main() {
   ensureDir(MANIFEST_PATH);
   fs.writeFileSync(MANIFEST_PATH, JSON.stringify(manifest, null, 2) + '\n', 'utf8');
 
+  const dups = findDuplicatePageIds(records);
+
   log(`[images-renew] 기록된 이미지 수 = ${records.length}`);
   log(`[images-renew] pageId source: posts=${inferredFromPosts}, manifest=${inferredFromManifest}, html/og=${inferredFromHtmlOrOg}, missing=${pageIdMissing}`);
+
+  if (dups.length > 0) {
+    for (const d of dups) {
+      log(`[images-renew][WARN] duplicate pageId: ${d.pageId} -> ${d.slugs.join(', ')}`);
+    }
+  } else {
+    log('[images-renew] duplicate pageId: none');
+  }
+
   log('────────────────────────────────────────────');
   log('[images-renew] 완료');
 }
