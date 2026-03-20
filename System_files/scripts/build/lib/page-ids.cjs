@@ -28,13 +28,18 @@
  * - manifests/page-ids.json        (active, 실번호 ledger)
  * - manifests/page-ids.local.json  (local, 로컬 테스트 번호 ledger)
  * - manifests/pageid-journal.jsonl (WAL: 발급 로그, 실패해도 치명 아님)
+ *
+ * ✅ 이번 수정(정합성 보강)
+ * - ledger는 map을 SSOT로 사용하되, bySlug 호환 미러를 함께 유지
+ * - 기존 문서가 이미 가진 pageId를 "안전하게 채택"할 수 있다
+ * - 같은 pageId를 다른 slug가 이미 소유 중이면 새 번호를 발급한다
+ * - ids.cjs 재실행만으로 문서/ledger 정합성을 복구할 수 있게 한다
  */
 
 const fs = require('fs');
 const path = require('path');
 
 // ✅ DRY_RUN 판정 SSOT: env.cjs의 parseDryRun만 사용
-// (초소형 정리) 같은 폴더이므로 상대경로 고정이 더 명확함
 const { parseDryRun } = require('./env.cjs');
 
 const ROOT = path.resolve(__dirname, '..', '..', '..'); // System_files
@@ -93,7 +98,6 @@ function isPublishEnabled() {
   return PUBLISH_MODE === 'enable';
 }
 
-// ✅ 문자열 비교 금지: parseDryRun 기준으로 통일
 function isDryRun() {
   return parseDryRun(process.env.DRY_RUN);
 }
@@ -104,13 +108,55 @@ function loadLedgerInfo() {
   return { mode, ledgerFile };
 }
 
+function normalizeLedger(raw, mode) {
+  const base = (raw && typeof raw === 'object') ? raw : {};
+
+  const mapSource =
+    (base.map && typeof base.map === 'object' && !Array.isArray(base.map) && base.map) ||
+    (base.bySlug && typeof base.bySlug === 'object' && !Array.isArray(base.bySlug) && base.bySlug) ||
+    {};
+
+  const map = {};
+  for (const [slug, pageId] of Object.entries(mapSource)) {
+    const s = String(slug || '').trim();
+    const pid = String(pageId || '').trim();
+    if (!s) continue;
+    if (!isValidPageId(pid)) continue;
+    map[s] = pid;
+  }
+
+  let next = Number(base.next || 1);
+  if (!Number.isFinite(next) || next < 1) next = 1;
+
+  // map 안에서 가장 큰 번호보다 next가 작으면 끌어올림
+  let maxN = 0;
+  for (const pid of Object.values(map)) {
+    const n = Number(String(pid).replace(/^page/, ''));
+    if (Number.isFinite(n) && n > maxN) maxN = n;
+  }
+  if (next <= maxN) next = maxN + 1;
+
+  return {
+    mode: base.mode || mode,
+    next,
+    map,
+    bySlug: { ...map }, // 호환 미러
+    updatedAt: base.updatedAt || nowIso(),
+  };
+}
+
+function persistLedger(ledgerFile, ledger) {
+  const normalized = normalizeLedger(ledger, ledger.mode || pickMode());
+  writeJson(ledgerFile, normalized);
+  return normalized;
+}
+
 function loadLedger() {
   ensureDir(MANIFESTS_DIR);
 
   const { mode, ledgerFile } = loadLedgerInfo();
 
   // ✅ 실번호(active ledger) 소모 방지 가드
-  // - publish enable + dry_run=false 에서만 active 발급 허용
   if (mode === 'active') {
     if (!isPublishEnabled()) {
       const err = new Error('PAUSE: PUBLISH_MODE=disable 이므로 active pageId 발급 금지');
@@ -125,17 +171,83 @@ function loadLedger() {
   }
 
   const base = readJsonSafe(ledgerFile, null);
-  if (base && typeof base === 'object') return { ledger: base, mode, ledgerFile };
+  if (base && typeof base === 'object') {
+    const normalized = normalizeLedger(base, mode);
+    // 구조 정규화 반영(map/bySlug/next 보정)
+    if (JSON.stringify(base) !== JSON.stringify(normalized)) {
+      persistLedger(ledgerFile, normalized);
+    }
+    return { ledger: normalized, mode, ledgerFile };
+  }
 
   // 최초 생성(리셋과 다름: 파일이 없을 때만 생성)
-  const init = {
+  const init = normalizeLedger({
     mode,
     next: 1,
-    map: {}, // slug -> pageId
+    map: {},
     updatedAt: nowIso(),
-  };
-  writeJson(ledgerFile, init);
+  }, mode);
+
+  persistLedger(ledgerFile, init);
   return { ledger: init, mode, ledgerFile };
+}
+
+function getOwnerSlugByPageId(pageId) {
+  if (!isValidPageId(pageId)) return null;
+
+  const { ledger } = loadLedger();
+  const map = ledger.map && typeof ledger.map === 'object' ? ledger.map : {};
+
+  for (const [slug, pid] of Object.entries(map)) {
+    if (pid === pageId) return slug;
+  }
+  return null;
+}
+
+function getCanonicalPageId(slug) {
+  if (!slug || typeof slug !== 'string') return null;
+
+  const { ledger } = loadLedger();
+  const map = ledger.map && typeof ledger.map === 'object' ? ledger.map : {};
+  const pid = map[slug];
+  return isValidPageId(pid) ? pid : null;
+}
+
+function claimSpecificPageId(slug, pageId, action) {
+  const { ledger, mode, ledgerFile } = loadLedger();
+
+  ledger.map = ledger.map && typeof ledger.map === 'object' ? ledger.map : {};
+  ledger.bySlug = ledger.bySlug && typeof ledger.bySlug === 'object' ? ledger.bySlug : {};
+
+  const existingForSlug = ledger.map[slug];
+  if (isValidPageId(existingForSlug)) return existingForSlug;
+
+  const owner = getOwnerSlugByPageId(pageId);
+  if (owner && owner !== slug) {
+    return null;
+  }
+
+  ledger.map[slug] = pageId;
+  ledger.bySlug[slug] = pageId;
+
+  const n = Number(String(pageId).replace(/^page/, ''));
+  if (Number.isFinite(n) && ledger.next <= n) {
+    ledger.next = n + 1;
+  }
+
+  ledger.updatedAt = nowIso();
+  persistLedger(ledgerFile, ledger);
+
+  appendJournal({
+    ts: nowIso(),
+    mode,
+    slug,
+    pageId,
+    ledger: path.basename(ledgerFile),
+    action: action || 'claim_specific',
+  });
+
+  return pageId;
 }
 
 /**
@@ -149,22 +261,23 @@ function ensurePageId(slug) {
   const { ledger, mode, ledgerFile } = loadLedger();
 
   ledger.map = ledger.map && typeof ledger.map === 'object' ? ledger.map : {};
+  ledger.bySlug = ledger.bySlug && typeof ledger.bySlug === 'object' ? ledger.bySlug : {};
 
   const existing = ledger.map[slug];
   if (isValidPageId(existing)) return existing;
 
   const n = Number(ledger.next || 1);
   if (!Number.isFinite(n) || n < 1) {
-    // 절대 0 리셋 금지. 이상치면 최소 1로만 복구.
     ledger.next = 1;
   }
 
   const pageId = `page${pad6(ledger.next)}`;
   ledger.map[slug] = pageId;
+  ledger.bySlug[slug] = pageId;
   ledger.next += 1;
   ledger.updatedAt = nowIso();
 
-  writeJson(ledgerFile, ledger);
+  persistLedger(ledgerFile, ledger);
 
   appendJournal({
     ts: nowIso(),
@@ -172,9 +285,31 @@ function ensurePageId(slug) {
     slug,
     pageId,
     ledger: path.basename(ledgerFile),
+    action: 'assign_new',
   });
 
   return pageId;
+}
+
+/**
+ * syncPageIdForSlug(slug, currentPageId)
+ * 우선순위:
+ * 1) ledger에 canonical pageId가 있으면 그것이 정답
+ * 2) currentPageId가 유효하고 다른 slug가 소유하지 않았다면 ledger에 채택
+ * 3) 위 두 경우가 아니면 새 번호 발급
+ */
+function syncPageIdForSlug(slug, currentPageId) {
+  if (!slug || typeof slug !== 'string') throw new Error('syncPageIdForSlug: slug 필요');
+
+  const canonical = getCanonicalPageId(slug);
+  if (isValidPageId(canonical)) return canonical;
+
+  if (isValidPageId(currentPageId)) {
+    const adopted = claimSpecificPageId(slug, currentPageId, 'adopt_existing');
+    if (isValidPageId(adopted)) return adopted;
+  }
+
+  return ensurePageId(slug);
 }
 
 module.exports = {
@@ -182,6 +317,9 @@ module.exports = {
   isValidPageId,
   ensurePageId,
   loadLedgerInfo,
+  getCanonicalPageId,
+  getOwnerSlugByPageId,
+  syncPageIdForSlug,
   _paths: {
     ROOT,
     MANIFESTS_DIR,
