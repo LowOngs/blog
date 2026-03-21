@@ -21,15 +21,19 @@
  * - items[slug] 엔트리:
  *   - pageId(선택) / label(선택)
  *   - url(필수, https)
- *   - width/height(선택, 있으면 양수)
+ *   - width/height(필수, 양수)
+ *   - alt(필수)
  *   - safe(선택, false면 경고)
  * - URL 도메인 allow:
  *   - 기본: CANONICAL_BASE host, CDN_BASE host
  *   - 추가: BODY_IMAGE_ALLOW_DOMAINS="a.com,b.com"
+ * - content/posts/*.json 과의 정합성:
+ *   - manifest slug는 실제 post slug여야 함
+ *   - manifest.pageId가 있으면 post.pageId와 일치해야 함
  *
  * 출력:
- * - [ERROR] 존재/파싱/필수필드/도메인 위반 → exit 1
- * - [WARN] safe=false, width/height 누락 등 → exit 0(경고만)
+ * - [ERROR] 존재/파싱/필수필드/도메인 위반/slug-pageId 불일치 → exit 1
+ * - [WARN] safe=false 등 → exit 0(경고만)
  */
 
 const fs = require('fs');
@@ -38,6 +42,7 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..', '..'); // System_files
 const MANIFESTS_DIR = path.join(ROOT, 'manifests');
 const MANIFEST_PATH = path.join(MANIFESTS_DIR, 'images-body-manifest.json');
+const POSTS_DIR = path.join(ROOT, 'content', 'posts');
 
 /* ───────────────────── 기본 유틸 ───────────────────── */
 
@@ -48,6 +53,49 @@ function readJsonSafe(p) {
 
 function isPlainObject(v) {
   return !!v && typeof v === 'object' && !Array.isArray(v);
+}
+
+function isValidPageId(v) {
+  return typeof v === 'string' && /^page\d{6}$/.test(v.trim());
+}
+
+/* ───────────────────── posts SSOT 로딩 ───────────────────── */
+
+function loadPostsMap(postsDir) {
+  const out = {};
+
+  if (!fs.existsSync(postsDir)) return out;
+
+  const files = fs.readdirSync(postsDir).filter((f) => f.toLowerCase().endsWith('.json'));
+
+  for (const filename of files) {
+    const fullPath = path.join(postsDir, filename);
+
+    let post;
+    try {
+      post = readJsonSafe(fullPath);
+    } catch {
+      continue;
+    }
+
+    if (!isPlainObject(post)) continue;
+
+    const slug = String(post.slug || filename.replace(/\.json$/i, '')).trim();
+    if (!slug) continue;
+
+    const pageId =
+      (typeof post.pageId === 'string' && post.pageId.trim()) ||
+      (typeof post.page_id === 'string' && post.page_id.trim()) ||
+      (post.seedMeta && typeof post.seedMeta.pageId === 'string' && post.seedMeta.pageId.trim()) ||
+      null;
+
+    out[slug] = {
+      file: filename,
+      pageId: isValidPageId(pageId) ? pageId : null,
+    };
+  }
+
+  return out;
 }
 
 /* ───────────────────── 도메인 allow ───────────────────── */
@@ -84,13 +132,16 @@ function main() {
   const cdnBase  = (process.env.CDN_BASE || (siteBase + '/images')).replace(/\/+$/,'');
 
   const allowedDomains = parseAllowedDomainsFromEnv(siteBase, cdnBase);
+  const postsMap = loadPostsMap(POSTS_DIR);
 
   console.log('────────────────────────────────────────────');
   console.log('[validate-body-images] ROOT         =', ROOT);
   console.log('[validate-body-images] MANIFEST     =', MANIFEST_PATH);
+  console.log('[validate-body-images] POSTS_DIR    =', POSTS_DIR);
   console.log('[validate-body-images] SITE_BASE    =', siteBase);
   console.log('[validate-body-images] CDN_BASE     =', cdnBase);
   console.log('[validate-body-images] ALLOW_DOMAIN =', allowedDomains.join(', ') || '(none)');
+  console.log('[validate-body-images] POSTS_COUNT  =', Object.keys(postsMap).length);
   console.log('────────────────────────────────────────────');
 
   // 1) 파일 존재
@@ -151,6 +202,26 @@ function main() {
       continue;
     }
 
+    // manifest slug가 실제 posts에 존재하는지
+    const postInfo = postsMap[slug];
+    if (!postInfo) {
+      console.error(`[ERROR] items["${slug}"] 는 content/posts에 존재하지 않는 slug입니다.`);
+      errors++;
+    }
+
+    // pageId 정합성(선택 필드이지만, 있으면 posts와 일치해야 함)
+    if (entry.pageId !== undefined && entry.pageId !== null && String(entry.pageId).trim() !== '') {
+      const manifestPageId = String(entry.pageId).trim();
+
+      if (!isValidPageId(manifestPageId)) {
+        console.error(`[ERROR] items["${slug}"].pageId 형식이 잘못되었습니다: ${entry.pageId}`);
+        errors++;
+      } else if (postInfo && postInfo.pageId && manifestPageId !== postInfo.pageId) {
+        console.error(`[ERROR] items["${slug}"].pageId 가 posts와 불일치합니다: manifest=${manifestPageId} posts=${postInfo.pageId}`);
+        errors++;
+      }
+    }
+
     // url 필수
     const url = String(entry.url || '').trim();
     if (!url) {
@@ -165,18 +236,18 @@ function main() {
       errors++;
     }
 
-    // width/height(선택, 있으면 양수 권장)
-    if (entry.width !== undefined || entry.height !== undefined) {
-      const w = Number(entry.width || 0);
-      const h = Number(entry.height || 0);
-      if (!(w > 0 && h > 0)) {
-        console.warn(`[WARN] items["${slug}"] width/height가 비정상입니다: width=${entry.width} height=${entry.height}`);
-        warns++;
-      }
-    } else {
-      // 완전 누락도 허용하지만 경고(UX/CLS 측면)
-      console.warn(`[WARN] items["${slug}"] width/height가 없습니다(권장: 넣기).`);
-      warns++;
+    // width/height 필수 + 양수
+    const hasWidth = entry.width !== undefined;
+    const hasHeight = entry.height !== undefined;
+    const w = Number(entry.width || 0);
+    const h = Number(entry.height || 0);
+
+    if (!hasWidth || !hasHeight) {
+      console.error(`[ERROR] items["${slug}"] width/height가 없습니다(필수). width=${entry.width} height=${entry.height}`);
+      errors++;
+    } else if (!(w > 0 && h > 0)) {
+      console.error(`[ERROR] items["${slug}"] width/height가 비정상입니다: width=${entry.width} height=${entry.height}`);
+      errors++;
     }
 
     // safe=false는 “의도된 차단”일 수 있으니 경고만
@@ -185,11 +256,11 @@ function main() {
       warns++;
     }
 
-    // alt 누락 경고(필수는 아님)
+    // alt 필수
     const alt = String(entry.alt || '').trim();
     if (!alt) {
-      console.warn(`[WARN] items["${slug}"].alt 가 비어있습니다(권장: 넣기).`);
-      warns++;
+      console.error(`[ERROR] items["${slug}"].alt 가 비어있습니다.`);
+      errors++;
     }
   }
 
