@@ -22,6 +22,10 @@ const ROOT = path.resolve(__dirname, '..', '..'); // System_files
 const POSTS_DIR = path.join(ROOT, 'content', 'posts');
 const MANIFEST_PATH = path.join(ROOT, 'manifests', 'images-body-manifest.json');
 
+/* 🔥 추가: CDN 기준 */
+const SITE_BASE = (process.env.CANONICAL_BASE || 'https://ongsblog.com').replace(/\/+$/,'');
+const CDN_BASE  = (process.env.CDN_BASE || (SITE_BASE + '/images')).replace(/\/+$/,'');
+
 /* ───────────────────── utils ───────────────────── */
 
 function readJsonSafe(p) {
@@ -44,6 +48,28 @@ function nowIso() {
   return new Date().toISOString();
 }
 
+/* 🔥 추가: URL 정규화 */
+function normalizeToCdnUrl(src) {
+  if (!src) return '';
+
+  if (/^https?:\/\//i.test(src)) {
+    return src; // 이미 절대경로
+  }
+
+  // ./assets/images/... → CDN_BASE/...
+  const clean = src.replace(/^\.?\/*assets\/images\//i, '');
+  return `${CDN_BASE}/${clean}`;
+}
+
+/* 🔥 추가: 파일명 기반 width/height 추론 */
+function inferSizeFromFilename(url) {
+  const m = String(url).match(/(\d{2,4})x(\d{2,4})/);
+  if (m) {
+    return { width: Number(m[1]), height: Number(m[2]) };
+  }
+  return { width: undefined, height: undefined };
+}
+
 /* ───────────────────── 이미지 추출 ───────────────────── */
 
 function extractImagesFromHtml(html) {
@@ -51,7 +77,6 @@ function extractImagesFromHtml(html) {
 
   const results = [];
 
-  // <img src="..." alt="..." width="..." height="...">
   const re = /<img[^>]+src=["']([^"']+)["'][^>]*>/gi;
 
   let m;
@@ -93,12 +118,10 @@ function scanPosts() {
 
     let images = [];
 
-    // body
     if (typeof post.body === 'string') {
       images = images.concat(extractImagesFromHtml(post.body));
     }
 
-    // blocks
     if (Array.isArray(post.blocks)) {
       for (const b of post.blocks) {
         if (b && typeof b.html === 'string') {
@@ -126,17 +149,28 @@ function buildManifest(postImages) {
   const items = {};
 
   for (const p of postImages) {
-    // 정책: 1 slug = 첫 번째 이미지만 사용
     const img = p.images[0];
     if (!img) continue;
+
+    const url = normalizeToCdnUrl(img.url);
+
+    /* 🔥 width/height 보강 */
+    let width = img.width;
+    let height = img.height;
+
+    if (!(width > 0 && height > 0)) {
+      const inferred = inferSizeFromFilename(url);
+      width = inferred.width;
+      height = inferred.height;
+    }
 
     items[p.slug] = {
       pageId: p.pageId || null,
       label: p.label || null,
-      url: img.url,
+      url,
       alt: img.alt || '',
-      width: img.width,
-      height: img.height,
+      width,
+      height,
       safe: true,
       updatedAt: nowIso(),
     };
