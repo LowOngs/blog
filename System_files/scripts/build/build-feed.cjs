@@ -16,11 +16,10 @@ try {
 } catch (_) {}
 
 /* ───────────────────── 경로 고정 ───────────────────── */
-// __dirname = System_files/scripts/build
-const ROOT        = path.resolve(__dirname, '..', '..');           // System_files
-const CONTENT_DIR = path.join(ROOT, 'content', 'posts');           // JSON 입력
-const OUT_DIR     = path.join(ROOT, 'dist', 'ai');                 // 피드 출력
-const OUT_FILE    = path.join(OUT_DIR, 'feed.ndjson');             // /ai/feed.ndjson
+const ROOT        = path.resolve(__dirname, '..', '..');
+const CONTENT_DIR = path.join(ROOT, 'content', 'posts');
+const OUT_DIR     = path.join(ROOT, 'dist', 'ai');
+const OUT_FILE    = path.join(OUT_DIR, 'feed.ndjson');
 
 /* ───────────────────── 로그 ───────────────────── */
 const LOGDIR  = path.join(ROOT, 'logs');
@@ -97,28 +96,45 @@ try {
     cwd: CONTENT_DIR,
     absolute: true,
   });
+
   log(
     '[feed] found JSON =',
     files.map((f) => path.basename(f)).join(', ') || '(none)'
   );
+
   if (!files.length) fail('JSON 없음. 위치/확장자 확인: ' + CONTENT_DIR);
 
   fs.mkdirSync(OUT_DIR, { recursive: true });
 
   const lines = [];
   let ok = 0;
+  let failCount = 0;
 
   for (const abs of files) {
     const base = path.basename(abs);
+
     try {
       const raw = fs.readFileSync(abs, 'utf8');
       const json = JSON.parse(raw);
 
+      // 🔥 핵심 보강: slug 필수 체크 (SSOT 보호)
+      if (!json.slug) {
+        throw new Error('slug 없음 (SSOT 위반)');
+      }
+
       const item = feedLib.buildFeedItem(json, ENV, AUTHORITY_REF_URL);
+
+      // 🔥 핵심 보강: 최소 필드 검증
+      if (!item.slug || !item.url || !item.title) {
+        throw new Error('feed item 필수 필드 누락');
+      }
+
       lines.push(JSON.stringify(item));
       ok++;
       log(`OK ${base} → feed item (${item.slug})`);
+
     } catch (e) {
+      failCount++;
       warn(
         `FAIL ${base} →`,
         e && e.message ? e.message : String(e)
@@ -126,8 +142,14 @@ try {
     }
   }
 
+  // 🔥 핵심 보강: 전체 실패 방지 가드
+  if (ok === 0) {
+    fail('모든 feed 생성 실패 (출력 중단)');
+  }
+
   fs.writeFileSync(OUT_FILE, lines.join('\n') + '\n', 'utf8');
+
   log(
-    `✨ feed 생성 완료 | 성공 ${ok}/${files.length} | OUT=${OUT_FILE} | LOGFILE=${LOGFILE}`
+    `✨ feed 생성 완료 | 성공 ${ok}/${files.length} | 실패 ${failCount} | OUT=${OUT_FILE} | LOGFILE=${LOGFILE}`
   );
 })();
