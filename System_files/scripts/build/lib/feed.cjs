@@ -16,7 +16,6 @@ const stripHtml = (s) => {
 
 /**
  * TL;DR + 본문 혼합 summary
- * (render-posts.cjs의 deriveSummary와 동일 로직)
  */
 function deriveSummary(json, max = 160) {
   const manual = (json.description || '').trim();
@@ -102,7 +101,14 @@ function deriveIntent(json, labels) {
 }
 
 const pad = (n) => String(n).padStart(2, '0');
-function isoKSTNow() {
+
+/* 🔥 수정 1: updated → post 기준 사용 */
+function resolveUpdated(json) {
+  if (json.updated) return String(json.updated);
+  if (json.updatedAt) return String(json.updatedAt);
+  if (json.updated_at) return String(json.updated_at);
+
+  // fallback (최후 수단)
   const d = new Date();
   const t = d.getTime() + 9 * 3600 * 1000;
   const k = new Date(t);
@@ -115,8 +121,6 @@ function isoKSTNow() {
 
 /**
  * citationId 생성
- * - pageId/page_id가 있으면: ongs-cite-{pageId}
- * - 없으면: ongs-cite-{slug-정규화}
  */
 function deriveCitationId(json, slug) {
   const rawPageId = json.pageId || json.page_id || null;
@@ -134,7 +138,6 @@ function deriveCitationId(json, slug) {
 
 /**
  * feed 아이템 1개 생성
- * env: { SITE_BASE }
  */
 function buildFeedItem(json, env, authorityRefUrl) {
   const SITE_BASE = (env && env.SITE_BASE) || 'https://ongsblog.com';
@@ -144,15 +147,22 @@ function buildFeedItem(json, env, authorityRefUrl) {
 
   const title = String(json.title || 'Untitled');
   const description = deriveSummary(json, 160);
-  const updated = isoKSTNow();
+
+  /* 🔥 수정 2: updated 정렬 */
+  const updated = resolveUpdated(json);
 
   const labels = deriveLabels(json);
   const intent = deriveIntent(json, labels);
 
   const tldr = Array.isArray(json?.aio?.tldr) ? json.aio.tldr : [];
+
+  /* 🔥 수정 3: keyfacts/keyFacts 통합 */
   const keyfacts = Array.isArray(json?.aio?.keyfacts)
     ? json.aio.keyfacts
+    : Array.isArray(json?.aio?.keyFacts)
+    ? json.aio.keyFacts
     : [];
+
   const faq = Array.isArray(json?.aio?.faq) ? json.aio.faq : [];
   const sources = Array.isArray(json?.aio?.sources)
     ? json.aio.sources
