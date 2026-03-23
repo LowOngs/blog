@@ -40,10 +40,29 @@ function deriveSummary(json, max = 160) {
   const mP = bodyHtml.match(/<p[^>]*>([\s\S]*?)<\/p>/i);
   const pick = mP ? mP[1] : bodyHtml;
   const clean = stripHtml(pick);
-  if (!clean) return '';
-  return clean.length <= max
-    ? clean
-    : clean.slice(0, max).trim() + '…';
+  if (clean) {
+    return clean.length <= max
+      ? clean
+      : clean.slice(0, max).trim() + '…';
+  }
+
+  /* ✅ 국부 수술: body 전체 텍스트 fallback 추가 */
+  const bodyWhole = stripHtml(bodyHtml);
+  if (bodyWhole) {
+    return bodyWhole.length <= max
+      ? bodyWhole
+      : bodyWhole.slice(0, max).trim() + '…';
+  }
+
+  /* ✅ 최후 fallback: title */
+  const titleFallback = String(json.title || '').trim();
+  if (titleFallback) {
+    return titleFallback.length <= max
+      ? titleFallback
+      : titleFallback.slice(0, max).trim() + '…';
+  }
+
+  return '';
 }
 
 /**
