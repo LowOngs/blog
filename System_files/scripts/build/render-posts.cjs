@@ -285,7 +285,17 @@ function ensurePageIdForPost(postJson, slug, jsonPath, idsCtx) {
   return { pageId: pid, wroteJson: false, via: 'ids.cjs' };
 }
 
-function resolveAio(postJson) {
+/* ✅ 국부 수정: meta.aio 우선 사용, 없으면 기존 fallback 유지 */
+function resolveAio(postJson, meta) {
+  if (meta && meta.aio) {
+    return {
+      tldr: firstNonEmpty(meta.aio.tldr, []),
+      keyfacts: firstNonEmpty(meta.aio.keyfacts, []),
+      faq: firstNonEmpty(meta.aio.faq, []),
+      sources: firstNonEmpty(meta.aio.sources, []),
+    };
+  }
+
   const aio = postJson.aio && typeof postJson.aio === 'object' ? postJson.aio : {};
   return {
     tldr: firstNonEmpty(aio.tldr, postJson.tldr, []),
@@ -317,7 +327,8 @@ function renderOne(template, postJson, jsonPath, bodyImgCtx, idsCtx) {
 
   const updatedDate = (meta.updatedIso || '').slice(0, 10) || '';
 
-  const aio = resolveAio(postJson);
+  /* ✅ 국부 수정: meta.aio 연결 */
+  const aio = resolveAio(postJson, meta);
 
   const tldrHtml    = blocks.renderTLDR(asArray(aio.tldr));
   const kfHtml      = blocks.renderKeyFacts(asArray(aio.keyfacts));
