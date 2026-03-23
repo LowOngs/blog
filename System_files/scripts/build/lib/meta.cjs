@@ -5,6 +5,7 @@
  * - 각 포스트에 들어갈 canonical / og:image / JSON-LD(Article, FAQPage, BreadcrumbList, WebSite) 생성
  * - render-posts.cjs 에서 buildMeta(post, { slug, pageId, siteBase, cdnBase }) 형태로 호출
  * - ✅ (회귀) meta가 "공장": meta head HTML(OG/Twitter/time/preload/schema)까지 생성
+ * - ✅ (통합) ai-meta.js가 하던 메타/AIO 보강 로직 일부를 흡수
  */
 
 /* ───────────────────── 헬퍼 ───────────────────── */
@@ -72,8 +73,9 @@ function escapeAttr(str) {
 
 /* FAQ 데이터 정규화
    - aio.faq 가
-     · [{q, a}, …] 이거나
-     · [{question, answer}, …] 인 경우 모두 수용 */
+     · [{q, a}, …]
+     · [{question, answer}, …]
+   를 모두 수용 */
 function normalizeFaq(faqRaw) {
   const list = [];
   for (const item of asArray(faqRaw)) {
@@ -81,7 +83,6 @@ function normalizeFaq(faqRaw) {
     let q = '';
     let a = '';
     if (typeof item === 'string') {
-      // 문자열 단일 항목은 FAQ로 쓰기 애매해서 스킵
       continue;
     } else if (typeof item === 'object') {
       q = firstNonEmpty(item.q, item.question, '');
@@ -91,6 +92,132 @@ function normalizeFaq(faqRaw) {
     list.push({ q, a });
   }
   return list;
+}
+
+/* sources 정규화
+   - 문자열
+   - { url }
+   - { name, url }
+   - { label, url }
+*/
+function normalizeSources(srcRaw) {
+  const out = [];
+  for (const item of asArray(srcRaw)) {
+    if (!item) continue;
+    if (typeof item === 'string') {
+      const s = item.trim();
+      if (s) out.push(s);
+      continue;
+    }
+    if (typeof item === 'object') {
+      const url = firstNonEmpty(item.url, item.href, '');
+      const label = firstNonEmpty(item.label, item.name, item.title, '');
+      if (url) {
+        out.push(label ? { label, url } : { url });
+      }
+    }
+  }
+  return out;
+}
+
+function normalizeTextList(listRaw) {
+  return asArray(listRaw)
+    .map((x) => String(x || '').trim())
+    .filter(Boolean);
+}
+
+function stripHtml(str) {
+  return String(str || '')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;|&#160;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/* description/tldr 생성용 간단 summary */
+function deriveSummaryFromPost(post, max = 160) {
+  const manual = firstNonEmpty(post.description, '');
+  if (manual) {
+    return manual.length <= max ? manual : manual.slice(0, max).trim() + '…';
+  }
+
+  const tldrArr = Array.isArray(post?.aio?.tldr) ? post.aio.tldr : null;
+  if (tldrArr && tldrArr.length) {
+    const joined = tldrArr.slice(0, 2).map(String).join(' ');
+    const clean = stripHtml(joined);
+    if (clean) {
+      return clean.length <= max ? clean : clean.slice(0, max).trim() + '…';
+    }
+  }
+
+  const bodyHtml = String(post.body || '');
+  const mP = bodyHtml.match(/<p[^>]*>([\s\S]*?)<\/p>/i);
+  const pick = mP ? mP[1] : bodyHtml;
+  const clean = stripHtml(pick);
+  if (!clean) return '';
+  return clean.length <= max ? clean : clean.slice(0, max).trim() + '…';
+}
+
+/* ai-meta.js 일부 흡수: 최소 AIO 보강 */
+function deriveAio(post, title, description) {
+  const aio = post.aio && typeof post.aio === 'object' ? post.aio : {};
+
+  const tldr = normalizeTextList(
+    firstNonEmpty(
+      aio.tldr,
+      post.tldr,
+      [
+        title,
+        description || 'Key summary',
+        'Key points'
+      ]
+    )
+  );
+
+  const keyfacts = normalizeTextList(
+    firstNonEmpty(
+      aio.keyfacts,
+      aio.keyFacts,
+      post.keyfacts,
+      post.keyFacts,
+      [
+        `${title} provides practical guidance or structured information for the topic.`,
+        'Official or reference-based supporting information may be included where available.'
+      ]
+    )
+  );
+
+  const faq = normalizeFaq(
+    firstNonEmpty(
+      aio.faq,
+      post.faq,
+      [
+        {
+          q: `${title} related frequently asked question`,
+          a: 'Check the article body and FAQ section for details.'
+        }
+      ]
+    )
+  );
+
+  const sources = normalizeSources(
+    firstNonEmpty(
+      aio.sources,
+      post.sources,
+      []
+    )
+  );
+
+  return {
+    tldr,
+    keyfacts,
+    faq,
+    sources,
+    heroImage: aio.heroImage && typeof aio.heroImage === 'object' ? aio.heroImage : undefined,
+  };
 }
 
 /* label → article:section용 대분류 매핑 */
@@ -207,10 +334,13 @@ function buildMeta(post, ctx = {}) {
 
   const description = firstNonEmpty(
     post.description,
-    (post.aio && Array.isArray(post.aio.tldr) && post.aio.tldr[1]),
+    deriveSummaryFromPost(post, 160),
     post.seedMeta && post.seedMeta.angle,
     ''
   );
+
+  /* ✅ ai-meta.js 흡수: aio 보강 생성 */
+  const resolvedAio = deriveAio(post, title, description);
 
   const canonicalUrl =
     (SITE_BASE.replace(/\/+$/, '') + '/' + slug.replace(/\.html?$/i, '') + '.html');
@@ -220,9 +350,8 @@ function buildMeta(post, ctx = {}) {
     `/og/${pageId}_${slug.replace(/\.html?$/i, '')}_1200x630.jpg`;
 
   // 대표 ALT 텍스트(히어로/OG/Twitter 공통 기준)
-  // 우선순위: aio.heroImage.alt → description → title → slug
   const heroAlt = firstNonEmpty(
-    post.aio && post.aio.heroImage && post.aio.heroImage.alt,
+    resolvedAio.heroImage && resolvedAio.heroImage.alt,
     description,
     title,
     slug
@@ -298,7 +427,7 @@ function buildMeta(post, ctx = {}) {
   };
 
   /* Sources → citation (선택) */
-  const sources = asArray(post.aio && post.aio.sources);
+  const sources = resolvedAio.sources;
   if (sources.length) {
     articleJsonLd.citation = sources
       .filter(
@@ -310,7 +439,7 @@ function buildMeta(post, ctx = {}) {
   }
 
   /* ─ FAQPage JSON-LD (있을 때만) ─ */
-  const faqItems = normalizeFaq(post.aio && post.aio.faq);
+  const faqItems = normalizeFaq(resolvedAio.faq);
   let faqJsonLd = null;
   if (faqItems.length) {
     faqJsonLd = {
@@ -374,6 +503,7 @@ function buildMeta(post, ctx = {}) {
     pageId,
     resolvedTitle: title,
     resolvedDescription: description || title,
+    aio: resolvedAio, // ✅ 다음 단계 render-posts.cjs에서 소비
   };
   metaRes.headHtml = buildHeadFromMetaResult(metaRes);
 
