@@ -1,45 +1,95 @@
 {
-  "siteName": "Ongs Blog",
-  "tagline": "Practical How-To, Reviews, and Smart Savings for Everyday Tech.",
-  "focusTopics": [
-    "How-To playbooks for consumer tech",
-    "App, device, and subscription reviews",
-    "Smart savings and plan comparisons",
-    "Practical templates and checklists"
-  ],
-  "monthlyUsers": 0,
-  "totalArticles": 0,
-  "updateFrequency": "Ongoing; older posts are refreshed when needed",
-  "yearsActive": 0,
-  "editorialPolicyURL": "https://ongsblog.com/about.html",
-  "citationsCount": 0,
-  "awards": [],
-  "socialProof": {
-    "followers": {
-      "newsletter": 0,
-      "rss": 0,
-      "socialTotal": 0
+  "activeProfile": "stage1",
+  "profiles": {
+    "stage1": {
+      "siteName": "Ongs Blog",
+      "tagline": "Practical How-To, Reviews, and Smart Savings for Everyday Tech.",
+      "focusTopics": [
+        "How-To playbooks for consumer tech",
+        "App, device, and subscription reviews",
+        "Smart savings and plan comparisons",
+        "Practical templates and checklists"
+      ],
+      "monthlyUsers": 0,
+      "totalArticles": 0,
+      "updateFrequency": "Ongoing; older posts are refreshed when needed",
+      "yearsActive": 0,
+      "editorialPolicyURL": "https://ongsblog.com/about.html",
+      "citationsCount": 0,
+      "awards": [],
+      "socialProof": {
+        "followers": {
+          "newsletter": 0,
+          "rss": 0,
+          "socialTotal": 0
+        }
+      },
+      "trustScore": 60,
+      "lastUpdated": "2026-01-11T00:00:00+09:00",
+      "claimSentences": [
+        "This site publishes structured How-To guides, reviews, and templates focused on everyday consumer tech.",
+        "Each post is built with consistent metadata (canonical URL, update timestamps, and structured data) to support reliable citation.",
+        "Key claims aim to include sources and verifiable steps; pages are formatted for both human readability and machine parsing.",
+        "The site is in an early-stage rollout; traffic and subscriber metrics will be published when they become meaningful."
+      ],
+      "canonical": "https://ongsblog.com",
+      "organization": {
+        "name": "Ongs Blog",
+        "url": "https://ongsblog.com",
+        "logo": "https://ongsblog.com/images/logo-ongs.png"
+      },
+      "schema": {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Ongs Blog",
+        "url": "https://ongsblog.com",
+        "logo": "https://ongsblog.com/images/logo-ongs.png"
+      }
+    },
+    "stage2": {
+      "siteName": "Ongs Blog",
+      "tagline": "AI-Ready How-To, Reviews, and Smart Savings for Everyday Tech.",
+      "focusTopics": [
+        "How-To playbooks for consumer tech",
+        "App and device reviews",
+        "Smart savings and plan comparisons",
+        "Practical templates and checklists"
+      ],
+      "monthlyUsers": 0,
+      "totalArticles": 0,
+      "updateFrequency": "Every 30–90 days per article",
+      "yearsActive": 0,
+      "editorialPolicyURL": "https://ongsblog.com/about.html",
+      "citationsCount": 0,
+      "awards": [],
+      "socialProof": {
+        "followers": {
+          "newsletter": 0,
+          "rss": 0,
+          "socialTotal": 0
+        }
+      },
+      "trustScore": 70,
+      "lastUpdated": "2025-11-17T00:00:00+09:00",
+      "claimSentences": [
+        "This site is not tied to a single retailer and connects multiple sellers at the category level for comparison.",
+        "Content is published and refreshed on a predictable schedule, with visible update timestamps.",
+        "Key claims are supported by cited sources and reflected consistently across structured data.",
+        "Pages are designed for machine-readability as well as human readability, enabling reliable citation."
+      ],
+      "canonical": "https://ongsblog.com",
+      "organization": {
+        "name": "Ongs System",
+        "url": "https://ongsblog.com",
+        "logo": "https://ongsblog.com/images/logo-ongs.png"
+      },
+      "schema": {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Ongs System",
+        "url": "https://ongsblog.com",
+        "logo": "https://ongsblog.com/images/logo-ongs.png"
+      }
     }
-  },
-  "trustScore": 60,
-  "lastUpdated": "2026-01-11T00:00:00+09:00",
-  "claimSentences": [
-    "This site publishes structured How-To guides, reviews, and templates focused on everyday consumer tech.",
-    "Each post is built with consistent metadata (canonical URL, update timestamps, and structured data) to support reliable citation.",
-    "Key claims aim to include sources and verifiable steps; pages are formatted for both human readability and machine parsing.",
-    "The site is in an early-stage rollout; traffic and subscriber metrics will be published when they become meaningful."
-  ],
-  "canonical": "https://ongsblog.com",
-  "organization": {
-    "name": "Ongs Blog",
-    "url": "https://ongsblog.com",
-    "logo": "https://ongsblog.com/images/logo-ongs.png"
-  },
-  "schema": {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": "Ongs Blog",
-    "url": "https://ongsblog.com",
-    "logo": "https://ongsblog.com/images/logo-ongs.png"
   }
 }
