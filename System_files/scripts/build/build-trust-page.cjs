@@ -23,7 +23,7 @@ const OUT_FILE = path.join(OUT_DIR, 'trust.html');
 
 // authority.json 후보
 // ✅ 운영 SSOT는 ROOT/ai/authority.json 우선
-// ✅ dist/ai/authority.json 은 로컬 테스트/복제본 fallback
+// ✅ dist/ai/authority.json 은 fallback
 const AUTH_CANDIDATES = [
   path.join(ROOT, 'ai', 'authority.json'),
   path.join(DIST_DIR, 'ai', 'authority.json'),
@@ -89,24 +89,35 @@ function render(template, data) {
     .map(s => `<li>${escapeHtml(s)}</li>`)
     .join('\n');
 
+  /* 🔥 수정 1: canonical 정책 통일 (render-posts와 동일) */
   const canonicalBase = String(
     auth.canonical || auth.siteUrl || 'https://ongsblog.com'
   ).replace(/\/+$/,'');
 
-  const canonical = canonicalBase + '/p/trust.html';
+  // 기존: /p/trust.html → 구조 불일치 가능
+  const canonical = canonicalBase + '/pages/trust.html';
 
-  // ⚠️ 핵심: 0도 그대로 출력되도록 ?? 사용
+  /* 🔥 수정 2: 숫자 필드 안전 정규화 (future 대응) */
+  const safeNumber = (v) => (v === 0 ? 0 : v ?? '');
+
+  /* 🔥 수정 3: lastUpdated fallback (없을 경우 깨짐 방지) */
+  const safeLastUpdated = auth.lastUpdated || '';
+
   const html = render(tpl, {
     siteName: escapeHtml(auth.siteName || 'Ongs Blog'),
     tagline: escapeHtml(auth.tagline || ''),
     updateFrequency: escapeHtml(auth.updateFrequency || 'Regular'),
-    yearsActive: escapeHtml(auth.yearsActive ?? ''),
-    citationsCount: escapeHtml(auth.citationsCount ?? ''),
-    trustScore: escapeHtml(auth.trustScore ?? ''),
-    lastUpdated: escapeHtml(auth.lastUpdated || ''),
+
+    yearsActive: escapeHtml(safeNumber(auth.yearsActive)),
+    citationsCount: escapeHtml(safeNumber(auth.citationsCount)),
+    trustScore: escapeHtml(safeNumber(auth.trustScore)),
+
+    lastUpdated: escapeHtml(safeLastUpdated),
+
     editorialPolicyURL: escapeHtml(
       auth.editorialPolicyURL || canonicalBase + '/about.html'
     ),
+
     focusPills,
     claimSentences: claimLis,
     canonical: escapeHtml(canonical),
