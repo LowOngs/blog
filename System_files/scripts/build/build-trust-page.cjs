@@ -9,6 +9,7 @@
  *  - authority.json 값이 0이어도 화면에 그대로 노출되어야 함
  *  - 사람용(trust.html)과 기계판(authority.json) 수치 불일치 금지
  *  - 운영 SSOT는 ROOT 기준 authority.json 이다
+ *  - activeProfile 기반 자동 전환 지원
  */
 
 const fs = require('fs');
@@ -59,6 +60,33 @@ function render(template, data) {
   );
 }
 
+/* ✅ 국부 수술: activeProfile 구조 지원 */
+function resolveAuthorityProfile(raw) {
+  if (!raw || typeof raw !== 'object') {
+    throw new Error('authority.json invalid');
+  }
+
+  const hasProfiles = raw.profiles && typeof raw.profiles === 'object';
+  if (!hasProfiles) {
+    return {
+      activeProfile: 'legacy',
+      auth: raw,
+    };
+  }
+
+  const activeProfile = String(raw.activeProfile || 'stage1');
+  const auth = raw.profiles[activeProfile];
+
+  if (!auth || typeof auth !== 'object') {
+    throw new Error(`authority activeProfile not found: ${activeProfile}`);
+  }
+
+  return {
+    activeProfile,
+    auth,
+  };
+}
+
 (function main(){
   console.log('────────────────────────────────────────────');
   console.log('[trust] ROOT =', ROOT);
@@ -75,7 +103,9 @@ function render(template, data) {
   }
 
   const tpl = fs.readFileSync(TEMPLATE, 'utf8');
-  const auth = readJson(authFile);
+  const rawAuth = readJson(authFile);
+  const resolved = resolveAuthorityProfile(rawAuth);
+  const auth = resolved.auth;
 
   // 배열 안전 처리
   const focusTopics = Array.isArray(auth.focusTopics) ? auth.focusTopics : [];
@@ -89,35 +119,26 @@ function render(template, data) {
     .map(s => `<li>${escapeHtml(s)}</li>`)
     .join('\n');
 
-  /* 🔥 수정 1: canonical 정책 통일 (render-posts와 동일) */
   const canonicalBase = String(
     auth.canonical || auth.siteUrl || 'https://ongsblog.com'
   ).replace(/\/+$/,'');
 
-  // 기존: /p/trust.html → 구조 불일치 가능
   const canonical = canonicalBase + '/pages/trust.html';
 
-  /* 🔥 수정 2: 숫자 필드 안전 정규화 (future 대응) */
   const safeNumber = (v) => (v === 0 ? 0 : v ?? '');
-
-  /* 🔥 수정 3: lastUpdated fallback (없을 경우 깨짐 방지) */
   const safeLastUpdated = auth.lastUpdated || '';
 
   const html = render(tpl, {
     siteName: escapeHtml(auth.siteName || 'Ongs Blog'),
     tagline: escapeHtml(auth.tagline || ''),
     updateFrequency: escapeHtml(auth.updateFrequency || 'Regular'),
-
     yearsActive: escapeHtml(safeNumber(auth.yearsActive)),
     citationsCount: escapeHtml(safeNumber(auth.citationsCount)),
     trustScore: escapeHtml(safeNumber(auth.trustScore)),
-
     lastUpdated: escapeHtml(safeLastUpdated),
-
     editorialPolicyURL: escapeHtml(
       auth.editorialPolicyURL || canonicalBase + '/about.html'
     ),
-
     focusPills,
     claimSentences: claimLis,
     canonical: escapeHtml(canonical),
@@ -127,6 +148,7 @@ function render(template, data) {
   fs.writeFileSync(OUT_FILE, html, 'utf8');
 
   console.log('[trust] authority =', authFile);
+  console.log('[trust] profile   =', resolved.activeProfile);
   console.log('[trust] output    =', OUT_FILE);
   console.log('────────────────────────────────────────────');
 })();
