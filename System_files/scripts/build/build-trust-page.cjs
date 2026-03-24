@@ -3,11 +3,12 @@
 /**
  * build-trust-page.cjs
  * Role: authority.json(SSOT) → dist/pages/trust.html 렌더
- * READ: templates/about-trust.html, dist/ai/authority.json
+ * READ: templates/about-trust.html, ROOT/ai/authority.json (우선), dist/ai/authority.json (fallback)
  * WRITE: dist/pages/trust.html
  * Invariants:
  *  - authority.json 값이 0이어도 화면에 그대로 노출되어야 함
  *  - 사람용(trust.html)과 기계판(authority.json) 수치 불일치 금지
+ *  - 운영 SSOT는 ROOT 기준 authority.json 이다
  */
 
 const fs = require('fs');
@@ -20,10 +21,12 @@ const DIST_DIR = path.join(ROOT, 'dist');
 const OUT_DIR = path.join(DIST_DIR, 'pages');
 const OUT_FILE = path.join(OUT_DIR, 'trust.html');
 
-// authority.json 후보 (빌드 순서/환경 차이 대비)
+// authority.json 후보
+// ✅ 운영 SSOT는 ROOT/ai/authority.json 우선
+// ✅ dist/ai/authority.json 은 로컬 테스트/복제본 fallback
 const AUTH_CANDIDATES = [
-  path.join(DIST_DIR, 'ai', 'authority.json'),
   path.join(ROOT, 'ai', 'authority.json'),
+  path.join(DIST_DIR, 'ai', 'authority.json'),
 ];
 
 function ensureDir(p) {
