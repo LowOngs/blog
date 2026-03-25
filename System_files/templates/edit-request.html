@@ -48,32 +48,56 @@
     </div>
 
     <small class="hint">
+      • 수정은 <b>본문(body) 한정 부분 수정</b>만 허용됩니다.<br>
+      • 허용 범위: <b>단어 / 문장 / 짧은 문단 일부 / 소제목 아래 일부 내용</b><br>
+      • 금지 범위: <b>본문 전체 재작성, 구조 변경, title, slug, pageId, labels, canonical, meta, schema, FAQ 전체, Sources 전체</b><br>
       • “내용 비우기”를 눌러도 <b>기본 서식 자체는 다시 채워집니다</b> (완전 빈칸 아님).<br>
       • 이 페이지는 실제 GitHub PR을 만들지 않고, <b>GPT에게 보낼 요청서만 만드는 도구</b>입니다.
     </small>
   </div>
 
   <script>
-    // ✅ 여기 안에 pull_request_template.md 원본 서식을 그대로 넣어 주세요.
     const DEFAULT_TEMPLATE = `# Page URL
 [여기에 수정이 필요한 페이지 URL을 적어 주세요]
 
 # Page ID
-□ 수정 대상 글번호(ex. Page123) : 
+□ 수정 대상 페이지 번호(ex. page000123) : 
+
+# Allowed scope
+■ 허용 범위(반드시 아래 중 하나로만 작성)
+- 단어 수정
+- 한 문장 수정
+- 짧은 문단 일부 수정
+- 소제목 아래 일부 내용 수정
+
+# Forbidden scope
+■ 금지 범위(요청하지 말 것)
+- 본문 전체 재작성
+- 문서 구조 변경
+- title 수정
+- slug 수정
+- pageId 수정
+- labels 수정
+- canonical 수정
+- meta / schema 수정
+- FAQ 전체 수정
+- Sources 전체 수정
 
 # Issue type
-□ 수정 의도(ex. 오타/의미 왜곡/정보 오류/표현 수정/기타):
+□ 수정 의도(ex. 오타 / 의미 왜곡 / 정보 오류 / 표현 수정) :
 
 # Current text
-□ 수정 대상 글 / 문장(대상 원문) :
+□ 수정 대상 본문 원문(단어/문장/짧은 문단 일부만) :
 
 
 # Suggested fix
-■ 수정 요청 내용(한글/영문) :
+■ 원하는 수정 내용 :
+(본문 한정 부분 수정만 적어 주세요. 전체 재작성 금지)
 
 
 # Extra notes
-□ 추가로 설명하고 싶은 내용을 적어 주세요. 없으면 "없음"`;
+□ 추가 메모 :
+없으면 "없음"`;
 
     const textarea = document.getElementById('prText');
     const copyBtn  = document.getElementById('copyBtn');
@@ -82,11 +106,10 @@
     function resetToTemplate() {
       textarea.value = DEFAULT_TEMPLATE;
       textarea.focus();
-      // 커서를 맨 아래로
       textarea.setSelectionRange(textarea.value.length, textarea.value.length);
     }
 
-    resetToTemplate(); // 처음 로드 시 기본 서식 채우기
+    resetToTemplate();
 
     copyBtn.addEventListener('click', async () => {
       try {
