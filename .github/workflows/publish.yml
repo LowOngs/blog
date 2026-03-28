@@ -122,7 +122,6 @@ jobs:
           test -f ./System_files/scripts/build/normalize-body.cjs
           test -f ./System_files/scripts/build/validate-repair.cjs
           test -f ./System_files/scripts/build/update-posts-index.cjs
-          test -f ./System_files/scripts/build/ai-meta.js
           test -f ./System_files/scripts/build/build-feed.cjs
           test -f ./System_files/scripts/build/validate-feed.cjs
           test -f ./System_files/scripts/build/copy-tools.cjs
@@ -158,9 +157,8 @@ jobs:
           npm run images:renew
           npm run images:build:og
           npm run images:upload
-          npm run images:rewrite
 
-      - name: Re-render after image rewrite
+      - name: Re-render after image pipeline
         run: |
           npm run reviews:ssot:build
           npm run reviews:inject
@@ -177,7 +175,6 @@ jobs:
       - name: AI outputs
         run: |
           node ./System_files/scripts/build/update-posts-index.cjs
-          node ./System_files/scripts/build/ai-meta.js
           npm run feed:build
           npm run feed:validate
 
