@@ -30,7 +30,6 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      # ── Runtime base (SSOT)
       SYSTEM_ROOT: System_files
 
       CANONICAL_BASE: ${{ secrets.CANONICAL_BASE }}
@@ -65,7 +64,6 @@ jobs:
         with:
           node-version: "24"
 
-      # repo root 기준
       - name: Install dependencies
         run: npm ci
 
@@ -84,20 +82,20 @@ jobs:
 
           if [ "${{ github.event_name }}" = "schedule" ]; then
             if [ "${SCHEDULE_MODE}" != "live" ]; then
-              echo "SKIP_SCHEDULE=true" >> $GITHUB_OUTPUT
+              echo "SKIP_SCHEDULE=true" >> "$GITHUB_OUTPUT"
               exit 0
             fi
-            echo "SKIP_SCHEDULE=false" >> $GITHUB_OUTPUT
-            echo "FINAL_DRY_RUN=false" >> $GITHUB_OUTPUT
+            echo "SKIP_SCHEDULE=false" >> "$GITHUB_OUTPUT"
+            echo "FINAL_DRY_RUN=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          echo "SKIP_SCHEDULE=false" >> $GITHUB_OUTPUT
+          echo "SKIP_SCHEDULE=false" >> "$GITHUB_OUTPUT"
 
           if [ "${RUN_MODE}" = "auto" ]; then
-            echo "FINAL_DRY_RUN=false" >> $GITHUB_OUTPUT
+            echo "FINAL_DRY_RUN=false" >> "$GITHUB_OUTPUT"
           else
-            echo "FINAL_DRY_RUN=$(parse_dry_run "${DRY_RUN_INPUT}")" >> $GITHUB_OUTPUT
+            echo "FINAL_DRY_RUN=$(parse_dry_run "${DRY_RUN_INPUT}")" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Stop (schedule disabled)
@@ -106,79 +104,93 @@ jobs:
 
       - name: Export runtime env
         run: |
-          echo "DRY_RUN=${{ steps.modes.outputs.FINAL_DRY_RUN }}" >> $GITHUB_ENV
-
-      # ─────────────────────────────────────────────
-      # 이하 전부 System_files 기준
-      # ─────────────────────────────────────────────
+          echo "DRY_RUN=${{ steps.modes.outputs.FINAL_DRY_RUN }}" >> "$GITHUB_ENV"
 
       - name: Sanity check
-        working-directory: System_files
         run: |
-          test -f scripts/build/seed-scheduler.cjs
-          test -f scripts/build/queue-to-posts.cjs
-          test -f scripts/build/ids.cjs
-          test -f scripts/build/generate-body.cjs
-          test -f scripts/build/render-posts.cjs
-          test -f scripts/publish/blogger.cjs
+          test -f ./System_files/scripts/build/seed-scheduler.cjs
+          test -f ./System_files/scripts/build/queue-to-posts.cjs
+          test -f ./System_files/scripts/build/ids.cjs
+          test -f ./System_files/scripts/build/generate-body.cjs
+          test -f ./System_files/scripts/build/images-body-sync.cjs
+          test -f ./System_files/scripts/build/validate-body-images.cjs
+          test -f ./System_files/scripts/build/build-ssot-reviews.cjs
+          test -f ./System_files/scripts/build/inject-reviews-from-ssot.cjs
+          test -f ./System_files/scripts/build/review-resolver.cjs
+          test -f ./System_files/scripts/build/review-meta-block.cjs
+          test -f ./System_files/scripts/build/render-posts.cjs
+          test -f ./System_files/scripts/build/normalize-body.cjs
+          test -f ./System_files/scripts/build/validate-repair.cjs
+          test -f ./System_files/scripts/build/update-posts-index.cjs
+          test -f ./System_files/scripts/build/ai-meta.js
+          test -f ./System_files/scripts/build/build-feed.cjs
+          test -f ./System_files/scripts/build/validate-feed.cjs
+          test -f ./System_files/scripts/build/copy-tools.cjs
+          test -f ./System_files/scripts/build/build-trust-page.cjs
+          test -f ./System_files/scripts/publish/blogger.cjs
 
-      - name: Build queue + body
-        working-directory: System_files
+      - name: Build queue + ids + body
         run: |
-          node scripts/build/seed-scheduler.cjs
-          node scripts/build/queue-to-posts.cjs
-          node scripts/build/ids.cjs
-          node scripts/build/generate-body.cjs
+          npm run queue:pick
+          npm run queue:to-posts
+          npm run ids
+          npm run posts:body:generate
 
-      - name: Reviews / render
-        working-directory: System_files
+      - name: Review SSOT build
         run: |
-          node scripts/build/review-resolver.cjs
-          node scripts/build/render-posts.cjs
-          node scripts/build/normalize-body.cjs
-          node scripts/build/review-meta-block.cjs
+          npm run reviews:ssot:build
+          npm run reviews:inject
+          npm run reviews:resolver
 
-      - name: Images
-        working-directory: System_files
+      - name: Body image SSOT sync + validate
         run: |
-          node scripts/build/images-renew.cjs
-          node scripts/build/images-build-og.cjs
+          node ./System_files/scripts/build/images-body-sync.cjs
+          npm run posts:body-images:validate
+
+      - name: First render + normalize + review meta
+        run: |
+          npm run posts:render
+          npm run posts:normalize
+          npm run posts:review:meta
+
+      - name: Images pipeline
+        run: |
+          npm run images:renew
+          npm run images:build:og
           npm run images:upload
           npm run images:rewrite
 
-      - name: Render after rewrite
-        working-directory: System_files
+      - name: Re-render after image rewrite
         run: |
-          node scripts/build/render-posts.cjs
-          node scripts/build/normalize-body.cjs
+          npm run reviews:ssot:build
+          npm run reviews:inject
+          npm run posts:render
+          npm run posts:normalize
+          npm run posts:review:meta
 
-      - name: Validate & QA
-        working-directory: System_files
+      - name: Validate + review SSOT validate + QA
         run: |
-          node scripts/build/validate-repair.cjs
+          npm run posts:validate
+          npm run posts:review:ssot:validate
           npm run posts:qa
 
       - name: AI outputs
-        working-directory: System_files
         run: |
-          node scripts/build/update-posts-index.cjs
-          node scripts/build/ai-meta.js
-          node scripts/build/build-feed.cjs
-          node scripts/build/validate-feed.cjs
+          node ./System_files/scripts/build/update-posts-index.cjs
+          node ./System_files/scripts/build/ai-meta.js
+          npm run feed:build
+          npm run feed:validate
 
       - name: Tools + Trust page
-        working-directory: System_files
         run: |
-          node scripts/build/copy-tools.cjs
-          node scripts/build/build-trust-page.cjs
+          npm run tools:copy
+          npm run pages:trust
 
       - name: Publish to Blogger
         if: env.DRY_RUN != 'true' && env.PUBLISH_MODE == 'enable'
-        working-directory: System_files
         run: |
-          node scripts/publish/blogger.cjs
+          npm run publish:blogger
 
-      # repo root 기준
       - name: Commit artifacts
         run: |
           git config user.name "github-actions"
