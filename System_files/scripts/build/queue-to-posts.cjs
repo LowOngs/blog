@@ -339,6 +339,38 @@ function findExistingPostBySeed(queueDate, label, seedId) {
 }
 
 /* ============================================================
+ * bodyPrompt 생성
+ * - generate-content.cjs가 읽을 최소 재료를 구성한다.
+ * - 기존 구현부와 무관한 로직은 건드리지 않는다.
+ * ============================================================ */
+function buildBodyPrompt(item, label, queueDate) {
+  const title = String(item?.title || '').trim();
+  const intent = Object.prototype.hasOwnProperty.call(item || {}, 'intent')
+    ? (item.intent == null ? '' : String(item.intent).trim())
+    : '';
+
+  const lines = [
+    `Title: ${title}`,
+    `Label: ${label}`,
+    `QueueDate: ${queueDate}`,
+  ];
+
+  if (intent) {
+    lines.push(`Intent: ${intent}`);
+  }
+
+  lines.push(
+    '',
+    'Write the article body in natural English for a real blog reader.',
+    'Follow the Google blog standard and keep the article aligned to the exact intent.',
+    'Use practical reasoning, real decision context, and useful explanation.',
+    'Do not use generic filler, robotic repetition, or shallow statements.'
+  );
+
+  return lines.join('\n');
+}
+
+/* ============================================================
  * 메인 처리
  * ============================================================ */
 const queueCutoff = normalizeCutoff(queue.cutoff || '10:00');
@@ -422,7 +454,7 @@ for (let i = 0; i < items.length; i++) {
     labels: [label],
     updated: resolveUpdatedIsoKst(queueDate, queueCutoff),
 
-    bodyPrompt: '',
+    bodyPrompt: buildBodyPrompt(item, label, queueDate),
     body: '',
 
     seedMeta: {
