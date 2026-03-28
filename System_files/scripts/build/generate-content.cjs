@@ -124,6 +124,42 @@ function extractContext(post) {
   );
 }
 
+function extractBodyPrompt(post) {
+  return normStr(post.bodyPrompt || '');
+}
+
+function parseBodyPrompt(bodyPrompt) {
+  const raw = normStr(bodyPrompt);
+  const out = {
+    raw,
+    lines: [],
+    title: '',
+    label: '',
+    intent: '',
+    queueDate: '',
+    guidance: '',
+  };
+
+  if (!raw) return out;
+
+  const lines = raw.split(/\r?\n/).map(normStr).filter(Boolean);
+  out.lines = lines;
+
+  for (const line of lines) {
+    const lower = toLower(line);
+    if (lower.startsWith('title:')) out.title = normStr(line.slice(6));
+    else if (lower.startsWith('label:')) out.label = normStr(line.slice(6));
+    else if (lower.startsWith('intent:')) out.intent = normStr(line.slice(7));
+    else if (lower.startsWith('queuedate:')) out.queueDate = normStr(line.slice(10));
+  }
+
+  out.guidance = lines
+    .filter(line => !/^(title|label|intent|queuedate)\s*:/i.test(line))
+    .join(' ');
+
+  return out;
+}
+
 function inferTopic(title) {
   const t = normStr(title);
   const l = toLower(title);
@@ -220,6 +256,12 @@ function makeTable(headers, rows) {
   ].join('\n');
 }
 
+function buildPromptAwareLine(meta, fallback) {
+  const hint = normStr(meta.bodyPromptInfo && meta.bodyPromptInfo.guidance);
+  if (!hint) return fallback;
+  return `${fallback} The article also needs to stay aligned with this writing direction: ${hint}.`;
+}
+
 function buildReviewSection(title, label, h2, meta) {
   const productType = inferProductType(label, title);
   const topic = inferTopic(title);
@@ -228,8 +270,8 @@ function buildReviewSection(title, label, h2, meta) {
 
   if (h2 === 'Overview') {
     return makeParagraphs([
-      `${title} should be read as a practical buying decision rather than a headline claim. What matters most at the start is whether this ${productType} fits the way people actually use it, how often they return to it, and whether the provider looks stable enough to keep supporting it over time.`,
-      `A short burst of attention is rarely enough in real use. People usually care about whether the service keeps improving, whether the company continues shipping updates, and whether the overall experience feels dependable after the first week of curiosity wears off.${context ? ` In this case, the context is especially relevant for ${context}.` : ''}`
+      `${title} should be read as a practical buying decision rather than a headline claim. What matters most at the start is whether this ${productType} fits the way people actually use it, how often they return to it, and whether the provider appears stable enough to keep supporting it over time.`,
+      `${buildPromptAwareLine(meta, `A short burst of attention is rarely enough in real use. People usually care about whether the service keeps improving, whether the company appears willing to continue shipping updates, and whether the overall experience feels dependable after the first week of curiosity wears off.${context ? ` In this case, the context is especially relevant for ${context}.` : ''}`)}`
     ]);
   }
 
@@ -325,7 +367,7 @@ function buildSavingsSection(title, h2, meta) {
   if (h2 === 'Overview') {
     return makeParagraphs([
       `${title} is best approached as a value decision, not just a price decision. Most people do not want the cheapest option if it creates friction later. They want something that feels fair, predictable, and strong enough for the way they actually use it.`,
-      `That is why a useful savings article must compare value, limits, and context together. For ${topic}, the practical question is which choice keeps both cost and inconvenience under control over time.${timing === 'future' ? ' If policy changes are expected, future flexibility matters even more.' : ''}`
+      `${buildPromptAwareLine(meta, `That is why a useful savings article must compare value, limits, and context together. For ${topic}, the practical question is which choice keeps both cost and inconvenience under control over time.${timing === 'future' ? ' If policy changes are expected, future flexibility matters even more.' : ''}`)}`
     ]);
   }
 
@@ -408,7 +450,7 @@ function buildHowToSection(title, h2, meta) {
   if (h2 === 'Overview') {
     return makeParagraphs([
       `${title} should be read as a practical execution guide. The goal is not to sound technical for its own sake, but to make the task feel controllable from the first step to the final verification.`,
-      `The most common reason a how-to fails is that people jump into action before checking environment, version, or dependency conditions. In ${context}, the setup around the task matters almost as much as the steps themselves.`
+      `${buildPromptAwareLine(meta, `The most common reason a how-to fails is that people jump into action before checking environment, version, or dependency conditions. In ${context}, the setup around the task matters almost as much as the steps themselves.`)}`
     ]);
   }
 
@@ -471,7 +513,7 @@ function buildTemplateSection(title, h2, meta) {
   if (h2 === 'Overview') {
     return makeParagraphs([
       `${title} is meant to reduce hesitation at the moment of action. The value of a template or checklist is not abstract structure by itself, but the way it turns a vague task into something repeatable and easier to start.`,
-      `People usually save and reuse a template when it removes friction, prevents omission, and still leaves enough room for personal adjustment.`
+      `${buildPromptAwareLine(meta, 'People usually save and reuse a template when it removes friction, prevents omission, and still leaves enough room for personal adjustment.')}`
     ]);
   }
 
@@ -524,6 +566,163 @@ function buildTemplateSection(title, h2, meta) {
   ]);
 }
 
+/* ============================================================
+ * A/C/D 자기검수·보정 루프
+ * A: 사실성/과장/일루전 완화
+ * C: 라벨별 핵심 기준 충족 보강
+ * D: AI-티/기계식 어투 완화
+ * ============================================================ */
+function stripDangerousAbsolutes(text) {
+  return String(text || '')
+    .replace(/\b(always|never|guaranteed|perfect|everyone|no one)\b/gi, (m) => {
+      const map = {
+        always: 'often',
+        never: 'rarely',
+        guaranteed: 'more likely',
+        perfect: 'strong',
+        everyone: 'many people',
+        'no one': 'few people'
+      };
+      return map[toLower(m)] || m;
+    })
+    .replace(/\b(is best judged by fit, not by hype)\b/gi, 'is more useful to judge by fit than by hype')
+    .replace(/\bthe strongest\b/gi, 'the more reliable')
+    .replace(/\bthe safest\b/gi, 'the safer');
+}
+
+function applyStabilityCaution(text) {
+  return String(text || '')
+    .replace(/provider looks stable enough/gi, 'provider appears stable enough')
+    .replace(/company continues shipping updates/gi, 'company appears willing to continue shipping updates')
+    .replace(/stays usable longer/gi, 'can remain usable longer')
+    .replace(/can be a sensible choice/gi, 'may be a sensible choice');
+}
+
+function stripRobotPhrases(text) {
+  return String(text || '')
+    .replace(/\bIn other words,\s*/g, '')
+    .replace(/\bThat is why\b/g, 'This is why')
+    .replace(/\bThe practical advantage\b/g, 'The value')
+    .replace(/\bThe better way\b/g, 'A better way')
+    .replace(/\bIt is better to\b/g, 'It helps to');
+}
+
+function ensureReviewCriteria(html, h2, title) {
+  let out = String(html || '');
+
+  if (h2 === 'Overview' && !/stable|supporting|updates|dependable/i.test(out)) {
+    out += '\n' + makeParagraphs([
+      `${title} should not be judged only by first impressions. Long-term support, update continuity, and the ability to remain dependable after the initial trial period matter just as much as early convenience.`
+    ]);
+  }
+
+  if (h2 === 'Specs & ROI' && !/cost|price|roi|limits|support/i.test(out)) {
+    out += '\n' + makeParagraphs([
+      `A realistic ROI view should connect cost, hidden limits, and support horizon instead of treating the visible price as the whole decision.`
+    ]);
+  }
+
+  return out;
+}
+
+function ensureSavingsCriteria(html, h2, title) {
+  let out = String(html || '');
+
+  if (h2 === 'Compare Options' && !/<table>/i.test(out)) {
+    out += '\n' + makeTable(
+      ['Option', 'Best when', 'Risk to watch'],
+      [
+        ['Option A', 'Lower entry cost matters most', 'Restrictions may surface early'],
+        ['Option B', 'Balance matters most', 'Can feel less distinctive'],
+        ['Option C', 'Flexibility matters most', 'Often starts higher']
+      ]
+    );
+  }
+
+  if (h2 === 'How to Save More' && !/<ul>/i.test(out)) {
+    out += '\n' + makeList([
+      'Compare real usage before changing.',
+      'Read the policy wording, not just the headline price.',
+      'Treat hidden limits as part of the actual cost.'
+    ]);
+  }
+
+  if (h2 === 'Overview' && !/value|limits|predictable|cost/i.test(out)) {
+    out += '\n' + makeParagraphs([
+      `${title} should balance visible price, practical limits, and predictable long-term value instead of chasing the smallest headline discount alone.`
+    ]);
+  }
+
+  return out;
+}
+
+function ensureHowToCriteria(html, h2, title) {
+  let out = String(html || '');
+
+  if (h2 === 'Checklist' && !/<ul>/i.test(out)) {
+    out += '\n' + makeList([
+      'Version checked',
+      'Environment confirmed',
+      'Main action completed',
+      'Result verified'
+    ]);
+  }
+
+  if (h2 === 'Overview' && !/verification|environment|step|setup/i.test(out)) {
+    out += '\n' + makeParagraphs([
+      `${title} needs a clear sequence, a known environment, and an explicit verification point so the reader can tell whether the task actually worked.`
+    ]);
+  }
+
+  return out;
+}
+
+function ensureTemplateCriteria(html, h2, title) {
+  let out = String(html || '');
+
+  if (h2 === 'Template / Checklist' && !/<table>/i.test(out)) {
+    out += '\n' + makeTable(
+      ['Item', 'Action', 'Tip'],
+      [
+        ['Prepare', 'Define the goal', 'Keep the target clear'],
+        ['Check', 'Confirm required inputs', 'Avoid missing blockers'],
+        ['Execute', 'Follow the steps', 'Verify before moving on']
+      ]
+    );
+  }
+
+  if (h2 === 'Overview' && !/repeatable|reuse|friction|action/i.test(out)) {
+    out += '\n' + makeParagraphs([
+      `${title} should reduce hesitation, make execution more repeatable, and help the reader move from intention to action with less friction.`
+    ]);
+  }
+
+  return out;
+}
+
+function selfReviewAndPolish(post, h2, html) {
+  const label = extractLabel(post);
+  let out = String(html || '');
+
+  for (let pass = 0; pass < 2; pass++) {
+    out = stripDangerousAbsolutes(out);
+    out = applyStabilityCaution(out);
+    out = stripRobotPhrases(out);
+
+    if (REVIEW_LABELS.has(label)) {
+      out = ensureReviewCriteria(out, h2, normStr(post.title));
+    } else if (label === 'smart-savings') {
+      out = ensureSavingsCriteria(out, h2, normStr(post.title));
+    } else if (label === 'how-to-playbooks') {
+      out = ensureHowToCriteria(out, h2, normStr(post.title));
+    } else if (label === 'templates-checklists') {
+      out = ensureTemplateCriteria(out, h2, normStr(post.title));
+    }
+  }
+
+  return out;
+}
+
 function buildBodyByLabel(post, h2) {
   const title = normStr(post.title);
   const label = extractLabel(post);
@@ -531,27 +730,26 @@ function buildBodyByLabel(post, h2) {
     intent: extractIntent(post),
     timing: extractTiming(post),
     context: extractContext(post),
+    bodyPromptInfo: parseBodyPrompt(extractBodyPrompt(post)),
   };
 
+  let html = '';
+
   if (REVIEW_LABELS.has(label)) {
-    return buildReviewSection(title, label, h2, meta);
+    html = buildReviewSection(title, label, h2, meta);
+  } else if (label === 'smart-savings') {
+    html = buildSavingsSection(title, h2, meta);
+  } else if (label === 'how-to-playbooks') {
+    html = buildHowToSection(title, h2, meta);
+  } else if (label === 'templates-checklists') {
+    html = buildTemplateSection(title, h2, meta);
+  } else {
+    html = makeParagraphs([
+      `${title} should be read through actual use, realistic constraints, and the quality of the decision it supports.`
+    ]);
   }
 
-  if (label === 'smart-savings') {
-    return buildSavingsSection(title, h2, meta);
-  }
-
-  if (label === 'how-to-playbooks') {
-    return buildHowToSection(title, h2, meta);
-  }
-
-  if (label === 'templates-checklists') {
-    return buildTemplateSection(title, h2, meta);
-  }
-
-  return makeParagraphs([
-    `${title} should be read through actual use, realistic constraints, and the quality of the decision it supports.`
-  ]);
+  return selfReviewAndPolish(post, h2, html);
 }
 
 function replacePlaceholderBody(post) {
@@ -619,6 +817,8 @@ function main() {
         updatedAt: new Date().toISOString(),
         writeMode: CONTENT_WRITE_MODE,
         label: label || '',
+        bodyPromptUsed: !!extractBodyPrompt(post),
+        selfReviewLoop: ['A:factuality', 'C:criteria-check', 'D:anti-ai-tone'],
       };
 
       if (CAN_WRITE) {
