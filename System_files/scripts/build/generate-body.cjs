@@ -62,6 +62,11 @@ const REVIEW_OPTIONAL_RULE = { min: 1, max: 2 };
 // 비리뷰 라벨(프로젝트 기준)
 const NON_REVIEW_LABELS = new Set(['how-to-playbooks', 'smart-savings', 'templates-checklists']);
 
+// generate-body 책임 범위 밖 라벨
+// - firstgate/origin 계열은 origin 파이프라인의 결과물/고정 콘텐츠 성격이므로
+//   여기서 본문 생성 대상으로 해석하지 않는다.
+const EXCLUDED_GENERATE_LABELS = new Set(['firstgate']);
+
 // 구글 기준서의 "의도(Intent) 필터" 카테고리(표준화)
 const INTENT_ENUM = Object.freeze({
   EXPLAIN: 'explain',       // 설명
@@ -156,6 +161,9 @@ function countH2(html) {
   const s = String(html || '');
   const m = s.match(/<h2\b[^>]*>/gi);
   return m ? m.length : 0;
+}
+function isExcludedGenerateLabel(label) {
+  return EXCLUDED_GENERATE_LABELS.has(normStr(label));
 }
 
 // ─────────────────────────────────────────────
@@ -461,6 +469,14 @@ function main() {
     // 0) body가 이미 있으면 스킵(덮어쓰기 금지)
     if (hasBody(post)) {
       console.log(`[SKIP] ${slug} — body 이미 존재`);
+      skipped++;
+      continue;
+    }
+
+    // 1) generate-body 책임 범위 밖 라벨은 조용히 스킵
+    // - firstgate/origin 계열이 여기서 FAIL 나면 파이프라인 해석 범위가 잘못된 것
+    if (isExcludedGenerateLabel(label)) {
+      console.log(`[SKIP] ${slug} — generate-body 대상 아님 (${label})`);
       skipped++;
       continue;
     }
