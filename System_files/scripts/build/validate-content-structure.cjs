@@ -35,6 +35,10 @@ const LOGS_DIR = path.join(ROOT, 'logs');
 const GENERATE_CONTENT_FILE = path.join(ROOT, 'scripts', 'build', 'generate-content.cjs');
 const REPAIR_REQUEST_FILE = path.join(LOGS_DIR, 'content-repair-request.json');
 const REPORT_FILE = path.join(LOGS_DIR, 'content-structure-report.json');
+const TODAY_EXPANDED_FILE = path.join(ROOT, 'dist', 'queue', 'today.expanded.json');
+
+const CONTENT_VALIDATE_MODE_RAW = String(process.env.CONTENT_VALIDATE_MODE || 'latest').trim().toLowerCase();
+const CONTENT_VALIDATE_MODE = CONTENT_VALIDATE_MODE_RAW === 'full' ? 'full' : 'latest';
 
 const EXCLUDED_LABELS = new Set(['firstgate']);
 
@@ -53,6 +57,7 @@ console.log('[validate-content-structure] ROOT       =', ROOT);
 console.log('[validate-content-structure] POSTS_DIR  =', POSTS_DIR);
 console.log('[validate-content-structure] REQUEST    =', REPAIR_REQUEST_FILE);
 console.log('[validate-content-structure] REPORT     =', REPORT_FILE);
+console.log('[validate-content-structure] MODE       =', CONTENT_VALIDATE_MODE);
 console.log('────────────────────────────────────────────');
 
 function ensureDir(dir) {
@@ -312,6 +317,7 @@ function writeRepairRequest(items) {
     generatedAt: new Date().toISOString(),
     requestedBy: 'validate-content-structure.cjs',
     mode: 'repair-once',
+    validateMode: CONTENT_VALIDATE_MODE,
     items: items.map(x => ({
       slug: x.slug,
       label: x.label,
@@ -384,6 +390,30 @@ function buildInitialReport(files) {
   return files.map(full => inspectPostFile(full));
 }
 
+function loadLatestTargetSlugSet() {
+  if (CONTENT_VALIDATE_MODE !== 'latest') return null;
+  if (!fs.existsSync(TODAY_EXPANDED_FILE)) return new Set();
+
+  try {
+    const doc = readJSON(TODAY_EXPANDED_FILE);
+    const items = Array.isArray(doc && doc.items) ? doc.items : [];
+
+    const slugs = items
+      .map(item => normStr(item && (item.generatedSlug || item.slug)))
+      .filter(Boolean);
+
+    return new Set(slugs);
+  } catch {
+    return new Set();
+  }
+}
+
+function shouldIncludeByMode(slug, latestSlugSet) {
+  if (CONTENT_VALIDATE_MODE === 'full') return true;
+  if (!latestSlugSet) return false;
+  return latestSlugSet.has(slug);
+}
+
 function main() {
   ensureDir(LOGS_DIR);
 
@@ -399,6 +429,11 @@ function main() {
 
   console.log('[validate-content-structure] JSON 파일 수 =', files.length);
 
+  const latestSlugSet = loadLatestTargetSlugSet();
+  if (CONTENT_VALIDATE_MODE === 'latest') {
+    console.log('[validate-content-structure] latest 대상 slug 수 =', latestSlugSet ? latestSlugSet.size : 0);
+  }
+
   const targetFiles = [];
   for (const full of files) {
     let post;
@@ -411,6 +446,9 @@ function main() {
 
     const label = extractLabel(post);
     if (isExcludedLabel(label)) continue;
+
+    const slug = normStr(post.slug) || path.basename(full, '.json');
+    if (!shouldIncludeByMode(slug, latestSlugSet)) continue;
 
     targetFiles.push(full);
   }
@@ -436,6 +474,7 @@ function main() {
 
   const summary = {
     generatedAt: new Date().toISOString(),
+    validateMode: CONTENT_VALIDATE_MODE,
     firstPassFailTargets: firstFailTargets.length,
     repairTriggered: repairResult.ran,
     repairOk: repairResult.ok,
@@ -465,6 +504,7 @@ function main() {
 
   console.log('────────────────────────────────────────────');
   console.log('[validate-content-structure] 결과');
+  console.log('  mode    =', summary.validateMode);
   console.log('  checked =', summary.checked);
   console.log('  pass    =', summary.pass);
   console.log('  warn    =', summary.warn);
