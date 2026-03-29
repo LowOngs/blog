@@ -90,6 +90,10 @@ function extractLabel(post) {
   return '';
 }
 
+function isExcludedLabel(label) {
+  return EXCLUDED_LABELS.has(normStr(label));
+}
+
 function stripHtml(html) {
   return String(html || '')
     .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, ' ')
