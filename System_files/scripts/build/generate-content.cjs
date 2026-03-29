@@ -32,6 +32,10 @@ const POSTS_DIR = path.join(ROOT, 'content', 'posts');
 const CONTENT_WRITE_MODE = String(process.env.CONTENT_WRITE_MODE || 'local').trim().toLowerCase();
 const CAN_WRITE = CONTENT_WRITE_MODE === 'local' || CONTENT_WRITE_MODE === 'active';
 
+const CONTENT_REPAIR_MODE = String(process.env.CONTENT_REPAIR_MODE || '').trim() === '1';
+const CONTENT_REPAIR_REQUEST_FILE = String(process.env.CONTENT_REPAIR_REQUEST_FILE || '').trim();
+const CONTENT_TARGET_SLUGS_RAW = String(process.env.CONTENT_TARGET_SLUGS || '').trim();
+
 const EXCLUDED_LABELS = new Set(['firstgate']);
 
 const REVIEW_LABELS = new Set([
@@ -51,6 +55,7 @@ console.log('[generate-content] 시작');
 console.log('[generate-content] ROOT              =', ROOT);
 console.log('[generate-content] POSTS_DIR         =', POSTS_DIR);
 console.log('[generate-content] CONTENT_WRITE_MODE=', CONTENT_WRITE_MODE, CAN_WRITE ? '(WRITE)' : '(DRY)');
+console.log('[generate-content] CONTENT_REPAIR_MODE =', CONTENT_REPAIR_MODE ? 'true' : 'false');
 console.log('────────────────────────────────────────────');
 
 function readJSON(p) {
@@ -723,7 +728,83 @@ function selfReviewAndPolish(post, h2, html) {
   return out;
 }
 
-function buildBodyByLabel(post, h2) {
+function parseRepairRequestFile() {
+  if (!CONTENT_REPAIR_REQUEST_FILE) return null;
+  if (!fs.existsSync(CONTENT_REPAIR_REQUEST_FILE)) return null;
+
+  try {
+    const doc = readJSON(CONTENT_REPAIR_REQUEST_FILE);
+    if (!doc || typeof doc !== 'object') return null;
+    if (!Array.isArray(doc.items)) return null;
+    return doc;
+  } catch {
+    return null;
+  }
+}
+
+function parseTargetSlugSet() {
+  if (!CONTENT_TARGET_SLUGS_RAW) return null;
+  const arr = CONTENT_TARGET_SLUGS_RAW
+    .split(',')
+    .map(normStr)
+    .filter(Boolean);
+
+  if (!arr.length) return null;
+  return new Set(arr);
+}
+
+function getRepairHintsBySlug() {
+  const req = parseRepairRequestFile();
+  const map = new Map();
+
+  if (!req || !Array.isArray(req.items)) return map;
+
+  for (const item of req.items) {
+    const slug = normStr(item && item.slug);
+    if (!slug) continue;
+
+    const issues = Array.isArray(item.issues) ? item.issues : [];
+    map.set(slug, issues);
+  }
+
+  return map;
+}
+
+function buildRepairHintParagraphs(slug, h2, issues) {
+  const codes = ensureArray(issues)
+    .map(x => normStr(x && x.code))
+    .filter(Boolean);
+
+  const hints = [];
+
+  if (codes.some(code => /TEXT_TOO_SHORT|SECTION_THIN/i.test(code))) {
+    hints.push(`This section needs slightly more concrete detail so the reader can understand not just the conclusion, but the reasoning behind it.`);
+  }
+
+  if (codes.some(code => /SAVINGS_TABLE_REQUIRED/i.test(code)) && h2 === 'Compare Options') {
+    hints.push(`A comparison should remain visible in structured form so the reader can weigh trade-offs instead of relying on vague impressions.`);
+  }
+
+  if (codes.some(code => /SAVINGS_LIST_REQUIRED/i.test(code)) && h2 === 'How to Save More') {
+    hints.push(`Practical savings advice is stronger when it ends with short, actionable points the reader can immediately apply.`);
+  }
+
+  if (codes.some(code => /HOWTO_LIST_REQUIRED/i.test(code)) && h2 === 'Checklist') {
+    hints.push(`This checklist should stay explicit enough that the reader can verify the task without guessing what comes next.`);
+  }
+
+  if (codes.some(code => /TEMPLATE_TABLE_REQUIRED/i.test(code)) && h2 === 'Template / Checklist') {
+    hints.push(`A reusable template becomes easier to trust when the structure is visible in a clear table rather than implied only through prose.`);
+  }
+
+  if (codes.some(code => /REVIEW_ROI_MISSING/i.test(code)) && h2 === 'Specs & ROI') {
+    hints.push(`The ROI part should make the cost-to-value relationship easier to judge under realistic limitations and long-term use.`);
+  }
+
+  return hints;
+}
+
+function buildBodyByLabel(post, h2, repairHints) {
   const title = normStr(post.title);
   const label = extractLabel(post);
   const meta = {
@@ -749,17 +830,53 @@ function buildBodyByLabel(post, h2) {
     ]);
   }
 
+  if (CONTENT_REPAIR_MODE && repairHints && repairHints.length) {
+    html += '\n' + makeParagraphs(repairHints);
+  }
+
   return selfReviewAndPolish(post, h2, html);
 }
 
-function replacePlaceholderBody(post) {
+function replacePlaceholderBody(post, repairIssues) {
   const body = String(post.body || '');
   const sectionRegex = /(<h2>(.*?)<\/h2>\s*)<p><!-- content --><\/p>/g;
 
   return body.replace(sectionRegex, (_m, h2Block, h2Text) => {
-    const injected = buildBodyByLabel(post, normStr(h2Text));
+    const hints = CONTENT_REPAIR_MODE ? buildRepairHintParagraphs(normStr(post.slug), normStr(h2Text), repairIssues) : [];
+    const injected = buildBodyByLabel(post, normStr(h2Text), hints);
     return `${h2Block}${injected}`;
   });
+}
+
+function repairExistingBody(post, repairIssues) {
+  const body = String(post.body || '');
+  const sectionRegex = /(<h2>(.*?)<\/h2>\s*)([\s\S]*?)(?=<h2>|$)/g;
+
+  return body.replace(sectionRegex, (_m, h2Block, h2Text, sectionBody) => {
+    const current = normStr(sectionBody);
+    const hints = buildRepairHintParagraphs(normStr(post.slug), normStr(h2Text), repairIssues);
+
+    if (!hints.length) {
+      return `${h2Block}${sectionBody}`;
+    }
+
+    const addition = makeParagraphs(hints);
+    if (!addition) {
+      return `${h2Block}${sectionBody}`;
+    }
+
+    if (!current) {
+      return `${h2Block}${addition}`;
+    }
+
+    return `${h2Block}${sectionBody}\n${addition}`;
+  });
+}
+
+function shouldProcessSlug(slug, targetSlugSet) {
+  if (!CONTENT_REPAIR_MODE) return true;
+  if (!targetSlugSet || !targetSlugSet.size) return true;
+  return targetSlugSet.has(slug);
 }
 
 function main() {
@@ -770,6 +887,9 @@ function main() {
 
   const files = fs.readdirSync(POSTS_DIR).filter(f => f.toLowerCase().endsWith('.json')).sort();
   console.log('[generate-content] JSON 파일 수 =', files.length);
+
+  const repairHintsBySlug = getRepairHintsBySlug();
+  const targetSlugSet = parseTargetSlugSet();
 
   let written = 0;
   let skipped = 0;
@@ -796,14 +916,36 @@ function main() {
       continue;
     }
 
-    if (!hasPlaceholderBody(post)) {
+    if (!shouldProcessSlug(slug, targetSlugSet)) {
+      console.log(`[SKIP] ${slug} — repair 대상 아님`);
+      skipped++;
+      continue;
+    }
+
+    const repairIssues = repairHintsBySlug.get(slug) || [];
+
+    if (!CONTENT_REPAIR_MODE && !hasPlaceholderBody(post)) {
       console.log(`[SKIP] ${slug} — 치환할 placeholder 없음`);
       skipped++;
       continue;
     }
 
+    if (CONTENT_REPAIR_MODE && !hasPlaceholderBody(post) && !repairIssues.length) {
+      console.log(`[SKIP] ${slug} — repair 사유 없음`);
+      skipped++;
+      continue;
+    }
+
     try {
-      const replaced = replacePlaceholderBody(post);
+      let replaced = '';
+
+      if (hasPlaceholderBody(post)) {
+        replaced = replacePlaceholderBody(post, repairIssues);
+      } else if (CONTENT_REPAIR_MODE) {
+        replaced = repairExistingBody(post, repairIssues);
+      } else {
+        replaced = String(post.body || '');
+      }
 
       if (replaced === post.body) {
         console.log(`[SKIP] ${slug} — 본문 변경 없음`);
@@ -813,20 +955,22 @@ function main() {
 
       post.body = replaced;
       post.contentGen = {
-        mode: 'section-content-fill',
+        mode: CONTENT_REPAIR_MODE ? 'section-content-repair' : 'section-content-fill',
         updatedAt: new Date().toISOString(),
         writeMode: CONTENT_WRITE_MODE,
         label: label || '',
         bodyPromptUsed: !!extractBodyPrompt(post),
         selfReviewLoop: ['A:factuality', 'C:criteria-check', 'D:anti-ai-tone'],
+        repairMode: CONTENT_REPAIR_MODE,
+        repairIssueCount: repairIssues.length,
       };
 
       if (CAN_WRITE) {
         writeJSON(full, post);
-        console.log(`[OK] ${slug} — 본문 치환 완료`);
+        console.log(`[OK] ${slug} — ${CONTENT_REPAIR_MODE ? '본문 보정 완료' : '본문 치환 완료'}`);
         written++;
       } else {
-        console.log(`[DRY] ${slug} — 본문 치환만 수행(미저장)`);
+        console.log(`[DRY] ${slug} — ${CONTENT_REPAIR_MODE ? '본문 보정만 수행(미저장)' : '본문 치환만 수행(미저장)'}`);
       }
     } catch (e) {
       failed++;
