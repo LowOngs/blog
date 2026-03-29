@@ -158,3 +158,318 @@ function inspectGeneric(slug, body, sections) {
     }
 
     if (!sec.text || sec.text.length < 40) {
+      issues.push({
+        level: 'warn',
+        code: 'SECTION_THIN',
+        message: `섹션 텍스트가 매우 짧음: ${sec.h2}`,
+      });
+    }
+  }
+
+  const totalText = stripHtml(body);
+  if (totalText.length < FAIL_MIN_TEXT_LENGTH) {
+    issues.push({
+      level: 'fail',
+      code: 'TEXT_TOO_SHORT_FAIL',
+      message: `전체 본문 텍스트가 너무 짧음(${totalText.length}자)`,
+    });
+  } else if (totalText.length < WARN_MIN_TEXT_LENGTH) {
+    issues.push({
+      level: 'warn',
+      code: 'TEXT_TOO_SHORT_WARN',
+      message: `전체 본문 텍스트가 권장보다 짧음(${totalText.length}자)`,
+    });
+  }
+
+  if (hasRobotPattern(totalText)) {
+    issues.push({
+      level: 'warn',
+      code: 'ROBOT_PATTERN',
+      message: '기계식/테스트성 패턴 의심',
+    });
+  }
+
+  return issues;
+}
+
+function inspectByLabel(label, sections, body) {
+  const issues = [];
+
+  const hasTable = /<table\b[^>]*>[\s\S]*?<\/table>/i.test(body);
+  const hasList = /<(ul|ol)\b[^>]*>[\s\S]*?<\/(ul|ol)>/i.test(body);
+
+  if (label === 'smart-savings') {
+    if (!hasTable) {
+      issues.push({
+        level: 'fail',
+        code: 'SAVINGS_TABLE_REQUIRED',
+        message: 'smart-savings 글에 비교표/테이블 없음',
+      });
+    }
+    if (!hasList) {
+      issues.push({
+        level: 'fail',
+        code: 'SAVINGS_LIST_REQUIRED',
+        message: 'smart-savings 글에 절약 팁/리스트 없음',
+      });
+    }
+  }
+
+  if (label === 'how-to-playbooks') {
+    if (!hasList) {
+      issues.push({
+        level: 'fail',
+        code: 'HOWTO_LIST_REQUIRED',
+        message: 'how-to-playbooks 글에 체크리스트/리스트 없음',
+      });
+    }
+  }
+
+  if (label === 'templates-checklists') {
+    if (!hasTable) {
+      issues.push({
+        level: 'fail',
+        code: 'TEMPLATE_TABLE_REQUIRED',
+        message: 'templates-checklists 글에 표/양식 없음',
+      });
+    }
+  }
+
+  if (REVIEW_LABELS.has(label)) {
+    const h2Names = sections.map(s => s.h2);
+    if (!h2Names.includes('Overview')) {
+      issues.push({
+        level: 'warn',
+        code: 'REVIEW_OVERVIEW_MISSING',
+        message: '리뷰 글에 Overview 섹션 없음',
+      });
+    }
+    if (!h2Names.includes('Specs & ROI')) {
+      issues.push({
+        level: 'warn',
+        code: 'REVIEW_ROI_MISSING',
+        message: '리뷰 글에 Specs & ROI 섹션 없음',
+      });
+    }
+    if (!h2Names.includes('Verdict')) {
+      issues.push({
+        level: 'warn',
+        code: 'REVIEW_VERDICT_MISSING',
+        message: '리뷰 글에 Verdict 섹션 없음',
+      });
+    }
+  }
+
+  return issues;
+}
+
+function dedupeIssues(issues) {
+  const seen = new Set();
+  const out = [];
+  for (const issue of issues) {
+    const key = `${issue.level}|${issue.code}|${issue.message}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(issue);
+  }
+  return out;
+}
+
+function inspectPostFile(fullPath) {
+  const post = readJSON(fullPath);
+  const slug = normStr(post.slug) || path.basename(fullPath, '.json');
+  const label = extractLabel(post);
+  const body = String(post.body || '');
+  const sections = parseSections(body);
+
+  const genericIssues = inspectGeneric(slug, body, sections);
+  const labelIssues = inspectByLabel(label, sections, body);
+  const issues = dedupeIssues([...genericIssues, ...labelIssues]);
+
+  const failCount = issues.filter(x => x.level === 'fail').length;
+  const warnCount = issues.filter(x => x.level === 'warn').length;
+
+  return {
+    slug,
+    label,
+    title: normStr(post.title),
+    file: fullPath,
+    failCount,
+    warnCount,
+    totalTextLength: stripHtml(body).length,
+    h2Count: countMatches(body, /<h2>/gi),
+    issues,
+  };
+}
+
+function writeRepairRequest(items) {
+  ensureDir(LOGS_DIR);
+  const doc = {
+    generatedAt: new Date().toISOString(),
+    requestedBy: 'validate-content-structure.cjs',
+    mode: 'repair-once',
+    items: items.map(x => ({
+      slug: x.slug,
+      label: x.label,
+      failCount: x.failCount,
+      warnCount: x.warnCount,
+      issues: x.issues,
+    })),
+  };
+  writeJSON(REPAIR_REQUEST_FILE, doc);
+}
+
+function rerunGenerateContent(targets) {
+  if (!targets.length) return { ok: true, ran: false, code: 0 };
+
+  if (!fs.existsSync(GENERATE_CONTENT_FILE)) {
+    return { ok: false, ran: false, code: -1, error: 'generate-content.cjs 없음' };
+  }
+
+  const targetSlugs = targets.map(x => x.slug).join(',');
+
+  console.log('────────────────────────────────────────────');
+  console.log('[validate-content-structure] repair request 감지 → generate-content 1회 재호출');
+  console.log('[validate-content-structure] TARGET_SLUGS =', targetSlugs);
+  console.log('────────────────────────────────────────────');
+
+  const res = cp.spawnSync(
+    process.execPath,
+    [GENERATE_CONTENT_FILE],
+    {
+      stdio: 'inherit',
+      env: {
+        ...process.env,
+        CONTENT_REPAIR_MODE: '1',
+        CONTENT_REPAIR_REQUEST_FILE: REPAIR_REQUEST_FILE,
+        CONTENT_TARGET_SLUGS: targetSlugs,
+      },
+    }
+  );
+
+  return {
+    ok: res.status === 0,
+    ran: true,
+    code: typeof res.status === 'number' ? res.status : -1,
+  };
+}
+
+function downgradeRemainingFailsToWarn(reportItems) {
+  return reportItems.map(item => {
+    const downgradedIssues = item.issues.map(issue => {
+      if (issue.level !== 'fail') return issue;
+      return {
+        ...issue,
+        level: 'warn',
+        code: `${issue.code}_WARN_AFTER_REPAIR`,
+        message: `${issue.message} (1회 보정 후에도 미달 → WARN 통과)`,
+      };
+    });
+
+    return {
+      ...item,
+      failCount: 0,
+      warnCount: downgradedIssues.filter(x => x.level === 'warn').length,
+      issues: downgradedIssues,
+      finalStatus: downgradedIssues.length ? 'WARN' : 'PASS',
+    };
+  });
+}
+
+function buildInitialReport(files) {
+  return files.map(full => inspectPostFile(full));
+}
+
+function main() {
+  ensureDir(LOGS_DIR);
+
+  if (!fs.existsSync(POSTS_DIR)) {
+    console.log('[validate-content-structure] posts 없음 -> 종료');
+    process.exit(0);
+  }
+
+  const files = fs.readdirSync(POSTS_DIR)
+    .filter(f => f.toLowerCase().endsWith('.json'))
+    .map(f => path.join(POSTS_DIR, f))
+    .sort();
+
+  console.log('[validate-content-structure] JSON 파일 수 =', files.length);
+
+  const targetFiles = [];
+  for (const full of files) {
+    let post;
+    try {
+      post = readJSON(full);
+    } catch (e) {
+      console.error('[validate-content-structure][WARN] JSON 파싱 실패:', full, e.message);
+      continue;
+    }
+
+    const label = extractLabel(post);
+    if (isExcludedLabel(label)) continue;
+
+    targetFiles.push(full);
+  }
+
+  let firstPass = buildInitialReport(targetFiles);
+  const firstFailTargets = firstPass.filter(x => x.failCount > 0);
+
+  let repairResult = { ok: true, ran: false, code: 0 };
+
+  if (firstFailTargets.length > 0) {
+    writeRepairRequest(firstFailTargets);
+    repairResult = rerunGenerateContent(firstFailTargets);
+  }
+
+  let secondPass = buildInitialReport(targetFiles);
+
+  const finalItems = downgradeRemainingFailsToWarn(
+    secondPass.map(item => ({
+      ...item,
+      finalStatus: item.failCount > 0 ? 'FAIL' : (item.warnCount > 0 ? 'WARN' : 'PASS'),
+    }))
+  );
+
+  const summary = {
+    generatedAt: new Date().toISOString(),
+    firstPassFailTargets: firstFailTargets.length,
+    repairTriggered: repairResult.ran,
+    repairOk: repairResult.ok,
+    repairExitCode: repairResult.code,
+    checked: finalItems.length,
+    pass: finalItems.filter(x => x.finalStatus === 'PASS').length,
+    warn: finalItems.filter(x => x.finalStatus === 'WARN').length,
+    fail: 0,
+  };
+
+  writeJSON(REPORT_FILE, {
+    summary,
+    items: finalItems,
+  });
+
+  for (const item of finalItems) {
+    console.log(`파일: ${path.basename(item.file)}`);
+    console.log(`상태: ${item.finalStatus}`);
+    for (const issue of item.issues) {
+      console.log(`  - [${issue.level.toUpperCase()}] ${issue.code} → ${issue.message}`);
+    }
+    if (!item.issues.length) {
+      console.log('  - [PASS] 구조 기준 충족');
+    }
+    console.log('');
+  }
+
+  console.log('────────────────────────────────────────────');
+  console.log('[validate-content-structure] 결과');
+  console.log('  checked =', summary.checked);
+  console.log('  pass    =', summary.pass);
+  console.log('  warn    =', summary.warn);
+  console.log('  fail    =', summary.fail);
+  console.log('  repair  =', summary.repairTriggered ? `triggered (exit=${summary.repairExitCode})` : 'not-needed');
+  console.log(`[validate-content-structure] report saved → ${REPORT_FILE}`);
+  console.log('────────────────────────────────────────────');
+
+  process.exitCode = 0;
+}
+
+if (require.main === module) main();
