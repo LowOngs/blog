@@ -105,6 +105,7 @@ jobs:
       - name: Export runtime env
         run: |
           echo "DRY_RUN=${{ steps.modes.outputs.FINAL_DRY_RUN }}" >> "$GITHUB_ENV"
+          echo "CONTENT_VALIDATE_MODE=latest" >> "$GITHUB_ENV"
 
       - name: Sanity check
         run: |
@@ -112,6 +113,8 @@ jobs:
           test -f ./System_files/scripts/build/queue-to-posts.cjs
           test -f ./System_files/scripts/build/ids.cjs
           test -f ./System_files/scripts/build/generate-body.cjs
+          test -f ./System_files/scripts/build/generate-content.cjs
+          test -f ./System_files/scripts/build/validate-content-structure.cjs
           test -f ./System_files/scripts/build/images-body-sync.cjs
           test -f ./System_files/scripts/build/validate-body-images.cjs
           test -f ./System_files/scripts/build/build-ssot-reviews.cjs
@@ -128,12 +131,14 @@ jobs:
           test -f ./System_files/scripts/build/build-trust-page.cjs
           test -f ./System_files/scripts/publish/blogger.cjs
 
-      - name: Build queue + ids + body
+      - name: Build queue + ids + body + content
         run: |
           npm run queue:pick
           npm run queue:to-posts
           npm run ids
           npm run posts:body:generate
+          npm run posts:content:generate
+          npm run posts:content:validate
 
       - name: Review SSOT build
         run: |
