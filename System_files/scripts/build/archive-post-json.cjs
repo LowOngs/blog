@@ -13,13 +13,15 @@
  * - LowOngs/blog 의 최종 post JSON 산출물을
  *   LowOngs/post-archive 저장소로 누적 복사한다.
  *
- * 핵심 원칙
+ * 저장 정책
  * 1) source는 항상 LowOngs/blog 의 content/posts/*.json
- * 2) target은 항상 LowOngs/post-archive 의 content/posts/*.json
- * 3) 기본 모드는 latest:
+ * 2) target은 항상 LowOngs/post-archive 의 content/posts/YYYY-MM-DD/pageId.json
+ * 3) 날짜 폴더는 queueDate 기준 자동 생성
+ * 4) 파일명은 pageId 우선, 없으면 slug fallback
+ * 5) 기본 모드는 latest:
  *    - dist/queue/today.expanded.json 기준 generatedSlug/slug 만 복사
- * 4) full 모드는 전체 JSON 복사
- * 5) 이 파일은 "복사"만 담당한다. 발행/렌더/수정 책임 없음
+ * 6) full 모드는 전체 JSON 복사
+ * 7) 이 파일은 "복사"만 담당한다. 발행/렌더/수정 책임 없음
  *
  * 동작 모드
  * - ARCHIVE_MODE=latest | full
@@ -62,7 +64,7 @@ const POST_ARCHIVE_ROOT = String(process.env.POST_ARCHIVE_ROOT || '').trim()
   ? path.resolve(String(process.env.POST_ARCHIVE_ROOT || '').trim())
   : path.resolve(BLOG_REPO_ROOT, '..', 'post-archive');
 
-const ARCHIVE_POSTS_DIR = path.join(POST_ARCHIVE_ROOT, 'content', 'posts');
+const ARCHIVE_POSTS_ROOT = path.join(POST_ARCHIVE_ROOT, 'content', 'posts');
 
 console.log('────────────────────────────────────────────');
 console.log('[archive-post-json] 시작');
@@ -72,7 +74,7 @@ console.log('[archive-post-json] BLOG_ROOT     =', BLOG_REPO_ROOT);
 console.log('[archive-post-json] SYSTEM_ROOT   =', SYSTEM_ROOT);
 console.log('[archive-post-json] POSTS_DIR     =', POSTS_DIR);
 console.log('[archive-post-json] ARCHIVE_ROOT  =', POST_ARCHIVE_ROOT);
-console.log('[archive-post-json] ARCHIVE_DIR   =', ARCHIVE_POSTS_DIR);
+console.log('[archive-post-json] ARCHIVE_ROOT_POSTS =', ARCHIVE_POSTS_ROOT);
 console.log('[archive-post-json] MODE          =', ARCHIVE_MODE);
 console.log('────────────────────────────────────────────');
 
@@ -129,7 +131,7 @@ function validatePaths() {
     warn('clone 직후 또는 worktree 구조가 다를 수 있음. 계속 진행합니다.');
   }
 
-  ensureDir(ARCHIVE_POSTS_DIR);
+  ensureDir(ARCHIVE_POSTS_ROOT);
   ensureDir(LOGS_DIR);
 }
 
@@ -171,9 +173,49 @@ function pickTargetFiles(allFiles, latestSlugSet) {
   });
 }
 
+function extractArchiveDate(post) {
+  const queueDate = normStr(post && post.seedMeta && post.seedMeta.queueDate);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(queueDate)) return queueDate;
+
+  const updated = normStr(post && post.updated);
+  const updatedDate = updated.slice(0, 10);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(updatedDate)) return updatedDate;
+
+  const now = new Date(Date.now() + 9 * 60 * 60 * 1000);
+  return now.toISOString().slice(0, 10);
+}
+
+function extractArchiveFileBase(post, sourceFile) {
+  const pageId = normStr(post && post.pageId);
+  if (pageId) return pageId;
+
+  const slug = normStr(post && post.slug);
+  if (slug) return slug;
+
+  return path.basename(sourceFile, '.json');
+}
+
+function buildArchiveTargetPath(sourceFile) {
+  const post = readJSON(sourceFile);
+  const archiveDate = extractArchiveDate(post);
+  const fileBase = extractArchiveFileBase(post, sourceFile);
+
+  const targetDir = path.join(ARCHIVE_POSTS_ROOT, archiveDate);
+  const targetFile = path.join(targetDir, `${fileBase}.json`);
+
+  return {
+    post,
+    archiveDate,
+    fileBase,
+    targetDir,
+    targetFile,
+  };
+}
+
 function copyOneFile(sourceFile) {
-  const fileName = path.basename(sourceFile);
-  const targetFile = path.join(ARCHIVE_POSTS_DIR, fileName);
+  const { post, archiveDate, fileBase, targetDir, targetFile } = buildArchiveTargetPath(sourceFile);
+
+  ensureDir(targetDir);
 
   const sourceSha = sha1File(sourceFile);
   const targetExists = fs.existsSync(targetFile);
@@ -181,8 +223,11 @@ function copyOneFile(sourceFile) {
 
   if (targetExists && sourceSha === targetSha) {
     return {
-      file: fileName,
-      slug: path.basename(fileName, '.json'),
+      sourceFile: path.basename(sourceFile),
+      slug: normStr(post.slug) || path.basename(sourceFile, '.json'),
+      pageId: normStr(post.pageId) || '',
+      archiveDate,
+      targetRelative: path.relative(POST_ARCHIVE_ROOT, targetFile).replace(/\\/g, '/'),
       status: 'skip-same',
       sourceSha,
       targetSha,
@@ -192,8 +237,11 @@ function copyOneFile(sourceFile) {
   fs.copyFileSync(sourceFile, targetFile);
 
   return {
-    file: fileName,
-    slug: path.basename(fileName, '.json'),
+    sourceFile: path.basename(sourceFile),
+    slug: normStr(post.slug) || path.basename(sourceFile, '.json'),
+    pageId: normStr(post.pageId) || '',
+    archiveDate,
+    targetRelative: path.relative(POST_ARCHIVE_ROOT, targetFile).replace(/\\/g, '/'),
     status: targetExists ? 'updated' : 'created',
     sourceSha,
     targetSha,
@@ -221,7 +269,7 @@ function main() {
       sourceRepo: 'LowOngs/blog',
       targetRepo: 'LowOngs/post-archive',
       sourcePostsDir: POSTS_DIR,
-      archivePostsDir: ARCHIVE_POSTS_DIR,
+      archivePostsRoot: ARCHIVE_POSTS_ROOT,
       checked: allFiles.length,
       copied: 0,
       created: 0,
@@ -255,7 +303,7 @@ function main() {
     else if (result.status === 'updated') updated++;
     else if (result.status === 'skip-same') skippedSame++;
 
-    console.log(`[archive-post-json] ${result.status.toUpperCase()} → ${result.file}`);
+    console.log(`[archive-post-json] ${result.status.toUpperCase()} → ${result.targetRelative}`);
   }
 
   const report = {
@@ -264,7 +312,7 @@ function main() {
     sourceRepo: 'LowOngs/blog',
     targetRepo: 'LowOngs/post-archive',
     sourcePostsDir: POSTS_DIR,
-    archivePostsDir: ARCHIVE_POSTS_DIR,
+    archivePostsRoot: ARCHIVE_POSTS_ROOT,
     checked: allFiles.length,
     copied: created + updated,
     created,
