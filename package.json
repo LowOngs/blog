@@ -13,6 +13,8 @@
     "posts:body:generate": "node ./System_files/scripts/build/generate-body.cjs",
     "posts:content:generate": "node ./System_files/scripts/build/generate-content.cjs",
     "posts:content:validate": "node ./System_files/scripts/build/validate-content-structure.cjs",
+    "posts:archive": "node ./System_files/scripts/build/archive-post-json.cjs",
+    "posts:archive:full": "node ./System_files/scripts/build/archive-post-json.cjs",
 
     "posts:markdown": "node ./System_files/scripts/build/markdown-list.cjs",
     "posts:render": "node ./System_files/scripts/build/render-posts.cjs",
