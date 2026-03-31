@@ -34,6 +34,12 @@
  * - consume 성공 후 fp-cache에 used/map를 함께 기록한다.
  * - seed-ledger는 장기 원장
  * - fp-cache는 빠른 차단/추적 cache
+ *
+ * [국부 보강]
+ * - scheduler가 생성하는 "한 번의 today.json" 안에서는 같은 라벨을 1건만 허용한다.
+ * - 즉, 같은 큐 내 same-label 중복 발행을 금지한다.
+ * - 중복 슬롯은 소비(pop)하지 않고 skip하여 warehouse에 그대로 남긴다.
+ * - 이 규칙은 scheduler 경유 queue 생성에만 적용되며, firstgate 독립 발행 라인은 건드리지 않는다.
  */
 
 require('./lib/env.cjs');
@@ -337,11 +343,21 @@ function popNextFromWarehouse(label, mode, usedIds, todayStr) {
   }));
 
   const usedIds = new Set();
+  const queuedLabels = new Set();
   const items = [];
 
   for (const slot of plan) {
     const slotLabel = slot.slotLabel;
     const preferredMode = slot.mode === 'evergreen' ? 'evergreen' : 'trend';
+
+    // ✅ 국부 추가:
+    // scheduler가 만드는 "한 번의 today.json" 안에서는 같은 라벨 1건만 허용
+    // - 중복 슬롯은 소비하지 않음
+    // - warehouse에는 그대로 남겨 둠
+    if (queuedLabels.has(slotLabel)) {
+      warn(`[queue] duplicate slotLabel skipped in same queue: label=${slotLabel}, mode=${preferredMode}`);
+      continue;
+    }
 
     const picked = popNextFromWarehouse(slotLabel, preferredMode, usedIds, todayStr);
     if (!picked) continue;
@@ -359,6 +375,8 @@ function popNextFromWarehouse(label, mode, usedIds, todayStr) {
       priority: picked.priority ?? 0,
       notes: picked.notes || '',
     });
+
+    queuedLabels.add(slotLabel);
   }
 
   const outFile = path.join(OUTDIR, 'today.json');
