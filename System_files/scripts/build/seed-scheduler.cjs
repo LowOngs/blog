@@ -40,6 +40,19 @@
  * - 즉, 같은 큐 내 same-label 중복 발행을 금지한다.
  * - 중복 슬롯은 소비(pop)하지 않고 skip하여 warehouse에 그대로 남긴다.
  * - 이 규칙은 scheduler 경유 queue 생성에만 적용되며, firstgate 독립 발행 라인은 건드리지 않는다.
+ *
+ * [이번 정책 반영]
+ * - 라인1: 월~금 how-to-playbooks 매일 1편
+ * - 라인2:
+ *   - 월/수/금: app-reviews
+ *   - 화: device-reviews
+ *   - 목: subscription-services
+ * - 주말: smart-savings 1편
+ * - fallback:
+ *   - device-reviews 시드가 없으면 app-reviews로 대체
+ *   - subscription-services 시드가 없으면 app-reviews로 대체
+ * - 실제 fallback이 발생하면 최종 queue item.label / seedLabel 은 app-reviews 로 기록한다.
+ *   (즉 "앱리뷰로 대체"를 실제 발행 라벨에도 반영)
  */
 
 require('./lib/env.cjs');
@@ -121,26 +134,31 @@ function getTodayDateKstOnly() {
 }
 
 // ────────────────────────────────────
-// 요일 슬롯 계획(기존 규칙 유지)
+// 요일 슬롯 계획(운영 정책 반영)
 // ────────────────────────────────────
 function planForWeekday(weekday) {
   switch (weekday) {
-    case 1:
+    case 1: // 월
       return [
         { slotLabel: 'how-to-playbooks', mode: 'trend' },
         { slotLabel: 'app-reviews', mode: 'trend' },
       ];
-    case 2:
-      return [{ slotLabel: 'how-to-playbooks', mode: 'trend' }];
-    case 3:
+    case 2: // 화
+      return [
+        { slotLabel: 'how-to-playbooks', mode: 'trend' },
+        { slotLabel: 'device-reviews', mode: 'trend', fallbackLabel: 'app-reviews' },
+      ];
+    case 3: // 수
       return [
         { slotLabel: 'how-to-playbooks', mode: 'trend' },
         { slotLabel: 'app-reviews', mode: 'trend' },
-        { slotLabel: 'templates-checklists', mode: 'trend' },
       ];
-    case 4:
-      return [{ slotLabel: 'how-to-playbooks', mode: 'trend' }];
-    case 5:
+    case 4: // 목
+      return [
+        { slotLabel: 'how-to-playbooks', mode: 'trend' },
+        { slotLabel: 'subscription-services', mode: 'trend', fallbackLabel: 'app-reviews' },
+      ];
+    case 5: // 금
       return [
         { slotLabel: 'how-to-playbooks', mode: 'trend' },
         { slotLabel: 'app-reviews', mode: 'trend' },
@@ -328,6 +346,63 @@ function popNextFromWarehouse(label, mode, usedIds, todayStr) {
   return null;
 }
 
+/**
+ * 슬롯 1개 해소:
+ * - 우선 slotLabel로 시도
+ * - 없고 fallbackLabel이 있으면 fallbackLabel로 1회 대체 시도
+ * - 같은 큐 내 중복 라벨 금지 규칙은 "실제 최종 발행 라벨" 기준으로 적용
+ */
+function resolveSlotPick(slot, usedIds, queuedLabels, todayStr) {
+  const slotLabel = assertAllowedLabel(slot.slotLabel, 'slot.slotLabel');
+  const preferredMode = slot.mode === 'evergreen' ? 'evergreen' : 'trend';
+  const fallbackLabel = slot.fallbackLabel ? assertAllowedLabel(slot.fallbackLabel, 'slot.fallbackLabel') : '';
+
+  // 1) 원래 슬롯 라벨 시도
+  if (!queuedLabels.has(slotLabel)) {
+    const picked = popNextFromWarehouse(slotLabel, preferredMode, usedIds, todayStr);
+    if (picked) {
+      return {
+        finalLabel: slotLabel,
+        seedLabel: slotLabel,
+        requestedSlotLabel: slotLabel,
+        mode: preferredMode,
+        picked,
+        fallbackUsed: false,
+      };
+    }
+  } else {
+    warn(`[queue] duplicate slotLabel skipped in same queue: label=${slotLabel}, mode=${preferredMode}`);
+    return null;
+  }
+
+  // 2) fallback 라벨 시도
+  if (fallbackLabel) {
+    if (queuedLabels.has(fallbackLabel)) {
+      warn(
+        `[queue] fallback skipped because final label already queued: requested=${slotLabel}, fallback=${fallbackLabel}, mode=${preferredMode}`
+      );
+      return null;
+    }
+
+    const pickedFallback = popNextFromWarehouse(fallbackLabel, preferredMode, usedIds, todayStr);
+    if (pickedFallback) {
+      warn(
+        `[queue] fallback applied: requested=${slotLabel} -> final=${fallbackLabel}, mode=${preferredMode}, id=${pickedFallback.id}`
+      );
+      return {
+        finalLabel: fallbackLabel,
+        seedLabel: fallbackLabel,
+        requestedSlotLabel: slotLabel,
+        mode: preferredMode,
+        picked: pickedFallback,
+        fallbackUsed: true,
+      };
+    }
+  }
+
+  return null;
+}
+
 // ────────────────────────────────────
 // main
 // ────────────────────────────────────
@@ -340,6 +415,7 @@ function popNextFromWarehouse(label, mode, usedIds, todayStr) {
   const plan = planForWeekday(weekday).map((p) => ({
     slotLabel: assertAllowedLabel(p.slotLabel, 'slotLabel'),
     mode: p.mode || 'trend',
+    fallbackLabel: p.fallbackLabel ? assertAllowedLabel(p.fallbackLabel, 'fallbackLabel') : '',
   }));
 
   const usedIds = new Set();
@@ -347,25 +423,20 @@ function popNextFromWarehouse(label, mode, usedIds, todayStr) {
   const items = [];
 
   for (const slot of plan) {
-    const slotLabel = slot.slotLabel;
-    const preferredMode = slot.mode === 'evergreen' ? 'evergreen' : 'trend';
+    const resolved = resolveSlotPick(slot, usedIds, queuedLabels, todayStr);
+    if (!resolved) continue;
 
-    // ✅ 국부 추가:
-    // scheduler가 만드는 "한 번의 today.json" 안에서는 같은 라벨 1건만 허용
-    // - 중복 슬롯은 소비하지 않음
-    // - warehouse에는 그대로 남겨 둠
-    if (queuedLabels.has(slotLabel)) {
-      warn(`[queue] duplicate slotLabel skipped in same queue: label=${slotLabel}, mode=${preferredMode}`);
-      continue;
-    }
-
-    const picked = popNextFromWarehouse(slotLabel, preferredMode, usedIds, todayStr);
-    if (!picked) continue;
+    const finalLabel = resolved.finalLabel;
+    const seedLabel = resolved.seedLabel;
+    const requestedSlotLabel = resolved.requestedSlotLabel;
+    const preferredMode = resolved.mode;
+    const picked = resolved.picked;
 
     items.push({
       date: todayStr,
-      label: slotLabel,
-      seedLabel: slotLabel,
+      label: finalLabel,
+      seedLabel,
+      requestedSlotLabel,
       mode: preferredMode,
       id: picked.id,
       title: picked.title,
@@ -376,7 +447,7 @@ function popNextFromWarehouse(label, mode, usedIds, todayStr) {
       notes: picked.notes || '',
     });
 
-    queuedLabels.add(slotLabel);
+    queuedLabels.add(finalLabel);
   }
 
   const outFile = path.join(OUTDIR, 'today.json');
