@@ -23,6 +23,11 @@
  * - 또한, 같은 seed(id)가 이미 content/posts에 존재하면 해당 slug/postId/reviewId를 “재사용”하여
  *   today.expanded 실행 스코프와 실제 SSOT가 어긋나는 상황을 최소화한다.
  *
+ * [국부 보강]
+ * - scheduler 경유 queue(today.json) 처리에서는 같은 날짜+같은 라벨 신규 생성은 1건만 허용한다.
+ * - 즉, same-date same-label 초과분은 content/posts 기준으로 차단한다.
+ * - firstgate 독립 발행 라인은 이 파일의 처리 대상이 아니므로 영향 없음.
+ *
  * 절대 하지 말아야 할 것:
  * - 기존 posts 덮어쓰기
  * - today.json 구조 변경
@@ -57,6 +62,9 @@ fs.mkdirSync(CONTENT_DIR, { recursive: true });
 
 const MANIFESTS_DIR = path.join(ROOT, 'manifests');
 const ISSUE_SEQ_FILE = path.join(MANIFESTS_DIR, 'issue-seq.json'); // ✅ SSOT(영속 카운터)
+
+// ✅ scheduler queue 한정: 같은 날짜+같은 라벨 신규 생성 상한
+const MAX_NEW_POSTS_PER_DATE_LABEL = 1;
 
 /* ============================================================
  * 공통 로그 / 중단 유틸
@@ -246,7 +254,7 @@ function writeExpandedSnapshot(queueObj, expandedItems) {
   try {
     const expanded = {
       ...queueObj,
-      expandedAt: new Date().toISOString(),  
+      expandedAt: new Date().toISOString(),
       items: expandedItems,
     };
     fs.writeFileSync(QUEUE_EXPANDED_FILE, JSON.stringify(expanded, null, 2) + '\n', 'utf8');
@@ -339,6 +347,43 @@ function findExistingPostBySeed(queueDate, label, seedId) {
 }
 
 /* ============================================================
+ * scheduler queue 한정: 같은 날짜+같은 라벨 기존 생성 수 조회
+ * - firstgate 독립 발행 라인은 이 파일 스코프 밖이므로 영향 없음
+ * - content/posts 기준으로 실제 SSOT를 센다
+ * ============================================================ */
+function countExistingPostsByDateLabel(queueDate, label) {
+  const qd = String(queueDate || '').slice(0, 10);
+  const lb = String(label || '').trim();
+  if (!qd || !lb) return 0;
+
+  let files;
+  try {
+    files = fs.readdirSync(CONTENT_DIR).filter((f) => f.toLowerCase().endsWith('.json'));
+  } catch {
+    return 0;
+  }
+
+  let count = 0;
+
+  for (const f of files) {
+    const full = path.join(CONTENT_DIR, f);
+    const doc = readJsonSafe(full, null);
+    if (!doc || typeof doc !== 'object') continue;
+
+    const sm = doc.seedMeta && typeof doc.seedMeta === 'object' ? doc.seedMeta : {};
+    const docQueueDate = String(sm.queueDate || '').slice(0, 10);
+    const docLabel = String(sm.label || '').trim();
+
+    if (docQueueDate !== qd) continue;
+    if (docLabel !== lb) continue;
+
+    count += 1;
+  }
+
+  return count;
+}
+
+/* ============================================================
  * bodyPrompt 생성
  * - generate-content.cjs가 읽을 최소 재료를 구성한다.
  * - 기존 구현부와 무관한 로직은 건드리지 않는다.
@@ -406,11 +451,27 @@ for (let i = 0; i < items.length; i++) {
     postId = existing.postId || null;
     reviewId = existing.reviewId || null;
   } else {
+    // ✅ 국부 추가:
+    // scheduler queue 한정으로 같은 날짜+같은 라벨 신규 생성은 1건만 허용
+    // - 기존 same-seed 재사용은 위에서 먼저 처리
+    // - 초과분은 생성하지 않고 skip
+    const existingCount = countExistingPostsByDateLabel(queueDate, label);
+    if (existingCount >= MAX_NEW_POSTS_PER_DATE_LABEL) {
+      if (outItem) {
+        outItem.skipped = true;
+        outItem.skippedReason = 'date-label-limit';
+        outItem.dateLabelLimit = MAX_NEW_POSTS_PER_DATE_LABEL;
+        outItem.existingDateLabelCount = existingCount;
+      }
+      skipped++;
+      continue;
+    }
+
     while (true) {
       const idx = nextIndexFor(queueDate, label, issueSeq);
 
       try {
-        slug = buildSlug({label, yyyymmdd: ymd, index3: pad3(idx),});
+        slug = buildSlug({ label, yyyymmdd: ymd, index3: pad3(idx) });
       } catch {
         slug = `${canonicalPrefix}-${ymd}-${pad3(idx)}`;
       }
