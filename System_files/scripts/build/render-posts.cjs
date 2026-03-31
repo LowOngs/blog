@@ -34,6 +34,8 @@ const blocks = require('./lib/blocks.cjs');
  *  - Review는 render 단계에서 절대 주입/생성/치환하지 않는다(후속 injector 책임).
  *  - ✅ FAQ/Sources는 템플릿에 <section id="faq|sources">가 존재한다는 전제(SSOT).
  *    render는 {{faq}} / {{sources}}에 "내용 조각"만 치환한다.
+ *  - ✅ dist/posts 는 산출물 폴더이므로 렌더 직전 기존 *.html 을 초기화한다.
+ *    과거 오염 산출물 잔존으로 QA가 깨지는 문제를 방지한다.
  * ───────────────────────────────────────────── */
 
 /* ───────────────────── file/json ───────────────────── */
@@ -84,6 +86,43 @@ function tryReadJsonFile(p) {
   } catch {
     return null;
   }
+}
+
+/* ───────────────────── dist cleanup ───────────────────── */
+
+/**
+ * What: dist/posts 내부 기존 html 산출물을 렌더 직전 제거한다.
+ * Why : dist/posts 는 SSOT가 아니라 산출물 폴더이므로,
+ *       과거 오염 html 잔존으로 qa-check 가 현재 코드와 무관한 실패를 내는 문제를 차단한다.
+ * I/O : READ/WRITE dist/posts 디렉터리
+ * Invariants:
+ *  - *.html 산출물만 제거
+ *  - 디렉터리 자체는 유지
+ *  - html 외 파일은 건드리지 않음
+ */
+function clearOutputHtmlFiles(dir) {
+  if (!fs.existsSync(dir)) return { removed: 0 };
+
+  const names = fs.readdirSync(dir);
+  let removed = 0;
+
+  for (const name of names) {
+    const full = path.join(dir, name);
+    let stat;
+    try {
+      stat = fs.statSync(full);
+    } catch {
+      continue;
+    }
+
+    if (!stat.isFile()) continue;
+    if (!name.toLowerCase().endsWith('.html')) continue;
+
+    fs.unlinkSync(full);
+    removed += 1;
+  }
+
+  return { removed };
 }
 
 /* ───────────────────── fragment normalizer ───────────────────── */
@@ -414,6 +453,10 @@ function main() {
     console.warn('[render-posts] POSTS_DIR 없음 → 종료');
     process.exit(0);
   }
+
+  // ✅ 국부 추가: dist/posts 산출물 초기화
+  const cleared = clearOutputHtmlFiles(OUTPUT_DIR);
+  console.log('[render-posts] OUTPUT_HTML_CLEARED =', cleared.removed);
 
   const siteBase = (process.env.CANONICAL_BASE || process.env.SITE_BASE || 'https://ongsblog.com').replace(/\/+$/,'');
   const cdnBase  = (process.env.CDN_BASE || (siteBase + '/images')).replace(/\/+$/,'');
