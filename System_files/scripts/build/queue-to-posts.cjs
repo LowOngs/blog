@@ -28,6 +28,15 @@
  * - 즉, same-date same-label 초과분은 content/posts 기준으로 차단한다.
  * - firstgate 독립 발행 라인은 이 파일의 처리 대상이 아니므로 영향 없음.
  *
+ * [이번 국부 추가]
+ * - scheduler가 today.json으로 전달한 reviewEntity를 post SSOT에 보존한다.
+ * - 역할 분리 원칙:
+ *   - queue-to-posts는 "전달받은 큐 데이터를 posts SSOT로 기록"만 수행
+ *   - 엔티티를 새로 생성/추론하지 않는다
+ * - 저장 위치:
+ *   - doc.reviewEntity
+ *   - doc.seedMeta.entity
+ *
  * 절대 하지 말아야 할 것:
  * - 기존 posts 덮어쓰기
  * - today.json 구조 변경
@@ -102,6 +111,45 @@ function isReviewLabel(label) {
     label === 'device-reviews' ||
     label === 'subscription-services'
   );
+}
+
+/* ============================================================
+ * reviewEntity 전달 보조
+ * - queue item에서 전달된 entity를 그대로 posts SSOT로 보존할 수 있는 최소 정규화
+ * - 새 추론/생성 금지
+ * ============================================================ */
+function normalizeReviewEntityFromQueue(item, label) {
+  if (!isReviewLabel(label)) return null;
+  const src = item && item.reviewEntity && typeof item.reviewEntity === 'object'
+    ? item.reviewEntity
+    : null;
+
+  if (!src) return null;
+
+  const type = String(src.type || '').trim().toLowerCase();
+  const appId = String(src.appId || '').trim();
+  const appName = String(src.appName || '').trim();
+  const platform = String(src.platform || '').trim();
+  const model = String(src.model || '').trim();
+  const service = String(src.service || '').trim();
+
+  if (type === 'app') {
+    if (appId) return { type: 'app', appId, platform, appName };
+    if (appName && platform) return { type: 'app', appName, platform };
+    return null;
+  }
+
+  if (type === 'device') {
+    if (model) return { type: 'device', model };
+    return null;
+  }
+
+  if (type === 'subscription') {
+    if (service) return { type: 'subscription', service };
+    return null;
+  }
+
+  return null;
 }
 
 /* ============================================================
@@ -507,6 +555,10 @@ for (let i = 0; i < items.length; i++) {
   const profileId = getProfileIdForLabel(label);
   if (!profileId) fatal(`profileId 없음: ${label} (labels.json SSOT 확인 필요)`);
 
+  // ✅ 국부 추가:
+  // scheduler가 전달한 reviewEntity를 post SSOT에 보존
+  const reviewEntity = normalizeReviewEntityFromQueue(item, label);
+
   const doc = {
     postId,
     reviewId,
@@ -534,6 +586,11 @@ for (let i = 0; i < items.length; i++) {
       reviewId,
     },
   };
+
+  if (reviewEntity) {
+    doc.reviewEntity = reviewEntity;
+    doc.seedMeta.entity = reviewEntity;
+  }
 
   fs.writeFileSync(targetPath, JSON.stringify(doc, null, 2) + '\n', 'utf8');
   created++;
