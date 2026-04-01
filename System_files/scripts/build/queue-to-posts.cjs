@@ -37,6 +37,14 @@
  *   - doc.reviewEntity
  *   - doc.seedMeta.entity
  *
+ * [이번 추가 패치]
+ * - 이미 같은 날짜+같은 라벨 기존 글이 존재해 신규 생성이 막히는 경우에도,
+ *   해당 기존 글을 실행 스코프(today.expanded.json)에 재연결한다.
+ * - 또한 reviewEntity / seedMeta.entity 가 비어 있으면 최소 보강만 수행한다.
+ * - 즉:
+ *   - "생성 정책"은 유지
+ *   - "운영 메타 보강"만 허용
+ *
  * 절대 하지 말아야 할 것:
  * - 기존 posts 덮어쓰기
  * - today.json 구조 변경
@@ -95,6 +103,11 @@ function readJsonSafe(file, fallback) {
   } catch {
     return fallback;
   }
+}
+function writeJsonAtomic(filePath, obj) {
+  const tmp = `${filePath}.tmp`;
+  fs.writeFileSync(tmp, JSON.stringify(obj, null, 2) + '\n', 'utf8');
+  fs.renameSync(tmp, filePath);
 }
 
 /* ============================================================
@@ -388,6 +401,7 @@ function findExistingPostBySeed(queueDate, label, seedId) {
       postId: String(doc.postId || '').trim() || null,
       reviewId: String(doc.reviewId || '').trim() || null,
       file: full,
+      doc,
     };
   }
 
@@ -429,6 +443,92 @@ function countExistingPostsByDateLabel(queueDate, label) {
   }
 
   return count;
+}
+
+/* ============================================================
+ * 같은 날짜+같은 라벨 기존 글 1건 탐색
+ * - 1일 1라벨 정책 하에서는 이 글이 “오늘 운영 대상”이 된다.
+ * - same-seed 재사용 탐색이 실패해도, 운영상 이미 존재하는 오늘 글을 재연결하는 용도
+ * ============================================================ */
+function findExistingPostByDateLabel(queueDate, label) {
+  const qd = String(queueDate || '').slice(0, 10);
+  const lb = String(label || '').trim();
+  if (!qd || !lb) return null;
+
+  let files;
+  try {
+    files = fs.readdirSync(CONTENT_DIR).filter((f) => f.toLowerCase().endsWith('.json')).sort();
+  } catch {
+    return null;
+  }
+
+  for (const f of files) {
+    const full = path.join(CONTENT_DIR, f);
+    const doc = readJsonSafe(full, null);
+    if (!doc || typeof doc !== 'object') continue;
+
+    const sm = doc.seedMeta && typeof doc.seedMeta === 'object' ? doc.seedMeta : {};
+    const docQueueDate = String(sm.queueDate || '').slice(0, 10);
+    const docLabel = String(sm.label || '').trim();
+
+    if (docQueueDate !== qd) continue;
+    if (docLabel !== lb) continue;
+
+    const slug = String(doc.slug || path.basename(f, '.json')).trim();
+    if (!slug) continue;
+
+    return {
+      slug,
+      postId: String(doc.postId || '').trim() || null,
+      reviewId: String(doc.reviewId || '').trim() || null,
+      file: full,
+      doc,
+    };
+  }
+
+  return null;
+}
+
+/* ============================================================
+ * 기존 글 최소 보강
+ * - 생성 정책은 유지
+ * - 운영에 필요한 메타(reviewEntity/seedMeta.entity)만 보강
+ * - unrelated 필드 덮어쓰기 금지
+ * ============================================================ */
+function patchExistingPostMinimum(existing, item, label) {
+  if (!existing || !existing.file || !existing.doc || typeof existing.doc !== 'object') {
+    return { patched: false, reason: 'no-existing-doc' };
+  }
+
+  const reviewEntity = normalizeReviewEntityFromQueue(item, label);
+  if (!reviewEntity) {
+    return { patched: false, reason: 'no-review-entity' };
+  }
+
+  let changed = false;
+  const doc = existing.doc;
+
+  if (!doc.reviewEntity) {
+    doc.reviewEntity = reviewEntity;
+    changed = true;
+  }
+
+  if (!doc.seedMeta || typeof doc.seedMeta !== 'object') {
+    doc.seedMeta = {};
+    changed = true;
+  }
+
+  if (!doc.seedMeta.entity) {
+    doc.seedMeta.entity = reviewEntity;
+    changed = true;
+  }
+
+  if (!changed) {
+    return { patched: false, reason: 'already-present' };
+  }
+
+  writeJsonAtomic(existing.file, doc);
+  return { patched: true, reason: 'patched-review-entity' };
 }
 
 /* ============================================================
@@ -499,12 +599,37 @@ for (let i = 0; i < items.length; i++) {
     postId = existing.postId || null;
     reviewId = existing.reviewId || null;
   } else {
-    // ✅ 국부 추가:
-    // scheduler queue 한정으로 같은 날짜+같은 라벨 신규 생성은 1건만 허용
+    // ✅ scheduler queue 한정으로 같은 날짜+같은 라벨 신규 생성은 1건만 허용
     // - 기존 same-seed 재사용은 위에서 먼저 처리
-    // - 초과분은 생성하지 않고 skip
+    // - 초과분은 "생성"하지 않되, 기존 오늘자 글을 재연결/최소 보강
     const existingCount = countExistingPostsByDateLabel(queueDate, label);
     if (existingCount >= MAX_NEW_POSTS_PER_DATE_LABEL) {
+      const existingByDateLabel = findExistingPostByDateLabel(queueDate, label);
+
+      if (existingByDateLabel) {
+        slug = existingByDateLabel.slug;
+        postId = existingByDateLabel.postId || null;
+        reviewId = existingByDateLabel.reviewId || null;
+
+        const patchResult = patchExistingPostMinimum(existingByDateLabel, item, label);
+
+        if (outItem) {
+          outItem.generatedSlug = slug;
+          outItem.postId = postId || outItem.postId || null;
+          if (isReviewLabel(label)) outItem.reviewId = reviewId || outItem.reviewId || null;
+          outItem.reused = true;
+          outItem.reusedReason = 'date-label-limit-existing';
+          outItem.dateLabelLimit = MAX_NEW_POSTS_PER_DATE_LABEL;
+          outItem.existingDateLabelCount = existingCount;
+          outItem.patched = !!patchResult.patched;
+          outItem.patchedReason = patchResult.reason || null;
+        }
+
+        reused++;
+        skipped++;
+        continue;
+      }
+
       if (outItem) {
         outItem.skipped = true;
         outItem.skippedReason = 'date-label-limit';
@@ -541,6 +666,15 @@ for (let i = 0; i < items.length; i++) {
   }
 
   if (existing) {
+    const patchResult = patchExistingPostMinimum(existing, item, label);
+
+    if (outItem) {
+      outItem.reused = true;
+      outItem.reusedReason = 'same-seed-existing';
+      outItem.patched = !!patchResult.patched;
+      outItem.patchedReason = patchResult.reason || null;
+    }
+
     reused++;
     skipped++;
     continue;
@@ -555,8 +689,7 @@ for (let i = 0; i < items.length; i++) {
   const profileId = getProfileIdForLabel(label);
   if (!profileId) fatal(`profileId 없음: ${label} (labels.json SSOT 확인 필요)`);
 
-  // ✅ 국부 추가:
-  // scheduler가 전달한 reviewEntity를 post SSOT에 보존
+  // ✅ scheduler가 전달한 reviewEntity를 post SSOT에 보존
   const reviewEntity = normalizeReviewEntityFromQueue(item, label);
 
   const doc = {
