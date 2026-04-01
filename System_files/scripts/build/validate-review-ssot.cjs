@@ -18,6 +18,11 @@
  * 필요 환경:
  * - ROOT는 System_files 기준(프로젝트 규칙)
  * - update-review-ratings.cjs가 존재해야 함 (package.json에 이미 있음)
+ *
+ * [국부 보강]
+ * - 파이프라인 실행 스코프 SSOT는 today.expanded.json 우선 사용
+ * - 신규 생성 slug는 generatedSlug 우선 사용
+ * - today.expanded.json이 없을 때만 today.json으로 fallback
  */
 
 const fs = require('fs');
@@ -28,6 +33,7 @@ const { spawnSync } = require('child_process');
 require('./lib/env.cjs');
 
 const ROOT = path.resolve(__dirname, '..', '..'); // System_files
+const QUEUE_EXPANDED_PATH = path.join(ROOT, 'dist', 'queue', 'today.expanded.json');
 const QUEUE_PATH = path.join(ROOT, 'dist', 'queue', 'today.json');
 const POSTS_DIR = path.join(ROOT, 'content', 'posts');
 const SSOT_PATH = path.join(ROOT, 'content', 'reviews', 'review-ratings.json');
@@ -161,6 +167,41 @@ function getRetryCount(ledger, slug) {
   return Number(ledger[slug] || 0) || 0;
 }
 
+function resolveScopeQueue() {
+  const expanded = readJsonSafe(QUEUE_EXPANDED_PATH, null);
+  const today = readJsonSafe(QUEUE_PATH, null);
+
+  if (expanded && typeof expanded === 'object') {
+    return {
+      queue: expanded,
+      queuePath: QUEUE_EXPANDED_PATH,
+      queueType: 'expanded',
+    };
+  }
+
+  if (today && typeof today === 'object') {
+    return {
+      queue: today,
+      queuePath: QUEUE_PATH,
+      queueType: 'today',
+    };
+  }
+
+  return {
+    queue: null,
+    queuePath: fs.existsSync(QUEUE_EXPANDED_PATH) ? QUEUE_EXPANDED_PATH : QUEUE_PATH,
+    queueType: 'none',
+  };
+}
+
+function resolveSlugFromQueueItem(it) {
+  return String(
+    it?.generatedSlug ||
+    it?.slug ||
+    ''
+  ).trim();
+}
+
 /**
  * 스파이크 실행
  * - 원칙: slug별 1회만 허용(ledger로 강제)
@@ -191,29 +232,33 @@ function runSpikeUpdate(slugs) {
 function main() {
   ensureDir(OUT_DIR);
 
-  // today.json 없으면 “발행 스코프”가 없으므로 검증도 스킵(중구난방 방지)
-  if (!fs.existsSync(QUEUE_PATH)) {
+  // 실행 스코프 SSOT: today.expanded.json 우선, 없으면 today.json
+  const scope = resolveScopeQueue();
+
+  // queue 자체가 없으면 검증도 스킵
+  if (!scope.queue) {
     const report = {
       ok: true,
       skipped: true,
-      reason: 'today.json not found',
-      queuePath: QUEUE_PATH,
+      reason: 'queue scope file not found',
+      queuePath: scope.queuePath,
+      queueType: scope.queueType,
       ts: new Date().toISOString(),
     };
     writeJson(REPORT_PATH, report);
-    console.log('[validate-review-ssot] today.json 없음 → 스킵');
+    console.log('[validate-review-ssot] queue scope file 없음 → 스킵');
     process.exit(0);
   }
 
-  const queue = readJsonSafe(QUEUE_PATH, null);
-  const items = Array.isArray(queue?.items) ? queue.items : [];
+  const items = Array.isArray(scope.queue?.items) ? scope.queue.items : [];
 
   if (!items.length) {
     const report = {
       ok: true,
       skipped: true,
-      reason: 'today.json items empty',
-      queuePath: QUEUE_PATH,
+      reason: 'queue items empty',
+      queuePath: scope.queuePath,
+      queueType: scope.queueType,
       ts: new Date().toISOString(),
     };
     writeJson(REPORT_PATH, report);
@@ -226,7 +271,7 @@ function main() {
   // 1) 오늘 발행 대상 중 “리뷰 라벨”만 실제 postJson을 찾아 검사
   const targets = [];
   for (const it of items) {
-    const slug = String(it?.slug || '').trim();
+    const slug = resolveSlugFromQueueItem(it);
     const label = String(it?.label || '').trim();
 
     if (!slug) continue;
@@ -241,6 +286,7 @@ function main() {
       postPath,
       postExists: fs.existsSync(postPath),
       postJson,
+      queueType: scope.queueType,
     });
   }
 
@@ -248,7 +294,9 @@ function main() {
     const report = {
       ok: true,
       skipped: true,
-      reason: 'no review posts in today scope',
+      reason: 'no review posts in queue scope',
+      queuePath: scope.queuePath,
+      queueType: scope.queueType,
       totalItems: items.length,
       reviewItems: 0,
       ts: new Date().toISOString(),
@@ -276,13 +324,13 @@ function main() {
       continue;
     }
 
-    // 라벨 방어(혹시 today.json이 맞더라도 postJson이 오염된 경우)
+    // 라벨 방어(혹시 queue label이 맞더라도 postJson이 오염된 경우)
     if (!isReviewPost(t.postJson)) {
       crit.push({
         slug: t.slug,
         label: t.label,
         code: 'label-mismatch',
-        detail: 'today.json label is review but postJson label is not review',
+        detail: 'queue label is review but postJson label is not review',
       });
       continue;
     }
@@ -355,7 +403,8 @@ function main() {
     ok: crit.length === 0,
     ts: new Date().toISOString(),
     scope: {
-      queuePath: QUEUE_PATH,
+      queuePath: scope.queuePath,
+      queueType: scope.queueType,
       itemsTotal: items.length,
       reviewTargets: targets.length,
     },
@@ -371,10 +420,11 @@ function main() {
 
   console.log('────────────────────────────────────────────');
   console.log('[validate-review-ssot] 결과');
-  console.log('  reviewTargets =', targets.length);
-  console.log('  spikeRequested=', needSpike.length);
-  console.log('  CRIT          =', crit.length);
-  console.log('  report        =', REPORT_PATH);
+  console.log('  queueType      =', scope.queueType);
+  console.log('  reviewTargets  =', targets.length);
+  console.log('  spikeRequested =', needSpike.length);
+  console.log('  CRIT           =', crit.length);
+  console.log('  report         =', REPORT_PATH);
   console.log('────────────────────────────────────────────');
 
   if (crit.length) process.exitCode = 1;
