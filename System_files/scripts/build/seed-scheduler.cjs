@@ -53,6 +53,14 @@
  *   - subscription-services 시드가 없으면 app-reviews로 대체
  * - 실제 fallback이 발생하면 최종 queue item.label / seedLabel 은 app-reviews 로 기록한다.
  *   (즉 "앱리뷰로 대체"를 실제 발행 라벨에도 반영)
+ *
+ * [이번 국부 추가]
+ * - 리뷰 라벨(app/device/subscription) 큐 아이템에는 reviewEntity를 함께 싣는다.
+ * - 역할 분리 원칙:
+ *   - scheduler는 "seed에서 발행 큐로 전달"만 담당
+ *   - entity를 새로 생성/추론하지 않고, seed가 가진 정보만 정규화해 전달
+ * - 목적:
+ *   - queue-to-posts → content/posts 저장 시 reviewEntity/seedMeta.entity로 이어지게 하기 위한 upstream 전달
  */
 
 require('./lib/env.cjs');
@@ -120,6 +128,10 @@ function assertAllowedLabel(label, ctx) {
   if (!v) fatal(`label missing (${ctx})`);
   if (!ALLOWED_LABELS.has(v)) fatal(`label not allowed: "${v}" (${ctx})`);
   return v;
+}
+function isReviewLabel(label) {
+  const v = String(label || '').trim();
+  return v === 'app-reviews' || v === 'device-reviews' || v === 'subscription-services';
 }
 
 // ────────────────────────────────────
@@ -232,6 +244,56 @@ function ensureFingerprint(seed) {
 
   warn('[fingerprint] fp util missing or invalid export; cannot build fingerprint');
   return '';
+}
+
+/**
+ * 리뷰 엔티티 전달용 최소 정규화
+ * - scheduler 책임: seed 안의 entity성 정보를 queue item으로 전달
+ * - 없는 정보를 억지 추론하지 않음
+ */
+function extractReviewEntityForQueue(seed, finalLabel) {
+  if (!isReviewLabel(finalLabel)) return null;
+  if (!seed || typeof seed !== 'object') return null;
+
+  const src =
+    (seed.reviewEntity && typeof seed.reviewEntity === 'object' && seed.reviewEntity) ||
+    (seed.entity && typeof seed.entity === 'object' && seed.entity) ||
+    (seed.meta && seed.meta.entity && typeof seed.meta.entity === 'object' && seed.meta.entity) ||
+    null;
+
+  if (!src) return null;
+
+  const typeRaw = String(src.type || '').trim().toLowerCase();
+  const appId = String(src.appId || '').trim();
+  const appName = String(src.appName || '').trim();
+  const platform = String(src.platform || '').trim();
+  const model = String(src.model || '').trim();
+  const service = String(src.service || '').trim();
+
+  let type = typeRaw;
+  if (!type) {
+    if (finalLabel === 'app-reviews') type = 'app';
+    else if (finalLabel === 'device-reviews') type = 'device';
+    else if (finalLabel === 'subscription-services') type = 'subscription';
+  }
+
+  if (type === 'app') {
+    if (appId) return { type: 'app', appId, platform, appName };
+    if (appName && platform) return { type: 'app', appName, platform };
+    return null;
+  }
+
+  if (type === 'device') {
+    if (model) return { type: 'device', model };
+    return null;
+  }
+
+  if (type === 'subscription') {
+    if (service) return { type: 'subscription', service };
+    return null;
+  }
+
+  return null;
 }
 
 /**
@@ -431,8 +493,9 @@ function resolveSlotPick(slot, usedIds, queuedLabels, todayStr) {
     const requestedSlotLabel = resolved.requestedSlotLabel;
     const preferredMode = resolved.mode;
     const picked = resolved.picked;
+    const reviewEntity = extractReviewEntityForQueue(picked, finalLabel);
 
-    items.push({
+    const queueItem = {
       date: todayStr,
       label: finalLabel,
       seedLabel,
@@ -445,8 +508,15 @@ function resolveSlotPick(slot, usedIds, queuedLabels, todayStr) {
       intent: picked.intent || '',
       priority: picked.priority ?? 0,
       notes: picked.notes || '',
-    });
+    };
 
+    // ✅ 국부 추가:
+    // 리뷰 라벨은 seed의 entity를 queue item.reviewEntity로 전달
+    if (reviewEntity) {
+      queueItem.reviewEntity = reviewEntity;
+    }
+
+    items.push(queueItem);
     queuedLabels.add(finalLabel);
   }
 
