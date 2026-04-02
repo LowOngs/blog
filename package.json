@@ -49,6 +49,7 @@
 
     "reviews:due": "node ./System_files/scripts/build/review-due-90days.cjs",
     "reviews:next": "node ./System_files/scripts/build/review-next-from-due.cjs",
+    "reviews:next:from-due": "node ./System_files/scripts/build/review-next-from-due.cjs",
     "review:ratings:update": "node ./System_files/scripts/build/update-review-ratings.cjs",
     "posts:review:update": "node ./System_files/scripts/build/review-diff-update.cjs",
 
