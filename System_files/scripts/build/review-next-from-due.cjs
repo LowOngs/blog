@@ -14,6 +14,7 @@
  *
  * 규칙:
  * - baseline({bucket}-ratings.json)에서 해당 slug 레코드를 가져와 next에 넣는다.
+ * - baseline에 없는 신규 리뷰 slug는 최소 stub 레코드를 생성해 next에 넣는다.
  * - 레코드에 status가 없으면 status='due'로 넣는다.
  * - next 파일은 bySlug 구조를 유지하며, 다른 slug는 건드리지 않는다(멱등).
  *
@@ -138,6 +139,48 @@ function collectDueItems(due) {
   return items;
 }
 
+function buildStubRecord(slug, bucket) {
+  const normalizedBucket = normalizeBucket(bucket) || inferBucketFromSlug(slug) || 'app';
+
+  const base = {
+    lastChecked: null,
+    status: 'due',
+    store: 'unknown',
+    source: 'pending',
+    storeId: null,
+    ratingCurrent: 0,
+    ratingPrevious: 0,
+    ratingDiff: 0,
+    votesCurrent: 0,
+    votesPrevious: 0,
+    votesDiff: 0,
+    histogram: {
+      '1': 0,
+      '2': 0,
+      '3': 0,
+      '4': 0,
+      '5': 0,
+    },
+    insights: [],
+    sources: [],
+    bucket: normalizedBucket,
+  };
+
+  return base;
+}
+
+function cloneRecordWithDue(baseRec, slug, bucket) {
+  const cloned = JSON.parse(JSON.stringify(baseRec));
+  if (!cloned.status) cloned.status = 'due';
+  if (!cloned.bucket) cloned.bucket = normalizeBucket(bucket) || inferBucketFromSlug(slug) || '';
+  if (!Array.isArray(cloned.insights)) cloned.insights = [];
+  if (!Array.isArray(cloned.sources)) cloned.sources = [];
+  if (!cloned.histogram || typeof cloned.histogram !== 'object') {
+    cloned.histogram = { '1': 0, '2': 0, '3': 0, '4': 0, '5': 0 };
+  }
+  return cloned;
+}
+
 function main() {
   console.log('────────────────────────────────────────────');
   console.log('[review-next] ROOT       =', ROOT);
@@ -192,6 +235,8 @@ function main() {
 
   let totalQueued = 0;
   let totalWritten = 0;
+  let totalMissingBaseline = 0;
+  let totalStubCreated = 0;
 
   for (const bucket of BUCKETS) {
     const slugs = uniq(picked[bucket]);
@@ -205,39 +250,52 @@ function main() {
 
     let wrote = 0;
     let missingBaseline = 0;
+    let stubCreated = 0;
 
     for (const slug of slugs) {
       const baseRec = baseline.bySlug[slug];
+
+      let candidate;
       if (!baseRec || typeof baseRec !== 'object') {
         missingBaseline++;
-        continue;
+        stubCreated++;
+        candidate = buildStubRecord(slug, bucket);
+      } else {
+        candidate = cloneRecordWithDue(baseRec, slug, bucket);
       }
 
-      // next에 넣을 레코드 (baseline 복제 + status 보정)
-      const cloned = JSON.parse(JSON.stringify(baseRec));
-      if (!cloned.status) cloned.status = 'due';
-
       const prev = JSON.stringify(next.bySlug[slug] || null);
-      const now = JSON.stringify(cloned);
+      const now = JSON.stringify(candidate);
 
       if (prev !== now) {
-        next.bySlug[slug] = cloned;
+        next.bySlug[slug] = candidate;
         wrote++;
       }
     }
 
+    totalMissingBaseline += missingBaseline;
+    totalStubCreated += stubCreated;
+
     if (wrote > 0) {
       writeJsonPretty(nextPath, next);
       totalWritten += wrote;
-      console.log(`[review-next] (${bucket}) next 갱신: ${nextPath} wrote=${wrote} missingBaseline=${missingBaseline}`);
+      console.log(
+        `[review-next] (${bucket}) next 갱신: ${nextPath} wrote=${wrote} missingBaseline=${missingBaseline} stubCreated=${stubCreated}`
+      );
     } else {
-      console.log(`[review-next] (${bucket}) 변경 없음 (queued=${slugs.length}, missingBaseline=${missingBaseline})`);
+      console.log(
+        `[review-next] (${bucket}) 변경 없음 (queued=${slugs.length}, missingBaseline=${missingBaseline}, stubCreated=${stubCreated})`
+      );
     }
   }
 
   console.log('────────────────────────────────────────────');
-  console.log(`[review-next] ignored(noSlug)=${ignoredNoSlug} ignored(noBucket)=${ignoredNoBucket} ignored(class)=${ignoredClass}`);
-  console.log(`[review-next] queued(total)=${totalQueued} | wrote(total)=${totalWritten}`);
+  console.log(
+    `[review-next] ignored(noSlug)=${ignoredNoSlug} ignored(noBucket)=${ignoredNoBucket} ignored(class)=${ignoredClass}`
+  );
+  console.log(
+    `[review-next] queued(total)=${totalQueued} | wrote(total)=${totalWritten} | missingBaseline(total)=${totalMissingBaseline} | stubCreated(total)=${totalStubCreated}`
+  );
   console.log('[review-next] 다음 순서: review-diff-update.cjs → review-resolver.cjs → render-posts.cjs');
   console.log('────────────────────────────────────────────');
 }
