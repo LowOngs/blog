@@ -2,509 +2,755 @@
   "label": "app-reviews",
   "limits": { "trend": 200 },
   "trend": [
-  {
-    "id": "ar-tr-001",
-    "title": "Is the New AI Writing App Worth Switching To?",
-    "angle": "Check latency, rewrite quality, and export options",
-    "audience": "Writers and students",
-    "intent": "review/feature-test",
-    "environment": "ai writing",
-    "timing": "launch period",
-    "goal": "decide if the upgrade offers real workflow gains"
-  },
-  {
-    "id": "ar-tr-002",
-    "title": "Which AI Chatbot App Gives the Most Accurate Answers?",
-    "angle": "Compare hallucination rate across models",
-    "audience": "General mobile users",
-    "intent": "review/accuracy-comparison",
-    "environment": "chatbot apps",
-    "timing": "during model updates",
-    "goal": "choose chatbot with consistently reliable output"
-  },
-  {
-    "id": "ar-tr-003",
-    "title": "The New Calendar App With Automated Time Blocking: Does It Work?",
-    "angle": "Real-world performance in busy schedules",
-    "audience": "Professionals",
-    "intent": "review/usability",
-    "environment": "calendar apps",
-    "timing": "post-update",
-    "goal": "verify if automation reduces schedule friction"
-  },
-  {
-    "id": "ar-tr-004",
-    "title": "Should You Switch to the Latest Password Manager?",
-    "angle": "Evaluate breach history + sync speed changes",
-    "audience": "Security-conscious users",
-    "intent": "review/security-check",
-    "environment": "password managers",
-    "timing": "major version launch",
-    "goal": "ensure upgrade does not introduce new risks"
-  },
-  {
-    "id": "ar-tr-005",
-    "title": "How Good Is the New Cross-Device Clipboard App?",
-    "angle": "Latency + file-type compatibility",
-    "audience": "Productivity users",
-    "intent": "review/utility",
-    "environment": "clipboard sync",
-    "timing": "initial release",
-    "goal": "see if it replaces manual cloud transfers"
-  },
-  {
-    "id": "ar-tr-006",
-    "title": "The Hottest Photo Editor of the Month: Hype or Real Upgrade?",
-    "angle": "AI masking + RAW export test",
-    "audience": "Mobile photographers",
-    "intent": "review/feature-test",
-    "environment": "photo editing",
-    "timing": "trend peak",
-    "goal": "judge if AI editing is actually accurate"
-  },
-  {
-    "id": "ar-tr-007",
-    "title": "Which Habit App Has the Best AI Coaching?",
-    "angle": "Model personalization and consistency",
-    "audience": "Self-improvement users",
-    "intent": "review/personalization",
-    "environment": "habit trackers",
-    "timing": "trend cycle",
-    "goal": "pick app with meaningful habit guidance"
-  },
-  {
-    "id": "ar-tr-008",
-    "title": "The New All-in-One Finance App: Too Much or Just Right?",
-    "angle": "Categorization AI accuracy",
-    "audience": "Budgeting beginners",
-    "intent": "review/data-handling",
-    "environment": "finance apps",
-    "timing": "launch wave",
-    "goal": "avoid apps with messy transaction labeling"
-  },
-  {
-    "id": "ar-tr-009",
-    "title": "Are AI-Powered Email Apps Actually Reducing Inbox Stress?",
-    "angle": "Smart filters + auto-summary accuracy",
-    "audience": "Professionals",
-    "intent": "review/productivity-gain",
-    "environment": "email clients",
-    "timing": "post-update",
-    "goal": "measure reduction in daily inbox time"
-  },
-  {
-    "id": "ar-tr-010",
-    "title": "Does This New Meditation App’s AI Coach Improve Focus?",
-    "angle": "Compare session personalization quality",
-    "audience": "Wellness seekers",
-    "intent": "review/effectiveness",
-    "environment": "meditation apps",
-    "timing": "early release",
-    "goal": "see if AI guidance produces measurable calm"
-  },
-
-  {
-    "id": "ar-tr-011",
-    "title": "The Most Viral Note App—Can It Replace Your Current Tool?",
-    "angle": "Check multi-device sync + offline reliability",
-    "audience": "Students and knowledge workers",
-    "intent": "review/replacement-check",
-    "environment": "note taking",
-    "timing": "trend",
-    "goal": "determine if switching is worth migration cost"
-  },
-  {
-    "id": "ar-tr-012",
-    "title": "Which AI Scanner App Captures Documents Most Accurately?",
-    "angle": "OCR error rate + export fidelity",
-    "audience": "Students and office workers",
-    "intent": "review/accuracy-test",
-    "environment": "document scanning",
-    "timing": "update cycles",
-    "goal": "pick app with reliable OCR output"
-  },
-  {
-    "id": "ar-tr-013",
-    "title": "The New Reading App With AI Summaries—Does It Deliver?",
-    "angle": "Summary depth vs correctness",
-    "audience": "Readers",
-    "intent": "review/content-quality",
-    "environment": "reading apps",
-    "timing": "launch phase",
-    "goal": "determine actual value of AI insights"
-  },
-  {
-    "id": "ar-tr-014",
-    "title": "Is the New Fitness App’s Form-Tracking AI Accurate?",
-    "angle": "Camera-based motion accuracy test",
-    "audience": "Fitness beginners",
-    "intent": "review/accuracy",
-    "environment": "fitness apps",
-    "timing": "early adoption",
-    "goal": "avoid apps giving unsafe workout guidance"
-  },
-  {
-    "id": "ar-tr-015",
-    "title": "The Best AI Translation App Right Now?",
-    "angle": "Latency + offline model quality",
-    "audience": "Travelers and students",
-    "intent": "review/comparison",
-    "environment": "translation apps",
-    "timing": "update frequency",
-    "goal": "pick app with accurate conversational translation"
-  },
-  {
-    "id": "ar-tr-016",
-    "title": "Which Video Editing App Handles AI Cutouts Best?",
-    "angle": "Edge detection and export quality test",
-    "audience": "Creators",
-    "intent": "review/performance",
-    "environment": "video editing",
-    "timing": "trending app wave",
-    "goal": "measure real-world AI cutout precision"
-  },
-  {
-    "id": "ar-tr-017",
-    "title": "Which Weather App Gives the Most Reliable Storm Alerts?",
-    "angle": "Alert precision + false alarm rate",
-    "audience": "Commuters and travelers",
-    "intent": "review/accuracy",
-    "environment": "weather apps",
-    "timing": "seasonal",
-    "goal": "choose app with trustworthy notifications"
-  },
-  {
-    "id": "ar-tr-018",
-    "title": "Is the New ‘Minimalist Email App’ Actually Better?",
-    "angle": "Check if simplicity removes essential tools",
-    "audience": "Busy professionals",
-    "intent": "review/usability",
-    "environment": "email apps",
-    "timing": "launch",
-    "goal": "see if minimal UI boosts productivity"
-  },
-  {
-    "id": "ar-tr-019",
-    "title": "The New AI Flashcard App—Does It Improve Memory Faster?",
-    "angle": "Spaced-repetition personalization",
-    "audience": "Students",
-    "intent": "review/learning-effectiveness",
-    "environment": "study apps",
-    "timing": "early trend",
-    "goal": "measure retention improvements"
-  },
-  {
-    "id": "ar-tr-020",
-    "title": "Which Ride-Hailing App Is the Most Efficient in Your City?",
-    "angle": "Wait time + cancellation frequency",
-    "audience": "Daily commuters",
-    "intent": "review/performance-check",
-    "environment": "transport apps",
-    "timing": "seasonal",
-    "goal": "find app with consistent service stability"
-  },
-
-  {
-    "id": "ar-tr-021",
-    "title": "Is the New Grocery Delivery App Worth the Fees?",
-    "angle": "Compare delivery accuracy + substitutions",
-    "audience": "Home shoppers",
-    "intent": "review/value-check",
-    "environment": "grocery delivery",
-    "timing": "launch period",
-    "goal": "judge cost-effectiveness over traditional shopping"
-  },
-  {
-    "id": "ar-tr-022",
-    "title": "Which AI Camera App Gives the Best Low-Light Shots?",
-    "angle": "Noise reduction + detail retention",
-    "audience": "Casual photographers",
-    "intent": "review/quality-test",
-    "environment": "camera apps",
-    "timing": "update",
-    "goal": "select camera app with superior night AI"
-  },
-  {
-    "id": "ar-tr-023",
-    "title": "Is the New Meal Planning App Good Enough to Replace Manual Planning?",
-    "angle": "AI nutrition suggestions accuracy",
-    "audience": "Families and fitness users",
-    "intent": "review/effectiveness",
-    "environment": "meal planner",
-    "timing": "launch",
-    "goal": "save meal prep time while maintaining accuracy"
-  },
-  {
-    "id": "ar-tr-024",
-    "title": "Which Music App’s Recommendation AI Improved the Most This Year?",
-    "angle": "Playlist personalization test",
-    "audience": "Music streamers",
-    "intent": "review/personalization",
-    "environment": "music apps",
-    "timing": "annual update",
-    "goal": "pick app with accurate taste prediction"
-  },
-  {
-    "id": "ar-tr-025",
-    "title": "The New File Manager App: Faster or Just Prettier?",
-    "angle": "Search index speed + folder navigation",
-    "audience": "Productivity users",
-    "intent": "review/performance",
-    "environment": "file managers",
-    "timing": "trend surge",
-    "goal": "verify real usability improvements"
-  },
-  {
-    "id": "ar-tr-026",
-    "title": "Which Podcast App Has the Best Playback AI?",
-    "angle": "Smart speed accuracy + noise removal",
-    "audience": "Podcast listeners",
-    "intent": "review/quality-test",
-    "environment": "podcast apps",
-    "timing": "feature release",
-    "goal": "improve listening efficiency"
-  },
-  {
-    "id": "ar-tr-027",
-    "title": "Is the New Focus Timer App Good Enough to Replace Pomodoro?",
-    "angle": "AI session planning",
-    "audience": "Productivity seekers",
-    "intent": "review/effectiveness",
-    "environment": "focus apps",
-    "timing": "early adoption",
-    "goal": "boost session effectiveness"
-  },
-  {
-    "id": "ar-tr-028",
-    "title": "Which AI Voice Recorder App Transcribes Most Accurately?",
-    "angle": "Accent handling + punctuation accuracy",
-    "audience": "Students and professionals",
-    "intent": "review/accuracy-test",
-    "environment": "recording apps",
-    "timing": "update",
-    "goal": "pick best transcription engine"
-  },
-  {
-    "id": "ar-tr-029",
-    "title": "The Latest Mapping App: Is It Better Than Your Default?",
-    "angle": "Route accuracy + traffic predictions",
-    "audience": "Drivers and travelers",
-    "intent": "review/comparison",
-    "environment": "navigation apps",
-    "timing": "peak usage",
-    "goal": "determine if switching adds value"
-  },
-  {
-    "id": "ar-tr-030",
-    "title": "Is the New Browser App Actually Faster?",
-    "angle": "Tab handling + memory usage",
-    "audience": "General users",
-    "intent": "review/performance-test",
-    "environment": "browsers",
-    "timing": "launch",
-    "goal": "confirm real speed gains"
-  },
-
-  {
-    "id": "ar-tr-031",
-    "title": "Which AI Math Solver App Explains Steps Best?",
-    "angle": "Reasoning clarity",
-    "audience": "Students",
-    "intent": "review/explanation-quality",
-    "environment": "math apps",
-    "timing": "exams cycle",
-    "goal": "choose app with strongest reasoning chain"
-  },
-  {
-    "id": "ar-tr-032",
-    "title": "The New Smart Dialer App—Does It Reduce Spam Calls?",
-    "angle": "Filter accuracy",
-    "audience": "Mobile users",
-    "intent": "review/effectiveness",
-    "environment": "phone apps",
-    "timing": "launch",
-    "goal": "minimize spam call interruptions"
-  },
-  {
-    "id": "ar-tr-033",
-    "title": "Which Cloud Storage App Syncs the Fastest?",
-    "angle": "File consistency + conflict handling",
-    "audience": "Professionals",
-    "intent": "review/performance",
-    "environment": "cloud apps",
-    "timing": "update",
-    "goal": "improve sync reliability"
-  },
-  {
-    "id": "ar-tr-034",
-    "title": "Is the New Fitness Tracker App Accurate for Steps and Calories?",
-    "angle": "Sensor calibration check",
-    "audience": "Health-conscious users",
-    "intent": "review/accuracy",
-    "environment": "fitness apps",
-    "timing": "trend",
-    "goal": "determine true tracking precision"
-  },
-  {
-    "id": "ar-tr-035",
-    "title": "Which Booking App Gives the Best Last-Minute Deals?",
-    "angle": "Price change behavior",
-    "audience": "Travelers",
-    "intent": "review/value",
-    "environment": "booking apps",
-    "timing": "seasonal",
-    "goal": "maximize travel discounts"
-  },
-  {
-    "id": "ar-tr-036",
-    "title": "How Accurate Is That New Air Quality App?",
-    "angle": "Compare sensor stations nearby",
-    "audience": "Urban residents",
-    "intent": "review/accuracy-check",
-    "environment": "environment apps",
-    "timing": "daily peak",
-    "goal": "use most reliable air quality readings"
-  },
-  {
-    "id": "ar-tr-037",
-    "title": "Which Social Media App Handles Video Uploads Best?",
-    "angle": "Compression + rendering stability",
-    "audience": "Creators",
-    "intent": "review/performance",
-    "environment": "social media",
-    "timing": "update",
-    "goal": "maintain quality during uploads"
-  },
-  {
-    "id": "ar-tr-038",
-    "title": "The New Photo Management App—Does It Organize Better?",
-    "angle": "Face recognition + auto-tagging",
-    "audience": "Photo-heavy users",
-    "intent": "review/organization",
-    "environment": "gallery apps",
-    "timing": "trend",
-    "goal": "reduce manual sorting time"
-  },
-  {
-    "id": "ar-tr-039",
-    "title": "Which Shopping App Finds the Lowest Price Automatically?",
-    "angle": "Cross-store comparison accuracy",
-    "audience": "Deal hunters",
-    "intent": "review/effectiveness",
-    "environment": "shopping apps",
-    "timing": "sale seasons",
-    "goal": "maximize savings with automated comparisons"
-  },
-  {
-    "id": "ar-tr-040",
-    "title": "Is the New Weather Radar App Better for Storm Tracking?",
-    "angle": "Real-time radar refresh rate",
-    "audience": "Travelers",
-    "intent": "review/performance",
-    "environment": "weather",
-    "timing": "storm season",
-    "goal": "improve severe weather awareness"
-  },
-
-  {
-    "id": "ar-tr-041",
-    "title": "Which Map App Has the Best Offline Navigation Right Now?",
-    "angle": "Offline routing accuracy",
-    "audience": "Travelers",
-    "intent": "review/offline-test",
-    "environment": "navigation",
-    "timing": "travel season",
-    "goal": "reliable navigation without data"
-  },
-  {
-    "id": "ar-tr-042",
-    "title": "Is the New Audio Cleanup App Worth the Hype?",
-    "angle": "AI noise removal consistency",
-    "audience": "Podcasters and creators",
-    "intent": "review/quality-test",
-    "environment": "audio tools",
-    "timing": "trend",
-    "goal": "improve clarity in recordings"
-  },
-  {
-    "id": "ar-tr-043",
-    "title": "Which Payment App Is Fastest at Peer Transfers?",
-    "angle": "Transfer latency + failure rate",
-    "audience": "General users",
-    "intent": "review/performance",
-    "environment": "payment apps",
-    "timing": "peak usage",
-    "goal": "ensure smooth transfers"
-  },
-  {
-    "id": "ar-tr-044",
-    "title": "Is the New AI Whiteboard App Good for Team Meetings?",
-    "angle": "Real-time sync + drawing AI",
-    "audience": "Remote teams",
-    "intent": "review/collaboration",
-    "environment": "whiteboard apps",
-    "timing": "update",
-    "goal": "enhance meeting productivity"
-  },
-  {
-    "id": "ar-tr-045",
-    "title": "Which Health App Has the Most Reliable Sleep Tracking?",
-    "angle": "Stage detection + wake accuracy",
-    "audience": "Sleep-conscious users",
-    "intent": "review/accuracy",
-    "environment": "health apps",
-    "timing": "monthly trend",
-    "goal": "find app with consistent sleep metrics"
-  },
-  {
-    "id": "ar-tr-046",
-    "title": "Is the Latest File-Sharing App Actually Faster?",
-    "angle": "Wi-Fi direct throughput test",
-    "audience": "General users",
-    "intent": "review/performance",
-    "environment": "file sharing",
-    "timing": "update wave",
-    "goal": "maximize transfer speeds"
-  },
-  {
-    "id": "ar-tr-047",
-    "title": "Which Learning App Has the Best AI Tutor This Year?",
-    "angle": "Reasoning clarity + feedback",
-    "audience": "Students",
-    "intent": "review/personalization",
-    "environment": "education apps",
-    "timing": "academic season",
-    "goal": "improve learning efficiency"
-  },
-  {
-    "id": "ar-tr-048",
-    "title": "Is the New Bookmark Manager App Worth Migrating To?",
-    "angle": "Tag handling + sync reliability",
-    "audience": "Researchers and power users",
-    "intent": "review/organization",
-    "environment": "bookmark tools",
-    "timing": "trend",
-    "goal": "simplify link management"
-  },
-  {
-    "id": "ar-tr-049",
-    "title": "Which AI Keyboard App Improves Typing Speed the Most?",
-    "angle": "Prediction accuracy + latency",
-    "audience": "Mobile users",
-    "intent": "review/performance",
-    "environment": "keyboard apps",
-    "timing": "feature roll-out",
-    "goal": "typing efficiency boost"
-  },
-  {
-    "id": "ar-tr-050",
-    "title": "Is the New Shopping Cashback App Legit?",
-    "angle": "Cashout reliability + merchant coverage",
-    "audience": "Deal hunters",
-    "intent": "review/trust-check",
-    "environment": "cashback apps",
-    "timing": "launch",
-    "goal": "avoid unreliable cashback platforms"
-  }
-]
+    {
+      "id": "ar-tr-001",
+      "title": "Is the New AI Writing App Worth Switching To?",
+      "angle": "Check latency, rewrite quality, and export options",
+      "audience": "Writers and students",
+      "intent": "review/feature-test",
+      "environment": "ai writing",
+      "timing": "launch period",
+      "goal": "decide if the upgrade offers real workflow gains",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "AI Writing App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-002",
+      "title": "Which AI Chatbot App Gives the Most Accurate Answers?",
+      "angle": "Compare hallucination rate across models",
+      "audience": "General mobile users",
+      "intent": "review/accuracy-comparison",
+      "environment": "chatbot apps",
+      "timing": "during model updates",
+      "goal": "choose chatbot with consistently reliable output",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "AI Chatbot App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-003",
+      "title": "The New Calendar App With Automated Time Blocking: Does It Work?",
+      "angle": "Real-world performance in busy schedules",
+      "audience": "Professionals",
+      "intent": "review/usability",
+      "environment": "calendar apps",
+      "timing": "post-update",
+      "goal": "verify if automation reduces schedule friction",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Automated Time Blocking Calendar App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-004",
+      "title": "Should You Switch to the Latest Password Manager?",
+      "angle": "Evaluate breach history + sync speed changes",
+      "audience": "Security-conscious users",
+      "intent": "review/security-check",
+      "environment": "password managers",
+      "timing": "major version launch",
+      "goal": "ensure upgrade does not introduce new risks",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Password Manager App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-005",
+      "title": "How Good Is the New Cross-Device Clipboard App?",
+      "angle": "Latency + file-type compatibility",
+      "audience": "Productivity users",
+      "intent": "review/utility",
+      "environment": "clipboard sync",
+      "timing": "initial release",
+      "goal": "see if it replaces manual cloud transfers",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Cross-Device Clipboard App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-006",
+      "title": "The Hottest Photo Editor of the Month: Hype or Real Upgrade?",
+      "angle": "AI masking + RAW export test",
+      "audience": "Mobile photographers",
+      "intent": "review/feature-test",
+      "environment": "photo editing",
+      "timing": "trend peak",
+      "goal": "judge if AI editing is actually accurate",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Photo Editor App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-007",
+      "title": "Which Habit App Has the Best AI Coaching?",
+      "angle": "Model personalization and consistency",
+      "audience": "Self-improvement users",
+      "intent": "review/personalization",
+      "environment": "habit trackers",
+      "timing": "trend cycle",
+      "goal": "pick app with meaningful habit guidance",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "AI Habit App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-008",
+      "title": "The New All-in-One Finance App: Too Much or Just Right?",
+      "angle": "Categorization AI accuracy",
+      "audience": "Budgeting beginners",
+      "intent": "review/data-handling",
+      "environment": "finance apps",
+      "timing": "launch wave",
+      "goal": "avoid apps with messy transaction labeling",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "All-in-One Finance App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-009",
+      "title": "Are AI-Powered Email Apps Actually Reducing Inbox Stress?",
+      "angle": "Smart filters + auto-summary accuracy",
+      "audience": "Professionals",
+      "intent": "review/productivity-gain",
+      "environment": "email clients",
+      "timing": "post-update",
+      "goal": "measure reduction in daily inbox time",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "AI Email App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-010",
+      "title": "Does This New Meditation App’s AI Coach Improve Focus?",
+      "angle": "Compare session personalization quality",
+      "audience": "Wellness seekers",
+      "intent": "review/effectiveness",
+      "environment": "meditation apps",
+      "timing": "early release",
+      "goal": "see if AI guidance produces measurable calm",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "AI Meditation App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-011",
+      "title": "The Most Viral Note App—Can It Replace Your Current Tool?",
+      "angle": "Check multi-device sync + offline reliability",
+      "audience": "Students and knowledge workers",
+      "intent": "review/replacement-check",
+      "environment": "note taking",
+      "timing": "trend",
+      "goal": "determine if switching is worth migration cost",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Note App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-012",
+      "title": "Which AI Scanner App Captures Documents Most Accurately?",
+      "angle": "OCR error rate + export fidelity",
+      "audience": "Students and office workers",
+      "intent": "review/accuracy-test",
+      "environment": "document scanning",
+      "timing": "update cycles",
+      "goal": "pick app with reliable OCR output",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "AI Scanner App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-013",
+      "title": "The New Reading App With AI Summaries—Does It Deliver?",
+      "angle": "Summary depth vs correctness",
+      "audience": "Readers",
+      "intent": "review/content-quality",
+      "environment": "reading apps",
+      "timing": "launch phase",
+      "goal": "determine actual value of AI insights",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "AI Summary Reading App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-014",
+      "title": "Is the New Fitness App’s Form-Tracking AI Accurate?",
+      "angle": "Camera-based motion accuracy test",
+      "audience": "Fitness beginners",
+      "intent": "review/accuracy",
+      "environment": "fitness apps",
+      "timing": "early adoption",
+      "goal": "avoid apps giving unsafe workout guidance",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "AI Form-Tracking Fitness App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-015",
+      "title": "The Best AI Translation App Right Now?",
+      "angle": "Latency + offline model quality",
+      "audience": "Travelers and students",
+      "intent": "review/comparison",
+      "environment": "translation apps",
+      "timing": "update frequency",
+      "goal": "pick app with accurate conversational translation",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "AI Translation App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-016",
+      "title": "Which Video Editing App Handles AI Cutouts Best?",
+      "angle": "Edge detection and export quality test",
+      "audience": "Creators",
+      "intent": "review/performance",
+      "environment": "video editing",
+      "timing": "trending app wave",
+      "goal": "measure real-world AI cutout precision",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "AI Video Editing App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-017",
+      "title": "Which Weather App Gives the Most Reliable Storm Alerts?",
+      "angle": "Alert precision + false alarm rate",
+      "audience": "Commuters and travelers",
+      "intent": "review/accuracy",
+      "environment": "weather apps",
+      "timing": "seasonal",
+      "goal": "choose app with trustworthy notifications",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Weather Alert App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-018",
+      "title": "Is the New ‘Minimalist Email App’ Actually Better?",
+      "angle": "Check if simplicity removes essential tools",
+      "audience": "Busy professionals",
+      "intent": "review/usability",
+      "environment": "email apps",
+      "timing": "launch",
+      "goal": "see if minimal UI boosts productivity",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Minimalist Email App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-019",
+      "title": "The New AI Flashcard App—Does It Improve Memory Faster?",
+      "angle": "Spaced-repetition personalization",
+      "audience": "Students",
+      "intent": "review/learning-effectiveness",
+      "environment": "study apps",
+      "timing": "early trend",
+      "goal": "measure retention improvements",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "AI Flashcard App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-020",
+      "title": "Which Ride-Hailing App Is the Most Efficient in Your City?",
+      "angle": "Wait time + cancellation frequency",
+      "audience": "Daily commuters",
+      "intent": "review/performance-check",
+      "environment": "transport apps",
+      "timing": "seasonal",
+      "goal": "find app with consistent service stability",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Ride-Hailing App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-021",
+      "title": "Is the New Grocery Delivery App Worth the Fees?",
+      "angle": "Compare delivery accuracy + substitutions",
+      "audience": "Home shoppers",
+      "intent": "review/value-check",
+      "environment": "grocery delivery",
+      "timing": "launch period",
+      "goal": "judge cost-effectiveness over traditional shopping",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Grocery Delivery App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-022",
+      "title": "Which AI Camera App Gives the Best Low-Light Shots?",
+      "angle": "Noise reduction + detail retention",
+      "audience": "Casual photographers",
+      "intent": "review/quality-test",
+      "environment": "camera apps",
+      "timing": "update",
+      "goal": "select camera app with superior night AI",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "AI Camera App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-023",
+      "title": "Is the New Meal Planning App Good Enough to Replace Manual Planning?",
+      "angle": "AI nutrition suggestions accuracy",
+      "audience": "Families and fitness users",
+      "intent": "review/effectiveness",
+      "environment": "meal planner",
+      "timing": "launch",
+      "goal": "save meal prep time while maintaining accuracy",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Meal Planning App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-024",
+      "title": "Which Music App’s Recommendation AI Improved the Most This Year?",
+      "angle": "Playlist personalization test",
+      "audience": "Music streamers",
+      "intent": "review/personalization",
+      "environment": "music apps",
+      "timing": "annual update",
+      "goal": "pick app with accurate taste prediction",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Music Recommendation App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-025",
+      "title": "The New File Manager App: Faster or Just Prettier?",
+      "angle": "Search index speed + folder navigation",
+      "audience": "Productivity users",
+      "intent": "review/performance",
+      "environment": "file managers",
+      "timing": "trend surge",
+      "goal": "verify real usability improvements",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "File Manager App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-026",
+      "title": "Which Podcast App Has the Best Playback AI?",
+      "angle": "Smart speed accuracy + noise removal",
+      "audience": "Podcast listeners",
+      "intent": "review/quality-test",
+      "environment": "podcast apps",
+      "timing": "feature release",
+      "goal": "improve listening efficiency",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Podcast App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-027",
+      "title": "Is the New Focus Timer App Good Enough to Replace Pomodoro?",
+      "angle": "AI session planning",
+      "audience": "Productivity seekers",
+      "intent": "review/effectiveness",
+      "environment": "focus apps",
+      "timing": "early adoption",
+      "goal": "boost session effectiveness",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "AI Focus Timer App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-028",
+      "title": "Which AI Voice Recorder App Transcribes Most Accurately?",
+      "angle": "Accent handling + punctuation accuracy",
+      "audience": "Students and professionals",
+      "intent": "review/accuracy-test",
+      "environment": "recording apps",
+      "timing": "update",
+      "goal": "pick best transcription engine",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "AI Voice Recorder App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-029",
+      "title": "The Latest Mapping App: Is It Better Than Your Default?",
+      "angle": "Route accuracy + traffic predictions",
+      "audience": "Drivers and travelers",
+      "intent": "review/comparison",
+      "environment": "navigation apps",
+      "timing": "peak usage",
+      "goal": "determine if switching adds value",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Mapping App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-030",
+      "title": "Is the New Browser App Actually Faster?",
+      "angle": "Tab handling + memory usage",
+      "audience": "General users",
+      "intent": "review/performance-test",
+      "environment": "browsers",
+      "timing": "launch",
+      "goal": "confirm real speed gains",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Browser App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-031",
+      "title": "Which AI Math Solver App Explains Steps Best?",
+      "angle": "Reasoning clarity",
+      "audience": "Students",
+      "intent": "review/explanation-quality",
+      "environment": "math apps",
+      "timing": "exams cycle",
+      "goal": "choose app with strongest reasoning chain",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "AI Math Solver App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-032",
+      "title": "The New Smart Dialer App—Does It Reduce Spam Calls?",
+      "angle": "Filter accuracy",
+      "audience": "Mobile users",
+      "intent": "review/effectiveness",
+      "environment": "phone apps",
+      "timing": "launch",
+      "goal": "minimize spam call interruptions",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Smart Dialer App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-033",
+      "title": "Which Cloud Storage App Syncs the Fastest?",
+      "angle": "File consistency + conflict handling",
+      "audience": "Professionals",
+      "intent": "review/performance",
+      "environment": "cloud apps",
+      "timing": "update",
+      "goal": "improve sync reliability",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Cloud Storage App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-034",
+      "title": "Is the New Fitness Tracker App Accurate for Steps and Calories?",
+      "angle": "Sensor calibration check",
+      "audience": "Health-conscious users",
+      "intent": "review/accuracy",
+      "environment": "fitness apps",
+      "timing": "trend",
+      "goal": "determine true tracking precision",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Fitness Tracker App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-035",
+      "title": "Which Booking App Gives the Best Last-Minute Deals?",
+      "angle": "Price change behavior",
+      "audience": "Travelers",
+      "intent": "review/value",
+      "environment": "booking apps",
+      "timing": "seasonal",
+      "goal": "maximize travel discounts",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Booking App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-036",
+      "title": "How Accurate Is That New Air Quality App?",
+      "angle": "Compare sensor stations nearby",
+      "audience": "Urban residents",
+      "intent": "review/accuracy-check",
+      "environment": "environment apps",
+      "timing": "daily peak",
+      "goal": "use most reliable air quality readings",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Air Quality App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-037",
+      "title": "Which Social Media App Handles Video Uploads Best?",
+      "angle": "Compression + rendering stability",
+      "audience": "Creators",
+      "intent": "review/performance",
+      "environment": "social media",
+      "timing": "update",
+      "goal": "maintain quality during uploads",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Social Media App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-038",
+      "title": "The New Photo Management App—Does It Organize Better?",
+      "angle": "Face recognition + auto-tagging",
+      "audience": "Photo-heavy users",
+      "intent": "review/organization",
+      "environment": "gallery apps",
+      "timing": "trend",
+      "goal": "reduce manual sorting time",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Photo Management App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-039",
+      "title": "Which Shopping App Finds the Lowest Price Automatically?",
+      "angle": "Cross-store comparison accuracy",
+      "audience": "Deal hunters",
+      "intent": "review/effectiveness",
+      "environment": "shopping apps",
+      "timing": "sale seasons",
+      "goal": "maximize savings with automated comparisons",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Shopping Price Comparison App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-040",
+      "title": "Is the New Weather Radar App Better for Storm Tracking?",
+      "angle": "Real-time radar refresh rate",
+      "audience": "Travelers",
+      "intent": "review/performance",
+      "environment": "weather",
+      "timing": "storm season",
+      "goal": "improve severe weather awareness",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Weather Radar App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-041",
+      "title": "Which Map App Has the Best Offline Navigation Right Now?",
+      "angle": "Offline routing accuracy",
+      "audience": "Travelers",
+      "intent": "review/offline-test",
+      "environment": "navigation",
+      "timing": "travel season",
+      "goal": "reliable navigation without data",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Offline Navigation App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-042",
+      "title": "Is the New Audio Cleanup App Worth the Hype?",
+      "angle": "AI noise removal consistency",
+      "audience": "Podcasters and creators",
+      "intent": "review/quality-test",
+      "environment": "audio tools",
+      "timing": "trend",
+      "goal": "improve clarity in recordings",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Audio Cleanup App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-043",
+      "title": "Which Payment App Is Fastest at Peer Transfers?",
+      "angle": "Transfer latency + failure rate",
+      "audience": "General users",
+      "intent": "review/performance",
+      "environment": "payment apps",
+      "timing": "peak usage",
+      "goal": "ensure smooth transfers",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Peer Transfer Payment App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-044",
+      "title": "Is the New AI Whiteboard App Good for Team Meetings?",
+      "angle": "Real-time sync + drawing AI",
+      "audience": "Remote teams",
+      "intent": "review/collaboration",
+      "environment": "whiteboard apps",
+      "timing": "update",
+      "goal": "enhance meeting productivity",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "AI Whiteboard App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-045",
+      "title": "Which Health App Has the Most Reliable Sleep Tracking?",
+      "angle": "Stage detection + wake accuracy",
+      "audience": "Sleep-conscious users",
+      "intent": "review/accuracy",
+      "environment": "health apps",
+      "timing": "monthly trend",
+      "goal": "find app with consistent sleep metrics",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Sleep Tracking Health App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-046",
+      "title": "Is the Latest File-Sharing App Actually Faster?",
+      "angle": "Wi-Fi direct throughput test",
+      "audience": "General users",
+      "intent": "review/performance",
+      "environment": "file sharing",
+      "timing": "update wave",
+      "goal": "maximize transfer speeds",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "File-Sharing App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-047",
+      "title": "Which Learning App Has the Best AI Tutor This Year?",
+      "angle": "Reasoning clarity + feedback",
+      "audience": "Students",
+      "intent": "review/personalization",
+      "environment": "education apps",
+      "timing": "academic season",
+      "goal": "improve learning efficiency",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "AI Tutor Learning App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-048",
+      "title": "Is the New Bookmark Manager App Worth Migrating To?",
+      "angle": "Tag handling + sync reliability",
+      "audience": "Researchers and power users",
+      "intent": "review/organization",
+      "environment": "bookmark tools",
+      "timing": "trend",
+      "goal": "simplify link management",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Bookmark Manager App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-049",
+      "title": "Which AI Keyboard App Improves Typing Speed the Most?",
+      "angle": "Prediction accuracy + latency",
+      "audience": "Mobile users",
+      "intent": "review/performance",
+      "environment": "keyboard apps",
+      "timing": "feature roll-out",
+      "goal": "typing efficiency boost",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "AI Keyboard App",
+        "platform": "android"
+      }
+    },
+    {
+      "id": "ar-tr-050",
+      "title": "Is the New Shopping Cashback App Legit?",
+      "angle": "Cashout reliability + merchant coverage",
+      "audience": "Deal hunters",
+      "intent": "review/trust-check",
+      "environment": "cashback apps",
+      "timing": "launch",
+      "goal": "avoid unreliable cashback platforms",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Shopping Cashback App",
+        "platform": "android"
+      }
+    }
+  ]
 }
