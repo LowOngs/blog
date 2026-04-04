@@ -49,22 +49,24 @@
 
     "reviews:due": "node ./System_files/scripts/build/review-due-90days.cjs",
     "reviews:next": "node ./System_files/scripts/build/review-next-from-due.cjs",
-    "reviews:next:from-due": "node ./System_files/scripts/build/review-next-from-due.cjs",
+    "reviews:next:new": "node ./System_files/scripts/build/review-rating-next.cjs",
     "review:ratings:update": "node ./System_files/scripts/build/update-review-ratings.cjs",
     "posts:review:update": "node ./System_files/scripts/build/review-diff-update.cjs",
 
     "reviews:bundle": "npm run reviews:stub && npm run reviews:build-next && npm run reviews:diff && npm run reviews:ssot:build",
     "reviews:freshness": "npm run reviews:due && npm run reviews:next && npm run reviews:diff && npm run reviews:ssot:build",
 
+    "reviews:new:issue": "npm run reviews:next:new && npm run reviews:fetch:official && npm run reviews:fetch:insights && npm run reviews:diff && npm run reviews:ssot:build && npm run reviews:inject",
+
     "publish:blogger": "node ./System_files/scripts/publish/blogger.cjs",
 
-    "build": "npm run posts:body:generate && npm run posts:content:generate && npm run posts:content:validate && npm run posts:body-images:validate && npm run posts:render && npm run posts:normalize && npm run reviews:ssot:build && npm run reviews:inject && npm run posts:validate && npm run posts:review:ssot:validate && npm run posts:qa && npm run posts:archive",
+    "build": "npm run posts:body:generate && npm run posts:content:generate && npm run posts:content:validate && npm run posts:body-images:validate && npm run posts:render && npm run posts:normalize && npm run reviews:next:new && npm run reviews:fetch:official && npm run reviews:fetch:insights && npm run reviews:diff && npm run reviews:ssot:build && npm run reviews:inject && npm run posts:validate && npm run posts:review:ssot:validate && npm run posts:qa && npm run posts:archive",
 
-    "posts:local:full": "npm run posts:body:generate && npm run posts:content:generate && npm run posts:content:validate && npm run posts:body-images:validate && npm run posts:render && npm run posts:normalize && npm run reviews:ssot:build && npm run reviews:inject && npm run images:renew && npm run images:build:og && npm run images:upload && npm run posts:render && npm run posts:normalize && npm run reviews:ssot:build && npm run reviews:inject && npm run posts:validate && npm run posts:review:ssot:validate && npm run posts:qa && npm run posts:archive && npm run feed:build && npm run feed:validate && npm run tools:copy",
+    "posts:local:full": "npm run posts:body:generate && npm run posts:content:generate && npm run posts:content:validate && npm run posts:body-images:validate && npm run posts:render && npm run posts:normalize && npm run reviews:next:new && npm run reviews:fetch:official && npm run reviews:fetch:insights && npm run reviews:diff && npm run reviews:ssot:build && npm run reviews:inject && npm run images:renew && npm run images:build:og && npm run images:upload && npm run posts:render && npm run posts:normalize && npm run reviews:ssot:build && npm run reviews:inject && npm run posts:validate && npm run posts:review:ssot:validate && npm run posts:qa && npm run posts:archive && npm run feed:build && npm run feed:validate && npm run tools:copy",
 
     "deploy": "npm run images:upload && npm run build",
 
-    "local:dryrun": "node ./System_files/scripts/build/seed-scheduler.cjs && node ./System_files/scripts/build/queue-to-posts.cjs && node ./System_files/scripts/build/ids.cjs && npm run posts:body:generate && npm run posts:content:generate && npm run posts:content:validate && npm run reviews:bundle && npm run posts:body-images:validate && npm run posts:render && npm run posts:normalize && npm run reviews:ssot:build && npm run reviews:inject && npm run images:renew && npm run images:build:og && npm run images:upload && npm run posts:render && npm run posts:normalize && npm run reviews:ssot:build && npm run reviews:inject && npm run posts:validate && npm run posts:review:ssot:validate && npm run posts:qa && npm run posts:archive && npm run feed:build && npm run feed:validate && npm run tools:copy",
+    "local:dryrun": "node ./System_files/scripts/build/seed-scheduler.cjs && node ./System_files/scripts/build/queue-to-posts.cjs && node ./System_files/scripts/build/ids.cjs && npm run posts:body:generate && npm run posts:content:generate && npm run posts:content:validate && npm run reviews:bundle && npm run posts:body-images:validate && npm run posts:render && npm run posts:normalize && npm run reviews:next:new && npm run reviews:fetch:official && npm run reviews:fetch:insights && npm run reviews:diff && npm run reviews:ssot:build && npm run reviews:inject && npm run images:renew && npm run images:build:og && npm run images:upload && npm run posts:render && npm run posts:normalize && npm run reviews:ssot:build && npm run reviews:inject && npm run posts:validate && npm run posts:review:ssot:validate && npm run posts:qa && npm run posts:archive && npm run feed:build && npm run feed:validate && npm run tools:copy",
 
     "local:publish": "npm run publish:blogger"
   },
