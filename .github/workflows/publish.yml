@@ -32,6 +32,9 @@ jobs:
     env:
       SYSTEM_ROOT: System_files
 
+      # ✅ Node24 강제 시험
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
       CANONICAL_BASE: ${{ secrets.CANONICAL_BASE }}
       CDN_BASE: ${{ secrets.CDN_BASE }}
 
@@ -55,12 +58,12 @@ jobs:
 
     steps:
       - name: Checkout blog repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
       - name: Checkout post-archive repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: LowOngs/post-archive
           token: ${{ secrets.ARCHIVE_REPO_TOKEN }}
@@ -68,9 +71,10 @@ jobs:
           fetch-depth: 0
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "24"
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci
