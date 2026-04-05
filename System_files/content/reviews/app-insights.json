@@ -1,14 +1,42 @@
 {
-  "updatedAt": "2026-01-19",
+  "updatedAt": "2026-04-05",
   "bySlug": {
+    "app-20260204-001": {
+      "reviewId": "06E2HR9DZWJW26ZSRSJ9HHN4XG",
+      "postId": "06E2HR9DZWQ7YVRYJBA1JX6K2P",
+      "insights": []
+    },
+    "app-20260401-001": {
+      "insights": {
+        "positive": [
+          "What matters most at the start is whether this app fits the way people actually use it, how often they return to it, and whether the provider appears stable enough to keep supporting it over time.p pA short burst of attention is rarely enough in real use",
+          "Use practical reasoning, real decision context, and useful explanation",
+          "Do not use generic filler, robotic repetition, or shallow statements..p h2Key Featuresh2 pThe useful way to read the feature set is to focus on what changes day-to-day behavior, not what only looks impressive on a landing page",
+          "A feature matters when it saves time, reduces friction, or makes a repeated task feel easier to finish.p pThis is why the more reliable features are usually the ones people keep coming back to after the first impression",
+          "A app that looks polished at first but becomes inconsistent later often creates the same pattern in user feedback short early excitement, then frustration around stability, pricing rules, or support responsiveness.p h2Ratingsh2 pRatings are useful when read as direction, not as a verdict by themselves",
+          "A strong average score can hide recurring complaints, while a mixed score can still point to a good fit for a specific kind of user.p pA better way to interpret rating data is to ask what the positive and negative sides are actually measuring"
+        ],
+        "negative": [
+          "The real question is whether the cost stays reasonable after hidden limits, subscription rules, upgrade pressure, or replacement timing are taken into account.p pA lower starting price can still become expensive when restrictions show up later",
+          "A more expensive option can make sense when it can remain usable longer, receives steady updates, or removes a recurring problem that would otherwise keep costing time or money.p table thead tr thFactorth thWhat to checkth thWhy it mattersth tr thead tbody tr tdBase costtd tdEntry price or monthly feetd tdSets the first comparison pointtd tr tr tdLimitstd tdCaps, lock-ins, feature restrictionstd tdChanges the real value quicklytd tr tr tdLongevitytd tdUpdate cycle, durability, long-term supporttd tdReduces replacement or switching costtd tr tbody table h2Insightsh2 pUser sentiment usually becomes meaningful when the same themes repeat"
+        ]
+      }
+    },
     "app-20251207-001": {
-      "insights": [
-        "기능 구조상 빠른 작업 입력과 정리 흐름을 만들기 쉬운 형태입니다.",
-        "단일 도구로 작업 관리 루틴을 유지하려는 경우에 적합한 타입입니다.",
-        "고급 기능은 유료 구간에 집중되는 경우가 있어 비용 판단이 필요합니다."
-      ],
-      "source": "rule",
-      "confidence": 0.6
+      "insights": {
+        "positive": [
+          "h2Managing App Fatigue Why Minimalism Mattersh2 pIn todays world, its easy to feel overwhelmed by the sheer number of productivity apps available",
+          "A simple, fast app that syncs well across devices reduces distractions and lowers the barrier to keeping your tasks in check",
+          "Instead, its for those who prefer straightforward, low-friction apps that keep things simple and efficient.p h2Criteria for Selecting These Appsh2 ul listrongSpeedstrong The app should open quickly and allow fast task entry without delays.li listrongSyncstrong Reliable synchronization across devices to keep your data consistent.li listrongCross-platformstrong Availability on major platforms iOS, Android, Windows, Mac, web to support your workflow anywhere.li listrongLow frictionstrong Minimal setup and simple, intuitive interfaces that dont require a learning curve.li ul h2App 1 Todoisth2 pstrongStrengthsstrong Todoist is known for its clean design and speed",
+          "Adding tasks is quick, with natural language input tomorrow 9am making scheduling fast",
+          "Its simple project and label system keeps things organized without clutter.p pstrongWeaknessesstrong Some advanced features, like reminders and productivity reports, require a subscription",
+          "The interface can feel slightly busy compared to ultra-minimalist apps, which may be a distraction for some.p pstrongIdeal Userstrong Someone who wants a balance between simplicity and useful features"
+        ],
+        "negative": [
+          "Each promises to solve your organization woes, but juggling multiple tools can actually slow you down",
+          "Its Android-only, so not ideal if you need cross-platform support beyond that.p pstrongIdeal Userstrong Perfect for users who appreciate minimalism at its core, are comfortable with plain text, and want control over syncing without proprietary lock-in.p h2Real-Life Usage Scenarios for Side Project Buildersh2 pIf youre building a side project alongside work and study, you need an app that can quickly capture ideas, deadlines, and next steps without slowing you down"
+        ]
+      }
     }
   }
 }
