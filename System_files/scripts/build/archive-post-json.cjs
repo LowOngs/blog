@@ -28,11 +28,12 @@
  *   기본값: latest
  *
  * 로컬 경로 주의
- * - 이 파일은 "레포 기준 역할"을 고정해 두되,
- *   실제 로컬 checkout 위치는 환경변수로 조절 가능하다.
+ * - 이 파일은 실행 위치(process.cwd())에 의존하지 않는다.
+ * - 항상 "이 파일의 실제 위치"를 기준으로 blog/System_files 루트를 계산한다.
  *
  * 기본 로컬 해석
- * - blog repo root         = process.cwd()
+ * - system root            = __dirname 기준 ../../  (System_files)
+ * - blog repo root         = system root 상위 1단계
  * - archive repo root      = ../post-archive
  *
  * 환경변수
@@ -50,8 +51,14 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
-const BLOG_REPO_ROOT = path.resolve(process.cwd());
-const SYSTEM_ROOT = path.join(BLOG_REPO_ROOT, 'System_files');
+/* ============================================================
+ * 루트 계산 SSOT
+ * - process.cwd() 의존 제거
+ * - 어디서 실행하든 동일한 블로그/System_files 루트를 바라보게 고정
+ * ============================================================ */
+const SYSTEM_ROOT = path.resolve(__dirname, '..', '..'); // System_files
+const BLOG_REPO_ROOT = path.resolve(SYSTEM_ROOT, '..');  // blog repo root
+
 const POSTS_DIR = path.join(SYSTEM_ROOT, 'content', 'posts');
 const TODAY_EXPANDED_FILE = path.join(SYSTEM_ROOT, 'dist', 'queue', 'today.expanded.json');
 const LOGS_DIR = path.join(SYSTEM_ROOT, 'logs');
@@ -68,14 +75,15 @@ const ARCHIVE_POSTS_ROOT = path.join(POST_ARCHIVE_ROOT, 'content', 'posts');
 
 console.log('────────────────────────────────────────────');
 console.log('[archive-post-json] 시작');
-console.log('[archive-post-json] SOURCE_REPO   = LowOngs/blog');
-console.log('[archive-post-json] TARGET_REPO   = LowOngs/post-archive');
-console.log('[archive-post-json] BLOG_ROOT     =', BLOG_REPO_ROOT);
-console.log('[archive-post-json] SYSTEM_ROOT   =', SYSTEM_ROOT);
-console.log('[archive-post-json] POSTS_DIR     =', POSTS_DIR);
-console.log('[archive-post-json] ARCHIVE_ROOT  =', POST_ARCHIVE_ROOT);
-console.log('[archive-post-json] ARCHIVE_ROOT_POSTS =', ARCHIVE_POSTS_ROOT);
-console.log('[archive-post-json] MODE          =', ARCHIVE_MODE);
+console.log('[archive-post-json] SOURCE_REPO         = LowOngs/blog');
+console.log('[archive-post-json] TARGET_REPO         = LowOngs/post-archive');
+console.log('[archive-post-json] BLOG_ROOT           =', BLOG_REPO_ROOT);
+console.log('[archive-post-json] SYSTEM_ROOT         =', SYSTEM_ROOT);
+console.log('[archive-post-json] POSTS_DIR           =', POSTS_DIR);
+console.log('[archive-post-json] TODAY_EXPANDED_FILE =', TODAY_EXPANDED_FILE);
+console.log('[archive-post-json] ARCHIVE_ROOT        =', POST_ARCHIVE_ROOT);
+console.log('[archive-post-json] ARCHIVE_POSTS_ROOT  =', ARCHIVE_POSTS_ROOT);
+console.log('[archive-post-json] MODE                =', ARCHIVE_MODE);
 console.log('────────────────────────────────────────────');
 
 function ensureDir(dir) {
@@ -117,6 +125,10 @@ function validatePaths() {
     fatal(`System_files 루트 없음: ${SYSTEM_ROOT}`);
   }
 
+  if (!fs.existsSync(BLOG_REPO_ROOT)) {
+    fatal(`blog repo 루트 없음: ${BLOG_REPO_ROOT}`);
+  }
+
   if (!fs.existsSync(POSTS_DIR)) {
     fatal(`source posts 디렉토리 없음: ${POSTS_DIR}`);
   }
@@ -137,6 +149,7 @@ function validatePaths() {
 
 function loadLatestSlugSet() {
   if (ARCHIVE_MODE !== 'latest') return null;
+
   if (!fs.existsSync(TODAY_EXPANDED_FILE)) {
     warn(`today.expanded.json 없음: ${TODAY_EXPANDED_FILE}`);
     return new Set();
@@ -227,6 +240,7 @@ function copyOneFile(sourceFile) {
       slug: normStr(post.slug) || path.basename(sourceFile, '.json'),
       pageId: normStr(post.pageId) || '',
       archiveDate,
+      fileBase,
       targetRelative: path.relative(POST_ARCHIVE_ROOT, targetFile).replace(/\\/g, '/'),
       status: 'skip-same',
       sourceSha,
@@ -241,10 +255,31 @@ function copyOneFile(sourceFile) {
     slug: normStr(post.slug) || path.basename(sourceFile, '.json'),
     pageId: normStr(post.pageId) || '',
     archiveDate,
+    fileBase,
     targetRelative: path.relative(POST_ARCHIVE_ROOT, targetFile).replace(/\\/g, '/'),
     status: targetExists ? 'updated' : 'created',
     sourceSha,
     targetSha,
+  };
+}
+
+function buildEmptyReport(checked) {
+  return {
+    generatedAt: new Date().toISOString(),
+    mode: ARCHIVE_MODE,
+    sourceRepo: 'LowOngs/blog',
+    targetRepo: 'LowOngs/post-archive',
+    blogRepoRoot: BLOG_REPO_ROOT,
+    systemRoot: SYSTEM_ROOT,
+    sourcePostsDir: POSTS_DIR,
+    archiveRoot: POST_ARCHIVE_ROOT,
+    archivePostsRoot: ARCHIVE_POSTS_ROOT,
+    checked,
+    copied: 0,
+    created: 0,
+    updated: 0,
+    skippedSame: 0,
+    items: [],
   };
 }
 
@@ -263,20 +298,8 @@ function main() {
   info(`archive 대상 JSON 수 = ${targetFiles.length}`);
 
   if (!targetFiles.length) {
-    writeJSON(REPORT_FILE, {
-      generatedAt: new Date().toISOString(),
-      mode: ARCHIVE_MODE,
-      sourceRepo: 'LowOngs/blog',
-      targetRepo: 'LowOngs/post-archive',
-      sourcePostsDir: POSTS_DIR,
-      archivePostsRoot: ARCHIVE_POSTS_ROOT,
-      checked: allFiles.length,
-      copied: 0,
-      created: 0,
-      updated: 0,
-      skippedSame: 0,
-      items: [],
-    });
+    const report = buildEmptyReport(allFiles.length);
+    writeJSON(REPORT_FILE, report);
 
     console.log('────────────────────────────────────────────');
     console.log('[archive-post-json] 복사 대상 없음');
@@ -311,7 +334,10 @@ function main() {
     mode: ARCHIVE_MODE,
     sourceRepo: 'LowOngs/blog',
     targetRepo: 'LowOngs/post-archive',
+    blogRepoRoot: BLOG_REPO_ROOT,
+    systemRoot: SYSTEM_ROOT,
     sourcePostsDir: POSTS_DIR,
+    archiveRoot: POST_ARCHIVE_ROOT,
     archivePostsRoot: ARCHIVE_POSTS_ROOT,
     checked: allFiles.length,
     copied: created + updated,
