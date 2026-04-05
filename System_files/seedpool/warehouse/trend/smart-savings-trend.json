@@ -1,96 +1,17 @@
 {
   "label": "smart-savings",
-  "limits": { "trend": 80 },
+  "limits": {
+    "trend": 80
+  },
   "trend": [
-    {
-      "id": "ss-tr-001",
-      "title": "2025 Phone Plan Price Drops: How to Switch Without Fees",
-      "angle": "Covers shifting telecom promotions and penalty-free migration tricks.",
-      "audience": "Users switching carriers for cheaper rates",
-      "intent": "saving",
-      "priority": 1
-    },
-    {
-      "id": "ss-tr-002",
-      "title": "How to Use AI Tools to Automatically Track Monthly Spending",
-      "angle": "AI finance assistants are booming and can classify spending automatically.",
-      "audience": "Workers and students",
-      "intent": "saving",
-      "priority": 1
-    },
-    {
-      "id": "ss-tr-003",
-      "title": "Streaming Fatigue: The 2025 Rotation Method to Save 40%+",
-      "angle": "Rotating Netflix, Disney+, Max, Crunchyroll is trending globally.",
-      "audience": "Heavy streaming users",
-      "intent": "saving",
-      "priority": 1
-    },
-    {
-      "id": "ss-tr-004",
-      "title": "Which AI Plan Should You Keep? A 2025 Comparison Framework",
-      "angle": "AIs overlap heavily; this trend helps users avoid double subscriptions.",
-      "audience": "AI power users",
-      "intent": "saving",
-      "priority": 1
-    },
-    {
-      "id": "ss-tr-005",
-      "title": "How to Optimize Cloud Storage Cost After the 2025 Price Resets",
-      "angle": "Google One, iCloud, and OneDrive all shifted tiers recently.",
-      "audience": "Users hitting storage limits",
-      "intent": "saving",
-      "priority": 1
-    },
-
-    {
-      "id": "ss-tr-006",
-      "title": "How to Stop Paying Twice for the Same App on Multiple Devices",
-      "angle": "Cross-platform billing confusion became a major 2025 issue.",
-      "audience": "Multi-device users",
-      "intent": "saving",
-      "priority": 1
-    },
-    {
-      "id": "ss-tr-007",
-      "title": "Data Rollover vs. Unlimited: How to Choose in 2025",
-      "angle": "Carriers now push data rollover aggressively.",
-      "audience": "Users unsure which plan fits their usage",
-      "intent": "saving",
-      "priority": 1
-    },
-    {
-      "id": "ss-tr-008",
-      "title": "How to Reduce Home Internet Costs with New 5G Home Offers",
-      "angle": "5G home internet is replacing cable in many cities.",
-      "audience": "Families looking to cut bills",
-      "intent": "saving",
-      "priority": 1
-    },
-    {
-      "id": "ss-tr-009",
-      "title": "Best 2025 Student Discounts for Apps and Subscriptions",
-      "angle": "Education discounts expanded massively this year.",
-      "audience": "Students and parents",
-      "intent": "saving",
-      "priority": 1
-    },
-    {
-      "id": "ss-tr-010",
-      "title": "How to Share Subscriptions Legally Without Violating ToS",
-      "angle": "Sharing laws and policies shifted in 2025.",
-      "audience": "Families and roommates",
-      "intent": "saving",
-      "priority": 1
-    },
-
     {
       "id": "ss-tr-011",
       "title": "How to Escape App Auto-Renew Traps After the 2025 Policy Change",
       "angle": "App Store and Play Store changed refund/renewal policies.",
       "audience": "Users with runaway subscriptions",
       "intent": "saving",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:54a25946169cd1b9a713eeabe213647a391ecc19"
     },
     {
       "id": "ss-tr-012",
@@ -98,7 +19,8 @@
       "angle": "AI scanning for duplicates is trending on mobile.",
       "audience": "Heavy app users",
       "intent": "saving",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:f230910dbb3f71a91b07923249f95ecc7b149321"
     },
     {
       "id": "ss-tr-013",
@@ -106,7 +28,8 @@
       "angle": "Many users now mix 100GB + small plan combos for savings.",
       "audience": "Cloud storage users",
       "intent": "saving",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:38b2f0fccdf7d76a162cd3a6bbafd2ef781d5b4f"
     },
     {
       "id": "ss-tr-014",
@@ -114,7 +37,8 @@
       "angle": "OS-level spend control is widely adopted in 2025.",
       "audience": "Mobile gamers and shoppers",
       "intent": "saving",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:25b547d07e36c408c721c0a5825c3dee28fe78a0"
     },
     {
       "id": "ss-tr-015",
@@ -122,16 +46,17 @@
       "angle": "Annual billing got cheaper, but users fear commitment.",
       "audience": "People aiming for long-term savings",
       "intent": "saving",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:99ce742fd855955afd587872c189ae1a532bd1c3"
     },
-
     {
       "id": "ss-tr-016",
       "title": "Which VPN Plan Saves the Most in 2025?",
       "angle": "VPN pricing fluctuates heavily; global comparisons trend.",
       "audience": "Remote workers and privacy-focused users",
       "intent": "saving",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:cced289ef44e19f0169ff366a1b99694d75fefc9"
     },
     {
       "id": "ss-tr-017",
@@ -139,7 +64,8 @@
       "angle": "Uber Eats, DoorDash, and GrabPass updated benefits.",
       "audience": "Heavy food delivery users",
       "intent": "saving",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:38afd7005ac50d1e26f3e1c78daf0c8c409958b6"
     },
     {
       "id": "ss-tr-018",
@@ -147,7 +73,8 @@
       "angle": "AI note and task apps replaced many paid tools.",
       "audience": "Workers, creators, students",
       "intent": "saving",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:f1daec3f9c94b340ec15fce19afd73c73d16de32"
     },
     {
       "id": "ss-tr-019",
@@ -155,7 +82,8 @@
       "angle": "Redundant photo backups cost users silently.",
       "audience": "iPhone/Android users",
       "intent": "saving",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:fe7b52b3ffd5fbffd503aaf11c89156da1759a1a"
     },
     {
       "id": "ss-tr-020",
@@ -163,16 +91,17 @@
       "angle": "AI writing apps exploded; users need clarity.",
       "audience": "Students, creators, marketers",
       "intent": "saving",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:bd4a8bdf89c222c450fee8106fa92a2d118e4b68"
     },
-
     {
       "id": "ss-tr-021",
       "title": "How to Save Money by Using Multi-Device Bundles",
       "angle": "Apple One, Microsoft 365, and Google bundles gained traction.",
       "audience": "Families and power users",
       "intent": "saving",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:6045df8fa7577dd830d78128f292fcc143ea9fae"
     },
     {
       "id": "ss-tr-022",
@@ -180,7 +109,8 @@
       "angle": "Cloud gaming pricing stabilized in 2025.",
       "audience": "Gamers",
       "intent": "saving",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:245bc5834e4680770320393c06cc10d12598d51a"
     },
     {
       "id": "ss-tr-023",
@@ -188,7 +118,8 @@
       "angle": "Digital-first spending patterns changed reward systems.",
       "audience": "Online shoppers",
       "intent": "saving",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:950786e8e32d471af8cdb90584f61a8f6282e53c"
     },
     {
       "id": "ss-tr-024",
@@ -196,7 +127,8 @@
       "angle": "In-app purchase spending became a top AI query.",
       "audience": "Mobile gamers",
       "intent": "saving",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:d4c50b16750879fe6c3d2e9a96e10ddb9b018332"
     },
     {
       "id": "ss-tr-025",
@@ -204,16 +136,17 @@
       "angle": "Travel platform fees increased quietly this year.",
       "audience": "Travelers",
       "intent": "saving",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:fc46bde8bd08a53d497048c5b84d0e1bc6a087e3"
     },
-
     {
       "id": "ss-tr-026",
       "title": "Best 2025 Bundles for Cloud + AI Tools",
       "angle": "Combining AI + cloud stacks saves significantly.",
       "audience": "Remote workers, creators",
       "intent": "saving",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:6e85e11c2eda8cffe36f8fccf12c85bb48ab360e"
     },
     {
       "id": "ss-tr-027",
@@ -221,7 +154,8 @@
       "angle": "Price-check queries surged in 2025.",
       "audience": "General consumers",
       "intent": "saving",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:f7475d2a402dfa4ae74b381b4ff021c48b2fe913"
     },
     {
       "id": "ss-tr-028",
@@ -229,7 +163,8 @@
       "angle": "Energy-saving smart devices exploded in adoption.",
       "audience": "Smart home users",
       "intent": "saving",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:c25d865ef548e79b240fb8157ff9da560eea0e7f"
     },
     {
       "id": "ss-tr-029",
@@ -237,7 +172,8 @@
       "angle": "Major SaaS vendors raised prices in 2025.",
       "audience": "Freelancers, workers, creators",
       "intent": "saving",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:3b6eb4088e187e1a1e60a779ea9be9610b5e715b"
     },
     {
       "id": "ss-tr-030",
@@ -245,16 +181,17 @@
       "angle": "Password managers now offer region-based discounts.",
       "audience": "Security-conscious users",
       "intent": "saving",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:a56fdc8515dbb64d6a3c0096d03befd740a2fa54"
     },
-
     {
       "id": "ss-tr-031",
       "title": "How to Pick the Cheapest Global eSIM Plan for Travel",
       "angle": "Travel eSIM usage surged worldwide.",
       "audience": "International travelers",
       "intent": "saving",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:7fc4d5b9f102904a0eaff4260a7bc638ec4ad96c"
     },
     {
       "id": "ss-tr-032",
@@ -262,7 +199,8 @@
       "angle": "Trending because apps keep inflating data consumption.",
       "audience": "Low-data plan users",
       "intent": "saving",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:5cfa440e60c5f464da3f5060ae0b06f40627702a"
     },
     {
       "id": "ss-tr-033",
@@ -270,7 +208,8 @@
       "angle": "AI replaced many categories of paid apps this year.",
       "audience": "Budget-conscious users",
       "intent": "saving",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:d5033a62dff53678f7e2f8e07cce2835ef7f1231"
     },
     {
       "id": "ss-tr-034",
@@ -278,7 +217,8 @@
       "angle": "Local app pricing varies widely in 2025.",
       "audience": "Frequent travelers",
       "intent": "saving",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:c9ebdb1ca08b1401a438d31cdaff767e7ac028d3"
     },
     {
       "id": "ss-tr-035",
@@ -286,16 +226,17 @@
       "angle": "Grocery price increases sparked surge in AI cost-saving queries.",
       "audience": "Families and singles",
       "intent": "saving",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:ecaf26d254d9c301ebde8d831da3f126f36baf96"
     },
-
     {
       "id": "ss-tr-036",
       "title": "2025 Best Value Storage Upgrades for Phones and Laptops",
       "angle": "Low-cost SSD and SD card upgrades trend globally.",
       "audience": "Mobile and laptop users",
       "intent": "saving",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:ad19f6c8e6167ae846789997fd9a6c74efaf6fba"
     },
     {
       "id": "ss-tr-037",
@@ -303,7 +244,8 @@
       "angle": "Users are overwhelmed by overlapping AI features.",
       "audience": "Workers, creators, students",
       "intent": "saving",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:c368808b8a61c8ee839a9a84c507c780dd9283f9"
     },
     {
       "id": "ss-tr-038",
@@ -311,7 +253,8 @@
       "angle": "Smart device scheduling becomes a top 2025 trend.",
       "audience": "Homeowners and renters",
       "intent": "saving",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:d45d9fa6b9309408c8790421b66c59dc4900b954"
     },
     {
       "id": "ss-tr-039",
@@ -319,7 +262,8 @@
       "angle": "Bundle-based security stacks trending widely.",
       "audience": "Security-focused users",
       "intent": "saving",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:9e72bf385fe1c13ad29c1d5fe81561ed7492ce5a"
     },
     {
       "id": "ss-tr-040",
@@ -327,16 +271,17 @@
       "angle": "Feature-sprawl in 2025 causes silent overspending.",
       "audience": "All app users",
       "intent": "saving",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:923de0c692285001488e8b9e7cb22564a972b31a"
     },
-
     {
       "id": "ss-tr-041",
       "title": "2025 Cheapest Cross-Device Note-Taking Combos",
       "angle": "Users mix free + paid note apps to reduce cost.",
       "audience": "Students and creators",
       "intent": "saving",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:7d2aad0a2e93d0ab2841f8fa68c0d17f436c61a2"
     },
     {
       "id": "ss-tr-042",
@@ -344,7 +289,8 @@
       "angle": "Prompts became a major budgeting strategy in 2025.",
       "audience": "AI heavy users",
       "intent": "saving",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:4fca7d14415c375e82b878d12d42fd36a23943a7"
     },
     {
       "id": "ss-tr-043",
@@ -352,7 +298,8 @@
       "angle": "Password manager pricing went through major changes.",
       "audience": "General users",
       "intent": "saving",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:66de32549186a7b4909d42d9de40f9f086c96ba3"
     },
     {
       "id": "ss-tr-044",
@@ -360,7 +307,8 @@
       "angle": "Device ecosystems expanded subscription models.",
       "audience": "Smart home owners",
       "intent": "saving",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:6c5a4989d4784275714c6e3162381d590e9bec29"
     },
     {
       "id": "ss-tr-045",
@@ -368,16 +316,17 @@
       "angle": "Cross-border usage surged among travelers.",
       "audience": "Travelers and freelancers",
       "intent": "saving",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:d7564905936ec1052afb35eac1688e39c6ed5c02"
     },
-
     {
       "id": "ss-tr-046",
       "title": "2025 Guide: Cutting Recurring Fees By Consolidating App Ecosystems",
       "angle": "People pay for duplicate ecosystem features accidentally.",
       "audience": "iOS + Android + Windows + Mac users",
       "intent": "saving",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:edbc89ec89353f10600b9670ccbb5b3a10186314"
     },
     {
       "id": "ss-tr-047",
@@ -385,7 +334,8 @@
       "angle": "Notion, Evernote, Todoist, Obsidian all changed plans.",
       "audience": "Workers and creators",
       "intent": "saving",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:658d9e3a1a400d7b461433d80ac553e2b7023bb2"
     },
     {
       "id": "ss-tr-048",
@@ -393,7 +343,8 @@
       "angle": "Data caps remain a top global frustration.",
       "audience": "Low-data mobile users",
       "intent": "saving",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:9ea0dc878829a9fc0a4730b4e17f873af4a2e34c"
     },
     {
       "id": "ss-tr-049",
@@ -401,7 +352,8 @@
       "angle": "Hybrid storage strategies trending among creators.",
       "audience": "iPhone/Android/PC users",
       "intent": "saving",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:6a15bd0b9eccc108742266e080f7cc1ce2033cb3"
     },
     {
       "id": "ss-tr-050",
@@ -409,7 +361,338 @@
       "angle": "App upsells quietly increased in 2025.",
       "audience": "General mobile users",
       "intent": "saving",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:c1f52da1d5e9de04ca37fe6083718fd46458d3cd"
+    },
+    {
+      "id": "smart-savings-trend-1772546046144-45865370",
+      "title": "AUTO GENERATED: smart-savings (trend)",
+      "angle": "Auto angle (trend)",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-03T13:54:06.144Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:22036b63b10d1914e732de0686d92d261a974957"
+    },
+    {
+      "id": "smart-savings-trend-1772628476412-900053569",
+      "title": "AUTO GENERATED: smart-savings (trend)",
+      "angle": "Auto angle (trend)",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T12:47:56.412Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:22036b63b10d1914e732de0686d92d261a974957"
+    },
+    {
+      "id": "smart-savings-trend-1772629568429-302195164",
+      "title": "AUTO GENERATED: smart-savings (trend)",
+      "angle": "Auto angle (trend)",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:06:08.429Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:22036b63b10d1914e732de0686d92d261a974957"
+    },
+    {
+      "id": "smart-savings-trend-1772630313809-693792704",
+      "title": "AUTO GENERATED: smart-savings (trend) #1772630313809-693792704",
+      "angle": "Auto angle (trend) var=1772630313809-693792704",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.809Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:bfbd4737568517b384341705514e3024475fd70d"
+    },
+    {
+      "id": "smart-savings-trend-1772630313809-721630055",
+      "title": "AUTO GENERATED: smart-savings (trend) #1772630313809-721630055",
+      "angle": "Auto angle (trend) var=1772630313809-721630055",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.809Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:d7f72d701cbf62c277a97d42ec7ed8ac025af2d4"
+    },
+    {
+      "id": "smart-savings-trend-1772630313809-998705501",
+      "title": "AUTO GENERATED: smart-savings (trend) #1772630313809-998705501",
+      "angle": "Auto angle (trend) var=1772630313809-998705501",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.809Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:0dc125b8693000f0aaada12c5c6bc94975e635d4"
+    },
+    {
+      "id": "smart-savings-trend-1772630313809-762200297",
+      "title": "AUTO GENERATED: smart-savings (trend) #1772630313809-762200297",
+      "angle": "Auto angle (trend) var=1772630313809-762200297",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.809Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:29245d50a486407156836b0e3fa5dc473ee2affd"
+    },
+    {
+      "id": "smart-savings-trend-1772630313809-495783121",
+      "title": "AUTO GENERATED: smart-savings (trend) #1772630313809-495783121",
+      "angle": "Auto angle (trend) var=1772630313809-495783121",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.809Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:8c79604f47dd1992e9ad8f3fdcc1b9ac320e6acd"
+    },
+    {
+      "id": "smart-savings-trend-1772630313809-432769635",
+      "title": "AUTO GENERATED: smart-savings (trend) #1772630313809-432769635",
+      "angle": "Auto angle (trend) var=1772630313809-432769635",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.809Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:aed982d8fe5d6174e6b0ae5ab84352115c43073a"
+    },
+    {
+      "id": "smart-savings-trend-1772630313809-217436808",
+      "title": "AUTO GENERATED: smart-savings (trend) #1772630313809-217436808",
+      "angle": "Auto angle (trend) var=1772630313809-217436808",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.809Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:509b2411647bd0023d023efd9c52586ebab056f0"
+    },
+    {
+      "id": "smart-savings-trend-1772630313809-691473234",
+      "title": "AUTO GENERATED: smart-savings (trend) #1772630313809-691473234",
+      "angle": "Auto angle (trend) var=1772630313809-691473234",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.809Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:1b2d7ab6379fa9c03d79054e9af8dc581e74a57c"
+    },
+    {
+      "id": "smart-savings-trend-1772630313809-586986907",
+      "title": "AUTO GENERATED: smart-savings (trend) #1772630313809-586986907",
+      "angle": "Auto angle (trend) var=1772630313809-586986907",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.809Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:06f7fcc92a805fb5c2c52992c84da8977ca4269b"
+    },
+    {
+      "id": "smart-savings-trend-1772630313809-770948872",
+      "title": "AUTO GENERATED: smart-savings (trend) #1772630313809-770948872",
+      "angle": "Auto angle (trend) var=1772630313809-770948872",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.809Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:56ca8648381c35c1bc39579e96b2053043e88bb6"
+    },
+    {
+      "id": "smart-savings-trend-1772630313809-679966329",
+      "title": "AUTO GENERATED: smart-savings (trend) #1772630313809-679966329",
+      "angle": "Auto angle (trend) var=1772630313809-679966329",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.809Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:9dc6719a83bee4e032424fdce43296a1d9c0ccf8"
+    },
+    {
+      "id": "smart-savings-trend-1772630313809-721968630",
+      "title": "AUTO GENERATED: smart-savings (trend) #1772630313809-721968630",
+      "angle": "Auto angle (trend) var=1772630313809-721968630",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.809Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:9db7035b70961d026eea082c2753c7420b4dc98f"
+    },
+    {
+      "id": "smart-savings-trend-1772630313809-842396587",
+      "title": "AUTO GENERATED: smart-savings (trend) #1772630313809-842396587",
+      "angle": "Auto angle (trend) var=1772630313809-842396587",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.809Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:8aa782c2873170ff887dff151fcc3bbd84a07be5"
+    },
+    {
+      "id": "smart-savings-trend-1772630313809-478889594",
+      "title": "AUTO GENERATED: smart-savings (trend) #1772630313809-478889594",
+      "angle": "Auto angle (trend) var=1772630313809-478889594",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.809Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:c445082c62855b53008966a798749fa8181358c1"
+    },
+    {
+      "id": "smart-savings-trend-1772630313809-609637760",
+      "title": "AUTO GENERATED: smart-savings (trend) #1772630313809-609637760",
+      "angle": "Auto angle (trend) var=1772630313809-609637760",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.809Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:6d7fd6a8d0e8cc18d6bc2824f1b794bc0ba74b54"
+    },
+    {
+      "id": "smart-savings-trend-1772630313809-985904969",
+      "title": "AUTO GENERATED: smart-savings (trend) #1772630313809-985904969",
+      "angle": "Auto angle (trend) var=1772630313809-985904969",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.809Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:5816dc36cb5932a69baff8bada6b24b4761dfb4f"
+    },
+    {
+      "id": "smart-savings-trend-1772630313809-956551260",
+      "title": "AUTO GENERATED: smart-savings (trend) #1772630313809-956551260",
+      "angle": "Auto angle (trend) var=1772630313809-956551260",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.809Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:b348c858ff2695783dc6757c0f4d23feb17791f7"
+    },
+    {
+      "id": "smart-savings-trend-1772630313809-879757155",
+      "title": "AUTO GENERATED: smart-savings (trend) #1772630313809-879757155",
+      "angle": "Auto angle (trend) var=1772630313809-879757155",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.809Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:515d27c767e3abe77f366c08a10a0731e4ee07a2"
+    },
+    {
+      "id": "smart-savings-trend-1772630313809-884441610",
+      "title": "AUTO GENERATED: smart-savings (trend) #1772630313809-884441610",
+      "angle": "Auto angle (trend) var=1772630313809-884441610",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.809Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:f2f08b5b321aa90d77eafd70934f16af89bb8b19"
+    },
+    {
+      "id": "smart-savings-trend-1772630313809-275314005",
+      "title": "AUTO GENERATED: smart-savings (trend) #1772630313809-275314005",
+      "angle": "Auto angle (trend) var=1772630313809-275314005",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.809Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:571cc9facb10257ddf3a7be5b5c1dfee4fe4c6c5"
+    },
+    {
+      "id": "smart-savings-trend-1772630313809-284131160",
+      "title": "AUTO GENERATED: smart-savings (trend) #1772630313809-284131160",
+      "angle": "Auto angle (trend) var=1772630313809-284131160",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.809Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:523a5835980b968c9cb60a9fd9d077220e0b7775"
+    },
+    {
+      "id": "smart-savings-trend-1772630313809-521358435",
+      "title": "AUTO GENERATED: smart-savings (trend) #1772630313809-521358435",
+      "angle": "Auto angle (trend) var=1772630313809-521358435",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.809Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:d694bb47614dd47b325436a6ea20291d0433ec73"
+    },
+    {
+      "id": "smart-savings-trend-1772630313809-679669663",
+      "title": "AUTO GENERATED: smart-savings (trend) #1772630313809-679669663",
+      "angle": "Auto angle (trend) var=1772630313809-679669663",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.809Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:5a357d11c590690a1eef8ae0c356fec910047323"
+    },
+    {
+      "id": "smart-savings-trend-1772630313809-367538745",
+      "title": "AUTO GENERATED: smart-savings (trend) #1772630313809-367538745",
+      "angle": "Auto angle (trend) var=1772630313809-367538745",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.809Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:870ff30f11d8afabdcac8bf74037f09ed66e8cca"
+    },
+    {
+      "id": "smart-savings-trend-1772630313809-333165961",
+      "title": "AUTO GENERATED: smart-savings (trend) #1772630313809-333165961",
+      "angle": "Auto angle (trend) var=1772630313809-333165961",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.809Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:f3b95d8c6ca1320132bb45ccae3d98aa4b1ec51c"
+    },
+    {
+      "id": "smart-savings-trend-1772630313809-288583667",
+      "title": "AUTO GENERATED: smart-savings (trend) #1772630313809-288583667",
+      "angle": "Auto angle (trend) var=1772630313809-288583667",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.809Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:245915fd08182a47db81aec87cd6987861fc48fe"
+    },
+    {
+      "id": "smart-savings-trend-1772630313809-851124497",
+      "title": "AUTO GENERATED: smart-savings (trend) #1772630313809-851124497",
+      "angle": "Auto angle (trend) var=1772630313809-851124497",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.809Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:bcc9190117f57dd87656bcae4b8dc4d880f5f20e"
     }
   ]
 }
