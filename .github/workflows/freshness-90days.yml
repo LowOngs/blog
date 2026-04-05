@@ -21,6 +21,9 @@ jobs:
   refresh:
     runs-on: ubuntu-latest
     env:
+      # ✅ Node24 액션 런타임 강제 시험
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
       CANONICAL_BASE: ${{ secrets.CANONICAL_BASE }}
       CDN_BASE: ${{ secrets.CDN_BASE }}
 
@@ -82,15 +85,16 @@ jobs:
 
       - name: Checkout
         if: env.SKIP_PIPELINE != 'true'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
       - name: Setup Node
         if: env.SKIP_PIPELINE != 'true'
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "24"
+          cache: "npm"
 
       - name: Install (repo root)
         if: env.SKIP_PIPELINE != 'true'
@@ -126,6 +130,8 @@ jobs:
       - name: Sanity check (required scripts exist)
         if: env.SKIP_PIPELINE != 'true'
         run: |
+          set -euo pipefail
+
           test -f System_files/scripts/build/review-due-90days.cjs
           test -f System_files/scripts/build/review-next-from-due.cjs
           test -f System_files/scripts/build/review-diff-update.cjs
@@ -145,8 +151,7 @@ jobs:
           test -f System_files/scripts/build/images-renew.cjs
           test -f System_files/scripts/build/images-build-og.cjs
 
-          # ✅ AOIA meta/feed/tools
-          test -f System_files/scripts/build/ai-meta.js
+          # ✅ 최신 구조 기준
           test -f System_files/scripts/build/build-feed.cjs
           test -f System_files/scripts/build/validate-feed.cjs
           test -f System_files/scripts/build/copy-tools.cjs
@@ -155,18 +160,21 @@ jobs:
       - name: Run 90days chain (due -> next -> diff -> inject)
         if: env.SKIP_PIPELINE != 'true'
         run: |
+          set -euo pipefail
           npm run reviews:freshness
 
       - name: Validate body images manifest
         if: env.SKIP_PIPELINE != 'true'
         working-directory: System_files
         run: |
+          set -euo pipefail
           node scripts/build/validate-body-images.cjs
 
       - name: Render posts
         if: env.SKIP_PIPELINE != 'true'
         working-directory: System_files
         run: |
+          set -euo pipefail
           node scripts/build/render-posts.cjs
           node scripts/build/normalize-body.cjs
           node scripts/build/review-meta-block.cjs
@@ -175,6 +183,7 @@ jobs:
         if: env.SKIP_PIPELINE != 'true'
         working-directory: System_files
         run: |
+          set -euo pipefail
           node scripts/build/images-renew.cjs
           node scripts/build/images-build-og.cjs
 
@@ -182,60 +191,62 @@ jobs:
         if: env.SKIP_PIPELINE != 'true'
         working-directory: System_files
         run: |
+          set -euo pipefail
           npm run images:upload
 
       - name: Validate & repair
         if: env.SKIP_PIPELINE != 'true'
         working-directory: System_files
         run: |
+          set -euo pipefail
           node scripts/build/validate-repair.cjs
 
       - name: Preflight QA
         if: env.SKIP_PIPELINE != 'true'
         working-directory: System_files
         run: |
+          set -euo pipefail
           npm run posts:qa
-
-      # ✅ AOIA: authority/feed/tools 갱신
-      - name: Build AI meta (authority, etc.)
-        if: env.SKIP_PIPELINE != 'true'
-        working-directory: System_files
-        run: |
-          node scripts/build/ai-meta.js
 
       - name: Build AI feed
         if: env.SKIP_PIPELINE != 'true'
         working-directory: System_files
         run: |
+          set -euo pipefail
           node scripts/build/build-feed.cjs
 
       - name: Validate AI feed
         if: env.SKIP_PIPELINE != 'true'
         working-directory: System_files
         run: |
+          set -euo pipefail
           node scripts/build/validate-feed.cjs
 
       - name: Build tools (edit-request)
         if: env.SKIP_PIPELINE != 'true'
         working-directory: System_files
         run: |
+          set -euo pipefail
           node scripts/build/copy-tools.cjs
 
       - name: Build Trust page
         if: env.SKIP_PIPELINE != 'true'
         working-directory: System_files
         run: |
+          set -euo pipefail
           node scripts/build/build-trust-page.cjs
 
       - name: Publish to Blogger (skip when DRY_RUN=true)
         if: env.SKIP_PIPELINE != 'true' && env.DRY_RUN != 'true'
         working-directory: System_files
         run: |
+          set -euo pipefail
           node scripts/publish/blogger.cjs
 
       - name: Commit freshness updates
         if: env.SKIP_PIPELINE != 'true'
         run: |
+          set -euo pipefail
           git config user.name "github-actions"
           git config user.email "github-actions@users.noreply.github.com"
           git add -A
