@@ -1,510 +1,893 @@
 {
   "label": "subscription-services",
-  "limits": { "trend": 60 },
+  "limits": {
+    "trend": 60
+  },
   "trend": [
-  {
-    "id": "ss-tr-001",
-    "title": "Which Streaming Service Adds the Best New Releases This Month?",
-    "angle": "Release cadence + regional availability",
-    "audience": "Entertainment users",
-    "intent": "review/content-update",
-    "environment": "video streaming",
-    "timing": "monthly cycle",
-    "goal": "track fastest content rotations"
-  },
-  {
-    "id": "ss-tr-002",
-    "title": "Are New AI Writing Tools Worth Their Subscription Price?",
-    "angle": "Token limits + accuracy gains",
-    "audience": "Students/professionals",
-    "intent": "review/value",
-    "environment": "AI text tools",
-    "timing": "launch period",
-    "goal": "spot real upgrades vs marketing"
-  },
-  {
-    "id": "ss-tr-003",
-    "title": "Which Music Streaming App Now Has the Best Audio Quality?",
-    "angle": "Lossless tiers + device support",
-    "audience": "Music listeners",
-    "intent": "review/quality",
-    "environment": "music streaming",
-    "timing": "update cycle",
-    "goal": "find strongest audio engine"
-  },
-  {
-    "id": "ss-tr-004",
-    "title": "Is the New Cloud Storage Tier Worth the Upgrade?",
-    "angle": "Speed + retention changes",
-    "audience": "Students/office users",
-    "intent": "review/performance",
-    "environment": "cloud storage",
-    "timing": "plan refresh",
-    "goal": "judge real transfer speed"
-  },
-  {
-    "id": "ss-tr-005",
-    "title": "Which VPN Just Updated Its Server Network?",
-    "angle": "Latency + streaming unlock performance",
-    "audience": "Privacy and travel users",
-    "intent": "review/network",
-    "environment": "vpn services",
-    "timing": "network update",
-    "goal": "find fastest new routes"
-  },
-  {
-    "id": "ss-tr-006",
-    "title": "Are New AI Photo Editors Worth Subscribing To?",
-    "angle": "Model accuracy + export quality",
-    "audience": "Creators",
-    "intent": "review/capability",
-    "environment": "AI photo tools",
-    "timing": "launch cycle",
-    "goal": "spot true improvements"
-  },
-  {
-    "id": "ss-tr-007",
-    "title": "Which Fitness App Added the Most Useful New Programs?",
-    "angle": "Workout diversity + progression",
-    "audience": "Fitness users",
-    "intent": "review/content-update",
-    "environment": "fitness subscriptions",
-    "timing": "monthly update",
-    "goal": "measure long-term value"
-  },
-  {
-    "id": "ss-tr-008",
-    "title": "Is the Latest Gaming Subscription Rotation Worth It?",
-    "angle": "Game quality + rotation pattern",
-    "audience": "Gamers",
-    "intent": "review/content",
-    "environment": "gaming services",
-    "timing": "rotation day",
-    "goal": "find strongest monthly lineup"
-  },
-  {
-    "id": "ss-tr-009",
-    "title": "Which Productivity Suite Just Got Real AI Upgrades?",
-    "angle": "Automation + document generation",
-    "audience": "Office/remote workers",
-    "intent": "review/productivity",
-    "environment": "productivity suites",
-    "timing": "feature rollout",
-    "goal": "spot meaningful workflow benefits"
-  },
-  {
-    "id": "ss-tr-010",
-    "title": "Are Premium Weather Apps Worth It After Recent Upgrades?",
-    "angle": "Accuracy + radar update frequency",
-    "audience": "Travelers/outdoor users",
-    "intent": "review/accuracy",
-    "environment": "weather apps",
-    "timing": "seasonal update",
-    "goal": "predict real precision gains"
-  },
-
-  {
-    "id": "ss-tr-011",
-    "title": "Which Note-Taking App Just Added the Best AI Search?",
-    "angle": "Semantic accuracy + speed",
-    "audience": "Students, researchers",
-    "intent": "review/search",
-    "environment": "note-taking apps",
-    "timing": "major update",
-    "goal": "improve knowledge retrieval"
-  },
-  {
-    "id": "ss-tr-012",
-    "title": "Are New Cloud Gaming Plans Really Stable?",
-    "angle": "Input latency + server load",
-    "audience": "Gamers",
-    "intent": "review/performance",
-    "environment": "cloud gaming",
-    "timing": "trial week",
-    "goal": "measure real low-latency behavior"
-  },
-  {
-    "id": "ss-tr-013",
-    "title": "Which Language Learning App Is Updating the Fastest?",
-    "angle": "Lesson pacing + review system",
-    "audience": "Learners",
-    "intent": "review/learning",
-    "environment": "language apps",
-    "timing": "content refresh",
-    "goal": "select apps with better repetition design"
-  },
-  {
-    "id": "ss-tr-014",
-    "title": "Is the New Password Manager Worth the Annual Cost?",
-    "angle": "Breach history + autofill reliability",
-    "audience": "Security-conscious users",
-    "intent": "review/security",
-    "environment": "password managers",
-    "timing": "renewal period",
-    "goal": "ensure safe, stable autofill"
-  },
-  {
-    "id": "ss-tr-015",
-    "title": "Which Meal Plan Subscription Improved Its Menu Recently?",
-    "angle": "Nutrition balance + variety",
-    "audience": "Health-focused users",
-    "intent": "review/content-update",
-    "environment": "meal plan services",
-    "timing": "weekly refresh",
-    "goal": "check if menus sustain interest"
-  },
-  {
-    "id": "ss-tr-016",
-    "title": "Are Virtual Fitness Classes Getting Better This Season?",
-    "angle": "Instructor quality + schedule density",
-    "audience": "Fitness users",
-    "intent": "review/experience",
-    "environment": "virtual classes",
-    "timing": "season update",
-    "goal": "find consistent high-quality classes"
-  },
-  {
-    "id": "ss-tr-017",
-    "title": "Which Meditation App Has the Most Useful New Sessions?",
-    "angle": "Session variety + narrator quality",
-    "audience": "Wellness users",
-    "intent": "review/content-update",
-    "environment": "meditation apps",
-    "timing": "monthly update",
-    "goal": "improve consistency of mindfulness habits"
-  },
-  {
-    "id": "ss-tr-018",
-    "title": "Which Budget Subscription Is Giving the Best Trial Offers?",
-    "angle": "Free tier limits + upsell patterns",
-    "audience": "Cost-conscious users",
-    "intent": "review/value",
-    "environment": "any subscription",
-    "timing": "deal season",
-    "goal": "spot high-value short-term deals"
-  },
-  {
-    "id": "ss-tr-019",
-    "title": "Are New Cloud Backup Services Actually Faster?",
-    "angle": "Block-level sync + restore speed",
-    "audience": "Professional users",
-    "intent": "review/performance",
-    "environment": "backup services",
-    "timing": "launch window",
-    "goal": "judge recovery time"
-  },
-  {
-    "id": "ss-tr-020",
-    "title": "Which Business SaaS Added the Most Practical AI Tools?",
-    "angle": "Automations + workflow triggers",
-    "audience": "Teams & startups",
-    "intent": "review/productivity",
-    "environment": "business SaaS",
-    "timing": "Q-updates",
-    "goal": "optimize team operations"
-  },
-
-  {
-    "id": "ss-tr-021",
-    "title": "Is the New Personal Finance Subscription Worth the Upgrade?",
-    "angle": "Category tracking + predictive budgets",
-    "audience": "General users",
-    "intent": "review/finance",
-    "environment": "budgeting apps",
-    "timing": "update cycle",
-    "goal": "simplify money management"
-  },
-  {
-    "id": "ss-tr-022",
-    "title": "Which Podcast App Is Improving Its Recommendation Engine?",
-    "angle": "AI-curation quality",
-    "audience": "Podcast users",
-    "intent": "review/content",
-    "environment": "podcast apps",
-    "timing": "algorithm refresh",
-    "goal": "find accurate content matches"
-  },
-  {
-    "id": "ss-tr-023",
-    "title": "Are New Productivity Subscriptions Worth the Workflow Lock-in?",
-    "angle": "Export options + cross-platform reliability",
-    "audience": "Creators/workers",
-    "intent": "review/compatibility",
-    "environment": "productivity tools",
-    "timing": "evaluation",
-    "goal": "avoid ecosystem traps"
-  },
-  {
-    "id": "ss-tr-024",
-    "title": "Which News Subscription Offers the Best Daily Summary?",
-    "angle": "Signal-to-noise ratio",
-    "audience": "Heavy readers",
-    "intent": "review/content",
-    "environment": "news apps",
-    "timing": "daily usage",
-    "goal": "consume more with less time"
-  },
-  {
-    "id": "ss-tr-025",
-    "title": "Is the Latest Learning Platform Worth Monthly Payment?",
-    "angle": "Course quality + instructor variety",
-    "audience": "Skill learners",
-    "intent": "review/education",
-    "environment": "learning platforms",
-    "timing": "trial period",
-    "goal": "ensure courses are actionable"
-  },
-  {
-    "id": "ss-tr-026",
-    "title": "Which Cloud IDE Subscription Just Improved Performance?",
-    "angle": "Container boot time + latency",
-    "audience": "Developers",
-    "intent": "review/development",
-    "environment": "cloud IDEs",
-    "timing": "update period",
-    "goal": "find faster coding environments"
-  },
-  {
-    "id": "ss-tr-027",
-    "title": "Which AI Translation Service Added Better Real-Time Accuracy?",
-    "angle": "Latency + context handling",
-    "audience": "Travelers/workers",
-    "intent": "review/capability",
-    "environment": "translation apps",
-    "timing": "update",
-    "goal": "improve communication reliability"
-  },
-  {
-    "id": "ss-tr-028",
-    "title": "Are New Crypto Portfolio Subscriptions Worth It?",
-    "angle": "Data refresh + alert latency",
-    "audience": "Investors",
-    "intent": "review/finance",
-    "environment": "crypto trackers",
-    "timing": "market shift",
-    "goal": "spot accurate, timely analytics"
-  },
-  {
-    "id": "ss-tr-029",
-    "title": "Which Online Storage App Improved Family Sharing?",
-    "angle": "Permission granularity + user roles",
-    "audience": "Families",
-    "intent": "review/usability",
-    "environment": "cloud storage",
-    "timing": "family update",
-    "goal": "easier shared-space management"
-  },
-  {
-    "id": "ss-tr-030",
-    "title": "Are New Browsing Tools Worth the Monthly Plan?",
-    "angle": "Tracking protection + speed",
-    "audience": "Privacy-first users",
-    "intent": "review/security",
-    "environment": "browser services",
-    "timing": "update",
-    "goal": "evaluate real protection"
-  },
-
-  {
-    "id": "ss-tr-031",
-    "title": "Which Photo Cloud Plan Now Offers the Best Backup Pipeline?",
-    "angle": "Deduplication + smart foldering",
-    "audience": "Creators/families",
-    "intent": "review/organization",
-    "environment": "photo cloud",
-    "timing": "plan refresh",
-    "goal": "improve long-term photo safety"
-  },
-  {
-    "id": "ss-tr-032",
-    "title": "Are New Study Apps Improving Their Smart Review System?",
-    "angle": "Spaced repetition accuracy",
-    "audience": "Students",
-    "intent": "review/learning",
-    "environment": "education apps",
-    "timing": "feature rollout",
-    "goal": "increase memorization efficiency"
-  },
-  {
-    "id": "ss-tr-033",
-    "title": "Which Streaming Music App Improved Personalized Playlists?",
-    "angle": "Model accuracy + diversity",
-    "audience": "Music fans",
-    "intent": "review/recommendation",
-    "environment": "music apps",
-    "timing": "algorithm refresh",
-    "goal": "find better curated mixes"
-  },
-  {
-    "id": "ss-tr-034",
-    "title": "Is the New Weather Subscription Worth It for Travelers?",
-    "angle": "Aviation layers + storm alerts",
-    "audience": "Frequent travelers",
-    "intent": "review/precision",
-    "environment": "weather apps",
-    "timing": "seasonal trend",
-    "goal": "improve travel reliability"
-  },
-  {
-    "id": "ss-tr-035",
-    "title": "Which Fitness Subscription Added Better Tracking Algorithms?",
-    "angle": "Calorie model + sensor fusion",
-    "audience": "Fitness users",
-    "intent": "review/accuracy",
-    "environment": "fitness apps",
-    "timing": "algorithm update",
-    "goal": "enhance tracking precision"
-  },
-  {
-    "id": "ss-tr-036",
-    "title": "Are Subscription Security Suites Improving Detection Rates?",
-    "angle": "Zero-day performance",
-    "audience": "General users",
-    "intent": "review/security",
-    "environment": "security suites",
-    "timing": "monthly patch cycle",
-    "goal": "maximize protection"
-  },
-  {
-    "id": "ss-tr-037",
-    "title": "Which Online Backup Service Improved Restore Accuracy?",
-    "angle": "Block integrity + metadata recovery",
-    "audience": "Professionals",
-    "intent": "review/reliability",
-    "environment": "backup apps",
-    "timing": "update",
-    "goal": "avoid corrupted restores"
-  },
-  {
-    "id": "ss-tr-038",
-    "title": "Which Cloud Document Service Upgraded Its Collaboration Engine?",
-    "angle": "Sync latency + conflict resolution",
-    "audience": "Remote teams",
-    "intent": "review/collaboration",
-    "environment": "cloud office",
-    "timing": "launch/update",
-    "goal": "improve group productivity"
-  },
-  {
-    "id": "ss-tr-039",
-    "title": "Is the Latest Podcast Premium Plan Worth It?",
-    "angle": "Ad-free value + exclusive content",
-    "audience": "Podcast listeners",
-    "intent": "review/content",
-    "environment": "podcast platforms",
-    "timing": "monthly review",
-    "goal": "maximize listening efficiency"
-  },
-  {
-    "id": "ss-tr-040",
-    "title": "Are New AI Chat Subscriptions Delivering Real Improvements?",
-    "angle": "Context window + generation reliability",
-    "audience": "Students/workers",
-    "intent": "review/productivity",
-    "environment": "AI chat tools",
-    "timing": "major update",
-    "goal": "see if upgrade improves real work"
-  },
-
-  {
-    "id": "ss-tr-041",
-    "title": "Which Study Platform Now Has the Best Offline Mode?",
-    "angle": "Cache stability + sync recovery",
-    "audience": "Students",
-    "intent": "review/usability",
-    "environment": "education platforms",
-    "timing": "update",
-    "goal": "support weak-network users"
-  },
-  {
-    "id": "ss-tr-042",
-    "title": "Are New Password Manager Features Actually Useful?",
-    "angle": "Auto-audit + breach alerts",
-    "audience": "General users",
-    "intent": "review/security",
-    "environment": "password apps",
-    "timing": "feature rollout",
-    "goal": "improve account safety"
-  },
-  {
-    "id": "ss-tr-043",
-    "title": "Which AI Audio Enhancer Subscription Improved Clarity?",
-    "angle": "Background suppression + tone preservation",
-    "audience": "Remote workers",
-    "intent": "review/audio",
-    "environment": "AI audio tools",
-    "timing": "update",
-    "goal": "cleaner voice calls"
-  },
-  {
-    "id": "ss-tr-044",
-    "title": "Are New Notes Subscriptions Overcharging for AI?",
-    "angle": "Quota fairness + export freedom",
-    "audience": "Students/writers",
-    "intent": "review/value",
-    "environment": "note apps",
-    "timing": "evaluation",
-    "goal": "avoid overpriced AI tiers"
-  },
-  {
-    "id": "ss-tr-045",
-    "title": "Which Cloud Whiteboard Service Improved Its Latency?",
-    "angle": "Stroke speed + sync",
-    "audience": "Remote teams",
-    "intent": "review/collaboration",
-    "environment": "whiteboard apps",
-    "timing": "update",
-    "goal": "smoother team sessions"
-  },
-  {
-    "id": "ss-tr-046",
-    "title": "Which Reading Subscription Updated Its Curation Engine?",
-    "angle": "Personalization model",
-    "audience": "Readers",
-    "intent": "review/content",
-    "environment": "reading apps",
-    "timing": "algorithm refresh",
-    "goal": "find better daily recommendations"
-  },
-  {
-    "id": "ss-tr-047",
-    "title": "Is the New Smart Home Subscription Worth Its Monthly Fee?",
-    "angle": "Automation reliability + device support",
-    "audience": "Homeowners",
-    "intent": "review/automation",
-    "environment": "smart home ecosystems",
-    "timing": "launch/update",
-    "goal": "judge actual system improvement"
-  },
-  {
-    "id": "ss-tr-048",
-    "title": "Which AI Calendar App Improved Scheduling Accuracy?",
-    "angle": "Smart conflict resolution",
-    "audience": "Busy workers",
-    "intent": "review/productivity",
-    "environment": "calendar apps",
-    "timing": "update",
-    "goal": "reduce scheduling friction"
-  },
-  {
-    "id": "ss-tr-049",
-    "title": "Are New Travel Subscription Perks Worth the Cost?",
-    "angle": "Airport benefits + hotel tiers",
-    "audience": "Travelers",
-    "intent": "review/value",
-    "environment": "travel services",
-    "timing": "season refresh",
-    "goal": "measure real savings"
-  },
-  {
-    "id": "ss-tr-050",
-    "title": "Which AI Music Generator Subscription Improved Output Quality?",
-    "angle": "Model update + genre diversity",
-    "audience": "Creators",
-    "intent": "review/creative-tools",
-    "environment": "AI music tools",
-    "timing": "model upgrade",
-    "goal": "judge improvements in realism"
-  }
-]
+    {
+      "id": "ss-tr-002",
+      "title": "Are New AI Writing Tools Worth Their Subscription Price?",
+      "angle": "Token limits + accuracy gains",
+      "audience": "Students/professionals",
+      "intent": "review/value",
+      "environment": "AI text tools",
+      "timing": "launch period",
+      "goal": "spot real upgrades vs marketing",
+      "fingerprint": "fp1:5c9d1b72f333e43a47c0997ea38cd39717ff20d1",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "AI Text Tools"
+      }
+    },
+    {
+      "id": "ss-tr-003",
+      "title": "Which Music Streaming App Now Has the Best Audio Quality?",
+      "angle": "Lossless tiers + device support",
+      "audience": "Music listeners",
+      "intent": "review/quality",
+      "environment": "music streaming",
+      "timing": "update cycle",
+      "goal": "find strongest audio engine",
+      "fingerprint": "fp1:e5b118e0461fa09b0cfaf90c9a84a1895138773b",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Music Streaming"
+      }
+    },
+    {
+      "id": "ss-tr-004",
+      "title": "Is the New Cloud Storage Tier Worth the Upgrade?",
+      "angle": "Speed + retention changes",
+      "audience": "Students/office users",
+      "intent": "review/performance",
+      "environment": "cloud storage",
+      "timing": "plan refresh",
+      "goal": "judge real transfer speed",
+      "fingerprint": "fp1:9bff1d86ae1466208ceebf73269b03d8eee313be",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Cloud Storage"
+      }
+    },
+    {
+      "id": "ss-tr-005",
+      "title": "Which VPN Just Updated Its Server Network?",
+      "angle": "Latency + streaming unlock performance",
+      "audience": "Privacy and travel users",
+      "intent": "review/network",
+      "environment": "vpn services",
+      "timing": "network update",
+      "goal": "find fastest new routes",
+      "fingerprint": "fp1:74d33a70b21b44e0304c464d5d2246ddc1b1e47d",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Vpn Services"
+      }
+    },
+    {
+      "id": "ss-tr-006",
+      "title": "Are New AI Photo Editors Worth Subscribing To?",
+      "angle": "Model accuracy + export quality",
+      "audience": "Creators",
+      "intent": "review/capability",
+      "environment": "AI photo tools",
+      "timing": "launch cycle",
+      "goal": "spot true improvements",
+      "fingerprint": "fp1:e7e00e9712ec9321ced640241630b75ca4c7b936",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "AI Photo Tools"
+      }
+    },
+    {
+      "id": "ss-tr-007",
+      "title": "Which Fitness App Added the Most Useful New Programs?",
+      "angle": "Workout diversity + progression",
+      "audience": "Fitness users",
+      "intent": "review/content-update",
+      "environment": "fitness subscriptions",
+      "timing": "monthly update",
+      "goal": "measure long-term value",
+      "fingerprint": "fp1:04418066c8f27518f7c9877e0b0ea357680ce5d5",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Fitness Subscriptions"
+      }
+    },
+    {
+      "id": "ss-tr-008",
+      "title": "Is the Latest Gaming Subscription Rotation Worth It?",
+      "angle": "Game quality + rotation pattern",
+      "audience": "Gamers",
+      "intent": "review/content",
+      "environment": "gaming services",
+      "timing": "rotation day",
+      "goal": "find strongest monthly lineup",
+      "fingerprint": "fp1:195ad508ca5166c77deb6c8e34a2e417c861cf86",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Gaming Services"
+      }
+    },
+    {
+      "id": "ss-tr-009",
+      "title": "Which Productivity Suite Just Got Real AI Upgrades?",
+      "angle": "Automation + document generation",
+      "audience": "Office/remote workers",
+      "intent": "review/productivity",
+      "environment": "productivity suites",
+      "timing": "feature rollout",
+      "goal": "spot meaningful workflow benefits",
+      "fingerprint": "fp1:322fc6bbc18dddab027eec16a62d439eaf92001a",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Productivity Suites"
+      }
+    },
+    {
+      "id": "ss-tr-010",
+      "title": "Are Premium Weather Apps Worth It After Recent Upgrades?",
+      "angle": "Accuracy + radar update frequency",
+      "audience": "Travelers/outdoor users",
+      "intent": "review/accuracy",
+      "environment": "weather apps",
+      "timing": "seasonal update",
+      "goal": "predict real precision gains",
+      "fingerprint": "fp1:0c72584ad037fe287bae0bb901130cced48f6894",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Weather Apps"
+      }
+    },
+    {
+      "id": "ss-tr-011",
+      "title": "Which Note-Taking App Just Added the Best AI Search?",
+      "angle": "Semantic accuracy + speed",
+      "audience": "Students, researchers",
+      "intent": "review/search",
+      "environment": "note-taking apps",
+      "timing": "major update",
+      "goal": "improve knowledge retrieval",
+      "fingerprint": "fp1:6bc19a26bd0ace6dabb7b70be8792f3024500248",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Note-taking Apps"
+      }
+    },
+    {
+      "id": "ss-tr-012",
+      "title": "Are New Cloud Gaming Plans Really Stable?",
+      "angle": "Input latency + server load",
+      "audience": "Gamers",
+      "intent": "review/performance",
+      "environment": "cloud gaming",
+      "timing": "trial week",
+      "goal": "measure real low-latency behavior",
+      "fingerprint": "fp1:269fd137385d1c245909939d21902ca5af8df097",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Cloud Gaming"
+      }
+    },
+    {
+      "id": "ss-tr-013",
+      "title": "Which Language Learning App Is Updating the Fastest?",
+      "angle": "Lesson pacing + review system",
+      "audience": "Learners",
+      "intent": "review/learning",
+      "environment": "language apps",
+      "timing": "content refresh",
+      "goal": "select apps with better repetition design",
+      "fingerprint": "fp1:d5ccd7a7ef3cd3b44570de060e7e659ca8e9a0a4",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Language Apps"
+      }
+    },
+    {
+      "id": "ss-tr-014",
+      "title": "Is the New Password Manager Worth the Annual Cost?",
+      "angle": "Breach history + autofill reliability",
+      "audience": "Security-conscious users",
+      "intent": "review/security",
+      "environment": "password managers",
+      "timing": "renewal period",
+      "goal": "ensure safe, stable autofill",
+      "fingerprint": "fp1:0718a45b99b0ebcb6a106888c45a109cdd7c9d34",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Password Managers"
+      }
+    },
+    {
+      "id": "ss-tr-015",
+      "title": "Which Meal Plan Subscription Improved Its Menu Recently?",
+      "angle": "Nutrition balance + variety",
+      "audience": "Health-focused users",
+      "intent": "review/content-update",
+      "environment": "meal plan services",
+      "timing": "weekly refresh",
+      "goal": "check if menus sustain interest",
+      "fingerprint": "fp1:6400584f5fbb1be18c861f4828ebc00f1df1405a",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Meal Plan Services"
+      }
+    },
+    {
+      "id": "ss-tr-016",
+      "title": "Are Virtual Fitness Classes Getting Better This Season?",
+      "angle": "Instructor quality + schedule density",
+      "audience": "Fitness users",
+      "intent": "review/experience",
+      "environment": "virtual classes",
+      "timing": "season update",
+      "goal": "find consistent high-quality classes",
+      "fingerprint": "fp1:4875fe8dff17606291618a73e482af404a5b0b54",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Virtual Classes"
+      }
+    },
+    {
+      "id": "ss-tr-017",
+      "title": "Which Meditation App Has the Most Useful New Sessions?",
+      "angle": "Session variety + narrator quality",
+      "audience": "Wellness users",
+      "intent": "review/content-update",
+      "environment": "meditation apps",
+      "timing": "monthly update",
+      "goal": "improve consistency of mindfulness habits",
+      "fingerprint": "fp1:d9c181e63246381cf43bf04cd79f9cb3c1289012",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Meditation Apps"
+      }
+    },
+    {
+      "id": "ss-tr-018",
+      "title": "Which Budget Subscription Is Giving the Best Trial Offers?",
+      "angle": "Free tier limits + upsell patterns",
+      "audience": "Cost-conscious users",
+      "intent": "review/value",
+      "environment": "any subscription",
+      "timing": "deal season",
+      "goal": "spot high-value short-term deals",
+      "fingerprint": "fp1:ea0ba97c5f17193a4474aa0256d7ef4fd6f72ca8",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Any Subscription"
+      }
+    },
+    {
+      "id": "ss-tr-019",
+      "title": "Are New Cloud Backup Services Actually Faster?",
+      "angle": "Block-level sync + restore speed",
+      "audience": "Professional users",
+      "intent": "review/performance",
+      "environment": "backup services",
+      "timing": "launch window",
+      "goal": "judge recovery time",
+      "fingerprint": "fp1:14c20247997a15e81b914e9fa9a213a423a590a7",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Backup Services"
+      }
+    },
+    {
+      "id": "ss-tr-020",
+      "title": "Which Business SaaS Added the Most Practical AI Tools?",
+      "angle": "Automations + workflow triggers",
+      "audience": "Teams & startups",
+      "intent": "review/productivity",
+      "environment": "business SaaS",
+      "timing": "Q-updates",
+      "goal": "optimize team operations",
+      "fingerprint": "fp1:d2b397b7ac5f299c93a9949214293fa298e59fd1",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Business Saas"
+      }
+    },
+    {
+      "id": "ss-tr-021",
+      "title": "Is the New Personal Finance Subscription Worth the Upgrade?",
+      "angle": "Category tracking + predictive budgets",
+      "audience": "General users",
+      "intent": "review/finance",
+      "environment": "budgeting apps",
+      "timing": "update cycle",
+      "goal": "simplify money management",
+      "fingerprint": "fp1:781caabc15f52a68b8e143194aa4a19b68f7105c",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Budgeting Apps"
+      }
+    },
+    {
+      "id": "ss-tr-022",
+      "title": "Which Podcast App Is Improving Its Recommendation Engine?",
+      "angle": "AI-curation quality",
+      "audience": "Podcast users",
+      "intent": "review/content",
+      "environment": "podcast apps",
+      "timing": "algorithm refresh",
+      "goal": "find accurate content matches",
+      "fingerprint": "fp1:2183ed87572bdfe61ccf9c27763f65bca6068830",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Podcast Apps"
+      }
+    },
+    {
+      "id": "ss-tr-023",
+      "title": "Are New Productivity Subscriptions Worth the Workflow Lock-in?",
+      "angle": "Export options + cross-platform reliability",
+      "audience": "Creators/workers",
+      "intent": "review/compatibility",
+      "environment": "productivity tools",
+      "timing": "evaluation",
+      "goal": "avoid ecosystem traps",
+      "fingerprint": "fp1:f239dd743c4c5e34be9deba5c38e0e682deba9fe",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Productivity Tools"
+      }
+    },
+    {
+      "id": "ss-tr-024",
+      "title": "Which News Subscription Offers the Best Daily Summary?",
+      "angle": "Signal-to-noise ratio",
+      "audience": "Heavy readers",
+      "intent": "review/content",
+      "environment": "news apps",
+      "timing": "daily usage",
+      "goal": "consume more with less time",
+      "fingerprint": "fp1:881380ea694f93cb8c2356bc975ff03fc257cfa4",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "News Apps"
+      }
+    },
+    {
+      "id": "ss-tr-025",
+      "title": "Is the Latest Learning Platform Worth Monthly Payment?",
+      "angle": "Course quality + instructor variety",
+      "audience": "Skill learners",
+      "intent": "review/education",
+      "environment": "learning platforms",
+      "timing": "trial period",
+      "goal": "ensure courses are actionable",
+      "fingerprint": "fp1:c51d71e47dc88a5047e841be5aa14f96ed41b81c",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Learning Platforms"
+      }
+    },
+    {
+      "id": "ss-tr-026",
+      "title": "Which Cloud IDE Subscription Just Improved Performance?",
+      "angle": "Container boot time + latency",
+      "audience": "Developers",
+      "intent": "review/development",
+      "environment": "cloud IDEs",
+      "timing": "update period",
+      "goal": "find faster coding environments",
+      "fingerprint": "fp1:ff44ac6d3efcff744381e55faa673e9f54a2c91d",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Cloud Ides"
+      }
+    },
+    {
+      "id": "ss-tr-027",
+      "title": "Which AI Translation Service Added Better Real-Time Accuracy?",
+      "angle": "Latency + context handling",
+      "audience": "Travelers/workers",
+      "intent": "review/capability",
+      "environment": "translation apps",
+      "timing": "update",
+      "goal": "improve communication reliability",
+      "fingerprint": "fp1:1261db412ca93d929bdf00693bf1b6f9da57eb4f",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Translation Apps"
+      }
+    },
+    {
+      "id": "ss-tr-028",
+      "title": "Are New Crypto Portfolio Subscriptions Worth It?",
+      "angle": "Data refresh + alert latency",
+      "audience": "Investors",
+      "intent": "review/finance",
+      "environment": "crypto trackers",
+      "timing": "market shift",
+      "goal": "spot accurate, timely analytics",
+      "fingerprint": "fp1:0ef2e3f945ee81302940c8a438100cd555dac638",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Crypto Trackers"
+      }
+    },
+    {
+      "id": "ss-tr-029",
+      "title": "Which Online Storage App Improved Family Sharing?",
+      "angle": "Permission granularity + user roles",
+      "audience": "Families",
+      "intent": "review/usability",
+      "environment": "cloud storage",
+      "timing": "family update",
+      "goal": "easier shared-space management",
+      "fingerprint": "fp1:37280b9ec5345d3061b9eaffeb8510088dd7075a",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Cloud Storage"
+      }
+    },
+    {
+      "id": "ss-tr-030",
+      "title": "Are New Browsing Tools Worth the Monthly Plan?",
+      "angle": "Tracking protection + speed",
+      "audience": "Privacy-first users",
+      "intent": "review/security",
+      "environment": "browser services",
+      "timing": "update",
+      "goal": "evaluate real protection",
+      "fingerprint": "fp1:02189c32ecb66c0ac8cf67d07beeda62a8a4c59b",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Browser Services"
+      }
+    },
+    {
+      "id": "ss-tr-031",
+      "title": "Which Photo Cloud Plan Now Offers the Best Backup Pipeline?",
+      "angle": "Deduplication + smart foldering",
+      "audience": "Creators/families",
+      "intent": "review/organization",
+      "environment": "photo cloud",
+      "timing": "plan refresh",
+      "goal": "improve long-term photo safety",
+      "fingerprint": "fp1:1c07d6b6946a2f4908dae2938074ead6d6afe6ab",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Photo Cloud"
+      }
+    },
+    {
+      "id": "ss-tr-032",
+      "title": "Are New Study Apps Improving Their Smart Review System?",
+      "angle": "Spaced repetition accuracy",
+      "audience": "Students",
+      "intent": "review/learning",
+      "environment": "education apps",
+      "timing": "feature rollout",
+      "goal": "increase memorization efficiency",
+      "fingerprint": "fp1:98e885fa0b7040f6c1566dbee882a660311b22a6",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Education Apps"
+      }
+    },
+    {
+      "id": "ss-tr-033",
+      "title": "Which Streaming Music App Improved Personalized Playlists?",
+      "angle": "Model accuracy + diversity",
+      "audience": "Music fans",
+      "intent": "review/recommendation",
+      "environment": "music apps",
+      "timing": "algorithm refresh",
+      "goal": "find better curated mixes",
+      "fingerprint": "fp1:d764b852bb40079fad549c4a680bf09e6a5e979e",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Music Apps"
+      }
+    },
+    {
+      "id": "ss-tr-034",
+      "title": "Is the New Weather Subscription Worth It for Travelers?",
+      "angle": "Aviation layers + storm alerts",
+      "audience": "Frequent travelers",
+      "intent": "review/precision",
+      "environment": "weather apps",
+      "timing": "seasonal trend",
+      "goal": "improve travel reliability",
+      "fingerprint": "fp1:9c6c1e76064900a9cfadfdb855eaa5b1ff6bf964",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Weather Apps"
+      }
+    },
+    {
+      "id": "ss-tr-035",
+      "title": "Which Fitness Subscription Added Better Tracking Algorithms?",
+      "angle": "Calorie model + sensor fusion",
+      "audience": "Fitness users",
+      "intent": "review/accuracy",
+      "environment": "fitness apps",
+      "timing": "algorithm update",
+      "goal": "enhance tracking precision",
+      "fingerprint": "fp1:e571f94f050e5c439456198c7643ef985cb1aced",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Fitness Apps"
+      }
+    },
+    {
+      "id": "ss-tr-036",
+      "title": "Are Subscription Security Suites Improving Detection Rates?",
+      "angle": "Zero-day performance",
+      "audience": "General users",
+      "intent": "review/security",
+      "environment": "security suites",
+      "timing": "monthly patch cycle",
+      "goal": "maximize protection",
+      "fingerprint": "fp1:f356bf15865bfefae9ab54ceac72b38ac1fc6ed2",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Security Suites"
+      }
+    },
+    {
+      "id": "ss-tr-037",
+      "title": "Which Online Backup Service Improved Restore Accuracy?",
+      "angle": "Block integrity + metadata recovery",
+      "audience": "Professionals",
+      "intent": "review/reliability",
+      "environment": "backup apps",
+      "timing": "update",
+      "goal": "avoid corrupted restores",
+      "fingerprint": "fp1:200508f998df7f7feaecb9ba336a3b33f8f5b384",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Backup Apps"
+      }
+    },
+    {
+      "id": "ss-tr-038",
+      "title": "Which Cloud Document Service Upgraded Its Collaboration Engine?",
+      "angle": "Sync latency + conflict resolution",
+      "audience": "Remote teams",
+      "intent": "review/collaboration",
+      "environment": "cloud office",
+      "timing": "launch/update",
+      "goal": "improve group productivity",
+      "fingerprint": "fp1:dfe3d289b763f5d5ecd1f142a68c7ee7694b476a",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Cloud Office"
+      }
+    },
+    {
+      "id": "ss-tr-039",
+      "title": "Is the Latest Podcast Premium Plan Worth It?",
+      "angle": "Ad-free value + exclusive content",
+      "audience": "Podcast listeners",
+      "intent": "review/content",
+      "environment": "podcast platforms",
+      "timing": "monthly review",
+      "goal": "maximize listening efficiency",
+      "fingerprint": "fp1:28173ed69b29a93e7b76efb9c18f8e3970628547",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Podcast Platforms"
+      }
+    },
+    {
+      "id": "ss-tr-040",
+      "title": "Are New AI Chat Subscriptions Delivering Real Improvements?",
+      "angle": "Context window + generation reliability",
+      "audience": "Students/workers",
+      "intent": "review/productivity",
+      "environment": "AI chat tools",
+      "timing": "major update",
+      "goal": "see if upgrade improves real work",
+      "fingerprint": "fp1:aa95e8f8522cc3e848facddde324701a441808a1",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "AI Chat Tools"
+      }
+    },
+    {
+      "id": "ss-tr-041",
+      "title": "Which Study Platform Now Has the Best Offline Mode?",
+      "angle": "Cache stability + sync recovery",
+      "audience": "Students",
+      "intent": "review/usability",
+      "environment": "education platforms",
+      "timing": "update",
+      "goal": "support weak-network users",
+      "fingerprint": "fp1:5a25526a5ba255a452e5315c2a7c2726abb01a64",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Education Platforms"
+      }
+    },
+    {
+      "id": "ss-tr-042",
+      "title": "Are New Password Manager Features Actually Useful?",
+      "angle": "Auto-audit + breach alerts",
+      "audience": "General users",
+      "intent": "review/security",
+      "environment": "password apps",
+      "timing": "feature rollout",
+      "goal": "improve account safety",
+      "fingerprint": "fp1:fbffe60421d6335dbc006b44145b2ad2fc2f68ce",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Password Apps"
+      }
+    },
+    {
+      "id": "ss-tr-043",
+      "title": "Which AI Audio Enhancer Subscription Improved Clarity?",
+      "angle": "Background suppression + tone preservation",
+      "audience": "Remote workers",
+      "intent": "review/audio",
+      "environment": "AI audio tools",
+      "timing": "update",
+      "goal": "cleaner voice calls",
+      "fingerprint": "fp1:9eebbbae6689fb0078794b5a714a5ca27148343a",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "AI Audio Tools"
+      }
+    },
+    {
+      "id": "ss-tr-044",
+      "title": "Are New Notes Subscriptions Overcharging for AI?",
+      "angle": "Quota fairness + export freedom",
+      "audience": "Students/writers",
+      "intent": "review/value",
+      "environment": "note apps",
+      "timing": "evaluation",
+      "goal": "avoid overpriced AI tiers",
+      "fingerprint": "fp1:e4cb7a84aed67ae3f1569512474a97682a81fa4d",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Note Apps"
+      }
+    },
+    {
+      "id": "ss-tr-045",
+      "title": "Which Cloud Whiteboard Service Improved Its Latency?",
+      "angle": "Stroke speed + sync",
+      "audience": "Remote teams",
+      "intent": "review/collaboration",
+      "environment": "whiteboard apps",
+      "timing": "update",
+      "goal": "smoother team sessions",
+      "fingerprint": "fp1:7e276d2a7a2b916be9d17d814a24724c362944f6",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Whiteboard Apps"
+      }
+    },
+    {
+      "id": "ss-tr-046",
+      "title": "Which Reading Subscription Updated Its Curation Engine?",
+      "angle": "Personalization model",
+      "audience": "Readers",
+      "intent": "review/content",
+      "environment": "reading apps",
+      "timing": "algorithm refresh",
+      "goal": "find better daily recommendations",
+      "fingerprint": "fp1:c3f17467dd1f26ec996e165db7a8073331f16577",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Reading Apps"
+      }
+    },
+    {
+      "id": "ss-tr-047",
+      "title": "Is the New Smart Home Subscription Worth Its Monthly Fee?",
+      "angle": "Automation reliability + device support",
+      "audience": "Homeowners",
+      "intent": "review/automation",
+      "environment": "smart home ecosystems",
+      "timing": "launch/update",
+      "goal": "judge actual system improvement",
+      "fingerprint": "fp1:91d321e42ae0d7499b38cbfe95724370f04044d5",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Smart Home Ecosystems"
+      }
+    },
+    {
+      "id": "ss-tr-048",
+      "title": "Which AI Calendar App Improved Scheduling Accuracy?",
+      "angle": "Smart conflict resolution",
+      "audience": "Busy workers",
+      "intent": "review/productivity",
+      "environment": "calendar apps",
+      "timing": "update",
+      "goal": "reduce scheduling friction",
+      "fingerprint": "fp1:15192e9f79418b20af55e1d84e5e47616d5c734c",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Calendar Apps"
+      }
+    },
+    {
+      "id": "ss-tr-049",
+      "title": "Are New Travel Subscription Perks Worth the Cost?",
+      "angle": "Airport benefits + hotel tiers",
+      "audience": "Travelers",
+      "intent": "review/value",
+      "environment": "travel services",
+      "timing": "season refresh",
+      "goal": "measure real savings",
+      "fingerprint": "fp1:e2650c1408c271afbb1db7f73d79c40113fc41ea",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Travel Services"
+      }
+    },
+    {
+      "id": "ss-tr-050",
+      "title": "Which AI Music Generator Subscription Improved Output Quality?",
+      "angle": "Model update + genre diversity",
+      "audience": "Creators",
+      "intent": "review/creative-tools",
+      "environment": "AI music tools",
+      "timing": "model upgrade",
+      "goal": "judge improvements in realism",
+      "fingerprint": "fp1:300d54839782f786a655344024c3c3487d5bea4f",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "AI Music Tools"
+      }
+    },
+    {
+      "id": "subscription-services-trend-1772546046533-229244985",
+      "title": "AUTO GENERATED: subscription-services (trend)",
+      "angle": "Auto angle (trend)",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-03T13:54:06.533Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:6abac784e57afb78183dc3999006ecbdff497dca",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "AUTO GENERATED: subscription-services (trend)"
+      }
+    },
+    {
+      "id": "subscription-services-trend-1772628476809-422036015",
+      "title": "AUTO GENERATED: subscription-services (trend)",
+      "angle": "Auto angle (trend)",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T12:47:56.809Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:6abac784e57afb78183dc3999006ecbdff497dca",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "AUTO GENERATED: subscription-services (trend)"
+      }
+    },
+    {
+      "id": "subscription-services-trend-1772629568809-730028705",
+      "title": "AUTO GENERATED: subscription-services (trend)",
+      "angle": "Auto angle (trend)",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:06:08.809Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:6abac784e57afb78183dc3999006ecbdff497dca",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "AUTO GENERATED: subscription-services (trend)"
+      }
+    },
+    {
+      "id": "subscription-services-trend-1772630313871-726460479",
+      "title": "AUTO GENERATED: subscription-services (trend) #1772630313871-726460479",
+      "angle": "Auto angle (trend) var=1772630313871-726460479",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.871Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:1f926a8ac1cecb09ce32ed929656e2c244eb43c7",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "AUTO GENERATED: subscription-services (trend) #1772630313871-726460479"
+      }
+    },
+    {
+      "id": "subscription-services-trend-1772630313871-245389224",
+      "title": "AUTO GENERATED: subscription-services (trend) #1772630313871-245389224",
+      "angle": "Auto angle (trend) var=1772630313871-245389224",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.871Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:e45081f921db668adf8d0ab3624ec72f590351da",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "AUTO GENERATED: subscription-services (trend) #1772630313871-245389224"
+      }
+    },
+    {
+      "id": "subscription-services-trend-1772630313871-57180707",
+      "title": "AUTO GENERATED: subscription-services (trend) #1772630313871-57180707",
+      "angle": "Auto angle (trend) var=1772630313871-57180707",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.871Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:aafa936ad927f41df320c23b2d056608826bc8e3",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "AUTO GENERATED: subscription-services (trend) #1772630313871-57180707"
+      }
+    },
+    {
+      "id": "subscription-services-trend-1772630313871-693018615",
+      "title": "AUTO GENERATED: subscription-services (trend) #1772630313871-693018615",
+      "angle": "Auto angle (trend) var=1772630313871-693018615",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.871Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:f0be3d56cb20bb4c73e023b63c5935cb18a21239",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "AUTO GENERATED: subscription-services (trend) #1772630313871-693018615"
+      }
+    },
+    {
+      "id": "subscription-services-trend-1772630313871-608786718",
+      "title": "AUTO GENERATED: subscription-services (trend) #1772630313871-608786718",
+      "angle": "Auto angle (trend) var=1772630313871-608786718",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.871Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:8d6fb9f647fcd0df4c0e62d9d9afc4bd80ea06c6",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "AUTO GENERATED: subscription-services (trend) #1772630313871-608786718"
+      }
+    },
+    {
+      "id": "subscription-services-trend-1772630313871-357098513",
+      "title": "AUTO GENERATED: subscription-services (trend) #1772630313871-357098513",
+      "angle": "Auto angle (trend) var=1772630313871-357098513",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.871Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:3a365204033924657f8dd88c937a05ced39ac8de",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "AUTO GENERATED: subscription-services (trend) #1772630313871-357098513"
+      }
+    },
+    {
+      "id": "subscription-services-trend-1772630313871-420587380",
+      "title": "AUTO GENERATED: subscription-services (trend) #1772630313871-420587380",
+      "angle": "Auto angle (trend) var=1772630313871-420587380",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.871Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:68a46a842b15c78d21fa3546ab9c11c03262f60b",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "AUTO GENERATED: subscription-services (trend) #1772630313871-420587380"
+      }
+    }
+  ]
 }
