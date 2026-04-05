@@ -10,9 +10,16 @@ const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..', '..'); // System_files
 
-const BASELINE_PATH = path.join(ROOT, 'content', 'reviews', 'review-ratings.json');
-const NEXT_PATH     = path.join(ROOT, 'content', 'reviews', 'review-ratings-next.json');
-const OUT_PATH      = path.join(ROOT, 'content', 'ssot', 'reviews.bySlug.json');
+const REVIEWS_DIR = path.join(ROOT, 'content', 'reviews');
+
+const BASELINE_PATH = path.join(REVIEWS_DIR, 'review-ratings.json');
+const NEXT_PATH = path.join(REVIEWS_DIR, 'review-ratings-next.json');
+const OUT_PATH = path.join(ROOT, 'content', 'ssot', 'reviews.bySlug.json');
+
+// ✅ bucket next들도 실행 종료 후 비움
+const APP_NEXT_PATH = path.join(REVIEWS_DIR, 'app-ratings-next.json');
+const DEVICE_NEXT_PATH = path.join(REVIEWS_DIR, 'device-ratings-next.json');
+const SUBSCRIPTION_NEXT_PATH = path.join(REVIEWS_DIR, 'subscription-ratings-next.json');
 
 // ─────────────────────────────────────────────
 // What/Why/I-O/Invariants
@@ -23,6 +30,7 @@ const OUT_PATH      = path.join(ROOT, 'content', 'ssot', 'reviews.bySlug.json');
 // Invariants:
 //  - baseline을 "초기화(리셋)"하지 않는다. bySlug 구조를 유지한다.
 //  - JSON 파싱 실패 시 기존 파일 보호(강제 초기화 금지)
+//  - next는 실행 스코프 임시 버퍼이며, 병합 성공 후 자동 초기화한다.
 // ─────────────────────────────────────────────
 
 function ensureDir(p) {
@@ -66,8 +74,8 @@ function isMeaningfullyChanged(prev, curr) {
   const b = curr || {};
   return (
     String(a.ratingCurrent ?? '') !== String(b.ratingCurrent ?? '') ||
-    String(a.votesCurrent ?? '')  !== String(b.votesCurrent ?? '')  ||
-    String(a.status ?? '')        !== String(b.status ?? '')
+    String(a.votesCurrent ?? '') !== String(b.votesCurrent ?? '') ||
+    String(a.status ?? '') !== String(b.status ?? '')
   );
 }
 
@@ -81,6 +89,27 @@ function fingerprintForSlugs(bySlug, slugs) {
   return parts.join('|');
 }
 
+// ✅ next 초기화 전용
+function buildEmptyNext() {
+  return {
+    updatedAt: null,
+    bySlug: {},
+  };
+}
+
+function resetNextFile(filePath) {
+  ensureDir(path.dirname(filePath));
+  writeJsonPrettyAtomic(filePath, buildEmptyNext());
+  console.log('[ssot] next 초기화 완료:', filePath);
+}
+
+function resetAllNextFiles() {
+  resetNextFile(NEXT_PATH);
+  resetNextFile(APP_NEXT_PATH);
+  resetNextFile(DEVICE_NEXT_PATH);
+  resetNextFile(SUBSCRIPTION_NEXT_PATH);
+}
+
 function main() {
   console.log('────────────────────────────────────────────');
   console.log('[ssot] build-ssot-reviews 시작');
@@ -91,7 +120,7 @@ function main() {
   console.log('────────────────────────────────────────────');
 
   const baselineRaw = safeReadJson(BASELINE_PATH, { bySlug: {} });
-  const nextRaw     = safeReadJson(NEXT_PATH, { bySlug: {} });
+  const nextRaw = safeReadJson(NEXT_PATH, { bySlug: {} });
 
   // (강화) 파싱 실패가 이미 발생했다면 안전하게 중단(기존 파일 보호)
   if (process.exitCode === 1) {
@@ -101,7 +130,7 @@ function main() {
   }
 
   const baseline = ensureBySlug(baselineRaw);
-  const next     = ensureBySlug(nextRaw);
+  const next = ensureBySlug(nextRaw);
 
   const baseBy = baseline.bySlug || {};
   const nextBy = next.bySlug || {};
@@ -158,8 +187,12 @@ function main() {
     if (String(process.env.SSOT_STRICT || '').toLowerCase() === '1') {
       console.error('[ssot] SSOT_STRICT=1 → exitCode=1');
       process.exitCode = 1;
+      return;
     }
   }
+
+  // ✅ A안: 병합 성공 후 next 계열 자동 초기화
+  resetAllNextFiles();
 
   console.log('────────────────────────────────────────────');
 }
