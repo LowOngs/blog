@@ -23,6 +23,10 @@ concurrency:
 env:
   NODE_VERSION: "20"
 
+  # ✅ Node24 강제 시험
+  # GitHub 공식 사전 전환 옵션
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
   # 기본 환경
   CANONICAL_BASE: ${{ secrets.CANONICAL_BASE }}
   CDN_BASE: ${{ secrets.CDN_BASE }}
@@ -99,15 +103,16 @@ jobs:
 
       - name: Checkout
         if: env.SKIP_PIPELINE != 'true'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
       - name: Setup Node
         if: env.SKIP_PIPELINE != 'true'
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
 
       - name: Install (repo root)
         if: env.SKIP_PIPELINE != 'true'
