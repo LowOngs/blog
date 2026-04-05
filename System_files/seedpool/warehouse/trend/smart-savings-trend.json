@@ -5,15 +5,6 @@
   },
   "trend": [
     {
-      "id": "ss-tr-012",
-      "title": "How to Use AI Assistants for Detecting Duplicate Subscriptions",
-      "angle": "AI scanning for duplicates is trending on mobile.",
-      "audience": "Heavy app users",
-      "intent": "saving",
-      "priority": 1,
-      "fingerprint": "fp1:f230910dbb3f71a91b07923249f95ecc7b149321"
-    },
-    {
       "id": "ss-tr-013",
       "title": "2025 Cheapest Cloud Storage Combos: Mix Google + OneDrive or iCloud?",
       "angle": "Many users now mix 100GB + small plan combos for savings.",

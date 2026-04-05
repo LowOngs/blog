@@ -8,7 +8,7 @@
     ],
     "title": "Minimalist productivity apps that actually stick in 2025",
     "description": "A practical guide to choosing one main productivity app that you can really stick with across work, study, and side projects.",
-    "updated": "2026-01-05T19:46:23+09:00"
+    "updated": "2026-04-05T13:44:46+09:00"
   },
   {
     "slug": "device-20251207-001",
@@ -19,29 +19,18 @@
     ],
     "title": "Best budget laptops under $800 for work, study, and side projects",
     "description": "A grounded guide to picking a budget laptop under $800 that can handle studying, remote work, and light side projects without frustration.",
-    "updated": "2026-01-05T19:46:23+09:00"
+    "updated": "2026-04-05T13:44:46+09:00"
   },
   {
-    "slug": "howto-20251207-001",
-    "pageId": "page000003",
-    "url": "https://ongsblog.com/howto-20251207-001.html",
+    "slug": "origin-verify-updates",
+    "pageId": "page000011",
+    "url": "https://ongsblog.com/origin-verify-updates.html",
     "labels": [
-      "how-to-playbooks"
+      "firstgate"
     ],
-    "title": "Build a simple cross-device productivity system in one weekend",
-    "description": "A realistic weekend plan to set up a unified productivity system that works across your phone, laptop, and tablet.",
-    "updated": "2026-01-05T19:46:23+09:00"
-  },
-  {
-    "slug": "smartsavings-20251207-001",
-    "pageId": "page000012",
-    "url": "https://ongsblog.com/smartsavings-20251207-001.html",
-    "labels": [
-      "smart-savings"
-    ],
-    "title": "Save money on productivity tools without breaking your workflow",
-    "description": "A practical guide to cutting productivity tool costs by comparing free and paid stacks without destroying a working system.",
-    "updated": "2026-01-05T19:46:23+09:00"
+    "title": "How Ongs Blog Verifies Updates (90-day refresh + version tags)",
+    "description": "We update guides on a fixed cadence and keep change visibility. Every post is version-tagged and source-linked.",
+    "updated": "2026-04-05T13:44:46+09:00"
   },
   {
     "slug": "subscription-20251207-001",
@@ -52,7 +41,40 @@
     ],
     "title": "When productivity app subscriptions are really worth paying for in 2025",
     "description": "A clear, numbers-based look at when it makes sense to pay for productivity app subscriptions and when free plans are enough.",
-    "updated": "2026-01-05T19:46:23+09:00"
+    "updated": "2026-04-05T13:44:46+09:00"
+  },
+  {
+    "slug": "smartsavings-20260405-001",
+    "pageId": "page000013",
+    "url": "https://ongsblog.com/smartsavings-20260405-001.html",
+    "labels": [
+      "smart-savings"
+    ],
+    "title": "How to Escape App Auto-Renew Traps After the 2025 Policy Change",
+    "description": "How to Escape App Auto-Renew Traps After the 2025 Policy Change is best approached as a value decision, not just a price decision. Most people do not want the c…",
+    "updated": "2026-04-05T10:00:00+09:00"
+  },
+  {
+    "slug": "howto-20251207-001",
+    "pageId": "page000003",
+    "url": "https://ongsblog.com/howto-20251207-001.html",
+    "labels": [
+      "how-to-playbooks"
+    ],
+    "title": "Build a simple cross-device productivity system in one weekend",
+    "description": "Managing tasks, notes, calendars, and files across multiple devices can quickly become chaotic. A simple, unified productivity system helps you stay organized,…",
+    "updated": "2025-12-07T10:00:00+09:00"
+  },
+  {
+    "slug": "smartsavings-20251207-001",
+    "pageId": "page000012",
+    "url": "https://ongsblog.com/smartsavings-20251207-001.html",
+    "labels": [
+      "smart-savings"
+    ],
+    "title": "Save money on productivity tools without breaking your workflow",
+    "description": "Save money on productivity tools without breaking your workflow is best approached as a value decision, not just a price decision. Most people do not want the c…",
+    "updated": "2025-12-07T10:00:00+09:00"
   },
   {
     "slug": "templates-20251207-001",
@@ -62,7 +84,7 @@
       "templates-checklists"
     ],
     "title": "A weekly review checklist template for busy creators",
-    "description": "A short, reusable weekly review checklist to keep work, study, and side projects under control without spending hours planning.",
-    "updated": "2026-01-05T19:46:23+09:00"
+    "description": "A weekly review checklist template for busy creators is meant to reduce hesitation at the moment of action. The value of a template or checklist is not abstract…",
+    "updated": "2025-12-07T10:00:00+09:00"
   }
 ]

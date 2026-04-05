@@ -9,16 +9,22 @@
       "seedLabel": "smart-savings",
       "requestedSlotLabel": "smart-savings",
       "mode": "trend",
-      "id": "ss-tr-011",
-      "title": "How to Escape App Auto-Renew Traps After the 2025 Policy Change",
-      "angle": "App Store and Play Store changed refund/renewal policies.",
-      "audience": "Users with runaway subscriptions",
+      "id": "ss-tr-012",
+      "title": "How to Use AI Assistants for Detecting Duplicate Subscriptions",
+      "angle": "AI scanning for duplicates is trending on mobile.",
+      "audience": "Heavy app users",
       "intent": "saving",
       "priority": 1,
       "notes": "",
       "generatedSlug": "smartsavings-20260405-001",
-      "postId": "06ENQX8P8MFGXEFEXGYF7TR51T"
+      "postId": "06ENQX8P8MFGXEFEXGYF7TR51T",
+      "reused": true,
+      "reusedReason": "date-label-limit-existing",
+      "dateLabelLimit": 1,
+      "existingDateLabelCount": 1,
+      "patched": false,
+      "patchedReason": "no-review-entity"
     }
   ],
-  "expandedAt": "2026-04-05T04:44:41.925Z"
+  "expandedAt": "2026-04-05T05:41:28.741Z"
 }
