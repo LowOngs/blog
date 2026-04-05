@@ -1,71 +1,17 @@
 {
   "label": "templates-checklists",
-  "limits": { "trend": 60 },
+  "limits": {
+    "trend": 60
+  },
   "trend": [
-    {
-      "id": "tc-tr-001",
-      "title": "Universal Daily Productivity Template (2025 edition)",
-      "angle": "A structured day planning system optimized for modern digital workflows.",
-      "audience": "Workers and students",
-      "intent": "template",
-      "priority": 1
-    },
-    {
-      "id": "tc-tr-002",
-      "title": "Cross-Platform Digital Declutter Checklist",
-      "angle": "A systemized approach to cleaning files, apps, and cloud clutter.",
-      "audience": "General users",
-      "intent": "template",
-      "priority": 1
-    },
-    {
-      "id": "tc-tr-003",
-      "title": "AI-Assisted Meeting Notes Template",
-      "angle": "A repeatable structure for cleaner, faster AI-supported meetings.",
-      "audience": "Teams and professionals",
-      "intent": "template",
-      "priority": 1
-    },
-    {
-      "id": "tc-tr-004",
-      "title": "Weekly Device Maintenance Checklist",
-      "angle": "Covers cache cleaning, permission checks, and battery optimization.",
-      "audience": "General users",
-      "intent": "template",
-      "priority": 1
-    },
-    {
-      "id": "tc-tr-005",
-      "title": "Universal App Troubleshooting Template",
-      "angle": "A reliable flow for diagnosing any mobile or desktop app issue.",
-      "audience": "All users",
-      "intent": "template",
-      "priority": 1
-    },
-
-    {
-      "id": "tc-tr-006",
-      "title": "AI-Friendly Task Breakdown Template",
-      "angle": "A step-by-step structure for requesting clear solutions from AI tools.",
-      "audience": "Workers and creators",
-      "intent": "template",
-      "priority": 1
-    },
-    {
-      "id": "tc-tr-007",
-      "title": "Cloud Storage Folder Architecture Template (2025)",
-      "angle": "A modern folder system adaptable to Google Drive, iCloud, and OneDrive.",
-      "audience": "Students and professionals",
-      "intent": "template",
-      "priority": 1
-    },
     {
       "id": "tc-tr-008",
       "title": "Universal Content Creation Checklist",
       "angle": "Ensures consistency across blogs, videos, and social media posts.",
       "audience": "Creators",
       "intent": "template",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:76f9942e106b6ba5ab002538a4ce56ac1e159c0f"
     },
     {
       "id": "tc-tr-009",
@@ -73,7 +19,8 @@
       "angle": "A structure that helps AI provide deeper, citation-ready responses.",
       "audience": "Students and analysts",
       "intent": "template",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:a8e6169d11a9a3cc852db860590f2489587ab0ed"
     },
     {
       "id": "tc-tr-010",
@@ -81,16 +28,17 @@
       "angle": "Modern 2025 privacy steps for all devices and accounts.",
       "audience": "General users",
       "intent": "template",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:6755be9f4ecbbe6767db5c2791af0f116fd56750"
     },
-
     {
       "id": "tc-tr-011",
       "title": "Daily AI-Assisted Workout Planner Template",
       "angle": "A structure for generating adaptive workouts using AI agents.",
       "audience": "Fitness users",
       "intent": "template",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:4f1eabe89bfe0a403531e6add1da6f3b7929e91b"
     },
     {
       "id": "tc-tr-012",
@@ -98,7 +46,8 @@
       "angle": "Ensures a complete first-time setup for any app or tool.",
       "audience": "All new users",
       "intent": "template",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:95c8c6ad8ceb7132f28cd9ae40901ce87900aba6"
     },
     {
       "id": "tc-tr-013",
@@ -106,7 +55,8 @@
       "angle": "Block scheduling + task mapping with AI reminders.",
       "audience": "Busy workers",
       "intent": "template",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:23914db4ccbef3f2e610e2bb503abdd4e385a9ec"
     },
     {
       "id": "tc-tr-014",
@@ -114,7 +64,8 @@
       "angle": "Step-by-step for configuring any ecosystem-driven smart home.",
       "audience": "Homeowners",
       "intent": "template",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:6c931f2bb950629d98765700263383255b8303c7"
     },
     {
       "id": "tc-tr-015",
@@ -122,16 +73,17 @@
       "angle": "Clear steps for mass sorting, filtering, and AI-based labels.",
       "audience": "Workers and students",
       "intent": "template",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:6c72463ba0a6e58c9a59509439cf52f5deed3d41"
     },
-
     {
       "id": "tc-tr-016",
       "title": "Device Migration Checklist (Android ↔ iPhone)",
       "angle": "Universal transfer steps excluding brand names.",
       "audience": "People switching phones",
       "intent": "template",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:3381b5d98dee26a79a848343423303df89a01ea3"
     },
     {
       "id": "tc-tr-017",
@@ -139,7 +91,8 @@
       "angle": "A structured reflection on expenses, balances, and goals.",
       "audience": "General users",
       "intent": "template",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:c4823208ef7af42aec5a5b5a5bfdae34c50bf7c9"
     },
     {
       "id": "tc-tr-018",
@@ -147,7 +100,8 @@
       "angle": "Task grouping + communication rituals for distributed teams.",
       "audience": "Remote workers",
       "intent": "template",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:b0d3d7912435d1b9a6ad5ff8f842b995caf7b257"
     },
     {
       "id": "tc-tr-019",
@@ -155,7 +109,8 @@
       "angle": "Aging device optimization, permissions review, and risk reduction.",
       "audience": "General public",
       "intent": "template",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:89776daa7adcc73588c68e79e8756bdef3b231fd"
     },
     {
       "id": "tc-tr-020",
@@ -163,16 +118,17 @@
       "angle": "A 3-layer structure for capturing tasks, insights, and references.",
       "audience": "Students and analysts",
       "intent": "template",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:f593aef72909fa6099e1dbfae46837ec677538dd"
     },
-
     {
       "id": "tc-tr-021",
       "title": "AI Project Planning Template",
       "angle": "Roadmapping for anyone building AI-assisted workflows.",
       "audience": "Productivity users",
       "intent": "template",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:9df9f2d206db28dc8d3559bd969756196e6378b7"
     },
     {
       "id": "tc-tr-022",
@@ -180,7 +136,8 @@
       "angle": "Covers cache, extension audits, cookies, and privacy resets.",
       "audience": "General users",
       "intent": "template",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:6d0ce77077130d607079959c802e4b7bb4737471"
     },
     {
       "id": "tc-tr-023",
@@ -188,7 +145,8 @@
       "angle": "Content slots + engagement windows that prevent burnout.",
       "audience": "Creators",
       "intent": "template",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:9529dcd2febd1544fbf72da8f00a63e6c99d64b3"
     },
     {
       "id": "tc-tr-024",
@@ -196,7 +154,8 @@
       "angle": "Universal steps for dedupe, tagging, and cloud sync.",
       "audience": "General users",
       "intent": "template",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:32d457f0f769df99939bbe3a22aaf4f326856cb0"
     },
     {
       "id": "tc-tr-025",
@@ -204,16 +163,17 @@
       "angle": "Monthly checkpoint system for improving job skills.",
       "audience": "Workers and students",
       "intent": "template",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:14d8aea5899d3a01e77639bb8539cb698398404f"
     },
-
     {
       "id": "tc-tr-026",
       "title": "AI-Ready Prompting Checklist",
       "angle": "Ensures clear, machine-readable requests every time.",
       "audience": "All AI users",
       "intent": "template",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:bb3f6173cd280df94b8833eaae6f1ed4c9f3e4d1"
     },
     {
       "id": "tc-tr-027",
@@ -221,7 +181,8 @@
       "angle": "Covers OS updates, password rules, and app audits.",
       "audience": "General users",
       "intent": "template",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:0bf031397d2d71c2b7a2cdfbcfd4eafa019931fa"
     },
     {
       "id": "tc-tr-028",
@@ -229,7 +190,8 @@
       "angle": "A 5-step ideation flow compatible with all apps.",
       "audience": "Creators and marketers",
       "intent": "template",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:ffcb547d8c6a664c5272c97d5dd3e362d7041bf0"
     },
     {
       "id": "tc-tr-029",
@@ -237,7 +199,8 @@
       "angle": "Backup, sync, logout, and cleanup before factory reset.",
       "audience": "Tech users",
       "intent": "template",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:68bba8fedf5cca1916516e0f3004b2b0a3d140a5"
     },
     {
       "id": "tc-tr-030",
@@ -245,16 +208,17 @@
       "angle": "A structured summary ritual for students and analysts.",
       "audience": "Learners",
       "intent": "template",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:ca8a68a04f17446e60709156b2fa24544ad042f5"
     },
-
     {
       "id": "tc-tr-031",
       "title": "AI-Optimized Writing Workflow Template",
       "angle": "Draft → refine → compress flow using AI agents.",
       "audience": "Writers/students",
       "intent": "template",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:97484813c4633a358085160c54c6912c6e3d54cf"
     },
     {
       "id": "tc-tr-032",
@@ -262,7 +226,8 @@
       "angle": "Clean desktop, synced cloud folders, and quick-launch habits.",
       "audience": "Workers",
       "intent": "template",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:a8e8f8122469ba723de87cf8b17a1e272f56f4d3"
     },
     {
       "id": "tc-tr-033",
@@ -270,7 +235,8 @@
       "angle": "A structured flow for identifying the root cause of any issue.",
       "audience": "General users",
       "intent": "template",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:8e3aefedb3c798182cc1903544eece39110efa1e"
     },
     {
       "id": "tc-tr-034",
@@ -278,7 +244,8 @@
       "angle": "A Zettelkasten-inspired digital workflow.",
       "audience": "Students/analysts",
       "intent": "template",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:df85a8e14df667ed39cce51f73a54131e5122c7b"
     },
     {
       "id": "tc-tr-035",
@@ -286,16 +253,17 @@
       "angle": "Weighted prioritization to help AIs produce clearer plans.",
       "audience": "Workers",
       "intent": "template",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:a021d2b28ea33f52f5e4f2662e8e21f840e9c9b5"
     },
-
     {
       "id": "tc-tr-036",
       "title": "Cross-App Notification Cleanup Checklist",
       "angle": "Silence distractions while keeping critical alerts.",
       "audience": "General users",
       "intent": "template",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:23b198ab853e4101dcb0fe563a4d4c81bab7d4fe"
     },
     {
       "id": "tc-tr-037",
@@ -303,7 +271,8 @@
       "angle": "Account recovery, emergency contacts, device backups.",
       "audience": "All users",
       "intent": "template",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:52e5ddea279585aeaec52ec6b8e315b14b69bc09"
     },
     {
       "id": "tc-tr-038",
@@ -311,7 +280,8 @@
       "angle": "A 7-step ritual that resets your entire productivity system.",
       "audience": "Workers/students",
       "intent": "template",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:ccc56e67c14da089e4ce0f1e597f6075a6cdb902"
     },
     {
       "id": "tc-tr-039",
@@ -319,7 +289,8 @@
       "angle": "A system to evaluate accuracy, tone, and safety in AI output.",
       "audience": "Creators and analysts",
       "intent": "template",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:163bba4a3fa86b9433e78adc0e784bd3b436418c"
     },
     {
       "id": "tc-tr-040",
@@ -327,16 +298,17 @@
       "angle": "Structured async updates + status categories.",
       "audience": "Remote teams",
       "intent": "template",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:5b625b17c4b4416bb1e88d59d4bcde8f1554b21f"
     },
-
     {
       "id": "tc-tr-041",
       "title": "Digital Note Audit Template",
       "angle": "A system for reorganizing cluttered notes into clean structures.",
       "audience": "Students/writers",
       "intent": "template",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:d33b826a2e689ab8ef4f9dda8534129a4295fa62"
     },
     {
       "id": "tc-tr-042",
@@ -344,7 +316,8 @@
       "angle": "Camera/mic/location permission review across OS types.",
       "audience": "General users",
       "intent": "template",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:9814eb4ef659704b985a0d32218d72b4d3e451dd"
     },
     {
       "id": "tc-tr-043",
@@ -352,7 +325,8 @@
       "angle": "A method to evaluate which subscriptions you should cancel.",
       "audience": "All users",
       "intent": "template",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:c52547393948f240f9be53f645c66bba7be01027"
     },
     {
       "id": "tc-tr-044",
@@ -360,7 +334,8 @@
       "angle": "A productivity method compatible with any calendar app.",
       "audience": "Workers",
       "intent": "template",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:6f08e6035f13c4fe303548823741b9a7e8334f15"
     },
     {
       "id": "tc-tr-045",
@@ -368,16 +343,17 @@
       "angle": "Cross-checking AI facts in structured form.",
       "audience": "Students/researchers",
       "intent": "template",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:9b0dd277b770536f73883f3bc2661717594e8005"
     },
-
     {
       "id": "tc-tr-046",
       "title": "Weekly Workspace Cleanup Template",
       "angle": "Organizing files, tasks, bookmarks, and downloads.",
       "audience": "General users",
       "intent": "template",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:590b6cab0595b7e605e5a56f4197848fe4e37663"
     },
     {
       "id": "tc-tr-047",
@@ -385,7 +361,8 @@
       "angle": "Steps to prepare for data loss, device breakage, or theft.",
       "audience": "All users",
       "intent": "template",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:24a66b3473b08bb2d10d3afe5dd0a5c500492b5e"
     },
     {
       "id": "tc-tr-048",
@@ -393,7 +370,8 @@
       "angle": "Ensures that tasks, notes, and files stay aligned across apps.",
       "audience": "Workers and creators",
       "intent": "template",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:bd2c168526a5cbd8eb0a368c59b18f206543fc8b"
     },
     {
       "id": "tc-tr-049",
@@ -401,7 +379,8 @@
       "angle": "A 6-step universal fix flow for common problems.",
       "audience": "General users",
       "intent": "template",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:c0dfe6e7be3872d4aa90d4a3b08ba6ebc07fcb0b"
     },
     {
       "id": "tc-tr-050",
@@ -409,7 +388,195 @@
       "angle": "A monthly structure for evaluating progress and next steps.",
       "audience": "Workers/creators",
       "intent": "template",
-      "priority": 1
+      "priority": 1,
+      "fingerprint": "fp1:76cb3be3cc3d1fc2d1eae3438f1aa9712449827f"
+    },
+    {
+      "id": "templates-checklists-trend-1772546046920-313048374",
+      "title": "AUTO GENERATED: templates-checklists (trend)",
+      "angle": "Auto angle (trend)",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-03T13:54:06.920Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:95a734475ced8517ce46af0bbe6f326d8724d8e3"
+    },
+    {
+      "id": "templates-checklists-trend-1772628477195-675981394",
+      "title": "AUTO GENERATED: templates-checklists (trend)",
+      "angle": "Auto angle (trend)",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T12:47:57.195Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:95a734475ced8517ce46af0bbe6f326d8724d8e3"
+    },
+    {
+      "id": "templates-checklists-trend-1772629569182-215383188",
+      "title": "AUTO GENERATED: templates-checklists (trend)",
+      "angle": "Auto angle (trend)",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:06:09.182Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:95a734475ced8517ce46af0bbe6f326d8724d8e3"
+    },
+    {
+      "id": "templates-checklists-trend-1772630313932-53282483",
+      "title": "AUTO GENERATED: templates-checklists (trend) #1772630313932-53282483",
+      "angle": "Auto angle (trend) var=1772630313932-53282483",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.932Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:4ff16773149740f1095f941c2811f6b3ec760cae"
+    },
+    {
+      "id": "templates-checklists-trend-1772630313932-893510182",
+      "title": "AUTO GENERATED: templates-checklists (trend) #1772630313932-893510182",
+      "angle": "Auto angle (trend) var=1772630313932-893510182",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.932Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:b5392c3f734fc0257db00a2ede16f23b41631441"
+    },
+    {
+      "id": "templates-checklists-trend-1772630313932-643604672",
+      "title": "AUTO GENERATED: templates-checklists (trend) #1772630313932-643604672",
+      "angle": "Auto angle (trend) var=1772630313932-643604672",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.932Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:91a7344967018f36e666b91fff652a594e33404f"
+    },
+    {
+      "id": "templates-checklists-trend-1772630313932-851615262",
+      "title": "AUTO GENERATED: templates-checklists (trend) #1772630313932-851615262",
+      "angle": "Auto angle (trend) var=1772630313932-851615262",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.932Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:02c7f608d3f03d956c3af1382e9e29376af294b5"
+    },
+    {
+      "id": "templates-checklists-trend-1772630313932-492600799",
+      "title": "AUTO GENERATED: templates-checklists (trend) #1772630313932-492600799",
+      "angle": "Auto angle (trend) var=1772630313932-492600799",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.932Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:d7c3ed5f00a72cb41ff98c5d5086e0390cfaf02f"
+    },
+    {
+      "id": "templates-checklists-trend-1772630313932-516380682",
+      "title": "AUTO GENERATED: templates-checklists (trend) #1772630313932-516380682",
+      "angle": "Auto angle (trend) var=1772630313932-516380682",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.932Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:57e315817a5d9040589823e82a90fa1ce33b4314"
+    },
+    {
+      "id": "templates-checklists-trend-1772630313932-345339612",
+      "title": "AUTO GENERATED: templates-checklists (trend) #1772630313932-345339612",
+      "angle": "Auto angle (trend) var=1772630313932-345339612",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.932Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:7cabb79a7ebf05dee60851a45916403284fa68d5"
+    },
+    {
+      "id": "templates-checklists-trend-1774530180310-42735330",
+      "title": "AUTO GENERATED: templates-checklists (trend) #1774530180310-42735330",
+      "angle": "Auto angle (trend) var=1774530180310-42735330",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-26T13:03:00.310Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:363186f3684b0a1d9e97742eb7dfdf5bb3600a46"
+    },
+    {
+      "id": "templates-checklists-trend-1774530180311-702345179",
+      "title": "AUTO GENERATED: templates-checklists (trend) #1774530180311-702345179",
+      "angle": "Auto angle (trend) var=1774530180311-702345179",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-26T13:03:00.311Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:c321f0b0ab96b421004ce0e1a8d029005de5aafc"
+    },
+    {
+      "id": "templates-checklists-trend-1774530180311-210043615",
+      "title": "AUTO GENERATED: templates-checklists (trend) #1774530180311-210043615",
+      "angle": "Auto angle (trend) var=1774530180311-210043615",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-26T13:03:00.311Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:39324fa05beea392e7d69802224150e3af9656d4"
+    },
+    {
+      "id": "templates-checklists-trend-1774530180312-594862594",
+      "title": "AUTO GENERATED: templates-checklists (trend) #1774530180312-594862594",
+      "angle": "Auto angle (trend) var=1774530180312-594862594",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-26T13:03:00.312Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:2566b4dbd1d956e0b65afef8fd74a13bf5952bdf"
+    },
+    {
+      "id": "templates-checklists-trend-1774530180312-441692216",
+      "title": "AUTO GENERATED: templates-checklists (trend) #1774530180312-441692216",
+      "angle": "Auto angle (trend) var=1774530180312-441692216",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-26T13:03:00.312Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:5d622a23acdb7fa900e0d5a000ef1ac2a682956d"
+    },
+    {
+      "id": "templates-checklists-trend-1774530180313-493419002",
+      "title": "AUTO GENERATED: templates-checklists (trend) #1774530180313-493419002",
+      "angle": "Auto angle (trend) var=1774530180313-493419002",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-26T13:03:00.313Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:db8be7bbc26358c7c6a0aad1f416e5adb9fb86e9"
+    },
+    {
+      "id": "templates-checklists-trend-1774530180313-802046746",
+      "title": "AUTO GENERATED: templates-checklists (trend) #1774530180313-802046746",
+      "angle": "Auto angle (trend) var=1774530180313-802046746",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-26T13:03:00.313Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:332eb2404e613f1bda9fbd7142e536b22ed4915f"
     }
   ]
 }
