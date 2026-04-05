@@ -1,22 +1,10 @@
 {
   "meta": {
     "version": 1,
+    "generatedAt": "2026-04-05T04:44:42.964Z",
     "policy": {
-      "maxImagesPerPost": 1,
-      "allowedSource": ["official", "generated"],
-      "fallback": "skip"
+      "maxImagesPerPost": 1
     }
   },
-  "items": {
-    "howto-20251207-001": {
-      "pageId": "page000005",
-      "label": "how-to-playbooks",
-      "sourceType": "generated",
-      "url": "https://ongsblog.com/images/body/page000005_howto-20251207-001_960x540.webp",
-      "alt": "Cloudflare placed in front of a Blogger site architecture diagram",
-      "width": 960,
-      "height": 540,
-      "safe": true
-    }
-  }
+  "items": {}
 }

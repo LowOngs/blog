@@ -5,15 +5,6 @@
   },
   "trend": [
     {
-      "id": "ss-tr-011",
-      "title": "How to Escape App Auto-Renew Traps After the 2025 Policy Change",
-      "angle": "App Store and Play Store changed refund/renewal policies.",
-      "audience": "Users with runaway subscriptions",
-      "intent": "saving",
-      "priority": 1,
-      "fingerprint": "fp1:54a25946169cd1b9a713eeabe213647a391ecc19"
-    },
-    {
       "id": "ss-tr-012",
       "title": "How to Use AI Assistants for Detecting Duplicate Subscriptions",
       "angle": "AI scanning for duplicates is trending on mobile.",

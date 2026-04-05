@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2025-12-09T07:40:58.163Z",
+  "updatedAt": "2026-04-05T04:44:44.565Z",
   "images": [
     {
       "slug": "app-20251207-001",
@@ -13,72 +13,106 @@
       "alt": "A practical guide to choosing one main productivity app that you can really stick with across work, study, and side projects.",
       "etag": null,
       "hash": null,
-      "lastSeenAt": "2025-12-09T07:40:57.648Z"
+      "lastSeenAt": "2026-04-05T04:44:43.756Z",
+      "lastBuiltAt": "2026-04-05T04:44:44.006Z"
     },
     {
       "slug": "device-20251207-001",
-      "pageId": "page000001",
+      "pageId": "page000004",
       "type": "og",
-      "url": "https://ongsblog.com/images/og/page000001_device-20251207-001_1200x630.jpg",
-      "filename": "page000001_device-20251207-001_1200x630.jpg",
+      "url": "https://ongsblog.com/images/og/page000004_device-20251207-001_1200x630.jpg",
+      "filename": "page000004_device-20251207-001_1200x630.jpg",
       "width": 1200,
       "height": 630,
       "alt": "A grounded guide to picking a budget laptop under $800 that can handle studying, remote work, and light side projects without frustration.",
       "etag": null,
       "hash": null,
-      "lastSeenAt": "2025-12-09T07:40:57.754Z"
+      "lastSeenAt": "2026-04-05T04:44:43.756Z",
+      "lastBuiltAt": "2026-04-05T04:44:44.086Z"
     },
     {
       "slug": "howto-20251207-001",
-      "pageId": "page000001",
+      "pageId": "page000003",
       "type": "og",
-      "url": "https://ongsblog.com/images/og/page000001_howto-20251207-001_1200x630.jpg",
-      "filename": "page000001_howto-20251207-001_1200x630.jpg",
+      "url": "https://ongsblog.com/images/og/page000003_howto-20251207-001_1200x630.jpg",
+      "filename": "page000003_howto-20251207-001_1200x630.jpg",
       "width": 1200,
       "height": 630,
-      "alt": "A realistic weekend plan to set up a unified productivity system that works across your phone, laptop, and tablet.",
+      "alt": "Managing tasks, notes, calendars, and files across multiple devices can quickly become chaotic. A simple, unified productivity system helps you stay organized,…",
       "etag": null,
       "hash": null,
-      "lastSeenAt": "2025-12-09T07:40:57.873Z"
+      "lastSeenAt": "2026-04-05T04:44:43.756Z",
+      "lastBuiltAt": "2026-04-05T04:44:44.166Z"
+    },
+    {
+      "slug": "origin-verify-updates",
+      "pageId": "page000011",
+      "type": "og",
+      "url": "https://ongsblog.com/images/og/page000011_origin-verify-updates_1200x630.jpg",
+      "filename": "page000011_origin-verify-updates_1200x630.jpg",
+      "width": 1200,
+      "height": 630,
+      "alt": "We update guides on a fixed cadence and keep change visibility. Every post is version-tagged and source-linked.",
+      "etag": null,
+      "hash": null,
+      "lastSeenAt": "2026-04-05T04:44:43.757Z",
+      "lastBuiltAt": "2026-04-05T04:44:44.245Z"
     },
     {
       "slug": "smartsavings-20251207-001",
-      "pageId": "page000001",
+      "pageId": "page000012",
       "type": "og",
-      "url": "https://ongsblog.com/images/og/page000001_smartsavings-20251207-001_1200x630.jpg",
-      "filename": "page000001_smartsavings-20251207-001_1200x630.jpg",
+      "url": "https://ongsblog.com/images/og/page000012_smartsavings-20251207-001_1200x630.jpg",
+      "filename": "page000012_smartsavings-20251207-001_1200x630.jpg",
       "width": 1200,
       "height": 630,
-      "alt": "A practical guide to cutting productivity tool costs by comparing free and paid stacks without destroying a working system.",
+      "alt": "Save money on productivity tools without breaking your workflow is best approached as a value decision, not just a price decision. Most people do not want the c…",
       "etag": null,
       "hash": null,
-      "lastSeenAt": "2025-12-09T07:40:57.993Z"
+      "lastSeenAt": "2026-04-05T04:44:43.757Z",
+      "lastBuiltAt": "2026-04-05T04:44:44.325Z"
+    },
+    {
+      "slug": "smartsavings-20260405-001",
+      "pageId": "page000013",
+      "type": "og",
+      "url": "https://ongsblog.com/images/og/page000013_smartsavings-20260405-001_1200x630.jpg",
+      "filename": "page000013_smartsavings-20260405-001_1200x630.jpg",
+      "width": 1200,
+      "height": 630,
+      "alt": "How to Escape App Auto-Renew Traps After the 2025 Policy Change is best approached as a value decision, not just a price decision. Most people do not want the c…",
+      "etag": null,
+      "hash": null,
+      "lastSeenAt": "2026-04-05T04:44:43.757Z",
+      "lastBuiltAt": "2026-04-05T04:44:44.403Z"
     },
     {
       "slug": "subscription-20251207-001",
-      "pageId": "page000001",
+      "pageId": "page000006",
       "type": "og",
-      "url": "https://ongsblog.com/images/og/page000001_subscription-20251207-001_1200x630.jpg",
-      "filename": "page000001_subscription-20251207-001_1200x630.jpg",
+      "url": "https://ongsblog.com/images/og/page000006_subscription-20251207-001_1200x630.jpg",
+      "filename": "page000006_subscription-20251207-001_1200x630.jpg",
       "width": 1200,
       "height": 630,
       "alt": "A clear, numbers-based look at when it makes sense to pay for productivity app subscriptions and when free plans are enough.",
       "etag": null,
       "hash": null,
-      "lastSeenAt": "2025-12-09T07:40:58.083Z"
+      "lastSeenAt": "2026-04-05T04:44:43.757Z",
+      "lastBuiltAt": "2026-04-05T04:44:44.482Z"
     },
     {
       "slug": "templates-20251207-001",
-      "pageId": "page000001",
+      "pageId": "page000007",
       "type": "og",
-      "url": "https://ongsblog.com/images/og/page000001_templates-20251207-001_1200x630.jpg",
-      "filename": "page000001_templates-20251207-001_1200x630.jpg",
+      "url": "https://ongsblog.com/images/og/page000007_templates-20251207-001_1200x630.jpg",
+      "filename": "page000007_templates-20251207-001_1200x630.jpg",
       "width": 1200,
       "height": 630,
-      "alt": "A short, reusable weekly review checklist to keep work, study, and side projects under control without spending hours planning.",
+      "alt": "A weekly review checklist template for busy creators is meant to reduce hesitation at the moment of action. The value of a template or checklist is not abstract…",
       "etag": null,
       "hash": null,
-      "lastSeenAt": "2025-12-09T07:40:58.163Z"
+      "lastSeenAt": "2026-04-05T04:44:43.757Z",
+      "lastBuiltAt": "2026-04-05T04:44:44.565Z"
     }
   ]
 }

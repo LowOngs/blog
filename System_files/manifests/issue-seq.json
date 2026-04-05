@@ -1,6 +1,9 @@
-
 {
   "version": 1,
-  "updatedAt": null,
-  "byDate": {}
+  "updatedAt": "2026-04-05T04:44:41.928Z",
+  "byDate": {
+    "2026-04-05": {
+      "smart-savings": 1
+    }
+  }
 }

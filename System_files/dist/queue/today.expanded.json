@@ -1,19 +1,24 @@
 {
-  "date": "2026-01-13",
+  "date": "2026-04-05",
+  "timezone": "Asia/Seoul",
+  "cutoff": "10:00",
   "items": [
     {
-      "date": "2026-01-13",
-      "label": "how-to-playbooks",
+      "date": "2026-04-05",
+      "label": "smart-savings",
+      "seedLabel": "smart-savings",
+      "requestedSlotLabel": "smart-savings",
       "mode": "trend",
-      "id": "howto-trend-001",
-      "title": "Safely migrating blog images to Cloudflare R2 without breaking links",
-      "angle": "Stage-by-stage migration plan that avoids 404s while switching image origins.",
-      "audience": "Blog owners moving from old image hosting to R2",
-      "intent": "how-to",
+      "id": "ss-tr-011",
+      "title": "How to Escape App Auto-Renew Traps After the 2025 Policy Change",
+      "angle": "App Store and Play Store changed refund/renewal policies.",
+      "audience": "Users with runaway subscriptions",
+      "intent": "saving",
       "priority": 1,
-      "notes": "Can reuse Ongs Blog’s real migration steps as a reference pattern.",
-      "generatedSlug": "howto-20260113-001"
+      "notes": "",
+      "generatedSlug": "smartsavings-20260405-001",
+      "postId": "06ENQX8P8MFGXEFEXGYF7TR51T"
     }
   ],
-  "expandedAt": "2026-01-13T13:12:34.708Z"
+  "expandedAt": "2026-04-05T04:44:41.925Z"
 }

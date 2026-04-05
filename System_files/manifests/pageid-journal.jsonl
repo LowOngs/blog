@@ -1,0 +1,8 @@
+{"ts":"2026-04-05T04:44:42.068Z","mode":"local","slug":"app-20251207-001","pageId":"page000001","ledger":"page-ids.local.json","action":"adopt_existing"}
+{"ts":"2026-04-05T04:44:42.068Z","mode":"local","slug":"device-20251207-001","pageId":"page000004","ledger":"page-ids.local.json","action":"adopt_existing"}
+{"ts":"2026-04-05T04:44:42.069Z","mode":"local","slug":"howto-20251207-001","pageId":"page000003","ledger":"page-ids.local.json","action":"adopt_existing"}
+{"ts":"2026-04-05T04:44:42.070Z","mode":"local","slug":"origin-verify-updates","pageId":"page000011","ledger":"page-ids.local.json","action":"adopt_existing"}
+{"ts":"2026-04-05T04:44:42.070Z","mode":"local","slug":"smartsavings-20251207-001","pageId":"page000012","ledger":"page-ids.local.json","action":"assign_new"}
+{"ts":"2026-04-05T04:44:42.072Z","mode":"local","slug":"smartsavings-20260405-001","pageId":"page000013","ledger":"page-ids.local.json","action":"assign_new"}
+{"ts":"2026-04-05T04:44:42.073Z","mode":"local","slug":"subscription-20251207-001","pageId":"page000006","ledger":"page-ids.local.json","action":"adopt_existing"}
+{"ts":"2026-04-05T04:44:42.073Z","mode":"local","slug":"templates-20251207-001","pageId":"page000007","ledger":"page-ids.local.json","action":"adopt_existing"}
