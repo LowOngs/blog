@@ -1,33 +1,54 @@
 {
+  "postId": "06EM0000000000000000000002",
+  "reviewId": null,
   "slug": "templates-20251207-001",
   "title": "A weekly review checklist template for busy creators",
-  "description": "A short, reusable weekly review checklist to keep work, study, and side projects under control without spending hours planning.",
-  "label": "templates-checklists",
-  "tldr": [
-    "A simple weekly review can keep your projects under control without huge effort.",
-    "This checklist is designed to fit into 10–15 minutes, once a week.",
-    "Use it as a template in your favorite note or task app and adjust as needed."
-  ],
-  "keyfacts": [
-    "Checklist is split into stages: review, clean-up, planning, and reflection.",
-    "Designed for creators balancing work, study, and side projects.",
-    "Can be used on paper or in any note/task app with minimal changes."
-  ],
-  "faq": [
-    {
-      "question": "What if I skip a weekly review?",
-      "answer": "Nothing breaks. Just run the checklist as soon as you can and treat it as a ‘catch-up’ review. The goal is consistency over months, not perfection every single week."
-    },
-    {
-      "question": "Should I do this on Friday or Sunday?",
-      "answer": "Pick whichever feels more natural. Many people prefer Sunday evening to reset for the week, while others like Friday afternoon to close the week cleanly."
-    }
-  ],
-  "sources": [],
-  "bodyPrompt": "Write the full article body in English. Topic: a weekly review checklist template for busy creators. Structure: 1) Intro: why weekly reviews matter for people juggling work, study, and side projects, 2) Explain when to run the review (time, duration, environment), 3) Present a clear checklist in stages (review past week, check projects, clean inboxes, plan next week, small reflection), 4) For each stage, show 3–5 concrete questions or actions, 5) Show one short example of using the checklist in real life, 6) Tips to keep the ritual under 10–15 minutes and avoid perfectionism, 7) How to adapt the template for digital vs paper use. Tone: supportive, low-pressure, very actionable.",
-  "body": "<h2>Why Weekly Reviews Matter for Busy Creators</h2>\n<p>Juggling work, study, and side projects can quickly become overwhelming. A weekly review helps you pause, reflect, and organize everything in one place. It’s a simple habit that boosts clarity, reduces stress, and keeps your goals on track—without adding extra pressure.</p>\n\n<h2>When and Where to Run Your Weekly Review</h2>\n<ul>\n  <li><strong>Time:</strong> Choose a consistent time each week, ideally at the end of your workweek or weekend, when you can reflect calmly without interruptions.</li>\n  <li><strong>Duration:</strong> Set aside 10–15 minutes to keep the review focused and manageable.</li>\n  <li><strong>Environment:</strong> Find a quiet, comfortable spot with minimal distractions—your favorite chair, a cozy cafe, or a calm workspace.</li>\n</ul>\n\n<h2>Your Weekly Review Checklist</h2>\n\n<h3>1. Review the Past Week</h3>\n<ul>\n  <li>What did I accomplish this week?</li>\n  <li>Which tasks or goals did I complete or move forward?</li>\n  <li>Were there any unexpected challenges or wins?</li>\n  <li>What lessons can I take from last week’s experiences?</li>\n</ul>\n\n<h3>2. Check Your Projects</h3>\n<ul>\n  <li>What active projects do I currently have?</li>\n  <li>Are any projects stalled or needing attention?</li>\n  <li>What are the next actionable steps for each project?</li>\n  <li>Do I need to adjust priorities based on progress?</li>\n</ul>\n\n<h3>3. Clean Your Inboxes</h3>\n<ul>\n  <li>Clear out your email inbox—delete, archive, or respond to important messages.</li>\n  <li>Review your task manager or to-do lists and update statuses.</li>\n  <li>Empty any physical inboxes or piles of notes and sort items accordingly.</li>\n</ul>\n\n<h3>4. Plan the Next Week</h3>\n<ul>\n  <li>What are my top 3 priorities for the upcoming week?</li>\n  <li>What deadlines or appointments do I need to prepare for?</li>\n  <li>How can I balance work, study, and side projects effectively?</li>\n  <li>What time blocks or focus sessions will I schedule?</li>\n</ul>\n\n<h3>5. Small Reflection</h3>\n<ul>\n  <li>How do I feel about the week ahead?</li>\n  <li>What’s one thing I can do to make next week better or easier?</li>\n  <li>Am I taking care of my well-being and energy levels?</li>\n</ul>\n\n<h2>Example: Using the Checklist in Real Life</h2>\n<p>On Sunday evening, Maya sets a 15-minute timer and finds a quiet corner at home. She reviews last week’s work and celebrates finishing a client project. She notices her side project has been neglected, so she adds a small step to her plan. After clearing 10 unread emails and updating her task list, Maya lists three priorities for the upcoming week, including study prep and a deadline at work. She ends by noting she wants to take short breaks daily to stay energized. Maya feels ready and calm for the week ahead.</p>\n\n<h2>Tips to Keep Your Weekly Review Quick and Low-Pressure</h2>\n<ul>\n  <li>Set a timer to stay within 10–15 minutes.</li>\n  <li>Focus on progress, not perfection—it’s okay if some tasks remain unfinished.</li>\n  <li>Use bullet points or short notes instead of long paragraphs.</li>\n  <li>Skip any questions that don’t feel relevant that week.</li>\n  <li>Remember: consistency is more important than depth each time.</li>\n</ul>\n\n<h2>Adapting the Template for Digital vs Paper Use</h2>\n<ul>\n  <li><strong>Digital:</strong> Use note apps, task managers, or templates in tools like Notion, Evernote, or Google Docs for easy editing and linking to projects.</li>\n  <li><strong>Paper:</strong> Keep a dedicated journal or planner page for your weekly reviews to encourage reflection and reduce screen time.</li>\n  <li>Combine methods by jotting quick notes on paper and transferring key actions to digital calendars or task lists.</li>\n  <li>Choose the format that feels easiest and most motivating to maintain regularly.</li>\n</ul>",
-  "pageId": "page000007",
   "labels": [
     "templates-checklists"
-  ]
+  ],
+  "updated": "2025-12-07T10:00:00+09:00",
+  "bodyPrompt": "Write the full article body in English. Topic: a weekly review checklist template for busy creators. Structure: 1) Intro: why weekly reviews matter for people juggling work, study, and side projects, 2) Explain when to run the review (time, duration, environment), 3) Present a clear checklist in stages (review past week, check projects, clean inboxes, plan next week, small reflection), 4) For each stage, show 3–5 concrete questions or actions, 5) Show one short example of using the checklist in real life, 6) Tips to keep the ritual under 10–15 minutes and avoid perfectionism, 7) How to adapt the template for digital vs paper use. Tone: supportive, low-pressure, very actionable.",
+  "body": "<h2>Overview</h2>\n<p>A weekly review checklist template for busy creators is meant to reduce hesitation at the moment of action. The value of a template or checklist is not abstract structure by itself, but the way it turns a vague task into something repeatable and easier to start.</p>\n<p>People usually reuse a checklist when it prevents omission, reduces thinking overhead, and still allows small adjustments based on the week’s situation.</p>\n\n<h2>When to Use This Template</h2>\n<p>A weekly review works best when your tasks span multiple areas such as work, study, and side projects. It is especially useful when things start to feel scattered or when priorities become unclear.</p>\n<p>It is less useful when used rigidly. The checklist should guide the process, not slow it down. If a step does not apply, it should be skipped rather than forced.</p>\n\n<h2>Template / Checklist</h2>\n<table>\n  <thead>\n    <tr>\n      <th>Stage</th>\n      <th>Action</th>\n      <th>Tip</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td>Review past week</td>\n      <td>Check completed tasks and unfinished items</td>\n      <td>Focus on patterns, not perfection</td>\n    </tr>\n    <tr>\n      <td>Check projects</td>\n      <td>List active projects and next actions</td>\n      <td>Keep each project to one clear next step</td>\n    </tr>\n    <tr>\n      <td>Clean inboxes</td>\n      <td>Clear email, notes, and task inbox</td>\n      <td>Remove friction before planning</td>\n    </tr>\n    <tr>\n      <td>Plan next week</td>\n      <td>Select top priorities and key tasks</td>\n      <td>Limit to a manageable number</td>\n    </tr>\n    <tr>\n      <td>Reflection</td>\n      <td>Note one improvement point</td>\n      <td>Keep it simple and actionable</td>\n    </tr>\n  </tbody>\n</table>\n\n<h2>Examples</h2>\n<p>For example, a creator finishing a client task may notice their side project has stalled. Instead of redesigning the whole system, they add one next step for that project and schedule it. The checklist stays the same, only the content inside changes.</p>\n<p>This shows how the template stays reusable while adapting to real conditions.</p>\n\n<h2>Common Pitfalls</h2>\n<p>The most common problem is turning a simple checklist into a long ritual. When the process becomes heavy, people skip it entirely.</p>\n<p>Another issue is over-reflection. Spending too much time analyzing instead of planning the next step reduces the usefulness of the review.</p>\n\n<h2>How to Customize</h2>\n<p>Customization should be minimal. The core stages should remain stable, while only the content inside each stage changes.</p>\n<p>This keeps the checklist fast, repeatable, and easy to return to every week.</p>",
+  "seedMeta": {
+    "queueDate": "2025-12-07",
+    "cutoff": "10:00",
+    "label": "templates-checklists",
+    "profileId": "templates_checklists_v2",
+    "id": null,
+    "intent": null,
+    "postId": "06EM0000000000000000000002",
+    "reviewId": null
+  },
+  "pageId": "page000007",
+  "bodyGen": {
+    "mode": "legacy-body",
+    "updatedAt": "2025-12-07T10:00:00+09:00",
+    "writeMode": "local",
+    "strict": true,
+    "label": "templates-checklists",
+    "kind": "non-review",
+    "h2Count": 6,
+    "headingHash": null,
+    "headingPlan": [
+      "Overview",
+      "When to Use This Template",
+      "Template / Checklist",
+      "Examples",
+      "Common Pitfalls",
+      "How to Customize"
+    ],
+    "intent": null,
+    "timing": null,
+    "context": null
+  },
+  "contentGen": {
+    "mode": "legacy-body",
+    "updatedAt": "2025-12-07T10:00:00+09:00",
+    "writeMode": "local",
+    "label": "templates-checklists",
+    "bodyPromptUsed": true,
+    "selfReviewLoop": [],
+    "repairMode": false,
+    "repairIssueCount": 0
+  }
 }
