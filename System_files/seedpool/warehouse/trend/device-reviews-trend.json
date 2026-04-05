@@ -1,514 +1,908 @@
 {
   "label": "device-reviews",
-  "limits": { "trend": 60 },
+  "limits": {
+    "trend": 60
+  },
   "trend": [
-  {
-    "id": "dr-tr-001",
-    "title": "Is This Year’s Flagship Phone Really Faster?",
-    "angle": "Thermal behavior + sustained performance",
-    "audience": "Smartphone buyers",
-    "intent": "review/performance-test",
-    "environment": "phones",
-    "timing": "launch season",
-    "goal": "check if new chip throttles under load"
-  },
-  {
-    "id": "dr-tr-002",
-    "title": "Which Foldable Phone Has the Stronger Hinge This Year?",
-    "angle": "Flex durability + crease visibility",
-    "audience": "Early adopters",
-    "intent": "review/durability",
-    "environment": "foldables",
-    "timing": "new model cycle",
-    "goal": "pick the foldable with lowest mechanical wear"
-  },
-  {
-    "id": "dr-tr-003",
-    "title": "The Latest AI Camera Phones: Which One Nails Low-Light?",
-    "angle": "Sensor size + noise model accuracy",
-    "audience": "Photography-focused users",
-    "intent": "review/camera-quality",
-    "environment": "camera phones",
-    "timing": "launch wave",
-    "goal": "identify best night photo engine"
-  },
-  {
-    "id": "dr-tr-004",
-    "title": "Is the New Gaming Laptop Worth the Price Hike?",
-    "angle": "GPU wattage + cooling redesign",
-    "audience": "Gamers",
-    "intent": "review/performance",
-    "environment": "gaming laptops",
-    "timing": "release window",
-    "goal": "estimate real fps gains"
-  },
-  {
-    "id": "dr-tr-005",
-    "title": "Which Tablet Handles Multitasking Best After Updates?",
-    "angle": "RAM pressure + window manager stability",
-    "audience": "Students and creatives",
-    "intent": "review/usability",
-    "environment": "tablets",
-    "timing": "post-update",
-    "goal": "judge real productivity capability"
-  },
-  {
-    "id": "dr-tr-006",
-    "title": "Are the New Wireless Earbuds Improving ANC or Just Marketing?",
-    "angle": "ANC depth + transparency mode quality",
-    "audience": "Music consumers",
-    "intent": "review/audio",
-    "environment": "earbuds",
-    "timing": "annual refresh",
-    "goal": "detect real acoustic improvements"
-  },
-  {
-    "id": "dr-tr-007",
-    "title": "Which Fitness Tracker Measures Heart Rate Most Accurately?",
-    "angle": "Sensor updates + sweat resistance",
-    "audience": "Fitness users",
-    "intent": "review/health-data",
-    "environment": "wearables",
-    "timing": "wear test",
-    "goal": "find device with precise sports tracking"
-  },
-  {
-    "id": "dr-tr-008",
-    "title": "Is the Latest Smartwatch Battery Upgrade Real?",
-    "angle": "Always-on drain + GPS endurance",
-    "audience": "Lifestyle and fitness users",
-    "intent": "review/battery",
-    "environment": "wearables",
-    "timing": "first-week usage",
-    "goal": "verify if marketing matches real runtime"
-  },
-  {
-    "id": "dr-tr-009",
-    "title": "Which Bluetooth Speaker Sounds Best at High Volume?",
-    "angle": "Distortion handling",
-    "audience": "Casual listeners",
-    "intent": "review/audio-test",
-    "environment": "audio devices",
-    "timing": "trend season",
-    "goal": "find speaker with clean loud output"
-  },
-  {
-    "id": "dr-tr-010",
-    "title": "Are Mini PCs Finally Good Enough?",
-    "angle": "Thermals + performance ceiling",
-    "audience": "Home office users",
-    "intent": "review/performance",
-    "environment": "mini pcs",
-    "timing": "new-gen CPU launch",
-    "goal": "judge if small form factor is viable"
-
-  },
-
-  {
-    "id": "dr-tr-011",
-    "title": "Which Budget Phone Punches Above Its Price?",
-    "angle": "Camera-to-price + performance-to-price ratio",
-    "audience": "Budget shoppers",
-    "intent": "review/value",
-    "environment": "budget phones",
-    "timing": "launch season",
-    "goal": "find low-price models with high real value"
-  },
-  {
-    "id": "dr-tr-012",
-    "title": "Is the New E-reader Better for Your Eyes?",
-    "angle": "Warm light accuracy + glare performance",
-    "audience": "Readers",
-    "intent": "review/display",
-    "environment": "e-readers",
-    "timing": "model refresh",
-    "goal": "check comfort and readability"
-  },
-  {
-    "id": "dr-tr-013",
-    "title": "Which Laptop Has the Quietest Keyboard?",
-    "angle": "Key travel + acoustic profile",
-    "audience": "Office + students",
-    "intent": "review/ergonomics",
-    "environment": "laptops",
-    "timing": "comparison test",
-    "goal": "find quiet comfortable typing"
-  },
-  {
-    "id": "dr-tr-014",
-    "title": "Is the New Smart TV OS Actually Faster?",
-    "angle": "App launch speed + UI lag",
-    "audience": "Home entertainment users",
-    "intent": "review/performance",
-    "environment": "smart tvs",
-    "timing": "post-update",
-    "goal": "avoid laggy smart TVs"
-  },
-  {
-    "id": "dr-tr-015",
-    "title": "Which Wireless Charger Is Truly Fast?",
-    "angle": "Heat generation + speed consistency",
-    "audience": "Phone users",
-    "intent": "review/performance",
-    "environment": "charging accessories",
-    "timing": "trend",
-    "goal": "pick chargers with safe fast charging"
-  },
-  {
-    "id": "dr-tr-016",
-    "title": "Are AI Cameras on Laptops Finally Good?",
-    "angle": "Noise handling + skin tones",
-    "audience": "Remote workers",
-    "intent": "review/camera",
-    "environment": "laptops",
-    "timing": "update season",
-    "goal": "judge real webcam improvements"
-  },
-  {
-    "id": "dr-tr-017",
-    "title": "Which Robot Vacuum Navigates Most Intelligently?",
-    "angle": "Map accuracy + obstacle avoidance",
-    "audience": "Home users",
-    "intent": "review/smart-home",
-    "environment": "robot vacuums",
-    "timing": "peak trend",
-    "goal": "find robot with best AI navigation"
-  },
-  {
-    "id": "dr-tr-018",
-    "title": "Is the New Action Camera Worth Upgrading?",
-    "angle": "Stabilization + overheating test",
-    "audience": "Creators and travelers",
-    "intent": "review/video-quality",
-    "environment": "action cams",
-    "timing": "annual release",
-    "goal": "judge real improvements outdoors"
-  },
-  {
-    "id": "dr-tr-019",
-    "title": "Which Portable Monitor Works Best for Travel?",
-    "angle": "Brightness + color accuracy",
-    "audience": "Remote workers",
-    "intent": "review/portability",
-    "environment": "mobile monitors",
-    "timing": "trend season",
-    "goal": "pick monitors that stay bright in daylight"
-  },
-  {
-    "id": "dr-tr-020",
-    "title": "Are Smart Home Hubs Actually Getting Better?",
-    "angle": "Matter support + latency",
-    "audience": "Smart home users",
-    "intent": "review/connectivity",
-    "environment": "hubs",
-    "timing": "ecosystem updates",
-    "goal": "ensure reliability across devices"
-
-  },
-
-  {
-    "id": "dr-tr-021",
-    "title": "Which Drone Has the Most Stable Hover?",
-    "angle": "Wind resistance + sensor package",
-    "audience": "Aerial video users",
-    "intent": "review/stability",
-    "environment": "drones",
-    "timing": "new-gen launch",
-    "goal": "improve aerial shooting consistency"
-  },
-  {
-    "id": "dr-tr-022",
-    "title": "Is the New Smart Kettle Worth It?",
-    "angle": "Heating precision + connectivity usefulness",
-    "audience": "Home gadget buyers",
-    "intent": "review/usability",
-    "environment": "smart kitchen",
-    "timing": "trend wave",
-    "goal": "judge real smart features vs gimmicks"
-  },
-  {
-    "id": "dr-tr-023",
-    "title": "Which Soundbar Has the Most Accurate Dialogue Mode?",
-    "angle": "Mid-range clarity test",
-    "audience": "Home entertainment users",
-    "intent": "review/audio-quality",
-    "environment": "soundbars",
-    "timing": "update cycle",
-    "goal": "improve movie clarity"
-  },
-  {
-    "id": "dr-tr-024",
-    "title": "Is the New Smart Scale Reliable for Daily Tracking?",
-    "angle": "BMI + impedance accuracy",
-    "audience": "Health users",
-    "intent": "review/accuracy",
-    "environment": "fitness devices",
-    "timing": "first-week",
-    "goal": "ensure readings are consistent"
-  },
-  {
-    "id": "dr-tr-025",
-    "title": "Which Keyboard Is Best for Long Typing Sessions?",
-    "angle": "Travel, feedback, fatigue",
-    "audience": "Writers and coders",
-    "intent": "review/ergonomics",
-    "environment": "mechanical keyboards",
-    "timing": "trend",
-    "goal": "reduce finger fatigue"
-  },
-  {
-    "id": "dr-tr-026",
-    "title": "Does This WebCam Improve Low Light Video?",
-    "angle": "Sensor performance + auto-exposure",
-    "audience": "Remote workers",
-    "intent": "review/camera-quality",
-    "environment": "webcams",
-    "timing": "launch",
-    "goal": "judge real indoor improvements"
-  },
-  {
-    "id": "dr-tr-027",
-    "title": "Which Smart Light System Has the Best Color Accuracy?",
-    "angle": "RGB calibration + flicker control",
-    "audience": "Home users",
-    "intent": "review/quality",
-    "environment": "smart lights",
-    "timing": "update cycle",
-    "goal": "ensure accurate lighting scenes"
-  },
-  {
-    "id": "dr-tr-028",
-    "title": "Is the New Smart Thermostat Actually Saving Energy?",
-    "angle": "Sensor accuracy + adaptive schedules",
-    "audience": "Homeowners",
-    "intent": "review/automation",
-    "environment": "thermostats",
-    "timing": "post-install",
-    "goal": "confirm real-world efficiency gains"
-  },
-  {
-    "id": "dr-tr-029",
-    "title": "Which Budget Laptop Is Best for Students?",
-    "angle": "Keyboard + screen + battery hierarchy",
-    "audience": "Students",
-    "intent": "review/value",
-    "environment": "laptops",
-    "timing": "back-to-school",
-    "goal": "find balanced budget models"
-  },
-  {
-    "id": "dr-tr-030",
-    "title": "Are the New Wi-Fi 7 Routers Worth Upgrading To?",
-    "angle": "Speed + latency + device compatibility",
-    "audience": "Tech-forward home users",
-    "intent": "review/performance",
-    "environment": "routers",
-    "timing": "technology transition",
-    "goal": "evaluate real Wi-Fi 7 gains"
-
-  },
-
-  {
-    "id": "dr-tr-031",
-    "title": "Which Mechanical Keyboard Has the Best Stabilizers?",
-    "angle": "Rattle test + key feel",
-    "audience": "Enthusiasts",
-    "intent": "review/build-quality",
-    "environment": "keyboards",
-    "timing": "trend wave",
-    "goal": "find smooth typing experience"
-  },
-  {
-    "id": "dr-tr-032",
-    "title": "Is the Latest Smart Doorbell Any Better at Motion Detection?",
-    "angle": "False positive + detection range",
-    "audience": "Homeowners",
-    "intent": "review/security",
-    "environment": "doorbell cameras",
-    "timing": "new model",
-    "goal": "reduce false alerts"
-  },
-  {
-    "id": "dr-tr-033",
-    "title": "Which Webcam Handles Skin Tones Most Naturally?",
-    "angle": "Color balance accuracy",
-    "audience": "Remote workers",
-    "intent": "review/camera",
-    "environment": "webcams",
-    "timing": "update period",
-    "goal": "choose webcam with natural color"
-  },
-  {
-    "id": "dr-tr-034",
-    "title": "Is the New Portable Projector Bright Enough?",
-    "angle": "ANSI lumen test",
-    "audience": "Home + travel users",
-    "intent": "review/display",
-    "environment": "projectors",
-    "timing": "launch",
-    "goal": "determine if usable in lit rooms"
-  },
-  {
-    "id": "dr-tr-035",
-    "title": "Which Vacuum Cleaner Has the Best Suction-to-Noise Ratio?",
-    "angle": "Performance vs noise",
-    "audience": "Households",
-    "intent": "review/efficiency",
-    "environment": "home appliances",
-    "timing": "trend cycle",
-    "goal": "maximize quiet cleaning"
-  },
-  {
-    "id": "dr-tr-036",
-    "title": "Are the New Smart Switches Actually Reliable?",
-    "angle": "Latency + tap response",
-    "audience": "Smart home users",
-    "intent": "review/stability",
-    "environment": "smart switches",
-    "timing": "ecosystem updates",
-    "goal": "avoid laggy automation"
-  },
-  {
-    "id": "dr-tr-037",
-    "title": "Which Streaming Box Loads Apps the Fastest?",
-    "angle": "Cold start speed",
-    "audience": "Home entertainment users",
-    "intent": "review/performance",
-    "environment": "tv boxes",
-    "timing": "update cycle",
-    "goal": "improve TV app responsiveness"
-  },
-  {
-    "id": "dr-tr-038",
-    "title": "Is the New Smart Plug Safe?",
-    "angle": "Heat + overload behavior",
-    "audience": "Smart home users",
-    "intent": "review/safety",
-    "environment": "smart plugs",
-    "timing": "launch",
-    "goal": "avoid overheating risks"
-  },
-  {
-    "id": "dr-tr-039",
-    "title": "Which Electric Toothbrush Is Actually the Most Gentle?",
-    "angle": "Vibration pattern test",
-    "audience": "Households",
-    "intent": "review/ergonomics",
-    "environment": "health devices",
-    "timing": "trend",
-    "goal": "reduce gum irritation"
-  },
-  {
-    "id": "dr-tr-040",
-    "title": "Is the New Wireless Mouse Truly Low-Latency?",
-    "angle": "Polling rate + click delay",
-    "audience": "Gamers and office workers",
-    "intent": "review/performance",
-    "environment": "mice",
-    "timing": "update",
-    "goal": "ensure responsive pointer control"
-
-  },
-
-  {
-    "id": "dr-tr-041",
-    "title": "Which Portable SSD Has the Most Stable Speed?",
-    "angle": "Thermal throttling + sustained write",
-    "audience": "Creators",
-    "intent": "review/performance",
-    "environment": "portable storage",
-    "timing": "benchmark season",
-    "goal": "ensure stable large-file transfers"
-  },
-  {
-    "id": "dr-tr-042",
-    "title": "Is the New Smart Lock Reliable Over Bluetooth?",
-    "angle": "Unlock latency + fail behavior",
-    "audience": "Homeowners",
-    "intent": "review/security",
-    "environment": "smart locks",
-    "timing": "launch",
-    "goal": "ensure reliable unlock every time"
-  },
-  {
-    "id": "dr-tr-043",
-    "title": "Which Robot Mop Cleans Best on Hard Floors?",
-    "angle": "Pressure + pattern accuracy",
-    "audience": "Households",
-    "intent": "review/cleaning-quality",
-    "environment": "robot mops",
-    "timing": "trend",
-    "goal": "pick mop with consistent patterns"
-  },
-  {
-    "id": "dr-tr-044",
-    "title": "Is the New Smart Air Purifier Worth Upgrading?",
-    "angle": "Sensor accuracy + noise at low speed",
-    "audience": "Home users",
-    "intent": "review/performance",
-    "environment": "air purifiers",
-    "timing": "launch window",
-    "goal": "ensure real clean-air performance"
-  },
-  {
-    "id": "dr-tr-045",
-    "title": "Which Dashcam Handles Night Footage Best?",
-    "angle": "Dynamic range + noise",
-    "audience": "Drivers",
-    "intent": "review/video-quality",
-    "environment": "dashcams",
-    "timing": "update",
-    "goal": "capture clear night evidence"
-  },
-  {
-    "id": "dr-tr-046",
-    "title": "Is the New Gaming Controller’s Hall Sensor Worth It?",
-    "angle": "Stick drift resistance",
-    "audience": "Gamers",
-    "intent": "review/durability",
-    "environment": "controllers",
-    "timing": "trend",
-    "goal": "avoid drift-prone controllers"
-  },
-  {
-    "id": "dr-tr-047",
-    "title": "Which Smart Refrigerator Actually Maintains Temperature Evenly?",
-    "angle": "Sensor consistency + door-open recovery",
-    "audience": "Families",
-    "intent": "review/performance",
-    "environment": "smart appliances",
-    "timing": "review cycle",
-    "goal": "preserve food better"
-  },
-  {
-    "id": "dr-tr-048",
-    "title": "Is the New Smart Oven’s Temperature Sensor Accurate?",
-    "angle": "Calibration test",
-    "audience": "Home cooks",
-    "intent": "review/accuracy",
-    "environment": "smart kitchen",
-    "timing": "trend season",
-    "goal": "ensure consistent baking results"
-  },
-  {
-    "id": "dr-tr-049",
-    "title": "Which EV Charger Is Safest for Home Use?",
-    "angle": "Heat stability + cable durability",
-    "audience": "EV owners",
-    "intent": "review/safety",
-    "environment": "home chargers",
-    "timing": "install season",
-    "goal": "avoid overheating risks"
-  },
-  {
-    "id": "dr-tr-050",
-    "title": "Are the New Noise Meters Accurate Enough for Home Testing?",
-    "angle": "Calibration + sensor range",
-    "audience": "Homeowners",
-    "intent": "review/accuracy",
-    "environment": "sound tools",
-    "timing": "launch",
-    "goal": "measure environmental noise correctly"
-  }
-]
+    {
+      "id": "dr-tr-001",
+      "title": "Is This Year’s Flagship Phone Really Faster?",
+      "angle": "Thermal behavior + sustained performance",
+      "audience": "Smartphone buyers",
+      "intent": "review/performance-test",
+      "environment": "phones",
+      "timing": "launch season",
+      "goal": "check if new chip throttles under load",
+      "fingerprint": "fp1:52c54f7ee5cd1d21a3962df11f7507eb4121a6b1",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Phones"
+      }
+    },
+    {
+      "id": "dr-tr-002",
+      "title": "Which Foldable Phone Has the Stronger Hinge This Year?",
+      "angle": "Flex durability + crease visibility",
+      "audience": "Early adopters",
+      "intent": "review/durability",
+      "environment": "foldables",
+      "timing": "new model cycle",
+      "goal": "pick the foldable with lowest mechanical wear",
+      "fingerprint": "fp1:1e284558dad6c580267680321c831a68bac8ee36",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Foldables"
+      }
+    },
+    {
+      "id": "dr-tr-003",
+      "title": "The Latest AI Camera Phones: Which One Nails Low-Light?",
+      "angle": "Sensor size + noise model accuracy",
+      "audience": "Photography-focused users",
+      "intent": "review/camera-quality",
+      "environment": "camera phones",
+      "timing": "launch wave",
+      "goal": "identify best night photo engine",
+      "fingerprint": "fp1:91274eaaa6b09544f7ea17db852f39bb225ded13",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Camera Phones"
+      }
+    },
+    {
+      "id": "dr-tr-004",
+      "title": "Is the New Gaming Laptop Worth the Price Hike?",
+      "angle": "GPU wattage + cooling redesign",
+      "audience": "Gamers",
+      "intent": "review/performance",
+      "environment": "gaming laptops",
+      "timing": "release window",
+      "goal": "estimate real fps gains",
+      "fingerprint": "fp1:ecbad990b50f839feeb05c9c72f685f9b9faedb8",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Gaming Laptops"
+      }
+    },
+    {
+      "id": "dr-tr-005",
+      "title": "Which Tablet Handles Multitasking Best After Updates?",
+      "angle": "RAM pressure + window manager stability",
+      "audience": "Students and creatives",
+      "intent": "review/usability",
+      "environment": "tablets",
+      "timing": "post-update",
+      "goal": "judge real productivity capability",
+      "fingerprint": "fp1:c9231cfae643daa17c667be03622ef790bfdbd76",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Tablets"
+      }
+    },
+    {
+      "id": "dr-tr-006",
+      "title": "Are the New Wireless Earbuds Improving ANC or Just Marketing?",
+      "angle": "ANC depth + transparency mode quality",
+      "audience": "Music consumers",
+      "intent": "review/audio",
+      "environment": "earbuds",
+      "timing": "annual refresh",
+      "goal": "detect real acoustic improvements",
+      "fingerprint": "fp1:7b3a7921ad857dd6255e65fdd649c9ed9a17e3da",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Earbuds"
+      }
+    },
+    {
+      "id": "dr-tr-007",
+      "title": "Which Fitness Tracker Measures Heart Rate Most Accurately?",
+      "angle": "Sensor updates + sweat resistance",
+      "audience": "Fitness users",
+      "intent": "review/health-data",
+      "environment": "wearables",
+      "timing": "wear test",
+      "goal": "find device with precise sports tracking",
+      "fingerprint": "fp1:de826f3b4b8234dcd7b05a6b7cc77b5378f02c86",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Wearables"
+      }
+    },
+    {
+      "id": "dr-tr-008",
+      "title": "Is the Latest Smartwatch Battery Upgrade Real?",
+      "angle": "Always-on drain + GPS endurance",
+      "audience": "Lifestyle and fitness users",
+      "intent": "review/battery",
+      "environment": "wearables",
+      "timing": "first-week usage",
+      "goal": "verify if marketing matches real runtime",
+      "fingerprint": "fp1:3b27c71373bd5c8a431486dd831f98f341ca75f5",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Wearables"
+      }
+    },
+    {
+      "id": "dr-tr-009",
+      "title": "Which Bluetooth Speaker Sounds Best at High Volume?",
+      "angle": "Distortion handling",
+      "audience": "Casual listeners",
+      "intent": "review/audio-test",
+      "environment": "audio devices",
+      "timing": "trend season",
+      "goal": "find speaker with clean loud output",
+      "fingerprint": "fp1:cb15a305f4dcf64f8fe84a57af0fe57df7eb4adf",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Audio Devices"
+      }
+    },
+    {
+      "id": "dr-tr-010",
+      "title": "Are Mini PCs Finally Good Enough?",
+      "angle": "Thermals + performance ceiling",
+      "audience": "Home office users",
+      "intent": "review/performance",
+      "environment": "mini pcs",
+      "timing": "new-gen CPU launch",
+      "goal": "judge if small form factor is viable",
+      "fingerprint": "fp1:3da007d498474f6bef6914ee6535ba66e8aa02f2",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Mini Pcs"
+      }
+    },
+    {
+      "id": "dr-tr-011",
+      "title": "Which Budget Phone Punches Above Its Price?",
+      "angle": "Camera-to-price + performance-to-price ratio",
+      "audience": "Budget shoppers",
+      "intent": "review/value",
+      "environment": "budget phones",
+      "timing": "launch season",
+      "goal": "find low-price models with high real value",
+      "fingerprint": "fp1:6087f6ca73729727a8e8f523e4c94d041b41c78c",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Budget Phones"
+      }
+    },
+    {
+      "id": "dr-tr-012",
+      "title": "Is the New E-reader Better for Your Eyes?",
+      "angle": "Warm light accuracy + glare performance",
+      "audience": "Readers",
+      "intent": "review/display",
+      "environment": "e-readers",
+      "timing": "model refresh",
+      "goal": "check comfort and readability",
+      "fingerprint": "fp1:a9351155ab0d388f252b1bd536e7d5819d32c7a1",
+      "reviewEntity": {
+        "type": "device",
+        "model": "E-readers"
+      }
+    },
+    {
+      "id": "dr-tr-013",
+      "title": "Which Laptop Has the Quietest Keyboard?",
+      "angle": "Key travel + acoustic profile",
+      "audience": "Office + students",
+      "intent": "review/ergonomics",
+      "environment": "laptops",
+      "timing": "comparison test",
+      "goal": "find quiet comfortable typing",
+      "fingerprint": "fp1:abaa42e13a62a52f01a9236f2e93c627a3bbb1f2",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Laptops"
+      }
+    },
+    {
+      "id": "dr-tr-014",
+      "title": "Is the New Smart TV OS Actually Faster?",
+      "angle": "App launch speed + UI lag",
+      "audience": "Home entertainment users",
+      "intent": "review/performance",
+      "environment": "smart tvs",
+      "timing": "post-update",
+      "goal": "avoid laggy smart TVs",
+      "fingerprint": "fp1:f44db1e98d0758cf474c56300614309f2719c397",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Smart Tvs"
+      }
+    },
+    {
+      "id": "dr-tr-015",
+      "title": "Which Wireless Charger Is Truly Fast?",
+      "angle": "Heat generation + speed consistency",
+      "audience": "Phone users",
+      "intent": "review/performance",
+      "environment": "charging accessories",
+      "timing": "trend",
+      "goal": "pick chargers with safe fast charging",
+      "fingerprint": "fp1:7c591167449ab0eb0cb50bb7263112a9da9b9982",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Charging Accessories"
+      }
+    },
+    {
+      "id": "dr-tr-016",
+      "title": "Are AI Cameras on Laptops Finally Good?",
+      "angle": "Noise handling + skin tones",
+      "audience": "Remote workers",
+      "intent": "review/camera",
+      "environment": "laptops",
+      "timing": "update season",
+      "goal": "judge real webcam improvements",
+      "fingerprint": "fp1:dc0e199a89ab173ce2732fa802d07026d0571fe8",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Laptops"
+      }
+    },
+    {
+      "id": "dr-tr-017",
+      "title": "Which Robot Vacuum Navigates Most Intelligently?",
+      "angle": "Map accuracy + obstacle avoidance",
+      "audience": "Home users",
+      "intent": "review/smart-home",
+      "environment": "robot vacuums",
+      "timing": "peak trend",
+      "goal": "find robot with best AI navigation",
+      "fingerprint": "fp1:fd8ebf810f2f0dafb55e49d23f735b3220de4ee4",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Robot Vacuums"
+      }
+    },
+    {
+      "id": "dr-tr-018",
+      "title": "Is the New Action Camera Worth Upgrading?",
+      "angle": "Stabilization + overheating test",
+      "audience": "Creators and travelers",
+      "intent": "review/video-quality",
+      "environment": "action cams",
+      "timing": "annual release",
+      "goal": "judge real improvements outdoors",
+      "fingerprint": "fp1:9f6725e2395318cc997f45093a1cd508ced4208b",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Action Cams"
+      }
+    },
+    {
+      "id": "dr-tr-019",
+      "title": "Which Portable Monitor Works Best for Travel?",
+      "angle": "Brightness + color accuracy",
+      "audience": "Remote workers",
+      "intent": "review/portability",
+      "environment": "mobile monitors",
+      "timing": "trend season",
+      "goal": "pick monitors that stay bright in daylight",
+      "fingerprint": "fp1:4717cca6de0b7245eb12dd5b7775b1190b80d720",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Mobile Monitors"
+      }
+    },
+    {
+      "id": "dr-tr-020",
+      "title": "Are Smart Home Hubs Actually Getting Better?",
+      "angle": "Matter support + latency",
+      "audience": "Smart home users",
+      "intent": "review/connectivity",
+      "environment": "hubs",
+      "timing": "ecosystem updates",
+      "goal": "ensure reliability across devices",
+      "fingerprint": "fp1:d2ab95b12d49f2de293c074adb733d4654322da1",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Hubs"
+      }
+    },
+    {
+      "id": "dr-tr-021",
+      "title": "Which Drone Has the Most Stable Hover?",
+      "angle": "Wind resistance + sensor package",
+      "audience": "Aerial video users",
+      "intent": "review/stability",
+      "environment": "drones",
+      "timing": "new-gen launch",
+      "goal": "improve aerial shooting consistency",
+      "fingerprint": "fp1:e15994cf7a5d6630e089443e99d3a536e17e0851",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Drones"
+      }
+    },
+    {
+      "id": "dr-tr-022",
+      "title": "Is the New Smart Kettle Worth It?",
+      "angle": "Heating precision + connectivity usefulness",
+      "audience": "Home gadget buyers",
+      "intent": "review/usability",
+      "environment": "smart kitchen",
+      "timing": "trend wave",
+      "goal": "judge real smart features vs gimmicks",
+      "fingerprint": "fp1:712f96f947a234526aa06064f0fe4358a8e99442",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Smart Kitchen"
+      }
+    },
+    {
+      "id": "dr-tr-023",
+      "title": "Which Soundbar Has the Most Accurate Dialogue Mode?",
+      "angle": "Mid-range clarity test",
+      "audience": "Home entertainment users",
+      "intent": "review/audio-quality",
+      "environment": "soundbars",
+      "timing": "update cycle",
+      "goal": "improve movie clarity",
+      "fingerprint": "fp1:2759bb00d75c63fba385603bd2bbee4fc56189c9",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Soundbars"
+      }
+    },
+    {
+      "id": "dr-tr-024",
+      "title": "Is the New Smart Scale Reliable for Daily Tracking?",
+      "angle": "BMI + impedance accuracy",
+      "audience": "Health users",
+      "intent": "review/accuracy",
+      "environment": "fitness devices",
+      "timing": "first-week",
+      "goal": "ensure readings are consistent",
+      "fingerprint": "fp1:3f4742cbc32245b8914e8621c70faabb25092e46",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Fitness Devices"
+      }
+    },
+    {
+      "id": "dr-tr-025",
+      "title": "Which Keyboard Is Best for Long Typing Sessions?",
+      "angle": "Travel, feedback, fatigue",
+      "audience": "Writers and coders",
+      "intent": "review/ergonomics",
+      "environment": "mechanical keyboards",
+      "timing": "trend",
+      "goal": "reduce finger fatigue",
+      "fingerprint": "fp1:3b9cd6a7e9340e13dd6beda1781070f073732552",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Mechanical Keyboards"
+      }
+    },
+    {
+      "id": "dr-tr-026",
+      "title": "Does This WebCam Improve Low Light Video?",
+      "angle": "Sensor performance + auto-exposure",
+      "audience": "Remote workers",
+      "intent": "review/camera-quality",
+      "environment": "webcams",
+      "timing": "launch",
+      "goal": "judge real indoor improvements",
+      "fingerprint": "fp1:c1bab7fc83ef381a44a65e004d577579792616cb",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Webcams"
+      }
+    },
+    {
+      "id": "dr-tr-027",
+      "title": "Which Smart Light System Has the Best Color Accuracy?",
+      "angle": "RGB calibration + flicker control",
+      "audience": "Home users",
+      "intent": "review/quality",
+      "environment": "smart lights",
+      "timing": "update cycle",
+      "goal": "ensure accurate lighting scenes",
+      "fingerprint": "fp1:61b86289ce01518684d8697b90f5a1fa6a3fb85d",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Smart Lights"
+      }
+    },
+    {
+      "id": "dr-tr-028",
+      "title": "Is the New Smart Thermostat Actually Saving Energy?",
+      "angle": "Sensor accuracy + adaptive schedules",
+      "audience": "Homeowners",
+      "intent": "review/automation",
+      "environment": "thermostats",
+      "timing": "post-install",
+      "goal": "confirm real-world efficiency gains",
+      "fingerprint": "fp1:1d898001fe8157164411be7b2e912b40ea75a507",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Thermostats"
+      }
+    },
+    {
+      "id": "dr-tr-029",
+      "title": "Which Budget Laptop Is Best for Students?",
+      "angle": "Keyboard + screen + battery hierarchy",
+      "audience": "Students",
+      "intent": "review/value",
+      "environment": "laptops",
+      "timing": "back-to-school",
+      "goal": "find balanced budget models",
+      "fingerprint": "fp1:2083fd7baae04b9a635d2bed0199c5876992f593",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Laptops"
+      }
+    },
+    {
+      "id": "dr-tr-030",
+      "title": "Are the New Wi-Fi 7 Routers Worth Upgrading To?",
+      "angle": "Speed + latency + device compatibility",
+      "audience": "Tech-forward home users",
+      "intent": "review/performance",
+      "environment": "routers",
+      "timing": "technology transition",
+      "goal": "evaluate real Wi-Fi 7 gains",
+      "fingerprint": "fp1:a717839938d19056f944594495cb9fb1cb222ba4",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Routers"
+      }
+    },
+    {
+      "id": "dr-tr-031",
+      "title": "Which Mechanical Keyboard Has the Best Stabilizers?",
+      "angle": "Rattle test + key feel",
+      "audience": "Enthusiasts",
+      "intent": "review/build-quality",
+      "environment": "keyboards",
+      "timing": "trend wave",
+      "goal": "find smooth typing experience",
+      "fingerprint": "fp1:a0ec11012787ece9fec3088def58f7a5e585c54e",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Keyboards"
+      }
+    },
+    {
+      "id": "dr-tr-032",
+      "title": "Is the Latest Smart Doorbell Any Better at Motion Detection?",
+      "angle": "False positive + detection range",
+      "audience": "Homeowners",
+      "intent": "review/security",
+      "environment": "doorbell cameras",
+      "timing": "new model",
+      "goal": "reduce false alerts",
+      "fingerprint": "fp1:add9c4c4f1eeb261f43255d1bda5e87272606e7c",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Doorbell Cameras"
+      }
+    },
+    {
+      "id": "dr-tr-033",
+      "title": "Which Webcam Handles Skin Tones Most Naturally?",
+      "angle": "Color balance accuracy",
+      "audience": "Remote workers",
+      "intent": "review/camera",
+      "environment": "webcams",
+      "timing": "update period",
+      "goal": "choose webcam with natural color",
+      "fingerprint": "fp1:897b971dd08279977b1e5ddbc2e06c4c73d82c4f",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Webcams"
+      }
+    },
+    {
+      "id": "dr-tr-034",
+      "title": "Is the New Portable Projector Bright Enough?",
+      "angle": "ANSI lumen test",
+      "audience": "Home + travel users",
+      "intent": "review/display",
+      "environment": "projectors",
+      "timing": "launch",
+      "goal": "determine if usable in lit rooms",
+      "fingerprint": "fp1:1ddac1baf5d9c33269d2328d369e796b674db5c2",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Projectors"
+      }
+    },
+    {
+      "id": "dr-tr-035",
+      "title": "Which Vacuum Cleaner Has the Best Suction-to-Noise Ratio?",
+      "angle": "Performance vs noise",
+      "audience": "Households",
+      "intent": "review/efficiency",
+      "environment": "home appliances",
+      "timing": "trend cycle",
+      "goal": "maximize quiet cleaning",
+      "fingerprint": "fp1:23e21e230884b1c45daa934c18afa1e855c6df95",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Home Appliances"
+      }
+    },
+    {
+      "id": "dr-tr-036",
+      "title": "Are the New Smart Switches Actually Reliable?",
+      "angle": "Latency + tap response",
+      "audience": "Smart home users",
+      "intent": "review/stability",
+      "environment": "smart switches",
+      "timing": "ecosystem updates",
+      "goal": "avoid laggy automation",
+      "fingerprint": "fp1:e11de737417070a34bcb2fdcd21f3344fae9104d",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Smart Switches"
+      }
+    },
+    {
+      "id": "dr-tr-037",
+      "title": "Which Streaming Box Loads Apps the Fastest?",
+      "angle": "Cold start speed",
+      "audience": "Home entertainment users",
+      "intent": "review/performance",
+      "environment": "tv boxes",
+      "timing": "update cycle",
+      "goal": "improve TV app responsiveness",
+      "fingerprint": "fp1:a073573f1d6e8a13b158ae8e610a04d84e5c2a70",
+      "reviewEntity": {
+        "type": "device",
+        "model": "TV Boxes"
+      }
+    },
+    {
+      "id": "dr-tr-038",
+      "title": "Is the New Smart Plug Safe?",
+      "angle": "Heat + overload behavior",
+      "audience": "Smart home users",
+      "intent": "review/safety",
+      "environment": "smart plugs",
+      "timing": "launch",
+      "goal": "avoid overheating risks",
+      "fingerprint": "fp1:711fd68973d89ce56c30984a8cb6b314e28e2962",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Smart Plugs"
+      }
+    },
+    {
+      "id": "dr-tr-039",
+      "title": "Which Electric Toothbrush Is Actually the Most Gentle?",
+      "angle": "Vibration pattern test",
+      "audience": "Households",
+      "intent": "review/ergonomics",
+      "environment": "health devices",
+      "timing": "trend",
+      "goal": "reduce gum irritation",
+      "fingerprint": "fp1:e4190e61eeb0f61ea8afbcdcad1b11a1ab438e19",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Health Devices"
+      }
+    },
+    {
+      "id": "dr-tr-040",
+      "title": "Is the New Wireless Mouse Truly Low-Latency?",
+      "angle": "Polling rate + click delay",
+      "audience": "Gamers and office workers",
+      "intent": "review/performance",
+      "environment": "mice",
+      "timing": "update",
+      "goal": "ensure responsive pointer control",
+      "fingerprint": "fp1:f8a82de62de2c7b0116963abdf6d5d3cdfc8f75e",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Mice"
+      }
+    },
+    {
+      "id": "dr-tr-041",
+      "title": "Which Portable SSD Has the Most Stable Speed?",
+      "angle": "Thermal throttling + sustained write",
+      "audience": "Creators",
+      "intent": "review/performance",
+      "environment": "portable storage",
+      "timing": "benchmark season",
+      "goal": "ensure stable large-file transfers",
+      "fingerprint": "fp1:2c32a07e123688b1dc91228f84ee5ecb094f3843",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Portable Storage"
+      }
+    },
+    {
+      "id": "dr-tr-042",
+      "title": "Is the New Smart Lock Reliable Over Bluetooth?",
+      "angle": "Unlock latency + fail behavior",
+      "audience": "Homeowners",
+      "intent": "review/security",
+      "environment": "smart locks",
+      "timing": "launch",
+      "goal": "ensure reliable unlock every time",
+      "fingerprint": "fp1:0ba4dd203e463d4046fe175b3f8f456d765e7ee1",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Smart Locks"
+      }
+    },
+    {
+      "id": "dr-tr-043",
+      "title": "Which Robot Mop Cleans Best on Hard Floors?",
+      "angle": "Pressure + pattern accuracy",
+      "audience": "Households",
+      "intent": "review/cleaning-quality",
+      "environment": "robot mops",
+      "timing": "trend",
+      "goal": "pick mop with consistent patterns",
+      "fingerprint": "fp1:16870ae238cd5d9a9e36e0200f9948c1e91ea7e9",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Robot Mops"
+      }
+    },
+    {
+      "id": "dr-tr-044",
+      "title": "Is the New Smart Air Purifier Worth Upgrading?",
+      "angle": "Sensor accuracy + noise at low speed",
+      "audience": "Home users",
+      "intent": "review/performance",
+      "environment": "air purifiers",
+      "timing": "launch window",
+      "goal": "ensure real clean-air performance",
+      "fingerprint": "fp1:1c01f2305edb1525e4d5f0f37dcd672f19c94aaf",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Air Purifiers"
+      }
+    },
+    {
+      "id": "dr-tr-045",
+      "title": "Which Dashcam Handles Night Footage Best?",
+      "angle": "Dynamic range + noise",
+      "audience": "Drivers",
+      "intent": "review/video-quality",
+      "environment": "dashcams",
+      "timing": "update",
+      "goal": "capture clear night evidence",
+      "fingerprint": "fp1:0a31a799125d491d8c53ec6af4d177c0491034d5",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Dashcams"
+      }
+    },
+    {
+      "id": "dr-tr-046",
+      "title": "Is the New Gaming Controller’s Hall Sensor Worth It?",
+      "angle": "Stick drift resistance",
+      "audience": "Gamers",
+      "intent": "review/durability",
+      "environment": "controllers",
+      "timing": "trend",
+      "goal": "avoid drift-prone controllers",
+      "fingerprint": "fp1:ddfd164b4d578cc5054201619bed14c3bd1c8fdb",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Controllers"
+      }
+    },
+    {
+      "id": "dr-tr-047",
+      "title": "Which Smart Refrigerator Actually Maintains Temperature Evenly?",
+      "angle": "Sensor consistency + door-open recovery",
+      "audience": "Families",
+      "intent": "review/performance",
+      "environment": "smart appliances",
+      "timing": "review cycle",
+      "goal": "preserve food better",
+      "fingerprint": "fp1:b38af21c754ab82b8a56ac255d9184b7a20c4f97",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Smart Appliances"
+      }
+    },
+    {
+      "id": "dr-tr-048",
+      "title": "Is the New Smart Oven’s Temperature Sensor Accurate?",
+      "angle": "Calibration test",
+      "audience": "Home cooks",
+      "intent": "review/accuracy",
+      "environment": "smart kitchen",
+      "timing": "trend season",
+      "goal": "ensure consistent baking results",
+      "fingerprint": "fp1:304ec0b29c8f0ad920a7eba2747435bc5199eab5",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Smart Kitchen"
+      }
+    },
+    {
+      "id": "dr-tr-049",
+      "title": "Which EV Charger Is Safest for Home Use?",
+      "angle": "Heat stability + cable durability",
+      "audience": "EV owners",
+      "intent": "review/safety",
+      "environment": "home chargers",
+      "timing": "install season",
+      "goal": "avoid overheating risks",
+      "fingerprint": "fp1:436f764bec86c397db2d6a8a8a259a5d8ad61948",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Home Chargers"
+      }
+    },
+    {
+      "id": "dr-tr-050",
+      "title": "Are the New Noise Meters Accurate Enough for Home Testing?",
+      "angle": "Calibration + sensor range",
+      "audience": "Homeowners",
+      "intent": "review/accuracy",
+      "environment": "sound tools",
+      "timing": "launch",
+      "goal": "measure environmental noise correctly",
+      "fingerprint": "fp1:1e24825a01452d4ca9ba0ea84aac7629be2ddd39",
+      "reviewEntity": {
+        "type": "device",
+        "model": "Sound Tools"
+      }
+    },
+    {
+      "id": "device-reviews-trend-1772546045335-548416576",
+      "title": "AUTO GENERATED: device-reviews (trend)",
+      "angle": "Auto angle (trend)",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-03T13:54:05.335Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:90ebb22075dab22d906c5ce3cb563974df30cdd2",
+      "reviewEntity": {
+        "type": "device",
+        "model": "AUTO GENERATED: device-reviews (trend)"
+      }
+    },
+    {
+      "id": "device-reviews-trend-1772628475585-645988913",
+      "title": "AUTO GENERATED: device-reviews (trend)",
+      "angle": "Auto angle (trend)",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T12:47:55.585Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:90ebb22075dab22d906c5ce3cb563974df30cdd2",
+      "reviewEntity": {
+        "type": "device",
+        "model": "AUTO GENERATED: device-reviews (trend)"
+      }
+    },
+    {
+      "id": "device-reviews-trend-1772629567549-773002489",
+      "title": "AUTO GENERATED: device-reviews (trend)",
+      "angle": "Auto angle (trend)",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:06:07.549Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:90ebb22075dab22d906c5ce3cb563974df30cdd2",
+      "reviewEntity": {
+        "type": "device",
+        "model": "AUTO GENERATED: device-reviews (trend)"
+      }
+    },
+    {
+      "id": "device-reviews-trend-1772630313674-444955",
+      "title": "AUTO GENERATED: device-reviews (trend) #1772630313674-444955",
+      "angle": "Auto angle (trend) var=1772630313674-444955",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.674Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:e722e297fbb09f1f7ae8ebed2c95f8eaef6e672a",
+      "reviewEntity": {
+        "type": "device",
+        "model": "AUTO GENERATED: device-reviews (trend) #1772630313674-444955"
+      }
+    },
+    {
+      "id": "device-reviews-trend-1772630313674-20129397",
+      "title": "AUTO GENERATED: device-reviews (trend) #1772630313674-20129397",
+      "angle": "Auto angle (trend) var=1772630313674-20129397",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.674Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:c36dc8216117202f7fdb91eadb2a1466b908b44c",
+      "reviewEntity": {
+        "type": "device",
+        "model": "AUTO GENERATED: device-reviews (trend) #1772630313674-20129397"
+      }
+    },
+    {
+      "id": "device-reviews-trend-1772630313674-500582637",
+      "title": "AUTO GENERATED: device-reviews (trend) #1772630313674-500582637",
+      "angle": "Auto angle (trend) var=1772630313674-500582637",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.674Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:48589cadff1c421366bc44b27ffa57db033335d9",
+      "reviewEntity": {
+        "type": "device",
+        "model": "AUTO GENERATED: device-reviews (trend) #1772630313674-500582637"
+      }
+    },
+    {
+      "id": "device-reviews-trend-1772630313674-671868703",
+      "title": "AUTO GENERATED: device-reviews (trend) #1772630313674-671868703",
+      "angle": "Auto angle (trend) var=1772630313674-671868703",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.674Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:e7e189bd41cab1ceb8e25fe70e1f226d65d53905",
+      "reviewEntity": {
+        "type": "device",
+        "model": "AUTO GENERATED: device-reviews (trend) #1772630313674-671868703"
+      }
+    },
+    {
+      "id": "device-reviews-trend-1772630313674-525078139",
+      "title": "AUTO GENERATED: device-reviews (trend) #1772630313674-525078139",
+      "angle": "Auto angle (trend) var=1772630313674-525078139",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.674Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:fbdc0ccc16f0987d1b3500b8ad5c9502629d2247",
+      "reviewEntity": {
+        "type": "device",
+        "model": "AUTO GENERATED: device-reviews (trend) #1772630313674-525078139"
+      }
+    },
+    {
+      "id": "device-reviews-trend-1772630313674-681960047",
+      "title": "AUTO GENERATED: device-reviews (trend) #1772630313674-681960047",
+      "angle": "Auto angle (trend) var=1772630313674-681960047",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.674Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:6da1b67b665499cc50b6ea8c463fd2c87dbe9562",
+      "reviewEntity": {
+        "type": "device",
+        "model": "AUTO GENERATED: device-reviews (trend) #1772630313674-681960047"
+      }
+    },
+    {
+      "id": "device-reviews-trend-1772630313674-387018358",
+      "title": "AUTO GENERATED: device-reviews (trend) #1772630313674-387018358",
+      "angle": "Auto angle (trend) var=1772630313674-387018358",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.674Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:7f62d35bd129329434cb045c32ee189109333cb2",
+      "reviewEntity": {
+        "type": "device",
+        "model": "AUTO GENERATED: device-reviews (trend) #1772630313674-387018358"
+      }
+    }
+  ]
 }
