@@ -5,15 +5,6 @@
   },
   "trend": [
     {
-      "id": "ss-tr-013",
-      "title": "2025 Cheapest Cloud Storage Combos: Mix Google + OneDrive or iCloud?",
-      "angle": "Many users now mix 100GB + small plan combos for savings.",
-      "audience": "Cloud storage users",
-      "intent": "saving",
-      "priority": 1,
-      "fingerprint": "fp1:38b2f0fccdf7d76a162cd3a6bbafd2ef781d5b4f"
-    },
-    {
       "id": "ss-tr-014",
       "title": "How to Minimize In-App Purchase Spending with App Limits",
       "angle": "OS-level spend control is widely adopted in 2025.",

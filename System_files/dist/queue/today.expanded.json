@@ -9,10 +9,10 @@
       "seedLabel": "smart-savings",
       "requestedSlotLabel": "smart-savings",
       "mode": "trend",
-      "id": "ss-tr-012",
-      "title": "How to Use AI Assistants for Detecting Duplicate Subscriptions",
-      "angle": "AI scanning for duplicates is trending on mobile.",
-      "audience": "Heavy app users",
+      "id": "ss-tr-013",
+      "title": "2025 Cheapest Cloud Storage Combos: Mix Google + OneDrive or iCloud?",
+      "angle": "Many users now mix 100GB + small plan combos for savings.",
+      "audience": "Cloud storage users",
       "intent": "saving",
       "priority": 1,
       "notes": "",
@@ -26,5 +26,5 @@
       "patchedReason": "no-review-entity"
     }
   ],
-  "expandedAt": "2026-04-05T05:41:28.741Z"
+  "expandedAt": "2026-04-05T05:54:31.278Z"
 }
