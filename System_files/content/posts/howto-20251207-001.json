@@ -1,33 +1,55 @@
 {
+  "postId": "06EM0000000000000000000000",
+  "reviewId": null,
   "slug": "howto-20251207-001",
   "title": "Build a simple cross-device productivity system in one weekend",
-  "description": "A realistic weekend plan to set up a unified productivity system that works across your phone, laptop, and tablet.",
-  "label": "how-to-playbooks",
-  "tldr": [
-    "You can build a usable productivity system in one weekend without overthinking it.",
-    "Pick one task app, one note app, one calendar, and one storage service, then connect them.",
-    "Focus on a few simple routines instead of chasing the perfect setup."
-  ],
-  "keyfacts": [
-    "Format: a two-day, step-by-step weekend plan.",
-    "Covers selection, setup, routines, and real-world testing.",
-    "Designed for people who work and study on multiple devices."
-  ],
-  "faq": [
-    {
-      "question": "What if I can’t finish everything in one weekend?",
-      "answer": "That’s okay. Finish the core setup (apps + basic lists) first, then stretch the testing and tweaking part into the next week. The system just needs to be ‘good enough’ to start using, not perfect."
-    },
-    {
-      "question": "Do I need to switch all my apps at once?",
-      "answer": "No. You can keep your current tools and only replace the parts that are clearly causing friction. The guide helps you decide what to keep and what to change."
-    }
-  ],
-  "sources": [],
-  "bodyPrompt": "Write the full article body in English as a weekend step-by-step guide. Topic: building a simple cross-device productivity system in one weekend. Structure: 1) Short intro: why a unified system matters, 2) Day 1 morning: choose core apps (one task app, one note app, one calendar, one storage), 3) Day 1 afternoon: set up devices and basic folders/lists, 4) Day 2 morning: create routines (daily plan, weekly review, backup rules), 5) Day 2 afternoon: test the workflow with real tasks and small tweaks, 6) Common mistakes and how to fix them, 7) Final checklist that confirms the system is ready. Use clear headings and numbered steps, keep instructions realistic and not perfectionist.",
-  "body": "<h2>Why a Unified Productivity System Matters</h2>\n<p>Managing tasks, notes, calendars, and files across multiple devices can quickly become chaotic. A simple, unified productivity system helps you stay organized, focused, and efficient no matter where you are or what device you’re using. Building this system in one weekend sets you up with a reliable workflow that saves time and reduces stress every day.</p>\n\n<h2>Day 1 Morning: Choose Your Core Apps</h2>\n<p>Start by selecting one reliable app for each key area. Keep it simple and compatible across your devices.</p>\n<ol>\n  <li><strong>Task Management:</strong> Pick an app that lets you create, organize, and prioritize tasks easily. Examples include Todoist, Microsoft To Do, or Google Tasks.</li>\n  <li><strong>Note Taking:</strong> Choose a note app that syncs across devices and supports quick capture. Options include Evernote, OneNote, or Apple Notes.</li>\n  <li><strong>Calendar:</strong> Use a calendar that integrates well with your task and note apps, such as Google Calendar, Outlook, or Apple Calendar.</li>\n  <li><strong>Cloud Storage:</strong> Select a cloud service for your files and backups. Common choices are Google Drive, Dropbox, or OneDrive.</li>\n</ol>\n<p>Make sure all apps are available on your main devices (phone, tablet, laptop) to ensure seamless access.</p>\n\n<h2>Day 1 Afternoon: Set Up Devices and Basic Folders/Lists</h2>\n<ol>\n  <li><strong>Install and log into apps:</strong> Download your chosen apps on all devices and sign in with the same account.</li>\n  <li><strong>Create main task lists:</strong> For example, “Work,” “Personal,” and “Errands.” Keep it simple at first.</li>\n  <li><strong>Organize note folders:</strong> Set up broad categories like “Meeting Notes,” “Ideas,” and “Reference.”</li>\n  <li><strong>Set up calendar events:</strong> Add regular commitments like work hours, exercise, or family time.</li>\n  <li><strong>Create cloud storage folders:</strong> Make folders such as “Projects,” “Receipts,” and “Archives” for easy file organization.</li>\n</ol>\n<p>Don’t worry about perfect details yet—focus on a clear, usable structure.</p>\n\n<h2>Day 2 Morning: Create Routines</h2>\n<ol>\n  <li><strong>Daily planning routine:</strong> Spend 5–10 minutes each morning reviewing your tasks and calendar. Adjust priorities as needed.</li>\n  <li><strong>Weekly review routine:</strong> Pick a consistent time once a week to review completed tasks, plan upcoming weeks, and clean up notes and files.</li>\n  <li><strong>Backup rules:</strong> Set automatic backups for your cloud storage and export important notes or tasks periodically to local storage.</li>\n</ol>\n<p>Write down these routines in your calendar or note app as reminders until they become habits.</p>\n\n<h2>Day 2 Afternoon: Test Your Workflow and Tweak</h2>\n<ol>\n  <li><strong>Add real tasks:</strong> Enter upcoming tasks and events for the next few days.</li>\n  <li><strong>Capture notes:</strong> Try taking notes during a meeting or brainstorming session.</li>\n  <li><strong>Access files:</strong> Upload, edit, and open documents from your cloud storage on different devices.</li>\n  <li><strong>Adjust as needed:</strong> Notice any friction points or missing features and make small changes—like renaming lists or shifting app settings.</li>\n</ol>\n<p>Keep tweaks practical and avoid overcomplicating your system.</p>\n\n<h2>Common Mistakes and How to Fix Them</h2>\n<ul>\n  <li><strong>Choosing too many apps:</strong> Fix this by consolidating tasks into one or two apps that cover your needs well.</li>\n  <li><strong>Over-organizing folders and lists:</strong> Simplify by merging similar categories and focusing on what you actually use.</li>\n  <li><strong>Neglecting regular reviews:</strong> Set reminders and keep reviews short to stay consistent.</li>\n  <li><strong>Ignoring device sync issues:</strong> Double-check login details and app settings to ensure smooth syncing.</li>\n</ul>\n\n<h2>Final Checklist: Confirm Your System Is Ready</h2>\n<ol>\n  <li>Core apps installed and logged in on all devices.</li>\n  <li>Basic task lists and note folders created.</li>\n  <li>Calendar events reflecting regular commitments.</li>\n  <li>Cloud storage organized with main folders.</li>\n  <li>Daily and weekly routines scheduled and noted.</li>\n  <li>Backup procedures set up.</li>\n  <li>Workflow tested with real tasks, notes, and files.</li>\n  <li>Minor tweaks made to improve usability.</li>\n</ol>\n<p>With this system in place, you’re ready to stay productive across devices—starting now.</p>",
-  "pageId": "page000003",
   "labels": [
     "how-to-playbooks"
-  ]
+  ],
+  "updated": "2025-12-07T10:00:00+09:00",
+  "bodyPrompt": "Write the full article body in English as a weekend step-by-step guide. Topic: building a simple cross-device productivity system in one weekend. Structure: 1) Short intro: why a unified system matters, 2) Day 1 morning: choose core apps (one task app, one note app, one calendar, one storage), 3) Day 1 afternoon: set up devices and basic folders/lists, 4) Day 2 morning: create routines (daily plan, weekly review, backup rules), 5) Day 2 afternoon: test the workflow with real tasks and small tweaks, 6) Common mistakes and how to fix them, 7) Final checklist that confirms the system is ready. Use clear headings and numbered steps, keep instructions realistic and not perfectionist.",
+  "body": "<h2>Why a Unified Productivity System Matters</h2>\n<p>Managing tasks, notes, calendars, and files across multiple devices can quickly become chaotic. A simple, unified productivity system helps you stay organized, focused, and efficient no matter where you are or what device you’re using. Building this system in one weekend sets you up with a reliable workflow that saves time and reduces stress every day.</p>\n\n<h2>Day 1 Morning: Choose Your Core Apps</h2>\n<p>Start by selecting one reliable app for each key area. Keep it simple and compatible across your devices.</p>\n<ol>\n  <li><strong>Task Management:</strong> Pick an app that lets you create, organize, and prioritize tasks easily. Examples include Todoist, Microsoft To Do, or Google Tasks.</li>\n  <li><strong>Note Taking:</strong> Choose a note app that syncs across devices and supports quick capture. Options include Evernote, OneNote, or Apple Notes.</li>\n  <li><strong>Calendar:</strong> Use a calendar that integrates well with your task and note apps, such as Google Calendar, Outlook, or Apple Calendar.</li>\n  <li><strong>Cloud Storage:</strong> Select a cloud service for your files and backups. Common choices are Google Drive, Dropbox, or OneDrive.</li>\n</ol>\n<p>Make sure all apps are available on your main devices (phone, tablet, laptop) to ensure seamless access.</p>\n\n<h2>Day 1 Afternoon: Set Up Devices and Basic Folders/Lists</h2>\n<ol>\n  <li><strong>Install and log into apps:</strong> Download your chosen apps on all devices and sign in with the same account.</li>\n  <li><strong>Create main task lists:</strong> For example, “Work,” “Personal,” and “Errands.” Keep it simple at first.</li>\n  <li><strong>Organize note folders:</strong> Set up broad categories like “Meeting Notes,” “Ideas,” and “Reference.”</li>\n  <li><strong>Set up calendar events:</strong> Add regular commitments like work hours, exercise, or family time.</li>\n  <li><strong>Create cloud storage folders:</strong> Make folders such as “Projects,” “Receipts,” and “Archives” for easy file organization.</li>\n</ol>\n<p>Don’t worry about perfect details yet—focus on a clear, usable structure.</p>\n\n<h2>Day 2 Morning: Create Routines</h2>\n<ol>\n  <li><strong>Daily planning routine:</strong> Spend 5–10 minutes each morning reviewing your tasks and calendar. Adjust priorities as needed.</li>\n  <li><strong>Weekly review routine:</strong> Pick a consistent time once a week to review completed tasks, plan upcoming weeks, and clean up notes and files.</li>\n  <li><strong>Backup rules:</strong> Set automatic backups for your cloud storage and export important notes or tasks periodically to local storage.</li>\n</ol>\n<p>Write down these routines in your calendar or note app as reminders until they become habits.</p>\n\n<h2>Day 2 Afternoon: Test Your Workflow and Tweak</h2>\n<ol>\n  <li><strong>Add real tasks:</strong> Enter upcoming tasks and events for the next few days.</li>\n  <li><strong>Capture notes:</strong> Try taking notes during a meeting or brainstorming session.</li>\n  <li><strong>Access files:</strong> Upload, edit, and open documents from your cloud storage on different devices.</li>\n  <li><strong>Adjust as needed:</strong> Notice any friction points or missing features and make small changes—like renaming lists or shifting app settings.</li>\n</ol>\n<p>Keep tweaks practical and avoid overcomplicating your system.</p>\n\n<h2>Common Mistakes and How to Fix Them</h2>\n<ul>\n  <li><strong>Choosing too many apps:</strong> Fix this by consolidating tasks into one or two apps that cover your needs well.</li>\n  <li><strong>Over-organizing folders and lists:</strong> Simplify by merging similar categories and focusing on what you actually use.</li>\n  <li><strong>Neglecting regular reviews:</strong> Set reminders and keep reviews short to stay consistent.</li>\n  <li><strong>Ignoring device sync issues:</strong> Double-check login details and app settings to ensure smooth syncing.</li>\n</ul>\n\n<h2>Final Checklist: Confirm Your System Is Ready</h2>\n<ol>\n  <li>Core apps installed and logged in on all devices.</li>\n  <li>Basic task lists and note folders created.</li>\n  <li>Calendar events reflecting regular commitments.</li>\n  <li>Cloud storage organized with main folders.</li>\n  <li>Daily and weekly routines scheduled and noted.</li>\n  <li>Backup procedures set up.</li>\n  <li>Workflow tested with real tasks, notes, and files.</li>\n  <li>Minor tweaks made to improve usability.</li>\n</ol>\n<p>With this system in place, you’re ready to stay productive across devices—starting now.</p>",
+  "seedMeta": {
+    "queueDate": "2025-12-07",
+    "cutoff": "10:00",
+    "label": "how-to-playbooks",
+    "profileId": "howto_playbooks_v1",
+    "id": null,
+    "intent": null,
+    "postId": "06EM0000000000000000000000",
+    "reviewId": null
+  },
+  "pageId": "page000003",
+  "bodyGen": {
+    "mode": "legacy-body",
+    "updatedAt": "2025-12-07T10:00:00+09:00",
+    "writeMode": "local",
+    "strict": true,
+    "label": "how-to-playbooks",
+    "kind": "non-review",
+    "h2Count": 7,
+    "headingHash": null,
+    "headingPlan": [
+      "Why a Unified Productivity System Matters",
+      "Day 1 Morning: Choose Your Core Apps",
+      "Day 1 Afternoon: Set Up Devices and Basic Folders/Lists",
+      "Day 2 Morning: Create Routines",
+      "Day 2 Afternoon: Test Your Workflow and Tweak",
+      "Common Mistakes and How to Fix Them",
+      "Final Checklist: Confirm Your System Is Ready"
+    ],
+    "intent": null,
+    "timing": null,
+    "context": null
+  },
+  "contentGen": {
+    "mode": "legacy-body",
+    "updatedAt": "2025-12-07T10:00:00+09:00",
+    "writeMode": "local",
+    "label": "how-to-playbooks",
+    "bodyPromptUsed": true,
+    "selfReviewLoop": [],
+    "repairMode": false,
+    "repairIssueCount": 0
+  }
 }
