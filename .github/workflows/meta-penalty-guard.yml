@@ -1,0 +1,227 @@
+name: meta-penalty-guard
+
+on:
+  workflow_dispatch:
+    inputs:
+      DRY_RUN:
+        description: "true/false (true면 커밋만, 발행은 안 함)"
+        required: false
+        default: "true"
+      MIN_POST_AGE_DAYS:
+        description: "보정 대상 최소 경과일 (기본 15)"
+        required: false
+        default: "15"
+      MAX_ITEMS_PER_RUN:
+        description: "1회 최대 처리 수 (기본 30)"
+        required: false
+        default: "30"
+  schedule:
+    - cron: "20 3 * * *" # UTC 03:20 (KST 12:20) 매일
+
+permissions:
+  contents: write
+
+concurrency:
+  group: meta-penalty-guard-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+      CANONICAL_BASE: ${{ secrets.CANONICAL_BASE }}
+      CDN_BASE: ${{ secrets.CDN_BASE }}
+
+      BLOGGER_BLOG_ID: ${{ secrets.BLOGGER_BLOG_ID }}
+      GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+      GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
+
+      R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_BUCKET: ${{ secrets.R2_BUCKET }}
+      R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+
+      PUBLISH_MODE: ${{ secrets.PUBLISH_MODE }}
+      DRY_RUN_INPUT: ${{ github.event.inputs.DRY_RUN || 'true' }}
+      MIN_POST_AGE_DAYS_INPUT: ${{ github.event.inputs.MIN_POST_AGE_DAYS || '15' }}
+      MAX_ITEMS_PER_RUN_INPUT: ${{ github.event.inputs.MAX_ITEMS_PER_RUN || '30' }}
+
+    steps:
+      - name: Guard (schedule requires PUBLISH_MODE=enable + auto-enable.json)
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          set -euo pipefail
+          echo "event_name=$EVENT_NAME"
+          echo "PUBLISH_MODE=${PUBLISH_MODE}"
+
+          echo "SKIP_PIPELINE=false" >> $GITHUB_ENV
+
+          # workflow_dispatch는 항상 허용
+          if [ "$EVENT_NAME" != "schedule" ]; then
+            echo "[GUARD] workflow_dispatch -> allowed"
+            exit 0
+          fi
+
+          # schedule일 때만 강제 통제
+          if [ "${PUBLISH_MODE}" != "enable" ]; then
+            echo "[GUARD] blocked: PUBLISH_MODE != enable"
+            echo "SKIP_PIPELINE=true" >> $GITHUB_ENV
+            exit 0
+          fi
+
+          if [ ! -f "System_files/manifests/auto-enable.json" ]; then
+            echo "[GUARD] blocked: missing System_files/manifests/auto-enable.json"
+            echo "SKIP_PIPELINE=true" >> $GITHUB_ENV
+            exit 0
+          fi
+
+          sw=$(node -e "try{const j=require('./System_files/manifests/auto-enable.json');process.stdout.write(String(!!j.autoEnable));}catch(e){process.stdout.write('false');}")
+          if [ "$sw" != "true" ]; then
+            echo "[GUARD] blocked: autoEnable != true"
+            echo "SKIP_PIPELINE=true" >> $GITHUB_ENV
+            exit 0
+          fi
+
+          echo "[GUARD] schedule allowed"
+          echo "SKIP_PIPELINE=false" >> $GITHUB_ENV
+
+      - name: Checkout
+        if: env.SKIP_PIPELINE != 'true'
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        if: env.SKIP_PIPELINE != 'true'
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: "npm"
+
+      - name: Install (repo root)
+        if: env.SKIP_PIPELINE != 'true'
+        run: npm ci
+
+      - name: Export runtime env
+        if: env.SKIP_PIPELINE != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          EVENT="${{ github.event_name }}"
+
+          parse_bool () {
+            v="$(echo "${1:-}" | tr '[:upper:]' '[:lower:]' | xargs)"
+            if [ "$v" = "false" ] || [ "$v" = "0" ]; then
+              echo "false"
+            else
+              echo "true"
+            fi
+          }
+
+          parse_posint () {
+            v="$(echo "${1:-}" | xargs)"
+            if [[ "$v" =~ ^[1-9][0-9]*$ ]]; then
+              echo "$v"
+            else
+              echo "$2"
+            fi
+          }
+
+          # schedule + enable일 때만 실제 발행 허용
+          DR="$(parse_bool "${DRY_RUN_INPUT}")"
+          if [ "$EVENT" = "schedule" ] && [ "${PUBLISH_MODE}" = "enable" ]; then
+            DR="false"
+          fi
+
+          MIN_AGE="$(parse_posint "${MIN_POST_AGE_DAYS_INPUT}" "15")"
+          MAX_ITEMS="$(parse_posint "${MAX_ITEMS_PER_RUN_INPUT}" "30")"
+
+          echo "DRY_RUN=$DR" >> "$GITHUB_ENV"
+          echo "MIN_POST_AGE_DAYS=$MIN_AGE" >> "$GITHUB_ENV"
+          echo "MAX_ITEMS_PER_RUN=$MAX_ITEMS" >> "$GITHUB_ENV"
+          echo "SIGNAL_GUARD_TARGET_MODE=baseline" >> "$GITHUB_ENV"
+
+          echo "Resolved:"
+          echo "  EVENT=$EVENT"
+          echo "  PUBLISH_MODE=${PUBLISH_MODE}"
+          echo "  DRY_RUN=$DR"
+          echo "  MIN_POST_AGE_DAYS=$MIN_AGE"
+          echo "  MAX_ITEMS_PER_RUN=$MAX_ITEMS"
+          echo "  SIGNAL_GUARD_TARGET_MODE=baseline"
+
+      - name: Sanity check
+        if: env.SKIP_PIPELINE != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          test -f System_files/scripts/build/review-signal-guard-boost.cjs
+
+          test -f System_files/scripts/build/render-posts.cjs
+          test -f System_files/scripts/build/normalize-body.cjs
+          test -f System_files/scripts/build/review-meta-block.cjs
+          test -f System_files/scripts/build/inject-reviews-from-ssot.cjs
+          test -f System_files/scripts/build/validate-repair.cjs
+          test -f System_files/scripts/build/qa-check.cjs
+
+          test -f System_files/scripts/build/build-ssot-reviews.cjs
+          test -f System_files/scripts/publish/blogger.cjs
+
+      - name: Run signal guard + boost
+        if: env.SKIP_PIPELINE != 'true'
+        env:
+          SIGNAL_GUARD_TARGET_MODE: ${{ env.SIGNAL_GUARD_TARGET_MODE }}
+          MIN_POST_AGE_DAYS: ${{ env.MIN_POST_AGE_DAYS }}
+          MAX_ITEMS_PER_RUN: ${{ env.MAX_ITEMS_PER_RUN }}
+        run: |
+          set -euo pipefail
+          node ./System_files/scripts/build/review-signal-guard-boost.cjs
+
+      - name: Rebuild review SSOT
+        if: env.SKIP_PIPELINE != 'true'
+        run: |
+          set -euo pipefail
+          npm run reviews:ssot:build
+
+      - name: Re-render posts after signal update
+        if: env.SKIP_PIPELINE != 'true'
+        working-directory: System_files
+        run: |
+          set -euo pipefail
+          node scripts/build/render-posts.cjs
+          node scripts/build/normalize-body.cjs
+          node scripts/build/review-meta-block.cjs
+          node scripts/build/inject-reviews-from-ssot.cjs
+
+      - name: Validate + QA
+        if: env.SKIP_PIPELINE != 'true'
+        working-directory: System_files
+        run: |
+          set -euo pipefail
+          node scripts/build/validate-repair.cjs
+          node scripts/build/qa-check.cjs
+
+      - name: Publish to Blogger (skip when DRY_RUN=true)
+        if: env.SKIP_PIPELINE != 'true' && env.DRY_RUN != 'true'
+        working-directory: System_files
+        run: |
+          set -euo pipefail
+          node scripts/publish/blogger.cjs
+
+      - name: Commit meta penalty guard updates
+        if: env.SKIP_PIPELINE != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet && echo "No changes" && exit 0
+          git commit -m "chore: meta penalty guard refresh"
+          git push
