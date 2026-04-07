@@ -35,7 +35,8 @@ require('./lib/env.cjs');
  *
  * 주의
  * - slug/postId/reviewId/pageId/body/seedMeta/reviewEntity/labels는 수정 금지
- * - source는 실제 post.reviewTarget / 기존 source / item store fields 기반으로만 보강
+ * - source는 원본 구조의 단일 필드(string)만 사용
+ * - sources 같은 신규 구조를 만들지 않는다
  * - 가짜 URL / example.com 등 금지
  */
 
@@ -224,142 +225,14 @@ function detectProvider(item, post) {
   return '';
 }
 
-function buildProviderUrl(provider, storeId) {
-  const p = normStr(provider).toLowerCase();
-  const id = normStr(storeId);
-  if (!p || !id) return '';
+function normalizeSourceField(item, post) {
+  const current = normStr(item && item.source).toLowerCase();
+  if (current === 'official' || current === 'manual') return current;
 
-  if (p === 'googleplay') {
-    return `https://play.google.com/store/apps/details?id=${encodeURIComponent(id)}`;
-  }
-
-  if (p === 'trustpilot') {
-    return `https://www.trustpilot.com/review/${id}`;
-  }
-
-  if (p === 'amazon') {
-    return `https://www.amazon.com/dp/${id}`;
-  }
-
-  return '';
-}
-
-function inferSourceFromPost(post) {
-  if (!post || typeof post !== 'object') return null;
-
-  const rt = post.reviewTarget && typeof post.reviewTarget === 'object'
-    ? post.reviewTarget
-    : null;
-
-  if (!rt) return null;
-
-  const provider = normStr(rt.provider).toLowerCase();
-  const url = normStr(rt.url);
-  const storeId = normStr(rt.storeId);
-
-  if (!provider && !url && !storeId) return null;
-
-  const item = {};
-  item.type = provider ? 'official' : 'manual';
-  if (provider) item.provider = provider;
-  item.label = providerLabel(provider || 'manual');
-
-  if (url) {
-    item.url = url;
-  } else {
-    const rebuilt = buildProviderUrl(provider, storeId);
-    if (rebuilt) item.url = rebuilt;
-  }
-
-  return item;
-}
-
-function inferSourceFromItem(item, post) {
   const provider = detectProvider(item, post);
-  const storeId = normStr(item && item.storeId);
+  if (provider) return 'official';
 
-  if (!provider && !storeId) return null;
-
-  const out = {};
-  out.type = provider && provider !== 'manual' ? 'official' : 'manual';
-  if (provider) out.provider = provider;
-  out.label = providerLabel(provider || 'manual');
-
-  const url = buildProviderUrl(provider, storeId);
-  if (url) out.url = url;
-
-  return out;
-}
-
-function uniqueSources(list) {
-  const out = [];
-  const seen = new Set();
-
-  for (const src of ensureArray(list)) {
-    if (!src || typeof src !== 'object') continue;
-
-    const url = normStr(src.url);
-    const label = normStr(src.label);
-    const provider = normStr(src.provider).toLowerCase();
-    const type = normStr(src.type).toLowerCase();
-    const lastChecked = normalizeDateString(src.lastChecked);
-
-    if (!url && !label) continue;
-
-    const key = [url.toLowerCase(), label.toLowerCase(), provider, type].join('|');
-    if (seen.has(key)) continue;
-    seen.add(key);
-
-    const item = {};
-    if (type) item.type = type;
-    if (provider) item.provider = provider;
-    if (label) item.label = label;
-    if (url) item.url = url;
-    if (lastChecked) item.lastChecked = lastChecked;
-
-    out.push(item);
-  }
-
-  return out;
-}
-
-function sanitizeSources(item, post) {
-  const existing = uniqueSources(item.sources);
-  const fromPost = inferSourceFromPost(post);
-  const fromItem = inferSourceFromItem(item, post);
-
-  let out = existing.slice();
-
-  if (fromPost) out = uniqueSources([...out, fromPost]);
-  if (fromItem) out = uniqueSources([...out, fromItem]);
-
-  // source.lastChecked는 item.lastChecked와 정합성 있게만 보강
-  const itemLastChecked = normalizeDateString(item.lastChecked);
-  out = out.map(src => {
-    const next = { ...src };
-
-    if (!next.label) {
-      next.label = providerLabel(next.provider || 'manual');
-    }
-
-    if (!next.lastChecked && itemLastChecked) {
-      next.lastChecked = itemLastChecked;
-    }
-
-    return next;
-  });
-
-  // source가 완전히 없으면 fake url 없이 manual label만 남김
-  if (out.length === 0) {
-    const provider = detectProvider(item, post) || 'manual';
-    out.push({
-      type: provider === 'manual' ? 'manual' : 'official',
-      provider,
-      label: providerLabel(provider),
-    });
-  }
-
-  return uniqueSources(out);
+  return 'manual';
 }
 
 function formatRating(v) {
@@ -383,6 +256,7 @@ function buildDataDrivenInsights(item) {
   const votesDiff = normalizeNonNegativeNumber(item.votesDiff);
   const status = normStr(item.status).toLowerCase();
   const store = normStr(item.store);
+  const source = normStr(item.source).toLowerCase();
 
   if (ratingCurrent > 0) {
     insights.push(`Current average rating is ${formatRating(ratingCurrent)} out of 5.`);
@@ -425,6 +299,10 @@ function buildDataDrivenInsights(item) {
     insights.push(`Primary review source is ${store}.`);
   }
 
+  if (source === 'official') {
+    insights.push('The review source is classified as official rather than placeholder-only metadata.');
+  }
+
   if (status === 'ok') {
     insights.push('The review record is currently in a valid state for structured snapshot injection.');
   }
@@ -451,7 +329,6 @@ function estimateHistogramFromRating(ratingCurrent, votesCurrent) {
     return { '1': 0, '2': 0, '3': 0, '4': 0, '5': 0 };
   }
 
-  // 실분포가 없을 때 과장 없이 완만한 고별점 중심 추정
   let w5 = Math.max(0.05, Math.min(0.80, (rating - 3.0) / 2.0));
   let w4 = Math.max(0.10, Math.min(0.55, 0.35 + (rating - 3.5) * 0.18));
   let w3 = Math.max(0.05, Math.min(0.30, 0.22 - (rating - 3.5) * 0.08));
@@ -498,11 +375,6 @@ function inferLastChecked(item, post) {
   const existing = normalizeDateString(item.lastChecked);
   if (existing) return existing;
 
-  for (const src of ensureArray(item.sources)) {
-    const d = normalizeDateString(src && src.lastChecked);
-    if (d) return d;
-  }
-
   const metaDate = normalizeDateString(item.histogramMeta && item.histogramMeta.generatedAt);
   if (metaDate) return metaDate;
 
@@ -518,10 +390,10 @@ function round1(v) {
 
 function needsFix(item, post) {
   const normalizedLastChecked = inferLastChecked(item, post);
-  const normalizedSources = sanitizeSources({ ...item, lastChecked: normalizedLastChecked }, post);
   const normalizedInsights = uniqueStrings(item.insights);
   const bucket = normStr(item.bucket || inferBucketFromSlug(normStr(post && post.slug) || ''));
   const status = normStr(item.status).toLowerCase();
+  const normalizedSource = normalizeSourceField(item, post);
 
   const histogram = ensureHistogram(item);
   const histSum = Object.values(histogram).reduce((a, b) => a + b, 0);
@@ -540,7 +412,7 @@ function needsFix(item, post) {
   if (!normalizedLastChecked) return true;
   if (!bucket) return true;
   if (!status || status === 'unknown' || status === 'queued') return true;
-  if (normalizedSources.length < 1) return true;
+  if (!normalizedSource) return true;
   if (normalizedInsights.length < 3) return true;
   if (!item.histogramMeta || typeof item.histogramMeta !== 'object') return true;
   if (histSum === 0 && ratingCurrent > 0 && votesCurrent > 0) return true;
@@ -553,41 +425,31 @@ function needsFix(item, post) {
 function guard(item, post) {
   const out = { ...item };
 
-  // lastChecked는 실제 점검일로 보정
   const inferredLastChecked = inferLastChecked(out, post);
   out.lastChecked = inferredLastChecked || todayKSTDate();
 
-  // status 정규화
   const existingStatus = normStr(out.status).toLowerCase();
   if (!existingStatus || existingStatus === 'unknown' || existingStatus === 'queued') {
-    const hasSources = sanitizeSources(out, post).length > 0;
-    out.status = hasSources ? 'ok' : 'manual';
+    out.status = normalizeSourceField(out, post) === 'official' ? 'ok' : 'manual';
   }
 
-  // sources 정리
-  out.sources = sanitizeSources(out, post);
-
-  // bucket 정리
   if (!normStr(out.bucket)) {
     const bucket = inferBucketFromSlug(normStr(post && post.slug) || '');
     if (bucket) out.bucket = bucket;
   }
 
-  // store / source / storeId 정규화
   const detectedProvider = detectProvider(out, post);
   if ((!normStr(out.store) || normStr(out.store).toLowerCase() === 'unknown') && detectedProvider) {
     out.store = detectedProvider;
   }
-  if ((!normStr(out.source) || normStr(out.source).toLowerCase() === 'unknown' || normStr(out.source).toLowerCase() === 'seed') && ensureArray(out.sources).length > 0) {
-    out.source = 'official';
-  }
+
+  out.source = normalizeSourceField(out, post);
 
   const postStoreId = normStr(post && post.reviewTarget && post.reviewTarget.storeId);
   if (!normStr(out.storeId) && postStoreId) {
     out.storeId = postStoreId;
   }
 
-  // 수치 정규화
   out.ratingCurrent = normalizeNonNegativeNumber(out.ratingCurrent);
   out.ratingPrevious = normalizeNonNegativeNumber(out.ratingPrevious);
   out.votesCurrent = normalizeNonNegativeNumber(out.votesCurrent);
@@ -599,20 +461,18 @@ function guard(item, post) {
   if (out.ratingDiff < 0) out.ratingDiff = 0;
   if (out.votesDiff < 0) out.votesDiff = 0;
 
-  // histogram 정규화 / 보강
   out.histogram = ensureHistogram(out);
   const histSum = Object.values(out.histogram).reduce((a, b) => a + b, 0);
   if (histSum === 0 && out.ratingCurrent > 0 && out.votesCurrent > 0) {
     out.histogram = estimateHistogramFromRating(out.ratingCurrent, out.votesCurrent);
   }
 
-  // histogramMeta 최소 구조
   if (!out.histogramMeta || typeof out.histogramMeta !== 'object') {
     out.histogramMeta = {
       source: 'estimated',
       generatedAt: out.lastChecked || todayKSTDate(),
       reason: 'guard-normalize',
-      method: 'signal-guard-boost-v3',
+      method: 'signal-guard-boost-v4',
     };
   } else {
     if (!normStr(out.histogramMeta.source)) out.histogramMeta.source = 'estimated';
@@ -620,7 +480,7 @@ function guard(item, post) {
       out.histogramMeta.generatedAt = out.lastChecked || todayKSTDate();
     }
     if (!normStr(out.histogramMeta.reason)) out.histogramMeta.reason = 'guard-normalize';
-    if (!normStr(out.histogramMeta.method)) out.histogramMeta.method = 'signal-guard-boost-v3';
+    if (!normStr(out.histogramMeta.method)) out.histogramMeta.method = 'signal-guard-boost-v4';
   }
 
   return out;
@@ -629,21 +489,16 @@ function guard(item, post) {
 function boost(item, post) {
   const out = { ...item };
 
-  // grounded insights only
   const existing = uniqueStrings(out.insights);
   const generated = buildDataDrivenInsights(out);
 
-  // source 구조에서 추가 설명 가능한 경우만 확장
   const provider = detectProvider(out, post);
-  if (provider && out.sources.length > 0) {
+  if (provider && normStr(out.source).toLowerCase() === 'official') {
     generated.push(`Source coverage includes ${providerLabel(provider)} metadata for structured trust signaling.`);
   }
 
   const merged = uniqueStrings([...existing, ...generated]);
   out.insights = merged.slice(0, 12);
-
-  // sources는 최대 3개까지만
-  out.sources = uniqueSources(out.sources).slice(0, 3);
 
   return out;
 }
