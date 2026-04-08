@@ -45,6 +45,14 @@
  *   - "생성 정책"은 유지
  *   - "운영 메타 보강"만 허용
  *
+ * [이번 국부 추가 2]
+ * - 기존 글 재사용/재연결 시에도 운영 필수 메타를 최소 보강한다.
+ * - 보강 대상:
+ *   - doc.seedMeta.queueDate
+ *   - doc.seedMeta.cutoff
+ *   - doc.updated
+ * - 기존 값이 있으면 유지하고, 없을 때만 채운다.
+ *
  * 절대 하지 말아야 할 것:
  * - 기존 posts 덮어쓰기
  * - today.json 구조 변경
@@ -492,34 +500,52 @@ function findExistingPostByDateLabel(queueDate, label) {
 /* ============================================================
  * 기존 글 최소 보강
  * - 생성 정책은 유지
- * - 운영에 필요한 메타(reviewEntity/seedMeta.entity)만 보강
+ * - 운영에 필요한 메타(reviewEntity/seedMeta.entity/queueDate/cutoff/updated)만 보강
  * - unrelated 필드 덮어쓰기 금지
  * ============================================================ */
-function patchExistingPostMinimum(existing, item, label) {
+function patchExistingPostMinimum(existing, item, label, queueDate, queueCutoff) {
   if (!existing || !existing.file || !existing.doc || typeof existing.doc !== 'object') {
     return { patched: false, reason: 'no-existing-doc' };
   }
 
-  const reviewEntity = normalizeReviewEntityFromQueue(item, label);
-  if (!reviewEntity) {
-    return { patched: false, reason: 'no-review-entity' };
-  }
-
   let changed = false;
   const doc = existing.doc;
-
-  if (!doc.reviewEntity) {
-    doc.reviewEntity = reviewEntity;
-    changed = true;
-  }
 
   if (!doc.seedMeta || typeof doc.seedMeta !== 'object') {
     doc.seedMeta = {};
     changed = true;
   }
 
-  if (!doc.seedMeta.entity) {
-    doc.seedMeta.entity = reviewEntity;
+  const reviewEntity = normalizeReviewEntityFromQueue(item, label);
+  if (reviewEntity) {
+    if (!doc.reviewEntity) {
+      doc.reviewEntity = reviewEntity;
+      changed = true;
+    }
+
+    if (!doc.seedMeta.entity) {
+      doc.seedMeta.entity = reviewEntity;
+      changed = true;
+    }
+  }
+
+  if (!String(doc.seedMeta.queueDate || '').trim()) {
+    doc.seedMeta.queueDate = queueDate;
+    changed = true;
+  }
+
+  if (!String(doc.seedMeta.cutoff || '').trim()) {
+    doc.seedMeta.cutoff = queueCutoff;
+    changed = true;
+  }
+
+  if (!String(doc.seedMeta.label || '').trim()) {
+    doc.seedMeta.label = label;
+    changed = true;
+  }
+
+  if (!String(doc.updated || '').trim()) {
+    doc.updated = resolveUpdatedIsoKst(queueDate, queueCutoff);
     changed = true;
   }
 
@@ -528,7 +554,7 @@ function patchExistingPostMinimum(existing, item, label) {
   }
 
   writeJsonAtomic(existing.file, doc);
-  return { patched: true, reason: 'patched-review-entity' };
+  return { patched: true, reason: 'patched-operational-meta' };
 }
 
 /* ============================================================
@@ -611,7 +637,13 @@ for (let i = 0; i < items.length; i++) {
         postId = existingByDateLabel.postId || null;
         reviewId = existingByDateLabel.reviewId || null;
 
-        const patchResult = patchExistingPostMinimum(existingByDateLabel, item, label);
+        const patchResult = patchExistingPostMinimum(
+          existingByDateLabel,
+          item,
+          label,
+          queueDate,
+          queueCutoff
+        );
 
         if (outItem) {
           outItem.generatedSlug = slug;
@@ -666,7 +698,13 @@ for (let i = 0; i < items.length; i++) {
   }
 
   if (existing) {
-    const patchResult = patchExistingPostMinimum(existing, item, label);
+    const patchResult = patchExistingPostMinimum(
+      existing,
+      item,
+      label,
+      queueDate,
+      queueCutoff
+    );
 
     if (outItem) {
       outItem.reused = true;
