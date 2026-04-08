@@ -47,6 +47,14 @@ function saveJson(p, data) {
   fs.writeFileSync(p, JSON.stringify(data, null, 2), 'utf8');
 }
 
+function writeJsonAtomic(p, data) {
+  const dir = path.dirname(p);
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  const tmp = `${p}.tmp`;
+  fs.writeFileSync(tmp, JSON.stringify(data, null, 2), 'utf8');
+  fs.renameSync(tmp, p);
+}
+
 function getTodayUtcDate() {
   const now = new Date();
   const yyyy = now.getUTCFullYear();
@@ -57,6 +65,15 @@ function getTodayUtcDate() {
 
 function nowUtcIso() {
   return new Date().toISOString();
+}
+
+function normalizeCutoff(v) {
+  const s = String(v || '').trim();
+  return /^\d{2}:\d{2}$/.test(s) ? s : '10:00';
+}
+
+function resolveUpdatedIsoKst(queueDate, cutoffHHMM) {
+  return `${queueDate}T${cutoffHHMM}:00+09:00`;
 }
 
 function slugify(str) {
@@ -110,6 +127,58 @@ function normalizeQueueLabel(queue) {
   return assertAllowedLabel(label, 'queue file label');
 }
 
+/**
+ * [국부 추가]
+ * - 기존 firstgate post가 이미 있을 때도 운영 필수 메타만 최소 보강
+ * - 기존 값은 유지하고, 없을 때만 채운다
+ * - unrelated 필드 수정 금지
+ */
+function patchExistingPostMinimum(targetPath, label, queueDate, queueCutoff, nowIso) {
+  const post = loadJson(targetPath);
+  if (!post || typeof post !== 'object') {
+    return { patched: false, reason: 'no-existing-doc' };
+  }
+
+  let changed = false;
+
+  if (!post.seedMeta || typeof post.seedMeta !== 'object') {
+    post.seedMeta = {};
+    changed = true;
+  }
+
+  if (!String(post.seedMeta.queueDate || '').trim()) {
+    post.seedMeta.queueDate = queueDate;
+    changed = true;
+  }
+
+  if (!String(post.seedMeta.label || '').trim()) {
+    post.seedMeta.label = label;
+    changed = true;
+  }
+
+  if (!String(post.seedMeta.cutoff || '').trim()) {
+    post.seedMeta.cutoff = queueCutoff;
+    changed = true;
+  }
+
+  if (!String(post.updated || '').trim()) {
+    post.updated = resolveUpdatedIsoKst(queueDate, queueCutoff);
+    changed = true;
+  }
+
+  if (!String(post.updatedAt || '').trim()) {
+    post.updatedAt = nowIso;
+    changed = true;
+  }
+
+  if (!changed) {
+    return { patched: false, reason: 'already-present' };
+  }
+
+  writeJsonAtomic(targetPath, post);
+  return { patched: true, reason: 'patched-operational-meta' };
+}
+
 function main() {
   console.log('[firstgate-queue-to-post] Start');
 
@@ -128,6 +197,7 @@ function main() {
   const seed = queue.seed || {};
   const seedId = String(queue.seedId || seed.id || 'fg-unknown').trim();
   const queueDate = queue.date || getTodayUtcDate();
+  const queueCutoff = normalizeCutoff(queue.cutoff || '10:00');
   const nowIso = nowUtcIso();
 
   const slug = buildSlug(label, seedId, queueDate);
@@ -135,7 +205,16 @@ function main() {
   const targetPath = path.join(CONTENT_POSTS_DIR, filename);
 
   if (fileExists(targetPath)) {
+    const patchResult = patchExistingPostMinimum(
+      targetPath,
+      label,
+      queueDate,
+      queueCutoff,
+      nowIso
+    );
+
     console.log(`[firstgate-queue-to-post] Target already exists, skipping: ${targetPath}`);
+    console.log(`[firstgate-queue-to-post] patched=${patchResult.patched} reason=${patchResult.reason}`);
     return;
   }
 
@@ -161,6 +240,7 @@ function main() {
       warehouseKey: `${label}::${seedId}`,
       pickedAt: queue.pickedAt || null,
       queueDate,
+      cutoff: queueCutoff,
 
       // 라벨은 메타로만 유지(표시/추적용)
       label,
@@ -173,6 +253,9 @@ function main() {
 
     createdAt: nowIso,
     updatedAt: nowIso,
+
+    // [국부 추가] 후속 날짜 기반 파이프라인과 정합성 유지
+    updated: resolveUpdatedIsoKst(queueDate, queueCutoff),
   };
 
   saveJson(targetPath, post);
