@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 'use strict';
 
+//origin-queue-to-post.cjs
+
 require('./lib/env.cjs'); // .env 로드(있으면)
 
 const fs = require('fs');
@@ -29,12 +31,68 @@ function writeJson(p, obj) {
   fs.writeFileSync(p, JSON.stringify(obj, null, 2) + '\n', 'utf8');
 }
 
-function resolveUpdatedIsoKst() {
+function writeJsonAtomic(p, obj) {
+  ensureDir(path.dirname(p));
+  const tmp = `${p}.tmp`;
+  fs.writeFileSync(tmp, JSON.stringify(obj, null, 2) + '\n', 'utf8');
+  fs.renameSync(tmp, p);
+}
+
+function resolveQueueDate(originQueue) {
+  const direct = String(originQueue && originQueue.date || '').trim().slice(0, 10);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(direct)) return direct;
+
+  const pickedAt = String(originQueue && originQueue.meta && originQueue.meta.pickedAt || '').trim();
+  const pickedDate = pickedAt.slice(0, 10);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(pickedDate)) return pickedDate;
+
   const now = new Date(Date.now() + 9 * 60 * 60 * 1000);
-  const yyyy = now.getUTCFullYear();
-  const mm = String(now.getUTCMonth() + 1).padStart(2, '0');
-  const dd = String(now.getUTCDate()).padStart(2, '0');
-  return `${yyyy}-${mm}-${dd}T10:00:00+09:00`;
+  return now.toISOString().slice(0, 10);
+}
+
+function normalizeCutoff(v) {
+  const s = String(v || '').trim();
+  return /^\d{2}:\d{2}$/.test(s) ? s : '10:00';
+}
+
+function resolveUpdatedIsoKst(queueDate, cutoffHHMM) {
+  return `${queueDate}T${cutoffHHMM}:00+09:00`;
+}
+
+function patchExistingPostMinimum(outPath, queueDate, cutoffHHMM) {
+  const post = readJsonSafe(outPath, null);
+  if (!post || typeof post !== 'object') {
+    return { patched: false, reason: 'no-existing-doc' };
+  }
+
+  let changed = false;
+
+  if (!post.seedMeta || typeof post.seedMeta !== 'object') {
+    post.seedMeta = {};
+    changed = true;
+  }
+
+  if (!String(post.seedMeta.queueDate || '').trim()) {
+    post.seedMeta.queueDate = queueDate;
+    changed = true;
+  }
+
+  if (!String(post.seedMeta.cutoff || '').trim()) {
+    post.seedMeta.cutoff = cutoffHHMM;
+    changed = true;
+  }
+
+  if (!String(post.updated || '').trim()) {
+    post.updated = resolveUpdatedIsoKst(queueDate, cutoffHHMM);
+    changed = true;
+  }
+
+  if (!changed) {
+    return { patched: false, reason: 'already-present' };
+  }
+
+  writeJsonAtomic(outPath, post);
+  return { patched: true, reason: 'patched-operational-meta' };
 }
 
 function main() {
@@ -55,6 +113,8 @@ function main() {
 
   const slug = String(q.seed.slug).trim();
   const outPath = path.join(POSTS_DIR, `${slug}.json`);
+  const queueDate = resolveQueueDate(q);
+  const cutoffHHMM = normalizeCutoff(q.cutoff || '10:00');
 
   // ✅ main posts 축에 최대한 맞춘 최소 구조
   // - labels 배열 사용
@@ -65,7 +125,7 @@ function main() {
     slug,
     title: q.seed.title,
     labels: ['firstgate'],
-    updated: resolveUpdatedIsoKst(),
+    updated: resolveUpdatedIsoKst(queueDate, cutoffHHMM),
 
     bodyPrompt: '',
     body: '',
@@ -83,6 +143,8 @@ function main() {
       label: 'firstgate',
       seedId: q.seed.seedId,
       id: q.seed.seedId,
+      queueDate,
+      cutoff: cutoffHHMM,
       labelHint: q.seed.labelHint || '',
       intent: q.seed.intent || '',
       trustClaims: q.seed.trustClaims || [],
@@ -94,7 +156,9 @@ function main() {
 
   // 이미 있으면 덮어쓰기 금지(사고 방지)
   if (fs.existsSync(outPath)) {
+    const patchResult = patchExistingPostMinimum(outPath, queueDate, cutoffHHMM);
     console.log('[origin-queue-to-post] SKIP: post json already exists ->', outPath);
+    console.log(`[origin-queue-to-post] patched=${patchResult.patched} reason=${patchResult.reason}`);
   } else {
     writeJson(outPath, post);
     console.log('[origin-queue-to-post] ✓ created ->', outPath);
