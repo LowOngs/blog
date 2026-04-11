@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-04-05T05:54:33.923Z",
+  "updatedAt": "2026-04-11T04:28:12.808Z",
   "images": [
     {
       "slug": "app-20251207-001",
@@ -13,8 +13,8 @@
       "alt": "A practical guide to choosing one main productivity app that you can really stick with across work, study, and side projects.",
       "etag": null,
       "hash": null,
-      "lastSeenAt": "2026-04-05T05:54:33.109Z",
-      "lastBuiltAt": "2026-04-05T05:54:33.358Z"
+      "lastSeenAt": "2026-04-11T04:28:11.780Z",
+      "lastBuiltAt": "2026-04-11T04:28:12.094Z"
     },
     {
       "slug": "device-20251207-001",
@@ -27,8 +27,8 @@
       "alt": "A grounded guide to picking a budget laptop under $800 that can handle studying, remote work, and light side projects without frustration.",
       "etag": null,
       "hash": null,
-      "lastSeenAt": "2026-04-05T05:54:33.109Z",
-      "lastBuiltAt": "2026-04-05T05:54:33.437Z"
+      "lastSeenAt": "2026-04-11T04:28:11.780Z",
+      "lastBuiltAt": "2026-04-11T04:28:12.197Z"
     },
     {
       "slug": "howto-20251207-001",
@@ -41,8 +41,8 @@
       "alt": "Managing tasks, notes, calendars, and files across multiple devices can quickly become chaotic. A simple, unified productivity system helps you stay organized,…",
       "etag": null,
       "hash": null,
-      "lastSeenAt": "2026-04-05T05:54:33.109Z",
-      "lastBuiltAt": "2026-04-05T05:54:33.516Z"
+      "lastSeenAt": "2026-04-11T04:28:11.780Z",
+      "lastBuiltAt": "2026-04-11T04:28:12.282Z"
     },
     {
       "slug": "origin-verify-updates",
@@ -55,8 +55,8 @@
       "alt": "We update guides on a fixed cadence and keep change visibility. Every post is version-tagged and source-linked.",
       "etag": null,
       "hash": null,
-      "lastSeenAt": "2026-04-05T05:54:33.110Z",
-      "lastBuiltAt": "2026-04-05T05:54:33.594Z"
+      "lastSeenAt": "2026-04-11T04:28:11.780Z",
+      "lastBuiltAt": "2026-04-11T04:28:12.369Z"
     },
     {
       "slug": "smartsavings-20251207-001",
@@ -69,8 +69,8 @@
       "alt": "Save money on productivity tools without breaking your workflow is best approached as a value decision, not just a price decision. Most people do not want the c…",
       "etag": null,
       "hash": null,
-      "lastSeenAt": "2026-04-05T05:54:33.110Z",
-      "lastBuiltAt": "2026-04-05T05:54:33.673Z"
+      "lastSeenAt": "2026-04-11T04:28:11.781Z",
+      "lastBuiltAt": "2026-04-11T04:28:12.455Z"
     },
     {
       "slug": "smartsavings-20260405-001",
@@ -83,8 +83,22 @@
       "alt": "How to Escape App Auto-Renew Traps After the 2025 Policy Change is best approached as a value decision, not just a price decision. Most people do not want the c…",
       "etag": null,
       "hash": null,
-      "lastSeenAt": "2026-04-05T05:54:33.110Z",
-      "lastBuiltAt": "2026-04-05T05:54:33.761Z"
+      "lastSeenAt": "2026-04-11T04:28:11.781Z",
+      "lastBuiltAt": "2026-04-11T04:28:12.545Z"
+    },
+    {
+      "slug": "smartsavings-20260411-001",
+      "pageId": "page000014",
+      "type": "og",
+      "url": "https://ongsblog.com/images/og/page000014_smartsavings-20260411-001_1200x630.jpg",
+      "filename": "page000014_smartsavings-20260411-001_1200x630.jpg",
+      "width": 1200,
+      "height": 630,
+      "alt": "How to Minimize In-App Purchase Spending with App Limits is best approached as a value decision, not just a price decision. Most people do not want the cheapest…",
+      "etag": null,
+      "hash": null,
+      "lastSeenAt": "2026-04-11T04:28:11.781Z",
+      "lastBuiltAt": "2026-04-11T04:28:12.631Z"
     },
     {
       "slug": "subscription-20251207-001",
@@ -97,8 +111,8 @@
       "alt": "A clear, numbers-based look at when it makes sense to pay for productivity app subscriptions and when free plans are enough.",
       "etag": null,
       "hash": null,
-      "lastSeenAt": "2026-04-05T05:54:33.110Z",
-      "lastBuiltAt": "2026-04-05T05:54:33.844Z"
+      "lastSeenAt": "2026-04-11T04:28:11.782Z",
+      "lastBuiltAt": "2026-04-11T04:28:12.717Z"
     },
     {
       "slug": "templates-20251207-001",
@@ -111,8 +125,8 @@
       "alt": "A weekly review checklist template for busy creators is meant to reduce hesitation at the moment of action. The value of a template or checklist is not abstract…",
       "etag": null,
       "hash": null,
-      "lastSeenAt": "2026-04-05T05:54:33.110Z",
-      "lastBuiltAt": "2026-04-05T05:54:33.922Z"
+      "lastSeenAt": "2026-04-11T04:28:11.782Z",
+      "lastBuiltAt": "2026-04-11T04:28:12.808Z"
     }
   ]
 }

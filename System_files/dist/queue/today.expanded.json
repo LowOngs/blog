@@ -1,30 +1,24 @@
 {
-  "date": "2026-04-05",
+  "date": "2026-04-11",
   "timezone": "Asia/Seoul",
   "cutoff": "10:00",
   "items": [
     {
-      "date": "2026-04-05",
+      "date": "2026-04-11",
       "label": "smart-savings",
       "seedLabel": "smart-savings",
       "requestedSlotLabel": "smart-savings",
       "mode": "trend",
-      "id": "ss-tr-013",
-      "title": "2025 Cheapest Cloud Storage Combos: Mix Google + OneDrive or iCloud?",
-      "angle": "Many users now mix 100GB + small plan combos for savings.",
-      "audience": "Cloud storage users",
+      "id": "ss-tr-014",
+      "title": "How to Minimize In-App Purchase Spending with App Limits",
+      "angle": "OS-level spend control is widely adopted in 2025.",
+      "audience": "Mobile gamers and shoppers",
       "intent": "saving",
       "priority": 1,
       "notes": "",
-      "generatedSlug": "smartsavings-20260405-001",
-      "postId": "06ENQX8P8MFGXEFEXGYF7TR51T",
-      "reused": true,
-      "reusedReason": "date-label-limit-existing",
-      "dateLabelLimit": 1,
-      "existingDateLabelCount": 1,
-      "patched": false,
-      "patchedReason": "no-review-entity"
+      "generatedSlug": "smartsavings-20260411-001",
+      "postId": "06EQNK0TTMN6BG24GW6QE8NJA6"
     }
   ],
-  "expandedAt": "2026-04-05T05:54:31.278Z"
+  "expandedAt": "2026-04-11T04:28:09.813Z"
 }

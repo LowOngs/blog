@@ -5,15 +5,6 @@
   },
   "trend": [
     {
-      "id": "ss-tr-014",
-      "title": "How to Minimize In-App Purchase Spending with App Limits",
-      "angle": "OS-level spend control is widely adopted in 2025.",
-      "audience": "Mobile gamers and shoppers",
-      "intent": "saving",
-      "priority": 1,
-      "fingerprint": "fp1:25b547d07e36c408c721c0a5825c3dee28fe78a0"
-    },
-    {
       "id": "ss-tr-015",
       "title": "How to Switch to Annual Plans Without Getting Locked In",
       "angle": "Annual billing got cheaper, but users fear commitment.",
