@@ -1,6 +1,6 @@
 {
   "version": 4,
-  "updatedAt": "2026-04-11T04:28:09.980Z",
+  "updatedAt": "2026-04-12T05:06:10.617Z",
   "offsetByKey": {
     "slug:ledger_smoke": 0,
     "pid:page000012": 8226,
@@ -27,7 +27,7 @@
     "slug:templates-20251207-001": 5950,
     "pid:page000014": 10626,
     "slug:smart-20260110-001": 6386,
-    "pid:page000015": 6740,
+    "pid:page000015": 11382,
     "slug:smart-20260111-001": 6740,
     "pid:page000016": 7453,
     "slug:howto-20260113-001": 7453,
@@ -36,7 +36,9 @@
     "fp:fp1:f230910dbb3f71a91b07923249f95ecc7b149321": 9384,
     "fp:fp1:38b2f0fccdf7d76a162cd3a6bbafd2ef781d5b4f": 9798,
     "fp:fp1:25b547d07e36c408c721c0a5825c3dee28fe78a0": 10212,
-    "slug:smartsavings-20260411-001": 10626
+    "slug:smartsavings-20260411-001": 10626,
+    "fp:fp1:99ce742fd855955afd587872c189ae1a532bd1c3": 10968,
+    "slug:smartsavings-20260412-001": 11382
   },
   "alias": {
     "slug:app-20260109-001": "pid:page000012",
@@ -54,6 +56,7 @@
     "slug:smart-20260111-001": "pid:page000015",
     "slug:howto-20260113-001": "pid:page000016",
     "slug:smartsavings-20260405-001": "pid:page000013",
-    "slug:smartsavings-20260411-001": "pid:page000014"
+    "slug:smartsavings-20260411-001": "pid:page000014",
+    "slug:smartsavings-20260412-001": "pid:page000015"
   }
 }

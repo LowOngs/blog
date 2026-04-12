@@ -1,6 +1,6 @@
 {
   "mode": "local",
-  "next": 15,
+  "next": 16,
   "map": {
     "app-20251207-001": "page000001",
     "device-20251207-001": "page000004",
@@ -10,7 +10,8 @@
     "smartsavings-20260405-001": "page000013",
     "subscription-20251207-001": "page000006",
     "templates-20251207-001": "page000007",
-    "smartsavings-20260411-001": "page000014"
+    "smartsavings-20260411-001": "page000014",
+    "smartsavings-20260412-001": "page000015"
   },
   "bySlug": {
     "app-20251207-001": "page000001",
@@ -21,7 +22,8 @@
     "smartsavings-20260405-001": "page000013",
     "subscription-20251207-001": "page000006",
     "templates-20251207-001": "page000007",
-    "smartsavings-20260411-001": "page000014"
+    "smartsavings-20260411-001": "page000014",
+    "smartsavings-20260412-001": "page000015"
   },
-  "updatedAt": "2026-04-11T04:28:09.978Z"
+  "updatedAt": "2026-04-12T05:06:10.616Z"
 }

@@ -1,24 +1,24 @@
 {
-  "date": "2026-04-11",
+  "date": "2026-04-12",
   "timezone": "Asia/Seoul",
   "cutoff": "10:00",
   "items": [
     {
-      "date": "2026-04-11",
+      "date": "2026-04-12",
       "label": "smart-savings",
       "seedLabel": "smart-savings",
       "requestedSlotLabel": "smart-savings",
       "mode": "trend",
-      "id": "ss-tr-014",
-      "title": "How to Minimize In-App Purchase Spending with App Limits",
-      "angle": "OS-level spend control is widely adopted in 2025.",
-      "audience": "Mobile gamers and shoppers",
+      "id": "ss-tr-015",
+      "title": "How to Switch to Annual Plans Without Getting Locked In",
+      "angle": "Annual billing got cheaper, but users fear commitment.",
+      "audience": "People aiming for long-term savings",
       "intent": "saving",
       "priority": 1,
       "notes": "",
-      "generatedSlug": "smartsavings-20260411-001",
-      "postId": "06EQNK0TTMN6BG24GW6QE8NJA6"
+      "generatedSlug": "smartsavings-20260412-001",
+      "postId": "06ER05A3M0C0PENWNVP5X8B59H"
     }
   ],
-  "expandedAt": "2026-04-11T04:28:09.813Z"
+  "expandedAt": "2026-04-12T05:06:10.464Z"
 }

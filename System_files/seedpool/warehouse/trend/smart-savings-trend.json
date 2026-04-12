@@ -5,15 +5,6 @@
   },
   "trend": [
     {
-      "id": "ss-tr-015",
-      "title": "How to Switch to Annual Plans Without Getting Locked In",
-      "angle": "Annual billing got cheaper, but users fear commitment.",
-      "audience": "People aiming for long-term savings",
-      "intent": "saving",
-      "priority": 1,
-      "fingerprint": "fp1:99ce742fd855955afd587872c189ae1a532bd1c3"
-    },
-    {
       "id": "ss-tr-016",
       "title": "Which VPN Plan Saves the Most in 2025?",
       "angle": "VPN pricing fluctuates heavily; global comparisons trend.",

@@ -7,3 +7,4 @@
 {"ts":"2026-04-05T04:44:42.073Z","mode":"local","slug":"subscription-20251207-001","pageId":"page000006","ledger":"page-ids.local.json","action":"adopt_existing"}
 {"ts":"2026-04-05T04:44:42.073Z","mode":"local","slug":"templates-20251207-001","pageId":"page000007","ledger":"page-ids.local.json","action":"adopt_existing"}
 {"ts":"2026-04-11T04:28:09.979Z","mode":"local","slug":"smartsavings-20260411-001","pageId":"page000014","ledger":"page-ids.local.json","action":"assign_new"}
+{"ts":"2026-04-12T05:06:10.616Z","mode":"local","slug":"smartsavings-20260412-001","pageId":"page000015","ledger":"page-ids.local.json","action":"assign_new"}
