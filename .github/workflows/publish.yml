@@ -124,6 +124,7 @@ jobs:
         run: |
           test -f ./System_files/scripts/build/seed-scheduler.cjs
           test -f ./System_files/scripts/build/queue-to-posts.cjs
+          test -f ./System_files/scripts/build/review-rating-next.cjs
           test -f ./System_files/scripts/build/ids.cjs
           test -f ./System_files/scripts/build/generate-body.cjs
           test -f ./System_files/scripts/build/generate-content.cjs
@@ -154,6 +155,10 @@ jobs:
           npm run posts:body:generate
           npm run posts:content:generate
           npm run posts:content:validate
+
+      - name: Bridge new reviews to review-ratings-next
+        run: |
+          node ./System_files/scripts/build/review-rating-next.cjs
 
       - name: Review SSOT build
         run: |
