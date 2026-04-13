@@ -21,6 +21,13 @@
  * D) review-meta는 "빈 placeholder(review-block--empty)"일 때만 채운다.
  *    - 이미 내용이 있는 review block은 절대 덮어쓰지 않음
  *    - 후처리 우회 경로를 최소화하고 템플릿 뼈대 무결성을 지킨다
+ *
+ * ✅ 이번 국부 추가
+ * E) review-trend-commentary.json 을 읽어 trend commentary를 insights 블록 하단에 추가한다.
+ *    - 기존 Positive / Negative insights 구조는 그대로 유지
+ *    - trend commentary는 별도 하단 블록으로만 추가
+ *    - trend commentary가 없으면 기존 동작과 동일
+ *    - review 본문/기존 insights를 덮어쓰지 않음
  */
 
 require('./lib/env.cjs'); // ✅ 공통 규칙: env 로더 최우선
@@ -33,6 +40,7 @@ const DIST_DIR = path.join(ROOT, 'dist', 'posts');
 const POSTS_DIR = path.join(ROOT, 'content', 'posts');
 const DATA_DIR = path.join(ROOT, 'content', 'reviews');
 const RATINGS_PATH = path.join(DATA_DIR, 'review-ratings.json');
+const TREND_COMMENTARY_PATH = path.join(DATA_DIR, 'review-trend-commentary.json');
 
 // ✅ 기본값: 리뷰 슬러그만 처리(노이즈 제거)
 // - 환경변수로 OFF 가능: REVIEW_META_ONLY_REVIEW_SLUGS=false
@@ -60,6 +68,18 @@ function loadRatings() {
   } catch (e) {
     console.error('[review-meta] review-ratings.json parse failed:', e.message);
     return { bySlug: {}, byReviewId: {} };
+  }
+}
+
+function loadTrendCommentary() {
+  if (!fs.existsSync(TREND_COMMENTARY_PATH)) return { bySlug: {}, windows: [] };
+  const raw = fs.readFileSync(TREND_COMMENTARY_PATH, 'utf8');
+  try {
+    const json = JSON.parse(raw);
+    return json || { bySlug: {}, windows: [] };
+  } catch (e) {
+    console.error('[review-meta] review-trend-commentary.json parse failed:', e.message);
+    return { bySlug: {}, windows: [] };
   }
 }
 
@@ -198,6 +218,19 @@ function takeUpTo6(list) {
   return out;
 }
 
+function takeUpTo4(list) {
+  const out = [];
+  const seen = new Set();
+  for (const item of list) {
+    const key = item.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(item);
+    if (out.length >= 4) break;
+  }
+  return out;
+}
+
 function pickPositiveNegative(data) {
   if (data && data.insights && typeof data.insights === 'object' && !Array.isArray(data.insights)) {
     const pos = normalizeTextList(data.insights.positive);
@@ -215,7 +248,43 @@ function pickPositiveNegative(data) {
   return { positive: flat, negative: [] };
 }
 
-function buildInsightsBlock(data) {
+function normalizeTrendInsights(trendData) {
+  if (!trendData || typeof trendData !== 'object') return [];
+  return takeUpTo4(normalizeTextList(trendData.insights));
+}
+
+function buildTrendMetaText(trendData, trendWindows) {
+  const latestDate = trendData && trendData.latest && trendData.latest.effectiveDate
+    ? String(trendData.latest.effectiveDate)
+    : 'n/a';
+
+  const windows = Array.isArray(trendWindows) && trendWindows.length
+    ? trendWindows.join('/')
+    : '90/180/270/360';
+
+  return `Trend commentary based on stored rating metrics (${windows}-day windows). Latest reference date: ${latestDate}.`;
+}
+
+function buildTrendCommentaryHtml(trendData, trendWindows) {
+  const insights = normalizeTrendInsights(trendData);
+  if (!insights.length) return '';
+
+  const itemsHtml = insights.map(t => `        <li>${t}</li>`).join('\n');
+  const metaText = buildTrendMetaText(trendData, trendWindows);
+
+  return [
+    '',
+    '    <div class="review-insights-trend">',
+    '      <div class="review-insights-col__title">Trend-based review commentary</div>',
+    `      <div class="review-block__meta">${metaText}</div>`,
+    '      <ul class="review-insights-list">',
+    itemsHtml,
+    '      </ul>',
+    '    </div>',
+  ].join('\n');
+}
+
+function buildInsightsBlock(data, trendData, trendWindows) {
   const { positive, negative } = pickPositiveNegative(data);
 
   const posPicked = takeUpTo6(positive);
@@ -233,6 +302,8 @@ function buildInsightsBlock(data) {
   const negHtml = negPicked.length
     ? negPicked.map(t => `        <li>${t}</li>`).join('\n')
     : `        <li class="review-insights-empty">${NEG_EMPTY_MSG}</li>`;
+
+  const trendHtml = buildTrendCommentaryHtml(trendData, trendWindows);
 
   return [
     '  <section id="review-insights-block" class="review-block">',
@@ -254,6 +325,7 @@ function buildInsightsBlock(data) {
     '        </ul>',
     '      </div>',
     '    </div>',
+    trendHtml,
     '  </section>',
   ].join('\n');
 }
@@ -285,17 +357,27 @@ function hasEmptyReviewPlaceholder(html, sectionId) {
   return pattern.test(html);
 }
 
+function resolveTrendDataForSlug(slug, trendDoc) {
+  if (!trendDoc || typeof trendDoc !== 'object') return null;
+  const bySlug = trendDoc.bySlug && typeof trendDoc.bySlug === 'object' ? trendDoc.bySlug : {};
+  return bySlug[slug] || null;
+}
+
 function main() {
   log('────────────────────────────────────────────');
   log('[review-meta] start');
   log(`[review-meta] ROOT = ${ROOT}`);
   log(`[review-meta] DIST = ${DIST_DIR}`);
   log(`[review-meta] SSOT = ${RATINGS_PATH}`);
+  log(`[review-meta] TREND = ${TREND_COMMENTARY_PATH}`);
   log(`[review-meta] ONLY_REVIEW_SLUGS = ${ONLY_REVIEW_SLUGS}`);
 
   const ratings = loadRatings();
+  const trendDoc = loadTrendCommentary();
+
   const bySlug = ratings.bySlug || {};
   const byReviewId = ratings.byReviewId || {};
+  const trendWindows = Array.isArray(trendDoc.windows) ? trendDoc.windows : [];
 
   if (!fs.existsSync(DIST_DIR)) {
     log('[review-meta] dist/posts does not exist. exit.');
@@ -313,6 +395,7 @@ function main() {
 
   let matchedById = 0;
   let matchedBySlug = 0;
+  let trendMatched = 0;
 
   for (const file of files) {
     const slug = path.basename(file, '.html');
@@ -338,6 +421,11 @@ function main() {
     if (!ratingData) {
       ratingMissing += 1;
       continue;
+    }
+
+    const trendData = resolveTrendDataForSlug(slug, trendDoc);
+    if (trendData) {
+      trendMatched += 1;
     }
 
     let html = fs.readFileSync(fullPath, 'utf8');
@@ -368,7 +456,7 @@ function main() {
     }
 
     if (canFillInsights) {
-      const insightsBlockHtml = buildInsightsBlock(ratingData);
+      const insightsBlockHtml = buildInsightsBlock(ratingData, trendData, trendWindows);
       const r2 = replaceSection(html, 'review-insights-block', insightsBlockHtml);
       html = r2.html;
       if (r2.changed) changed = true;
@@ -382,7 +470,7 @@ function main() {
 
   log('────────────────────────────────────────────');
   log(`[review-meta] done: updated=${updatedCount}, ssot-missing=${ratingMissing}, slot-missing=${slotMissing}, skipped-filled=${skippedFilled}, skipped-non-review=${skippedNonReview}`);
-  log(`[review-meta] match: byId=${matchedById}, bySlug=${matchedBySlug}`);
+  log(`[review-meta] match: byId=${matchedById}, bySlug=${matchedBySlug}, trendBySlug=${trendMatched}`);
   log('────────────────────────────────────────────');
 }
 
