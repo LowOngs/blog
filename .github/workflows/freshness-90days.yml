@@ -136,6 +136,7 @@ jobs:
           test -f System_files/scripts/build/review-next-from-due.cjs
           test -f System_files/scripts/build/review-diff-update.cjs
           test -f System_files/scripts/build/review-resolver.cjs
+          test -f System_files/scripts/build/review-trend-commentary.cjs
 
           test -f System_files/scripts/build/validate-body-images.cjs
 
@@ -162,6 +163,15 @@ jobs:
         run: |
           set -euo pipefail
           npm run reviews:freshness
+
+      - name: Build review trend commentary (90/180/270/360)
+        if: env.SKIP_PIPELINE != 'true'
+        working-directory: System_files
+        env:
+          REVIEW_TREND_MODE: both
+        run: |
+          set -euo pipefail
+          node scripts/build/review-trend-commentary.cjs
 
       - name: Validate body images manifest
         if: env.SKIP_PIPELINE != 'true'
