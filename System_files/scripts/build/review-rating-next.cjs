@@ -22,6 +22,7 @@
  *
  * 출력:
  * - System_files/content/reviews/review-ratings-next.json
+ * - System_files/content/reviews/{app|device|subscription}-ratings-next.json
  *
  * 정책:
  * 1) today.expanded.json 우선 사용
@@ -36,6 +37,15 @@
  * - 이 파일은 실제 리뷰 수집기가 아니다.
  * - "신규 리뷰를 next SSOT 후보에 연결"만 담당한다.
  * - 실제 값 수집은 기존 fetch/update 파이프가 이어서 수행한다.
+ *
+ * [이번 국부 추가]
+ * - 글로벌 next(review-ratings-next.json)뿐 아니라
+ *   버킷 next(app/device/subscription-ratings-next.json)도 함께 동기화한다.
+ * - 목적:
+ *   - 신규 리뷰 브리지와 기존 버킷 기반 diff/update 흐름의 정합성 보강
+ * - 원칙:
+ *   - 기존 stronger data 보호 정책은 글로벌/버킷 next 모두 동일 적용
+ *   - 없는 구조 생성 없이 기존 next shape(bySlug)만 유지
  */
 
 require('./lib/env.cjs');
@@ -46,7 +56,14 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..', '..'); // System_files
 const QUEUE_EXPANDED_PATH = path.join(ROOT, 'dist', 'queue', 'today.expanded.json');
 const POSTS_DIR = path.join(ROOT, 'content', 'posts');
-const NEXT_PATH = path.join(ROOT, 'content', 'reviews', 'review-ratings-next.json');
+const REVIEWS_DIR = path.join(ROOT, 'content', 'reviews');
+const NEXT_PATH = path.join(REVIEWS_DIR, 'review-ratings-next.json');
+
+const BUCKET_NEXT_PATHS = {
+  app: path.join(REVIEWS_DIR, 'app-ratings-next.json'),
+  device: path.join(REVIEWS_DIR, 'device-ratings-next.json'),
+  subscription: path.join(REVIEWS_DIR, 'subscription-ratings-next.json'),
+};
 
 const REVIEW_LABELS = new Set([
   'app-reviews',
@@ -235,6 +252,33 @@ function buildSeedStubRecord({ postJson, label, entity }) {
   };
 }
 
+function upsertSeedStub(doc, slug, candidate) {
+  const prev = doc.bySlug[slug];
+
+  if (hasMeaningfulRealData(prev)) {
+    return { action: 'keptStrong' };
+  }
+
+  const before = JSON.stringify(prev || null);
+  const after = JSON.stringify(candidate);
+
+  if (!prev) {
+    doc.bySlug[slug] = candidate;
+    return { action: 'created' };
+  }
+
+  if (before !== after) {
+    doc.bySlug[slug] = candidate;
+    return { action: 'updated' };
+  }
+
+  return { action: 'same' };
+}
+
+function touchUpdatedAt(doc) {
+  doc.updatedAt = new Date().toISOString();
+}
+
 function main() {
   log('ROOT =', ROOT);
   log('QUEUE_EXPANDED =', QUEUE_EXPANDED_PATH);
@@ -255,11 +299,23 @@ function main() {
 
   const next = ensureNextShape(readJsonSafe(NEXT_PATH, { updatedAt: null, bySlug: {} }));
 
+  const bucketDocs = {
+    app: ensureNextShape(readJsonSafe(BUCKET_NEXT_PATHS.app, { updatedAt: null, bySlug: {} })),
+    device: ensureNextShape(readJsonSafe(BUCKET_NEXT_PATHS.device, { updatedAt: null, bySlug: {} })),
+    subscription: ensureNextShape(readJsonSafe(BUCKET_NEXT_PATHS.subscription, { updatedAt: null, bySlug: {} })),
+  };
+
   let checked = 0;
   let reviewTargets = 0;
-  let created = 0;
-  let updated = 0;
-  let keptStrong = 0;
+
+  let globalCreated = 0;
+  let globalUpdated = 0;
+  let globalKeptStrong = 0;
+
+  let bucketCreated = 0;
+  let bucketUpdated = 0;
+  let bucketKeptStrong = 0;
+
   let skippedNoSlug = 0;
   let skippedNoPost = 0;
   let skippedNoEntity = 0;
@@ -303,38 +359,36 @@ function main() {
       continue;
     }
 
-    const prev = next.bySlug[slug];
-    if (hasMeaningfulRealData(prev)) {
-      keptStrong += 1;
-      continue;
-    }
-
     const candidate = buildSeedStubRecord({
       postJson,
       label: postLabel,
       entity,
     });
 
-    const before = JSON.stringify(prev || null);
-    const after = JSON.stringify(candidate);
+    const globalResult = upsertSeedStub(next, slug, candidate);
+    if (globalResult.action === 'created') globalCreated += 1;
+    else if (globalResult.action === 'updated') globalUpdated += 1;
+    else if (globalResult.action === 'keptStrong') globalKeptStrong += 1;
 
-    if (!prev) {
-      next.bySlug[slug] = candidate;
-      created += 1;
-      continue;
-    }
-
-    if (before !== after) {
-      next.bySlug[slug] = candidate;
-      updated += 1;
+    const bucket = normalizeBucketFromLabel(postLabel);
+    if (bucket && bucketDocs[bucket]) {
+      const bucketResult = upsertSeedStub(bucketDocs[bucket], slug, candidate);
+      if (bucketResult.action === 'created') bucketCreated += 1;
+      else if (bucketResult.action === 'updated') bucketUpdated += 1;
+      else if (bucketResult.action === 'keptStrong') bucketKeptStrong += 1;
     }
   }
 
-  next.updatedAt = new Date().toISOString();
+  touchUpdatedAt(next);
   writeJsonAtomic(NEXT_PATH, next);
 
+  for (const [bucket, filePath] of Object.entries(BUCKET_NEXT_PATHS)) {
+    touchUpdatedAt(bucketDocs[bucket]);
+    writeJsonAtomic(filePath, bucketDocs[bucket]);
+  }
+
   log(
-    `done: checked=${checked}, reviewTargets=${reviewTargets}, created=${created}, updated=${updated}, keptStrong=${keptStrong}, skippedNoSlug=${skippedNoSlug}, skippedNoPost=${skippedNoPost}, skippedNoEntity=${skippedNoEntity}, skippedNonReview=${skippedNonReview}`
+    `done: checked=${checked}, reviewTargets=${reviewTargets}, globalCreated=${globalCreated}, globalUpdated=${globalUpdated}, globalKeptStrong=${globalKeptStrong}, bucketCreated=${bucketCreated}, bucketUpdated=${bucketUpdated}, bucketKeptStrong=${bucketKeptStrong}, skippedNoSlug=${skippedNoSlug}, skippedNoPost=${skippedNoPost}, skippedNoEntity=${skippedNoEntity}, skippedNonReview=${skippedNonReview}`
   );
 }
 
