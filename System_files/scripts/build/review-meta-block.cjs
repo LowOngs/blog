@@ -28,6 +28,11 @@
  *    - trend commentary는 별도 하단 블록으로만 추가
  *    - trend commentary가 없으면 기존 동작과 동일
  *    - review 본문/기존 insights를 덮어쓰지 않음
+ *
+ * ✅ 이번 출력 경계 정리
+ * F) 독자에게 보이면 안 되는 시스템/설계 문구는 출력하지 않는다.
+ *    - "최대 6개", "안내문이 표시됩니다", "90/180/270/360-day windows" 같은 내부 규칙 문구 제거
+ *    - 독자용 제목/설명만 남긴다.
  */
 
 require('./lib/env.cjs'); // ✅ 공통 규칙: env 로더 최우선
@@ -107,14 +112,80 @@ function formatLastChecked(v) {
   return String(v);
 }
 
+function normalizeTextList(list) {
+  return (Array.isArray(list) ? list : [])
+    .map(t => (t ? String(t).trim() : ''))
+    .filter(Boolean);
+}
+
+function takeUpTo6(list) {
+  const out = [];
+  const seen = new Set();
+  for (const item of list) {
+    const key = item.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(item);
+    if (out.length >= 6) break;
+  }
+  return out;
+}
+
+function takeUpTo4(list) {
+  const out = [];
+  const seen = new Set();
+  for (const item of list) {
+    const key = item.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(item);
+    if (out.length >= 4) break;
+  }
+  return out;
+}
+
+function normalizeNonNegativeNumber(v) {
+  const n = Number(v);
+  return Number.isFinite(n) && n >= 0 ? n : 0;
+}
+
+function isQueuedOrEmpty(data) {
+  if (!data || typeof data !== 'object') return true;
+
+  const status = String(data.status || '').trim().toLowerCase();
+  const ratingCurrent = normalizeNonNegativeNumber(data.ratingCurrent);
+  const votesCurrent = normalizeNonNegativeNumber(data.votesCurrent);
+
+  return status === 'queued' || (ratingCurrent === 0 && votesCurrent === 0);
+}
+
+function ensureHistogramObject(histogram) {
+  const src = histogram && typeof histogram === 'object' ? histogram : {};
+  return {
+    '1': normalizeNonNegativeNumber(src['1']),
+    '2': normalizeNonNegativeNumber(src['2']),
+    '3': normalizeNonNegativeNumber(src['3']),
+    '4': normalizeNonNegativeNumber(src['4']),
+    '5': normalizeNonNegativeNumber(src['5']),
+  };
+}
+
+function hasHistogramData(histogram) {
+  const h = ensureHistogramObject(histogram);
+  return Object.values(h).some(v => normalizeNonNegativeNumber(v) > 0);
+}
+
 function buildHistogramHtml(histogram) {
   if (!histogram || typeof histogram !== 'object') return '';
+
+  const h = ensureHistogramObject(histogram);
+  if (!hasHistogramData(h)) return '';
 
   const stars = [5, 4, 3, 2, 1];
   const rows = [];
 
   for (const star of stars) {
-    const raw = Number(histogram[String(star)] ?? 0);
+    const raw = Number(h[String(star)] ?? 0);
     if (!Number.isFinite(raw)) continue;
 
     const pct = Math.max(0, Math.min(100, raw));
@@ -145,7 +216,26 @@ function buildHistogramHtml(histogram) {
   ].join('\n');
 }
 
+function buildPendingRatingBlock(data) {
+  const store = data && data.store ? String(data.store) : 'review source unavailable';
+
+  return [
+    '  <section id="review-rating-block" class="review-block">',
+    '    <div class="review-block__title">User ratings</div>',
+    '    <div class="review-block__meta">',
+    `      A full rating snapshot is not available yet. Current source status: ${store}.`,
+    '    </div>',
+    '    <p>The review record has been connected, but reliable rating data has not been collected in a stable form yet.</p>',
+    '    <p>Until that update is available, this section should be read as an early review placeholder rather than a final scorecard.</p>',
+    '  </section>',
+  ].join('\n');
+}
+
 function buildRatingBlock(data) {
+  if (isQueuedOrEmpty(data)) {
+    return buildPendingRatingBlock(data);
+  }
+
   const lastChecked = formatLastChecked(data.lastChecked);
   const status = data.status || 'n/a';
   const store = data.store || 'multi';
@@ -164,7 +254,7 @@ function buildRatingBlock(data) {
 
   return [
     '  <section id="review-rating-block" class="review-block">',
-    '    <div class="review-block__title">User ratings snapshot (last 90 days)</div>',
+    '    <div class="review-block__title">User ratings</div>',
     '    <div class="review-block__meta">',
     `      Last checked: ${lastChecked} · Status: ${status} · Store: ${store}`,
     '    </div>',
@@ -199,38 +289,6 @@ function buildRatingBlock(data) {
   ].join('\n');
 }
 
-function normalizeTextList(list) {
-  return (Array.isArray(list) ? list : [])
-    .map(t => (t ? String(t).trim() : ''))
-    .filter(Boolean);
-}
-
-function takeUpTo6(list) {
-  const out = [];
-  const seen = new Set();
-  for (const item of list) {
-    const key = item.toLowerCase();
-    if (seen.has(key)) continue;
-    seen.add(key);
-    out.push(item);
-    if (out.length >= 6) break;
-  }
-  return out;
-}
-
-function takeUpTo4(list) {
-  const out = [];
-  const seen = new Set();
-  for (const item of list) {
-    const key = item.toLowerCase();
-    if (seen.has(key)) continue;
-    seen.add(key);
-    out.push(item);
-    if (out.length >= 4) break;
-  }
-  return out;
-}
-
 function pickPositiveNegative(data) {
   if (data && data.insights && typeof data.insights === 'object' && !Array.isArray(data.insights)) {
     const pos = normalizeTextList(data.insights.positive);
@@ -253,30 +311,16 @@ function normalizeTrendInsights(trendData) {
   return takeUpTo4(normalizeTextList(trendData.insights));
 }
 
-function buildTrendMetaText(trendData, trendWindows) {
-  const latestDate = trendData && trendData.latest && trendData.latest.effectiveDate
-    ? String(trendData.latest.effectiveDate)
-    : 'n/a';
-
-  const windows = Array.isArray(trendWindows) && trendWindows.length
-    ? trendWindows.join('/')
-    : '90/180/270/360';
-
-  return `Trend commentary based on stored rating metrics (${windows}-day windows). Latest reference date: ${latestDate}.`;
-}
-
-function buildTrendCommentaryHtml(trendData, trendWindows) {
+function buildTrendCommentaryHtml(trendData) {
   const insights = normalizeTrendInsights(trendData);
   if (!insights.length) return '';
 
   const itemsHtml = insights.map(t => `        <li>${t}</li>`).join('\n');
-  const metaText = buildTrendMetaText(trendData, trendWindows);
 
   return [
     '',
     '    <div class="review-insights-trend">',
-    '      <div class="review-insights-col__title">Trend-based review commentary</div>',
-    `      <div class="review-block__meta">${metaText}</div>`,
+    '      <div class="review-insights-col__title">Recent review reading</div>',
     '      <ul class="review-insights-list">',
     itemsHtml,
     '      </ul>',
@@ -284,16 +328,16 @@ function buildTrendCommentaryHtml(trendData, trendWindows) {
   ].join('\n');
 }
 
-function buildInsightsBlock(data, trendData, trendWindows) {
+function buildInsightsBlock(data, trendData) {
   const { positive, negative } = pickPositiveNegative(data);
 
   const posPicked = takeUpTo6(positive);
   const negPicked = takeUpTo6(negative);
 
   const POS_EMPTY_MSG =
-    'Positive feedback exists, but there are not enough specific, detailed comments to summarize yet.';
+    'There is still not enough concrete user feedback to summarize the main strengths with confidence.';
   const NEG_EMPTY_MSG =
-    'No meaningful negative issues (specific complaints or problems) have been identified so far.';
+    'No clearly repeated negative issue stands out yet from the currently available feedback.';
 
   const posHtml = posPicked.length
     ? posPicked.map(t => `        <li>${t}</li>`).join('\n')
@@ -303,12 +347,12 @@ function buildInsightsBlock(data, trendData, trendWindows) {
     ? negPicked.map(t => `        <li>${t}</li>`).join('\n')
     : `        <li class="review-insights-empty">${NEG_EMPTY_MSG}</li>`;
 
-  const trendHtml = buildTrendCommentaryHtml(trendData, trendWindows);
+  const trendHtml = buildTrendCommentaryHtml(trendData);
 
   return [
     '  <section id="review-insights-block" class="review-block">',
-    '    <div class="review-block__title">User insights snapshot</div>',
-    '    <div class="review-block__meta">Positive vs. negative signals (up to 6 each). If evidence is insufficient, a notice is shown.</div>',
+    '    <div class="review-block__title">What users seem to like and dislike</div>',
+    '    <div class="review-block__meta">This section summarizes currently available user-facing signals.</div>',
     '',
     '    <div class="review-insights-split">',
     '      <div class="review-insights-col review-insights-col--positive">',
@@ -377,7 +421,6 @@ function main() {
 
   const bySlug = ratings.bySlug || {};
   const byReviewId = ratings.byReviewId || {};
-  const trendWindows = Array.isArray(trendDoc.windows) ? trendDoc.windows : [];
 
   if (!fs.existsSync(DIST_DIR)) {
     log('[review-meta] dist/posts does not exist. exit.');
@@ -456,7 +499,7 @@ function main() {
     }
 
     if (canFillInsights) {
-      const insightsBlockHtml = buildInsightsBlock(ratingData, trendData, trendWindows);
+      const insightsBlockHtml = buildInsightsBlock(ratingData, trendData);
       const r2 = replaceSection(html, 'review-insights-block', insightsBlockHtml);
       html = r2.html;
       if (r2.changed) changed = true;
