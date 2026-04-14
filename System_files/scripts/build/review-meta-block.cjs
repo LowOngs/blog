@@ -221,7 +221,7 @@ function buildPendingRatingBlock(data) {
 
   return [
     '  <section id="review-rating-block" class="review-block">',
-    '    <div class="review-block__title">User ratings</div>',
+    '    <div class="review-block__title">User ratings snapshot (last 90 days)</div>',
     '    <div class="review-block__meta">',
     `      A full rating snapshot is not available yet. Current source status: ${store}.`,
     '    </div>',
@@ -254,7 +254,7 @@ function buildRatingBlock(data) {
 
   return [
     '  <section id="review-rating-block" class="review-block">',
-    '    <div class="review-block__title">User ratings</div>',
+    '    <div class="review-block__title">User ratings snapshot (last 90 days)</div>',
     '    <div class="review-block__meta">',
     `      Last checked: ${lastChecked} · Status: ${status} · Store: ${store}`,
     '    </div>',
