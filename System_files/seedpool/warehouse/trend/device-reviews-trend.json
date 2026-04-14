@@ -5,21 +5,6 @@
   },
   "trend": [
     {
-      "id": "dr-tr-001",
-      "title": "Is This Year’s Flagship Phone Really Faster?",
-      "angle": "Thermal behavior + sustained performance",
-      "audience": "Smartphone buyers",
-      "intent": "review/performance-test",
-      "environment": "phones",
-      "timing": "launch season",
-      "goal": "check if new chip throttles under load",
-      "fingerprint": "fp1:52c54f7ee5cd1d21a3962df11f7507eb4121a6b1",
-      "reviewEntity": {
-        "type": "device",
-        "model": "Phones"
-      }
-    },
-    {
       "id": "dr-tr-002",
       "title": "Which Foldable Phone Has the Stronger Hinge This Year?",
       "angle": "Flex durability + crease visibility",

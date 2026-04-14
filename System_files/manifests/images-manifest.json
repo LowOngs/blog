@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-04-12T05:06:13.361Z",
+  "updatedAt": "2026-04-14T05:05:53.708Z",
   "images": [
     {
       "slug": "app-20251207-001",
@@ -13,8 +13,8 @@
       "alt": "A practical guide to choosing one main productivity app that you can really stick with across work, study, and side projects.",
       "etag": null,
       "hash": null,
-      "lastSeenAt": "2026-04-12T05:06:12.345Z",
-      "lastBuiltAt": "2026-04-12T05:06:12.603Z"
+      "lastSeenAt": "2026-04-14T05:05:52.551Z",
+      "lastBuiltAt": "2026-04-14T05:05:52.806Z"
     },
     {
       "slug": "device-20251207-001",
@@ -27,8 +27,22 @@
       "alt": "A grounded guide to picking a budget laptop under $800 that can handle studying, remote work, and light side projects without frustration.",
       "etag": null,
       "hash": null,
-      "lastSeenAt": "2026-04-12T05:06:12.345Z",
-      "lastBuiltAt": "2026-04-12T05:06:12.689Z"
+      "lastSeenAt": "2026-04-14T05:05:52.551Z",
+      "lastBuiltAt": "2026-04-14T05:05:52.898Z"
+    },
+    {
+      "slug": "device-20260414-001",
+      "pageId": "page000016",
+      "type": "og",
+      "url": "https://ongsblog.com/images/og/page000016_device-20260414-001_1200x630.jpg",
+      "filename": "page000016_device-20260414-001_1200x630.jpg",
+      "width": 1200,
+      "height": 630,
+      "alt": "Is This Year’s Flagship Phone Really Faster? should be read as a practical buying decision rather than a headline claim. What matters most at the start is wheth…",
+      "etag": null,
+      "hash": null,
+      "lastSeenAt": "2026-04-14T05:05:52.551Z",
+      "lastBuiltAt": "2026-04-14T05:05:52.977Z"
     },
     {
       "slug": "howto-20251207-001",
@@ -41,8 +55,22 @@
       "alt": "Managing tasks, notes, calendars, and files across multiple devices can quickly become chaotic. A simple, unified productivity system helps you stay organized,…",
       "etag": null,
       "hash": null,
-      "lastSeenAt": "2026-04-12T05:06:12.346Z",
-      "lastBuiltAt": "2026-04-12T05:06:12.774Z"
+      "lastSeenAt": "2026-04-14T05:05:52.551Z",
+      "lastBuiltAt": "2026-04-14T05:05:53.061Z"
+    },
+    {
+      "slug": "howto-20260414-001",
+      "pageId": "page000017",
+      "type": "og",
+      "url": "https://ongsblog.com/images/og/page000017_howto-20260414-001_1200x630.jpg",
+      "filename": "page000017_howto-20260414-001_1200x630.jpg",
+      "width": 1200,
+      "height": 630,
+      "alt": "How to set up a new router and optimize home Wi-Fi coverage should be read as a practical execution guide. The goal is not to sound technical for its own sake,…",
+      "etag": null,
+      "hash": null,
+      "lastSeenAt": "2026-04-14T05:05:52.551Z",
+      "lastBuiltAt": "2026-04-14T05:05:53.140Z"
     },
     {
       "slug": "origin-verify-updates",
@@ -55,8 +83,8 @@
       "alt": "We update guides on a fixed cadence and keep change visibility. Every post is version-tagged and source-linked.",
       "etag": null,
       "hash": null,
-      "lastSeenAt": "2026-04-12T05:06:12.346Z",
-      "lastBuiltAt": "2026-04-12T05:06:12.857Z"
+      "lastSeenAt": "2026-04-14T05:05:52.552Z",
+      "lastBuiltAt": "2026-04-14T05:05:53.220Z"
     },
     {
       "slug": "smartsavings-20251207-001",
@@ -69,8 +97,8 @@
       "alt": "Save money on productivity tools without breaking your workflow is best approached as a value decision, not just a price decision. Most people do not want the c…",
       "etag": null,
       "hash": null,
-      "lastSeenAt": "2026-04-12T05:06:12.346Z",
-      "lastBuiltAt": "2026-04-12T05:06:12.941Z"
+      "lastSeenAt": "2026-04-14T05:05:52.552Z",
+      "lastBuiltAt": "2026-04-14T05:05:53.302Z"
     },
     {
       "slug": "smartsavings-20260405-001",
@@ -83,8 +111,8 @@
       "alt": "How to Escape App Auto-Renew Traps After the 2025 Policy Change is best approached as a value decision, not just a price decision. Most people do not want the c…",
       "etag": null,
       "hash": null,
-      "lastSeenAt": "2026-04-12T05:06:12.346Z",
-      "lastBuiltAt": "2026-04-12T05:06:13.025Z"
+      "lastSeenAt": "2026-04-14T05:05:52.552Z",
+      "lastBuiltAt": "2026-04-14T05:05:53.387Z"
     },
     {
       "slug": "smartsavings-20260411-001",
@@ -97,8 +125,8 @@
       "alt": "How to Minimize In-App Purchase Spending with App Limits is best approached as a value decision, not just a price decision. Most people do not want the cheapest…",
       "etag": null,
       "hash": null,
-      "lastSeenAt": "2026-04-12T05:06:12.346Z",
-      "lastBuiltAt": "2026-04-12T05:06:13.109Z"
+      "lastSeenAt": "2026-04-14T05:05:52.552Z",
+      "lastBuiltAt": "2026-04-14T05:05:53.472Z"
     },
     {
       "slug": "smartsavings-20260412-001",
@@ -111,8 +139,8 @@
       "alt": "How to Switch to Annual Plans Without Getting Locked In is best approached as a value decision, not just a price decision. Most people do not want the cheapest…",
       "etag": null,
       "hash": null,
-      "lastSeenAt": "2026-04-12T05:06:12.347Z",
-      "lastBuiltAt": "2026-04-12T05:06:13.192Z"
+      "lastSeenAt": "2026-04-14T05:05:52.553Z",
+      "lastBuiltAt": "2026-04-14T05:05:53.551Z"
     },
     {
       "slug": "subscription-20251207-001",
@@ -125,8 +153,8 @@
       "alt": "A clear, numbers-based look at when it makes sense to pay for productivity app subscriptions and when free plans are enough.",
       "etag": null,
       "hash": null,
-      "lastSeenAt": "2026-04-12T05:06:12.347Z",
-      "lastBuiltAt": "2026-04-12T05:06:13.275Z"
+      "lastSeenAt": "2026-04-14T05:05:52.553Z",
+      "lastBuiltAt": "2026-04-14T05:05:53.629Z"
     },
     {
       "slug": "templates-20251207-001",
@@ -139,8 +167,8 @@
       "alt": "A weekly review checklist template for busy creators is meant to reduce hesitation at the moment of action. The value of a template or checklist is not abstract…",
       "etag": null,
       "hash": null,
-      "lastSeenAt": "2026-04-12T05:06:12.347Z",
-      "lastBuiltAt": "2026-04-12T05:06:13.361Z"
+      "lastSeenAt": "2026-04-14T05:05:52.553Z",
+      "lastBuiltAt": "2026-04-14T05:05:53.708Z"
     }
   ]
 }

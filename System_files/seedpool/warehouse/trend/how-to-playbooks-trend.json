@@ -5,15 +5,6 @@
   },
   "trend": [
     {
-      "id": "ht-tr-023",
-      "title": "How to set up a new router and optimize home Wi-Fi coverage",
-      "angle": "Home mesh networks surged in 2025.",
-      "audience": "Home network users",
-      "intent": "howto",
-      "priority": 1,
-      "fingerprint": "fp1:968f43c0383845c9d18dc472d224ee906a19c58d"
-    },
-    {
       "id": "ht-tr-024",
       "title": "How to use digital IDs and passwordless login (FIDO2)",
       "angle": "Passwordless adoption accelerates worldwide.",
