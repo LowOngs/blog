@@ -216,6 +216,117 @@ function inferProductType(label, title) {
   return 'product';
 }
 
+function extractReviewEntity(post) {
+  const a = post && post.reviewEntity && typeof post.reviewEntity === 'object' ? post.reviewEntity : null;
+  if (a) return a;
+
+  const b = post && post.seedMeta && post.seedMeta.entity && typeof post.seedMeta.entity === 'object'
+    ? post.seedMeta.entity
+    : null;
+  if (b) return b;
+
+  const c = post && post.seedMeta && post.seedMeta.reviewEntity && typeof post.seedMeta.reviewEntity === 'object'
+    ? post.seedMeta.reviewEntity
+    : null;
+  if (c) return c;
+
+  return null;
+}
+
+function extractReviewTarget(post) {
+  if (post && post.reviewTarget && typeof post.reviewTarget === 'object') {
+    return post.reviewTarget;
+  }
+  return null;
+}
+
+function deriveReviewTargetName(post, label) {
+  const entity = extractReviewEntity(post);
+  const target = extractReviewTarget(post);
+  const title = normStr(post && post.title);
+  const fallbackProduct = inferProductType(label, title);
+
+  if (entity) {
+    if (label === 'app-reviews') {
+      if (normStr(entity.appName)) return normStr(entity.appName);
+      if (normStr(entity.appId)) return normStr(entity.appId);
+    }
+    if (label === 'device-reviews') {
+      if (normStr(entity.model)) return normStr(entity.model);
+      if (normStr(entity.deviceName)) return normStr(entity.deviceName);
+    }
+    if (label === 'subscription-services') {
+      if (normStr(entity.service)) return normStr(entity.service);
+      if (normStr(entity.serviceName)) return normStr(entity.serviceName);
+    }
+  }
+
+  if (target) {
+    if (normStr(target.appName)) return normStr(target.appName);
+    if (normStr(target.name)) return normStr(target.name);
+    if (normStr(target.storeId)) return normStr(target.storeId);
+  }
+
+  if (title) return title;
+
+  return fallbackProduct;
+}
+
+function deriveReviewEntityType(post, label) {
+  const entity = extractReviewEntity(post);
+  if (entity && normStr(entity.type)) return toLower(entity.type);
+
+  if (label === 'app-reviews') return 'app';
+  if (label === 'device-reviews') return 'device';
+  if (label === 'subscription-services') return 'subscription';
+
+  return inferProductType(label, normStr(post && post.title));
+}
+
+function deriveReviewProvider(post) {
+  const target = extractReviewTarget(post);
+  if (target && normStr(target.provider)) return toLower(target.provider);
+
+  const reviewData = post && post.reviewData && typeof post.reviewData === 'object' ? post.reviewData : null;
+  if (reviewData && normStr(reviewData.source)) return toLower(reviewData.source);
+
+  return '';
+}
+
+function deriveReviewState(post) {
+  const reviewData = post && post.reviewData && typeof post.reviewData === 'object' ? post.reviewData : null;
+  const rating = reviewData && reviewData.rating && typeof reviewData.rating === 'object' ? reviewData.rating : null;
+
+  const votes = Number(rating && rating.votes);
+  const overall = Number(rating && rating.overall);
+
+  if (Number.isFinite(votes) && votes > 0 && Number.isFinite(overall) && overall > 0) {
+    return 'measured';
+  }
+
+  return 'early';
+}
+
+function buildReviewIdentityLine(targetName, entityType, provider) {
+  const typeLabel =
+    entityType === 'subscription' ? 'service' :
+    entityType === 'device' ? 'device' :
+    entityType === 'app' ? 'app' :
+    'product';
+
+  if (provider) {
+    return `${targetName} is treated here as a specific ${typeLabel} review target, not as a broad category discussion. The current reference path is tied to ${provider} data where available.`;
+  }
+
+  return `${targetName} is treated here as a specific ${typeLabel} review target, not as a broad category discussion. The goal is to judge this single target on actual fit, limits, and real use value.`;
+}
+
+function buildPromptAwareLine(meta, fallback) {
+  const hint = normStr(meta.bodyPromptInfo && meta.bodyPromptInfo.guidance);
+  if (!hint) return fallback;
+  return `${fallback} The article also needs to stay aligned with this writing direction: ${hint}.`;
+}
+
 function escapeHtml(s) {
   return String(s)
     .replace(/&/g, '&amp;')
@@ -261,35 +372,34 @@ function makeTable(headers, rows) {
   ].join('\n');
 }
 
-function buildPromptAwareLine(meta, fallback) {
-  const hint = normStr(meta.bodyPromptInfo && meta.bodyPromptInfo.guidance);
-  if (!hint) return fallback;
-  return `${fallback} The article also needs to stay aligned with this writing direction: ${hint}.`;
-}
-
-function buildReviewSection(title, label, h2, meta) {
+function buildReviewSection(title, label, h2, meta, post) {
   const productType = inferProductType(label, title);
   const topic = inferTopic(title);
   const timing = meta.timing || 'present';
   const context = meta.context || '';
+  const targetName = deriveReviewTargetName(post, label);
+  const entityType = deriveReviewEntityType(post, label);
+  const provider = deriveReviewProvider(post);
+  const reviewState = deriveReviewState(post);
+  const identityLine = buildReviewIdentityLine(targetName, entityType, provider);
 
   if (h2 === 'Overview') {
     return makeParagraphs([
-      `${title} should be read as a practical buying decision rather than a headline claim. What matters most at the start is whether this ${productType} fits the way people actually use it, how often they return to it, and whether the provider appears stable enough to keep supporting it over time.`,
-      `${buildPromptAwareLine(meta, `A short burst of attention is rarely enough in real use. People usually care about whether the service keeps improving, whether the company appears willing to continue shipping updates, and whether the overall experience feels dependable after the first week of curiosity wears off.${context ? ` In this case, the context is especially relevant for ${context}.` : ''}`)}`
+      `${title} should be read as a review of ${targetName}, not as a general article about ${productType}s. The first question is whether ${targetName} solves the specific job it claims to solve, and whether switching to it makes sense for the kind of user implied by the title.`,
+      `${buildPromptAwareLine(meta, `${identityLine} In practical terms, buyers usually care about whether ${targetName} stays usable after the first week, whether the workflow feels coherent, and whether the provider appears dependable enough to keep improving the experience over time.${context ? ` The surrounding use context also matters here, especially for ${context}.` : ''}`)}`
     ]);
   }
 
   if (h2 === 'Key Features') {
     return [
       makeParagraphs([
-        `The useful way to read the feature set is to focus on what changes day-to-day behavior, not what only looks impressive on a landing page. A feature matters when it saves time, reduces friction, or makes a repeated task feel easier to finish.`,
-        `That is why the strongest features are usually the ones people keep coming back to after the first impression. In practice, buyers tend to remember stability, speed, clarity, and the ease of reaching the outcome they wanted.`
+        `The feature question is not whether ${targetName} can list many functions, but whether its core workflow is actually easy to return to every day. For a review target like this, the strongest features are the ones that reduce friction without forcing the user to relearn the tool every time.`,
+        `That means the review should stay focused on what ${targetName} appears to do in real use: how quickly the main task can be started, whether the interface supports repetition without fatigue, and whether the useful parts are easy to reach without paying attention to gimmicks.`
       ]),
       makeList([
-        'Look for features that reduce repeated effort rather than one-time novelty.',
-        'Check whether the core function is clear without a long learning curve.',
-        'Treat convenience, reliability, and update quality as part of the feature value.'
+        `${targetName} should be judged by the quality of its core workflow, not by the length of its feature list.`,
+        'The most valuable features are usually the ones that save repeated effort.',
+        'A good feature set should feel coherent rather than impressive only on first glance.'
       ])
     ].join('\n');
   }
@@ -297,15 +407,15 @@ function buildReviewSection(title, label, h2, meta) {
   if (h2 === 'Specs & ROI') {
     return [
       makeParagraphs([
-        `Price alone does not explain the return on investment (ROI, practical value for the money). The real question is whether the cost stays reasonable after hidden limits, subscription rules, upgrade pressure, or replacement timing are taken into account.`,
-        `A lower starting price can still become expensive when restrictions show up later. A more expensive option can make sense when it stays usable longer, receives steady updates, or removes a recurring problem that would otherwise keep costing time or money.`
+        `Even though this section heading uses the word "ROI", the practical question for ${targetName} is simpler: what does the buyer actually get for the price, and what hidden trade-offs appear after the first impression. For apps and services, this usually comes down to plan limits, lock-in risk, upgrade pressure, and how much usable value remains once those limits are understood.`,
+        `A lower price is not automatically the better deal if ${targetName} becomes restrictive in daily use. A higher price can still make sense when the workflow is stronger, support looks more dependable, or the product removes enough repeated friction to justify the cost over time.`
       ]),
       makeTable(
-        ['Factor', 'What to check', 'Why it matters'],
+        ['Factor', 'What to check in this review', 'Why it matters'],
         [
-          ['Base cost', 'Entry price or monthly fee', 'Sets the first comparison point'],
-          ['Limits', 'Caps, lock-ins, feature restrictions', 'Changes the real value quickly'],
-          ['Longevity', 'Update cycle, durability, long-term support', 'Reduces replacement or switching cost']
+          ['Price model', 'Free tier, paid plan, upgrade pressure', 'Changes the real entry cost'],
+          ['Practical limits', 'Usage caps, missing features, lock-in conditions', 'Defines what the buyer can actually do'],
+          ['Long-term value', 'Support horizon, update continuity, switching cost', 'Explains whether the choice still makes sense later']
         ]
       )
     ].join('\n');
@@ -313,55 +423,62 @@ function buildReviewSection(title, label, h2, meta) {
 
   if (h2 === 'Insights') {
     return makeParagraphs([
-      `User sentiment usually becomes meaningful when the same themes repeat. People rarely describe a product in formal terms, but they consistently reveal where the friction is: onboarding, update stability, billing clarity, reliability under daily use, or support quality when something goes wrong.`,
-      `That is also where long-term trust is formed. A ${productType} that looks polished at first but becomes inconsistent later often creates the same pattern in user feedback: short early excitement, then frustration around stability, pricing rules, or support responsiveness.`
+      `For ${targetName}, the most useful user insight is not a vague statement that people "like it" or "dislike it". What matters is which themes repeat: setup friction, reliability, billing clarity, day-to-day convenience, or the feeling that the product becomes easier or harder to trust over time.`,
+      `That is why this section should stay anchored to ${targetName} as a single review target. If the same friction keeps appearing around support, policy, or stability, that matters more than a polished first impression. If the same strengths repeat around clarity and convenience, that is a stronger signal than surface-level praise.`
     ]);
   }
 
   if (h2 === 'Ratings') {
+    if (reviewState === 'measured') {
+      return makeParagraphs([
+        `For ${targetName}, rating data is useful as supporting evidence, not as the whole review. A strong score can still hide recurring complaints, while a mixed score can still make sense for a user whose needs align closely with the product’s strongest use case.`,
+        `The right reading is to compare the score with the pattern behind it. If ${targetName} is praised for speed or clarity but questioned on limits or pricing, the final judgment should depend on how sensitive the buyer is to those trade-offs.`
+      ]);
+    }
+
     return makeParagraphs([
-      `Ratings are useful when read as direction, not as a verdict by themselves. A strong average score can hide recurring complaints, while a mixed score can still point to a good fit for a specific kind of user.`,
-      `The better way to interpret rating data is to ask what the positive and negative sides are actually measuring. If praise centers on convenience but criticism centers on limits or policy changes, the final decision should depend on how sensitive the buyer is to those trade-offs.`
+      `For ${targetName}, rating data should currently be treated as incomplete rather than decisive. Until a more stable snapshot is collected, this section works better as a reminder to read the product through fit, workflow, and visible trade-offs instead of pretending that the score alone already settles the question.`,
+      `That makes the review more honest. A target-specific review should say when the evidence is still early rather than turning weak data into a stronger conclusion than the facts can support.`
     ]);
   }
 
   if (h2 === 'Verdict') {
     return makeParagraphs([
-      `${title} is best judged by fit, not by hype. For someone whose priorities match the core strengths of this ${productType}, it can be a sensible choice. For someone who values a different workflow, a longer support horizon, or stricter cost predictability, a competing option may be more practical.`,
-      `In other words, the right question is not whether it is universally good, but whether it stays useful after the first purchase decision. That is the point where short-term excitement turns into real value.`
+      `${targetName} is more useful to judge by fit than by hype. If the buyer’s main priorities align with what ${targetName} appears to do best, it may be a sensible switch. If the buyer needs a different workflow, stronger long-term certainty, or clearer value under paid limits, the better decision may be to stay with an alternative.`,
+      `That is the real verdict question for ${targetName}: not whether it is universally strong, but whether it remains worth using after the first curiosity fades and daily habits take over.`
     ]);
   }
 
   if (h2 === 'Pros & Cons') {
     return [
       makeParagraphs([
-        `The practical advantage of a pros-and-cons view is that it removes vague praise. A strong point is only meaningful if it changes the real experience. A weak point matters when it creates repeated friction or uncertainty after adoption.`
+        `A useful pros-and-cons section for ${targetName} should stay concrete. A "pro" only matters when it changes real use. A "con" matters when it creates repeated friction, uncertainty, or extra cost that keeps showing up after adoption.`
       ]),
       makeList([
-        'Pros should connect to daily convenience, speed, or clarity.',
-        'Cons should connect to cost, stability, lock-in, or learning friction.',
-        'A balanced decision comes from how those two sides interact in real use.'
+        `The strongest pros for ${targetName} should connect to repeated daily value, not one-time novelty.`,
+        'The strongest cons should connect to limits, stability, pricing pressure, or workflow friction.',
+        'The final decision depends on which of those two sides matters more to the intended user.'
       ])
     ].join('\n');
   }
 
   if (h2 === 'Best For / Not For') {
     return makeParagraphs([
-      `A product usually becomes easier to judge when the target user is clear. The best fit is someone whose needs align with the product’s strongest repeated advantage, not someone who only likes its surface appeal.`,
-      `The weakest fit is often the person who needs predictability in an area where the product still feels unstable, expensive over time, or too narrow for changing needs.`
+      `${targetName} is best for the user whose needs match its strongest repeated advantage. That usually means the person who values the exact workflow, pace, or structure this target seems to support, rather than someone who only likes the idea of it in theory.`,
+      `${targetName} is a weaker fit for someone who depends on strengths it does not clearly provide yet, or who is especially sensitive to the kind of friction that tends to matter in this category: unclear pricing, support uncertainty, or instability under daily use.`
     ]);
   }
 
   if (h2 === 'Alternatives & Comparisons') {
     return makeParagraphs([
-      `Alternatives matter not because every option must be compared line by line, but because comparison reveals what this choice emphasizes. One competitor may win on price, another on long-term support, and another on ease of use.`,
-      `That makes comparison useful as a decision lens. Instead of asking which option is absolutely best, it is better to ask which one matches the user’s real priorities most closely.`
+      `Alternatives matter here because they reveal what ${targetName} actually emphasizes. One competing option may be stronger on price, another on maturity, and another on ease of use. That comparison helps define ${targetName} more clearly as a review target instead of leaving it as a vague idea.`,
+      `The practical comparison question is not which option wins in the abstract, but which one fits the buyer’s real priorities most closely. ${targetName} only becomes the right choice when that comparison still holds after convenience, limits, and long-term trust are weighed together.`
     ]);
   }
 
   return makeParagraphs([
-    `${title} should still be interpreted through actual use, cost stability, and trust in the provider rather than surface-level promises alone.`,
-    `For ${topic}, the sensible approach is to compare convenience, support horizon, and practical trade-offs before making a final choice.`
+    `${targetName} should still be interpreted as a single review target with a specific use case, not as a general comment on ${topic}.`,
+    `For ${topic}, the sensible approach is to compare real workflow fit, visible limits, and trust in the provider before making a final choice.`
   ]);
 }
 
@@ -621,9 +738,9 @@ function ensureReviewCriteria(html, h2, title) {
     ]);
   }
 
-  if (h2 === 'Specs & ROI' && !/cost|price|roi|limits|support/i.test(out)) {
+  if (h2 === 'Specs & ROI' && !/cost|price|value|limits|support/i.test(out)) {
     out += '\n' + makeParagraphs([
-      `A realistic ROI view should connect cost, hidden limits, and support horizon instead of treating the visible price as the whole decision.`
+      `This section should make the cost-to-value relationship easier to judge under realistic limitations and long-term use.`
     ]);
   }
 
@@ -798,7 +915,7 @@ function buildRepairHintParagraphs(slug, h2, issues) {
   }
 
   if (codes.some(code => /REVIEW_ROI_MISSING/i.test(code)) && h2 === 'Specs & ROI') {
-    hints.push(`The ROI part should make the cost-to-value relationship easier to judge under realistic limitations and long-term use.`);
+    hints.push(`This section should make the cost-to-value relationship easier to judge under realistic limitations and long-term use.`);
   }
 
   return hints;
@@ -817,7 +934,7 @@ function buildBodyByLabel(post, h2, repairHints) {
   let html = '';
 
   if (REVIEW_LABELS.has(label)) {
-    html = buildReviewSection(title, label, h2, meta);
+    html = buildReviewSection(title, label, h2, meta, post);
   } else if (label === 'smart-savings') {
     html = buildSavingsSection(title, h2, meta);
   } else if (label === 'how-to-playbooks') {
