@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-04-14T05:05:53.708Z",
+  "updatedAt": "2026-04-15T05:06:12.994Z",
   "images": [
     {
       "slug": "app-20251207-001",
@@ -13,8 +13,22 @@
       "alt": "A practical guide to choosing one main productivity app that you can really stick with across work, study, and side projects.",
       "etag": null,
       "hash": null,
-      "lastSeenAt": "2026-04-14T05:05:52.551Z",
-      "lastBuiltAt": "2026-04-14T05:05:52.806Z"
+      "lastSeenAt": "2026-04-15T05:06:11.652Z",
+      "lastBuiltAt": "2026-04-15T05:06:11.911Z"
+    },
+    {
+      "slug": "app-20260415-001",
+      "pageId": "page000018",
+      "type": "og",
+      "url": "https://ongsblog.com/images/og/page000018_app-20260415-001_1200x630.jpg",
+      "filename": "page000018_app-20260415-001_1200x630.jpg",
+      "width": 1200,
+      "height": 630,
+      "alt": "Is the New AI Writing App Worth Switching To? should be read as a review of AI Writing App, not as a general article about apps. The first question is whether A…",
+      "etag": null,
+      "hash": null,
+      "lastSeenAt": "2026-04-15T05:06:11.653Z",
+      "lastBuiltAt": "2026-04-15T05:06:11.995Z"
     },
     {
       "slug": "device-20251207-001",
@@ -27,8 +41,8 @@
       "alt": "A grounded guide to picking a budget laptop under $800 that can handle studying, remote work, and light side projects without frustration.",
       "etag": null,
       "hash": null,
-      "lastSeenAt": "2026-04-14T05:05:52.551Z",
-      "lastBuiltAt": "2026-04-14T05:05:52.898Z"
+      "lastSeenAt": "2026-04-15T05:06:11.653Z",
+      "lastBuiltAt": "2026-04-15T05:06:12.079Z"
     },
     {
       "slug": "device-20260414-001",
@@ -41,8 +55,8 @@
       "alt": "Is This Year’s Flagship Phone Really Faster? should be read as a practical buying decision rather than a headline claim. What matters most at the start is wheth…",
       "etag": null,
       "hash": null,
-      "lastSeenAt": "2026-04-14T05:05:52.551Z",
-      "lastBuiltAt": "2026-04-14T05:05:52.977Z"
+      "lastSeenAt": "2026-04-15T05:06:11.653Z",
+      "lastBuiltAt": "2026-04-15T05:06:12.162Z"
     },
     {
       "slug": "howto-20251207-001",
@@ -55,8 +69,8 @@
       "alt": "Managing tasks, notes, calendars, and files across multiple devices can quickly become chaotic. A simple, unified productivity system helps you stay organized,…",
       "etag": null,
       "hash": null,
-      "lastSeenAt": "2026-04-14T05:05:52.551Z",
-      "lastBuiltAt": "2026-04-14T05:05:53.061Z"
+      "lastSeenAt": "2026-04-15T05:06:11.653Z",
+      "lastBuiltAt": "2026-04-15T05:06:12.245Z"
     },
     {
       "slug": "howto-20260414-001",
@@ -69,8 +83,22 @@
       "alt": "How to set up a new router and optimize home Wi-Fi coverage should be read as a practical execution guide. The goal is not to sound technical for its own sake,…",
       "etag": null,
       "hash": null,
-      "lastSeenAt": "2026-04-14T05:05:52.551Z",
-      "lastBuiltAt": "2026-04-14T05:05:53.140Z"
+      "lastSeenAt": "2026-04-15T05:06:11.654Z",
+      "lastBuiltAt": "2026-04-15T05:06:12.328Z"
+    },
+    {
+      "slug": "howto-20260415-001",
+      "pageId": "page000019",
+      "type": "og",
+      "url": "https://ongsblog.com/images/og/page000019_howto-20260415-001_1200x630.jpg",
+      "filename": "page000019_howto-20260415-001_1200x630.jpg",
+      "width": 1200,
+      "height": 630,
+      "alt": "How to use digital IDs and passwordless login (FIDO2) should be read as a practical execution guide. The goal is not to sound technical for its own sake, but to…",
+      "etag": null,
+      "hash": null,
+      "lastSeenAt": "2026-04-15T05:06:11.654Z",
+      "lastBuiltAt": "2026-04-15T05:06:12.411Z"
     },
     {
       "slug": "origin-verify-updates",
@@ -83,8 +111,8 @@
       "alt": "We update guides on a fixed cadence and keep change visibility. Every post is version-tagged and source-linked.",
       "etag": null,
       "hash": null,
-      "lastSeenAt": "2026-04-14T05:05:52.552Z",
-      "lastBuiltAt": "2026-04-14T05:05:53.220Z"
+      "lastSeenAt": "2026-04-15T05:06:11.654Z",
+      "lastBuiltAt": "2026-04-15T05:06:12.494Z"
     },
     {
       "slug": "smartsavings-20251207-001",
@@ -97,8 +125,8 @@
       "alt": "Save money on productivity tools without breaking your workflow is best approached as a value decision, not just a price decision. Most people do not want the c…",
       "etag": null,
       "hash": null,
-      "lastSeenAt": "2026-04-14T05:05:52.552Z",
-      "lastBuiltAt": "2026-04-14T05:05:53.302Z"
+      "lastSeenAt": "2026-04-15T05:06:11.654Z",
+      "lastBuiltAt": "2026-04-15T05:06:12.577Z"
     },
     {
       "slug": "smartsavings-20260405-001",
@@ -111,8 +139,8 @@
       "alt": "How to Escape App Auto-Renew Traps After the 2025 Policy Change is best approached as a value decision, not just a price decision. Most people do not want the c…",
       "etag": null,
       "hash": null,
-      "lastSeenAt": "2026-04-14T05:05:52.552Z",
-      "lastBuiltAt": "2026-04-14T05:05:53.387Z"
+      "lastSeenAt": "2026-04-15T05:06:11.654Z",
+      "lastBuiltAt": "2026-04-15T05:06:12.659Z"
     },
     {
       "slug": "smartsavings-20260411-001",
@@ -125,8 +153,8 @@
       "alt": "How to Minimize In-App Purchase Spending with App Limits is best approached as a value decision, not just a price decision. Most people do not want the cheapest…",
       "etag": null,
       "hash": null,
-      "lastSeenAt": "2026-04-14T05:05:52.552Z",
-      "lastBuiltAt": "2026-04-14T05:05:53.472Z"
+      "lastSeenAt": "2026-04-15T05:06:11.654Z",
+      "lastBuiltAt": "2026-04-15T05:06:12.741Z"
     },
     {
       "slug": "smartsavings-20260412-001",
@@ -139,8 +167,8 @@
       "alt": "How to Switch to Annual Plans Without Getting Locked In is best approached as a value decision, not just a price decision. Most people do not want the cheapest…",
       "etag": null,
       "hash": null,
-      "lastSeenAt": "2026-04-14T05:05:52.553Z",
-      "lastBuiltAt": "2026-04-14T05:05:53.551Z"
+      "lastSeenAt": "2026-04-15T05:06:11.654Z",
+      "lastBuiltAt": "2026-04-15T05:06:12.828Z"
     },
     {
       "slug": "subscription-20251207-001",
@@ -153,8 +181,8 @@
       "alt": "A clear, numbers-based look at when it makes sense to pay for productivity app subscriptions and when free plans are enough.",
       "etag": null,
       "hash": null,
-      "lastSeenAt": "2026-04-14T05:05:52.553Z",
-      "lastBuiltAt": "2026-04-14T05:05:53.629Z"
+      "lastSeenAt": "2026-04-15T05:06:11.654Z",
+      "lastBuiltAt": "2026-04-15T05:06:12.911Z"
     },
     {
       "slug": "templates-20251207-001",
@@ -167,8 +195,8 @@
       "alt": "A weekly review checklist template for busy creators is meant to reduce hesitation at the moment of action. The value of a template or checklist is not abstract…",
       "etag": null,
       "hash": null,
-      "lastSeenAt": "2026-04-14T05:05:52.553Z",
-      "lastBuiltAt": "2026-04-14T05:05:53.708Z"
+      "lastSeenAt": "2026-04-15T05:06:11.654Z",
+      "lastBuiltAt": "2026-04-15T05:06:12.994Z"
     }
   ]
 }

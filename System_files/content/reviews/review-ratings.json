@@ -126,6 +126,31 @@
       "insights": [],
       "sources": [],
       "bucket": "device"
+    },
+    "app-20260415-001": {
+      "reviewId": "06ERZ22N145X6Y2P5DX0PJQAEM",
+      "postId": "06ERZ22N149DS53XAXDTBEZRVJ",
+      "lastChecked": null,
+      "status": "queued",
+      "store": "unknown",
+      "source": "seed",
+      "storeId": "AI Writing App",
+      "ratingCurrent": 0,
+      "ratingPrevious": 0,
+      "ratingDiff": 0,
+      "votesCurrent": 0,
+      "votesPrevious": 0,
+      "votesDiff": 0,
+      "histogram": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0
+      },
+      "insights": [],
+      "sources": [],
+      "bucket": "app"
     }
   },
   "updatedAt": "2026-01-15"

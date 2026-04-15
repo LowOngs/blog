@@ -1,45 +1,46 @@
 {
-  "date": "2026-04-14",
+  "date": "2026-04-15",
   "timezone": "Asia/Seoul",
   "cutoff": "10:00",
   "items": [
     {
-      "date": "2026-04-14",
+      "date": "2026-04-15",
       "label": "how-to-playbooks",
       "seedLabel": "how-to-playbooks",
       "requestedSlotLabel": "how-to-playbooks",
       "mode": "trend",
-      "id": "ht-tr-023",
-      "title": "How to set up a new router and optimize home Wi-Fi coverage",
-      "angle": "Home mesh networks surged in 2025.",
-      "audience": "Home network users",
+      "id": "ht-tr-024",
+      "title": "How to use digital IDs and passwordless login (FIDO2)",
+      "angle": "Passwordless adoption accelerates worldwide.",
+      "audience": "Users upgrading security",
       "intent": "howto",
       "priority": 1,
       "notes": "",
-      "generatedSlug": "howto-20260414-001",
-      "postId": "06ERMRDE444MAW649AKHRTKJTA"
+      "generatedSlug": "howto-20260415-001",
+      "postId": "06ERZ22N0RC77H7EB91BGA0AYR"
     },
     {
-      "date": "2026-04-14",
-      "label": "device-reviews",
-      "seedLabel": "device-reviews",
-      "requestedSlotLabel": "device-reviews",
+      "date": "2026-04-15",
+      "label": "app-reviews",
+      "seedLabel": "app-reviews",
+      "requestedSlotLabel": "app-reviews",
       "mode": "trend",
-      "id": "dr-tr-001",
-      "title": "Is This Year’s Flagship Phone Really Faster?",
-      "angle": "Thermal behavior + sustained performance",
-      "audience": "Smartphone buyers",
-      "intent": "review/performance-test",
+      "id": "ar-tr-001",
+      "title": "Is the New AI Writing App Worth Switching To?",
+      "angle": "Check latency, rewrite quality, and export options",
+      "audience": "Writers and students",
+      "intent": "review/feature-test",
       "priority": 0,
       "notes": "",
       "reviewEntity": {
-        "type": "device",
-        "model": "Phones"
+        "type": "app",
+        "appName": "AI Writing App",
+        "platform": "android"
       },
-      "generatedSlug": "device-20260414-001",
-      "postId": "06ERMRDE4C7X69Q8FP9B5XX3C2",
-      "reviewId": "06ERMRDE4G040TBCWHPRSRSKV2"
+      "generatedSlug": "app-20260415-001",
+      "postId": "06ERZ22N149DS53XAXDTBEZRVJ",
+      "reviewId": "06ERZ22N145X6Y2P5DX0PJQAEM"
     }
   ],
-  "expandedAt": "2026-04-14T05:05:50.628Z"
+  "expandedAt": "2026-04-15T05:06:09.801Z"
 }

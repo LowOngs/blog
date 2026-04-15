@@ -1,22 +1,9 @@
 {
   "label": "app-reviews",
-  "limits": { "trend": 200 },
+  "limits": {
+    "trend": 200
+  },
   "trend": [
-    {
-      "id": "ar-tr-001",
-      "title": "Is the New AI Writing App Worth Switching To?",
-      "angle": "Check latency, rewrite quality, and export options",
-      "audience": "Writers and students",
-      "intent": "review/feature-test",
-      "environment": "ai writing",
-      "timing": "launch period",
-      "goal": "decide if the upgrade offers real workflow gains",
-      "reviewEntity": {
-        "type": "app",
-        "appName": "AI Writing App",
-        "platform": "android"
-      }
-    },
     {
       "id": "ar-tr-002",
       "title": "Which AI Chatbot App Gives the Most Accurate Answers?",
