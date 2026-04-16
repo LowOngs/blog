@@ -39,6 +39,12 @@
  * [이번 수정]
  * - seed-ledger.jsonl 전체 스캔으로 fingerprint를 모으지 않고
  *   lib/fp-cache.cjs 의 hasUsedFingerprint() 기준으로 중복 여부를 판정
+ *
+ * [이번 강화 수정]
+ * - 생성 시드가 단순 제목 더미가 아니라 "글 설계 완료 상태"가 되도록
+ *   entity / angle / audience / intent / keyPoints 를 포함해 생성한다.
+ * - 생성 직후 seed-design-policy.cjs 기준으로 normalize + validate 한다.
+ * - 구조 미달 시 warehouse에 넣지 않고 재시도하며, 끝까지 need를 못 채우면 FATAL.
  */
 
 require('./lib/env.cjs');
@@ -51,6 +57,13 @@ const fpUtil = require('./lib/fingerprint.cjs');
 
 // fp-cache 유틸
 const fpCache = require('./lib/fp-cache.cjs');
+
+// seed design policy SSOT
+const seedDesignPolicy = require('./lib/seed-design-policy.cjs');
+const {
+  normalizeSeed,
+  validateSeedStructure,
+} = seedDesignPolicy;
 
 const ROOT = path.resolve(__dirname, '..', '..'); // System_files
 const SEEDPOOL_DIR = path.join(ROOT, 'seedpool');
@@ -167,6 +180,10 @@ function computeTarget(floor, used7) {
  * 주의:
  * - 여기서는 "used 기록"을 하지 않음
  * - refill은 생성/보충 단계이므로, 실제 소비 전에는 fp-cache used에 기록하면 안 됨
+ *
+ * 강화:
+ * - entity / angle / audience / intent / keyPoints 포함
+ * - seed-design-policy 기준 validate 통과 시에만 채택
  */
 function generateSeedsDummy(label, mode, count) {
   const out = [];
@@ -178,6 +195,199 @@ function generateSeedsDummy(label, mode, count) {
   // 같은 refill 실행 안에서의 중복 방지
   const localFpSet = new Set();
 
+  function buildEntity(labelValue, idx) {
+    if (labelValue === 'app-reviews') {
+      return {
+        type: 'app',
+        name: `AI App ${idx}`,
+        platform: 'android',
+      };
+    }
+
+    if (labelValue === 'device-reviews') {
+      return {
+        type: 'device',
+        brand: `Brand ${idx}`,
+        model: `Model ${idx}`,
+      };
+    }
+
+    if (labelValue === 'subscription-services') {
+      return {
+        type: 'service',
+        name: `Service ${idx}`,
+        category: mode === 'trend' ? 'fast-changing subscription' : 'stable subscription',
+      };
+    }
+
+    if (labelValue === 'how-to-playbooks') {
+      return {
+        type: 'task',
+        name: `Setup Task ${idx}`,
+      };
+    }
+
+    if (labelValue === 'smart-savings') {
+      return {
+        type: 'decision',
+        name: `Cost Decision ${idx}`,
+      };
+    }
+
+    if (labelValue === 'templates-checklists') {
+      return {
+        type: 'template',
+        name: `Checklist ${idx}`,
+      };
+    }
+
+    return {
+      type: 'generic',
+      name: `Item ${idx}`,
+    };
+  }
+
+  function buildTitle(labelValue, entity, idx) {
+    const entityName =
+      (entity && (entity.name || entity.model)) ? String(entity.name || entity.model) : `Item ${idx}`;
+
+    if (labelValue === 'app-reviews') {
+      return `Should You Use ${entityName}? (${mode}) #${idx}`;
+    }
+
+    if (labelValue === 'device-reviews') {
+      return `Is ${entityName} Worth Considering? (${mode}) #${idx}`;
+    }
+
+    if (labelValue === 'subscription-services') {
+      return `Is ${entityName} Worth Paying For? (${mode}) #${idx}`;
+    }
+
+    if (labelValue === 'how-to-playbooks') {
+      return `How to Complete ${entityName} Safely (${mode}) #${idx}`;
+    }
+
+    if (labelValue === 'smart-savings') {
+      return `How to Save More with ${entityName} (${mode}) #${idx}`;
+    }
+
+    if (labelValue === 'templates-checklists') {
+      return `A Practical Template for ${entityName} (${mode}) #${idx}`;
+    }
+
+    return `AUTO GENERATED: ${labelValue} (${mode}) #${idx}`;
+  }
+
+  function buildAngle(labelValue, idx) {
+    if (labelValue === 'app-reviews') {
+      return `Evaluate real-world app usefulness and switching fit (${mode}) var=${idx}`;
+    }
+
+    if (labelValue === 'device-reviews') {
+      return `Evaluate real-world device value and trade-offs (${mode}) var=${idx}`;
+    }
+
+    if (labelValue === 'subscription-services') {
+      return `Evaluate subscription value, limits, and retention fit (${mode}) var=${idx}`;
+    }
+
+    if (labelValue === 'how-to-playbooks') {
+      return `Step-by-step execution with failure recovery and verification (${mode}) var=${idx}`;
+    }
+
+    if (labelValue === 'smart-savings') {
+      return `Cost versus value decision breakdown under realistic limits (${mode}) var=${idx}`;
+    }
+
+    if (labelValue === 'templates-checklists') {
+      return `Reusable workflow structure with practical execution checkpoints (${mode}) var=${idx}`;
+    }
+
+    return `Practical decision context (${mode}) var=${idx}`;
+  }
+
+  function buildAudience(labelValue) {
+    if (labelValue === 'app-reviews') return 'intermediate';
+    if (labelValue === 'device-reviews') return 'intermediate';
+    if (labelValue === 'subscription-services') return 'general';
+    if (labelValue === 'how-to-playbooks') return 'beginner';
+    if (labelValue === 'smart-savings') return 'general';
+    if (labelValue === 'templates-checklists') return 'general';
+    return 'general';
+  }
+
+  function buildIntent(labelValue, modeValue) {
+    if (labelValue === 'app-reviews') return 'review';
+    if (labelValue === 'device-reviews') return 'review';
+    if (labelValue === 'subscription-services') return 'review';
+    if (labelValue === 'how-to-playbooks') return 'howto';
+    if (labelValue === 'smart-savings') return 'decision';
+    if (labelValue === 'templates-checklists') return 'template';
+    return modeValue === 'trend' ? 'trend' : 'evergreen';
+  }
+
+  function buildKeyPoints(labelValue) {
+    if (labelValue === 'app-reviews') {
+      return [
+        'core workflow usefulness',
+        'daily reliability',
+        'cost versus practical value',
+        'switching friction',
+      ];
+    }
+
+    if (labelValue === 'device-reviews') {
+      return [
+        'real-world usability',
+        'performance versus price',
+        'durability or support horizon',
+        'best-fit user profile',
+      ];
+    }
+
+    if (labelValue === 'subscription-services') {
+      return [
+        'plan value clarity',
+        'hidden limits and lock-in',
+        'renewal or cancellation risk',
+        'best-fit usage pattern',
+      ];
+    }
+
+    if (labelValue === 'how-to-playbooks') {
+      return [
+        'setup prerequisites',
+        'execution sequence',
+        'common failure points',
+        'verification method',
+      ];
+    }
+
+    if (labelValue === 'smart-savings') {
+      return [
+        'real cost breakdown',
+        'hidden restrictions',
+        'switching cost',
+        'best-fit scenario',
+      ];
+    }
+
+    if (labelValue === 'templates-checklists') {
+      return [
+        'repeatable structure',
+        'execution clarity',
+        'common mistakes to avoid',
+        'customization points',
+      ];
+    }
+
+    return [
+      'practical use',
+      'decision factors',
+      'real constraints',
+    ];
+  }
+
   while (out.length < count) {
     guard++;
     if (guard > MAX_ATTEMPTS) {
@@ -188,19 +398,34 @@ function generateSeedsDummy(label, mode, count) {
     }
 
     const idx = String(Date.now()) + '-' + String(Math.floor(Math.random() * 1e9));
-    const seed = {
+    const entity = buildEntity(label, idx);
+
+    let seed = {
       id: `${label}-${mode}-${idx}`,
 
       // title/angle에 idx 포함 → fp 중복 방지
-      title: `AUTO GENERATED: ${label} (${mode}) #${idx}`,
-      angle: `Auto angle (${mode}) var=${idx}`,
+      title: buildTitle(label, entity, idx),
+      entity,
+      angle: buildAngle(label, idx),
 
-      audience: 'General',
-      intent: mode === 'trend' ? 'trend' : 'evergreen',
+      audience: buildAudience(label),
+      intent: buildIntent(label, mode),
+      keyPoints: buildKeyPoints(label),
+
       priority: 5,
       createdAt: new Date().toISOString(),
       notes: 'Replace with real LLM generation.',
     };
+
+    seed = normalizeSeed({
+      ...seed,
+      label,
+    });
+
+    const validation = validateSeedStructure(seed);
+    if (!validation.ok) {
+      continue;
+    }
 
     const fp = fpUtil.buildFingerprintFromSeed(seed);
 
