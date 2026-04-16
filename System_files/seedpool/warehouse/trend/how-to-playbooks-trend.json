@@ -5,15 +5,6 @@
   },
   "trend": [
     {
-      "id": "ht-tr-025",
-      "title": "How to fix notifications not appearing on Android/iPhone",
-      "angle": "Focus modes frequently confuse users.",
-      "audience": "General smartphone users",
-      "intent": "howto",
-      "priority": 1,
-      "fingerprint": "fp1:4f87a18df822c61a44e86aa5dd6907d7886efa5c"
-    },
-    {
       "id": "ht-tr-026",
       "title": "How to set up Google Photos → iCloud Photos migration",
       "angle": "Photo migration is a constant global request.",

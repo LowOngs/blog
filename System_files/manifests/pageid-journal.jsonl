@@ -12,3 +12,5 @@
 {"ts":"2026-04-14T05:05:50.778Z","mode":"local","slug":"howto-20260414-001","pageId":"page000017","ledger":"page-ids.local.json","action":"assign_new"}
 {"ts":"2026-04-15T05:06:09.945Z","mode":"local","slug":"app-20260415-001","pageId":"page000018","ledger":"page-ids.local.json","action":"assign_new"}
 {"ts":"2026-04-15T05:06:09.951Z","mode":"local","slug":"howto-20260415-001","pageId":"page000019","ledger":"page-ids.local.json","action":"assign_new"}
+{"ts":"2026-04-16T05:11:33.938Z","mode":"local","slug":"howto-20260416-001","pageId":"page000020","ledger":"page-ids.local.json","action":"assign_new"}
+{"ts":"2026-04-16T05:11:33.941Z","mode":"local","slug":"subscription-20260416-001","pageId":"page000021","ledger":"page-ids.local.json","action":"assign_new"}

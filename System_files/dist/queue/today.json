@@ -1,39 +1,38 @@
 {
-  "date": "2026-04-15",
+  "date": "2026-04-16",
   "timezone": "Asia/Seoul",
   "cutoff": "10:00",
   "items": [
     {
-      "date": "2026-04-15",
+      "date": "2026-04-16",
       "label": "how-to-playbooks",
       "seedLabel": "how-to-playbooks",
       "requestedSlotLabel": "how-to-playbooks",
       "mode": "trend",
-      "id": "ht-tr-024",
-      "title": "How to use digital IDs and passwordless login (FIDO2)",
-      "angle": "Passwordless adoption accelerates worldwide.",
-      "audience": "Users upgrading security",
+      "id": "ht-tr-025",
+      "title": "How to fix notifications not appearing on Android/iPhone",
+      "angle": "Focus modes frequently confuse users.",
+      "audience": "General smartphone users",
       "intent": "howto",
       "priority": 1,
       "notes": ""
     },
     {
-      "date": "2026-04-15",
-      "label": "app-reviews",
-      "seedLabel": "app-reviews",
-      "requestedSlotLabel": "app-reviews",
+      "date": "2026-04-16",
+      "label": "subscription-services",
+      "seedLabel": "subscription-services",
+      "requestedSlotLabel": "subscription-services",
       "mode": "trend",
-      "id": "ar-tr-001",
-      "title": "Is the New AI Writing App Worth Switching To?",
-      "angle": "Check latency, rewrite quality, and export options",
-      "audience": "Writers and students",
-      "intent": "review/feature-test",
+      "id": "ss-tr-002",
+      "title": "Are New AI Writing Tools Worth Their Subscription Price?",
+      "angle": "Token limits + accuracy gains",
+      "audience": "Students/professionals",
+      "intent": "review/value",
       "priority": 0,
       "notes": "",
       "reviewEntity": {
-        "type": "app",
-        "appName": "AI Writing App",
-        "platform": "android"
+        "type": "subscription",
+        "service": "AI Text Tools"
       }
     }
   ]
