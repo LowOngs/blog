@@ -1,45 +1,46 @@
 {
-  "date": "2026-04-16",
+  "date": "2026-04-17",
   "timezone": "Asia/Seoul",
   "cutoff": "10:00",
   "items": [
     {
-      "date": "2026-04-16",
+      "date": "2026-04-17",
       "label": "how-to-playbooks",
       "seedLabel": "how-to-playbooks",
       "requestedSlotLabel": "how-to-playbooks",
       "mode": "trend",
-      "id": "ht-tr-025",
-      "title": "How to fix notifications not appearing on Android/iPhone",
-      "angle": "Focus modes frequently confuse users.",
-      "audience": "General smartphone users",
+      "id": "ht-tr-026",
+      "title": "How to set up Google Photos → iCloud Photos migration",
+      "angle": "Photo migration is a constant global request.",
+      "audience": "Smartphone photographers",
       "intent": "howto",
       "priority": 1,
       "notes": "",
-      "generatedSlug": "howto-20260416-001",
-      "postId": "06ES9CX2KRPNXF0JEBACWJ0WBX"
+      "generatedSlug": "howto-20260417-001",
+      "postId": "06ESKP5414XXH42JFV9DJCZS4B"
     },
     {
-      "date": "2026-04-16",
-      "label": "subscription-services",
-      "seedLabel": "subscription-services",
-      "requestedSlotLabel": "subscription-services",
+      "date": "2026-04-17",
+      "label": "app-reviews",
+      "seedLabel": "app-reviews",
+      "requestedSlotLabel": "app-reviews",
       "mode": "trend",
-      "id": "ss-tr-002",
-      "title": "Are New AI Writing Tools Worth Their Subscription Price?",
-      "angle": "Token limits + accuracy gains",
-      "audience": "Students/professionals",
-      "intent": "review/value",
+      "id": "ar-tr-002",
+      "title": "Which AI Chatbot App Gives the Most Accurate Answers?",
+      "angle": "Compare hallucination rate across models",
+      "audience": "General mobile users",
+      "intent": "review/accuracy-comparison",
       "priority": 0,
       "notes": "",
       "reviewEntity": {
-        "type": "subscription",
-        "service": "AI Text Tools"
+        "type": "app",
+        "appName": "AI Chatbot App",
+        "platform": "android"
       },
-      "generatedSlug": "subscription-20260416-001",
-      "postId": "06ES9CX2M0JW3QTJ07TJT0EG5Q",
-      "reviewId": "06ES9CX2M0YAE1S38XT20ZKK3C"
+      "generatedSlug": "app-20260417-001",
+      "postId": "06ESKP541C63E70MG6K0H8RVNE",
+      "reviewId": "06ESKP541CZEXGCEZ4VX0PRFQP"
     }
   ],
-  "expandedAt": "2026-04-16T05:11:33.792Z"
+  "expandedAt": "2026-04-17T05:10:05.067Z"
 }

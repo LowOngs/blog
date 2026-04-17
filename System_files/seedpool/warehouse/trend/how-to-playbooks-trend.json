@@ -5,15 +5,6 @@
   },
   "trend": [
     {
-      "id": "ht-tr-026",
-      "title": "How to set up Google Photos → iCloud Photos migration",
-      "angle": "Photo migration is a constant global request.",
-      "audience": "Smartphone photographers",
-      "intent": "howto",
-      "priority": 1,
-      "fingerprint": "fp1:5782bbe4e5c2804e23ba4895375e8d1b5f937ecd"
-    },
-    {
       "id": "ht-tr-027",
       "title": "How to use AI to schedule tasks and automate reminders",
       "angle": "AI scheduling is now a daily use case.",

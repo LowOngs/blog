@@ -176,6 +176,31 @@
       "insights": [],
       "sources": [],
       "bucket": "subscription"
+    },
+    "app-20260417-001": {
+      "reviewId": "06ESKP541CZEXGCEZ4VX0PRFQP",
+      "postId": "06ESKP541C63E70MG6K0H8RVNE",
+      "lastChecked": null,
+      "status": "queued",
+      "store": "unknown",
+      "source": "seed",
+      "storeId": "AI Chatbot App",
+      "ratingCurrent": 0,
+      "ratingPrevious": 0,
+      "ratingDiff": 0,
+      "votesCurrent": 0,
+      "votesPrevious": 0,
+      "votesDiff": 0,
+      "histogram": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0
+      },
+      "insights": [],
+      "sources": [],
+      "bucket": "app"
     }
   },
   "updatedAt": "2026-01-15"
