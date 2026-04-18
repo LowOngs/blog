@@ -33,12 +33,25 @@ const ALLOWED_LABELS = [
   'templates-checklists',
 ];
 
+const REVIEW_LABELS = [
+  'app-reviews',
+  'device-reviews',
+  'subscription-services',
+];
+
 const REQUIRED_COMMON_FIELDS = [
   'entity',
   'angle',
   'audience',
   'intent',
   'keyPoints',
+  'fingerprint',
+];
+
+const REQUIRED_REVIEW_FIELDS = [
+  'reviewEntity',
+  'selectionCriteria',
+  'selectionMeta',
 ];
 
 /* ============================================================
@@ -59,17 +72,71 @@ const ENTITY_SCHEMAS = {
     type: 'service',
   },
   'how-to-playbooks': {
-    required: [],
-    type: 'generic',
+    required: ['type', 'name'],
+    type: 'task',
   },
   'smart-savings': {
-    required: [],
-    type: 'generic',
+    required: ['type', 'name'],
+    type: 'decision',
   },
   'templates-checklists': {
-    required: [],
-    type: 'generic',
+    required: ['type', 'name'],
+    type: 'template',
   },
+};
+
+const REVIEW_ENTITY_SCHEMAS = {
+  'app-reviews': {
+    required: ['type', 'appName', 'platform'],
+    type: 'app',
+  },
+  'device-reviews': {
+    required: ['type', 'model'],
+    type: 'device',
+  },
+  'subscription-services': {
+    required: ['type', 'service'],
+    type: 'subscription',
+  },
+};
+
+const REVIEW_SELECTION_CRITERIA_SCHEMAS = {
+  'app-reviews': {
+    required: [
+      'labelMatchStrict',
+      'minDownloads',
+      'minReviewCount',
+      'minRatingCount',
+      'requiresRating',
+      'lastUpdatedWithinDays',
+    ],
+  },
+  'device-reviews': {
+    required: [
+      'labelMatchStrict',
+      'requiresMarketPresence',
+      'requiresReviewVolume',
+      'requiresComparableAlternatives',
+    ],
+  },
+  'subscription-services': {
+    required: [
+      'labelMatchStrict',
+      'requiresActivePlan',
+      'requiresPublicPricing',
+      'requiresReviewVolume',
+      'requiresCancellationPolicy',
+    ],
+  },
+};
+
+const REVIEW_SELECTION_META_SCHEMA = {
+  required: [
+    'validated',
+    'sourceType',
+    'selectionReason',
+    'selectedAt',
+  ],
 };
 
 /* ============================================================
@@ -86,6 +153,33 @@ function isNonEmpty(v) {
 
 function isArray(v) {
   return Array.isArray(v);
+}
+
+function isObject(v) {
+  return !!v && typeof v === 'object' && !Array.isArray(v);
+}
+
+function isReviewLabel(label) {
+  return REVIEW_LABELS.includes(normStr(label));
+}
+
+function isFiniteNumber(v) {
+  return Number.isFinite(Number(v));
+}
+
+function hasOwn(obj, key) {
+  return Object.prototype.hasOwnProperty.call(obj, key);
+}
+
+function normalizeObjectStrings(obj) {
+  if (!isObject(obj)) return obj;
+  const out = { ...obj };
+  Object.keys(out).forEach((k) => {
+    if (typeof out[k] === 'string' || out[k] == null) {
+      out[k] = normStr(out[k]);
+    }
+  });
+  return out;
 }
 
 /* ============================================================
@@ -117,6 +211,15 @@ function validateSeedStructure(seed) {
     }
   }
 
+  // 리뷰 계열 추가 필드 검증
+  if (isReviewLabel(label)) {
+    for (const field of REQUIRED_REVIEW_FIELDS) {
+      if (!(field in seed)) {
+        errors.push(`Missing required review field: ${field}`);
+      }
+    }
+  }
+
   // entity 검증
   const entity = seed.entity;
   const schema = ENTITY_SCHEMAS[label];
@@ -140,6 +243,26 @@ function validateSeedStructure(seed) {
     }
   }
 
+  // reviewEntity 검증
+  if (isReviewLabel(label)) {
+    const reviewEntity = seed.reviewEntity;
+    const reviewSchema = REVIEW_ENTITY_SCHEMAS[label];
+
+    if (!isObject(reviewEntity)) {
+      errors.push('reviewEntity must be an object');
+    } else if (reviewSchema) {
+      for (const key of reviewSchema.required) {
+        if (!isNonEmpty(reviewEntity[key])) {
+          errors.push(`reviewEntity missing field: ${key}`);
+        }
+      }
+
+      if (reviewEntity.type !== reviewSchema.type) {
+        errors.push(`reviewEntity type mismatch: expected ${reviewSchema.type}`);
+      }
+    }
+  }
+
   // angle
   if (!isNonEmpty(seed.angle)) {
     errors.push('angle must be non-empty');
@@ -155,6 +278,13 @@ function validateSeedStructure(seed) {
     errors.push('intent must be non-empty');
   }
 
+  // fingerprint
+  if (!isNonEmpty(seed.fingerprint)) {
+    errors.push('fingerprint must be non-empty');
+  } else if (!/^fp\d+:[a-f0-9]+$/i.test(normStr(seed.fingerprint))) {
+    errors.push('fingerprint format is invalid');
+  }
+
   // keyPoints
   if (!isArray(seed.keyPoints)) {
     errors.push('keyPoints must be an array');
@@ -165,6 +295,75 @@ function validateSeedStructure(seed) {
     }
     if (validPoints.length > 5) {
       errors.push('keyPoints must have at most 5 items');
+    }
+  }
+
+  // selectionCriteria
+  if (isReviewLabel(label)) {
+    const selectionCriteria = seed.selectionCriteria;
+    const criteriaSchema = REVIEW_SELECTION_CRITERIA_SCHEMAS[label];
+
+    if (!isObject(selectionCriteria)) {
+      errors.push('selectionCriteria must be an object');
+    } else if (criteriaSchema) {
+      for (const key of criteriaSchema.required) {
+        if (!hasOwn(selectionCriteria, key)) {
+          errors.push(`selectionCriteria missing field: ${key}`);
+        }
+      }
+
+      if (hasOwn(selectionCriteria, 'labelMatchStrict') && typeof selectionCriteria.labelMatchStrict !== 'boolean') {
+        errors.push('selectionCriteria.labelMatchStrict must be boolean');
+      }
+
+      if (label === 'app-reviews') {
+        if (hasOwn(selectionCriteria, 'minDownloads') && !isFiniteNumber(selectionCriteria.minDownloads)) {
+          errors.push('selectionCriteria.minDownloads must be numeric');
+        }
+        if (hasOwn(selectionCriteria, 'minReviewCount') && !isFiniteNumber(selectionCriteria.minReviewCount)) {
+          errors.push('selectionCriteria.minReviewCount must be numeric');
+        }
+        if (hasOwn(selectionCriteria, 'minRatingCount') && !isFiniteNumber(selectionCriteria.minRatingCount)) {
+          errors.push('selectionCriteria.minRatingCount must be numeric');
+        }
+        if (hasOwn(selectionCriteria, 'requiresRating') && typeof selectionCriteria.requiresRating !== 'boolean') {
+          errors.push('selectionCriteria.requiresRating must be boolean');
+        }
+        if (hasOwn(selectionCriteria, 'lastUpdatedWithinDays') && !isFiniteNumber(selectionCriteria.lastUpdatedWithinDays)) {
+          errors.push('selectionCriteria.lastUpdatedWithinDays must be numeric');
+        }
+      }
+    }
+  }
+
+  // selectionMeta
+  if (isReviewLabel(label)) {
+    const selectionMeta = seed.selectionMeta;
+
+    if (!isObject(selectionMeta)) {
+      errors.push('selectionMeta must be an object');
+    } else {
+      for (const key of REVIEW_SELECTION_META_SCHEMA.required) {
+        if (!hasOwn(selectionMeta, key)) {
+          errors.push(`selectionMeta missing field: ${key}`);
+        }
+      }
+
+      if (hasOwn(selectionMeta, 'validated') && typeof selectionMeta.validated !== 'boolean') {
+        errors.push('selectionMeta.validated must be boolean');
+      }
+
+      if (hasOwn(selectionMeta, 'sourceType') && !isNonEmpty(selectionMeta.sourceType)) {
+        errors.push('selectionMeta.sourceType must be non-empty');
+      }
+
+      if (hasOwn(selectionMeta, 'selectionReason') && !isNonEmpty(selectionMeta.selectionReason)) {
+        errors.push('selectionMeta.selectionReason must be non-empty');
+      }
+
+      if (hasOwn(selectionMeta, 'selectedAt') && !isNonEmpty(selectionMeta.selectedAt)) {
+        errors.push('selectionMeta.selectedAt must be non-empty');
+      }
     }
   }
 
@@ -185,11 +384,33 @@ function normalizeSeed(seed) {
   out.angle = normStr(out.angle);
   out.audience = normStr(out.audience);
   out.intent = normStr(out.intent);
+  out.fingerprint = normStr(out.fingerprint);
 
   if (out.entity && typeof out.entity === 'object') {
-    out.entity = { ...out.entity };
-    Object.keys(out.entity).forEach(k => {
-      out.entity[k] = normStr(out.entity[k]);
+    out.entity = normalizeObjectStrings(out.entity);
+  }
+
+  if (out.reviewEntity && typeof out.reviewEntity === 'object') {
+    out.reviewEntity = normalizeObjectStrings(out.reviewEntity);
+  }
+
+  if (out.selectionCriteria && typeof out.selectionCriteria === 'object') {
+    out.selectionCriteria = { ...out.selectionCriteria };
+    Object.keys(out.selectionCriteria).forEach((k) => {
+      const value = out.selectionCriteria[k];
+      if (typeof value === 'string' || value == null) {
+        out.selectionCriteria[k] = normStr(value);
+      }
+    });
+  }
+
+  if (out.selectionMeta && typeof out.selectionMeta === 'object') {
+    out.selectionMeta = { ...out.selectionMeta };
+    Object.keys(out.selectionMeta).forEach((k) => {
+      const value = out.selectionMeta[k];
+      if (typeof value === 'string' || value == null) {
+        out.selectionMeta[k] = normStr(value);
+      }
     });
   }
 
@@ -206,8 +427,13 @@ function normalizeSeed(seed) {
 
 module.exports = {
   ALLOWED_LABELS,
+  REVIEW_LABELS,
   REQUIRED_COMMON_FIELDS,
+  REQUIRED_REVIEW_FIELDS,
   ENTITY_SCHEMAS,
+  REVIEW_ENTITY_SCHEMAS,
+  REVIEW_SELECTION_CRITERIA_SCHEMAS,
+  REVIEW_SELECTION_META_SCHEMA,
   validateSeedStructure,
   normalizeSeed,
 };
