@@ -5,15 +5,6 @@
   },
   "trend": [
     {
-      "id": "ss-tr-016",
-      "title": "Which VPN Plan Saves the Most in 2025?",
-      "angle": "VPN pricing fluctuates heavily; global comparisons trend.",
-      "audience": "Remote workers and privacy-focused users",
-      "intent": "saving",
-      "priority": 1,
-      "fingerprint": "fp1:cced289ef44e19f0169ff366a1b99694d75fefc9"
-    },
-    {
       "id": "ss-tr-017",
       "title": "How to Minimize Food Delivery Fees Using 2025 Membership Models",
       "angle": "Uber Eats, DoorDash, and GrabPass updated benefits.",
