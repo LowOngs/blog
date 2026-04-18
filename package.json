@@ -5,6 +5,9 @@
   "scripts": {
     "ids": "node ./System_files/scripts/build/ids.cjs",
 
+    "seed:refill": "node ./System_files/scripts/build/seed-refill.cjs",
+    "seeds:validate": "node ./System_files/scripts/build/validate-seeds.cjs",
+
     "queue:pick": "node ./System_files/scripts/build/seed-scheduler.cjs",
     "queue:to-posts": "node ./System_files/scripts/build/queue-to-posts.cjs",
 
