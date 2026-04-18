@@ -39,6 +39,12 @@ const REVIEW_LABELS = [
   'subscription-services',
 ];
 
+const NON_REVIEW_LABELS = [
+  'how-to-playbooks',
+  'smart-savings',
+  'templates-checklists',
+];
+
 const REQUIRED_COMMON_FIELDS = [
   'entity',
   'angle',
@@ -52,6 +58,11 @@ const REQUIRED_REVIEW_FIELDS = [
   'reviewEntity',
   'selectionCriteria',
   'selectionMeta',
+];
+
+const REQUIRED_NON_REVIEW_FIELDS = [
+  'executionCriteria',
+  'executionMeta',
 ];
 
 /* ============================================================
@@ -139,6 +150,45 @@ const REVIEW_SELECTION_META_SCHEMA = {
   ],
 };
 
+const NON_REVIEW_EXECUTION_CRITERIA_SCHEMAS = {
+  'how-to-playbooks': {
+    required: [
+      'requiresPrerequisites',
+      'requiresSequentialSteps',
+      'requiresFailureRecovery',
+      'requiresVerification',
+      'requiresDecisionTrigger',
+    ],
+  },
+  'smart-savings': {
+    required: [
+      'requiresCostBreakdown',
+      'requiresHiddenCostCheck',
+      'requiresComparisonBase',
+      'requiresSwitchingCost',
+      'requiresBestScenario',
+    ],
+  },
+  'templates-checklists': {
+    required: [
+      'requiresTemplateStructure',
+      'requiresUsageGuide',
+      'requiresCustomizationPoints',
+      'requiresCommonMistakes',
+      'requiresReuseContext',
+    ],
+  },
+};
+
+const NON_REVIEW_EXECUTION_META_SCHEMA = {
+  required: [
+    'validated',
+    'sourceType',
+    'executionReason',
+    'selectedAt',
+  ],
+};
+
 /* ============================================================
  * 유틸
  * ============================================================ */
@@ -161,6 +211,10 @@ function isObject(v) {
 
 function isReviewLabel(label) {
   return REVIEW_LABELS.includes(normStr(label));
+}
+
+function isNonReviewLabel(label) {
+  return NON_REVIEW_LABELS.includes(normStr(label));
 }
 
 function isFiniteNumber(v) {
@@ -220,6 +274,15 @@ function validateSeedStructure(seed) {
     }
   }
 
+  // 비리뷰 계열 추가 필드 검증
+  if (isNonReviewLabel(label)) {
+    for (const field of REQUIRED_NON_REVIEW_FIELDS) {
+      if (!(field in seed)) {
+        errors.push(`Missing required non-review field: ${field}`);
+      }
+    }
+  }
+
   // entity 검증
   const entity = seed.entity;
   const schema = ENTITY_SCHEMAS[label];
@@ -234,11 +297,8 @@ function validateSeedStructure(seed) {
         }
       }
 
-      // type 강제
-      if (schema.type !== 'generic') {
-        if (entity.type !== schema.type) {
-          errors.push(`Entity type mismatch: expected ${schema.type}`);
-        }
+      if (entity.type !== schema.type) {
+        errors.push(`Entity type mismatch: expected ${schema.type}`);
       }
     }
   }
@@ -367,6 +427,59 @@ function validateSeedStructure(seed) {
     }
   }
 
+  // executionCriteria
+  if (isNonReviewLabel(label)) {
+    const executionCriteria = seed.executionCriteria;
+    const executionSchema = NON_REVIEW_EXECUTION_CRITERIA_SCHEMAS[label];
+
+    if (!isObject(executionCriteria)) {
+      errors.push('executionCriteria must be an object');
+    } else if (executionSchema) {
+      for (const key of executionSchema.required) {
+        if (!hasOwn(executionCriteria, key)) {
+          errors.push(`executionCriteria missing field: ${key}`);
+        }
+      }
+
+      Object.keys(executionCriteria).forEach((key) => {
+        if (hasOwn(executionCriteria, key) && typeof executionCriteria[key] !== 'boolean') {
+          errors.push(`executionCriteria.${key} must be boolean`);
+        }
+      });
+    }
+  }
+
+  // executionMeta
+  if (isNonReviewLabel(label)) {
+    const executionMeta = seed.executionMeta;
+
+    if (!isObject(executionMeta)) {
+      errors.push('executionMeta must be an object');
+    } else {
+      for (const key of NON_REVIEW_EXECUTION_META_SCHEMA.required) {
+        if (!hasOwn(executionMeta, key)) {
+          errors.push(`executionMeta missing field: ${key}`);
+        }
+      }
+
+      if (hasOwn(executionMeta, 'validated') && typeof executionMeta.validated !== 'boolean') {
+        errors.push('executionMeta.validated must be boolean');
+      }
+
+      if (hasOwn(executionMeta, 'sourceType') && !isNonEmpty(executionMeta.sourceType)) {
+        errors.push('executionMeta.sourceType must be non-empty');
+      }
+
+      if (hasOwn(executionMeta, 'executionReason') && !isNonEmpty(executionMeta.executionReason)) {
+        errors.push('executionMeta.executionReason must be non-empty');
+      }
+
+      if (hasOwn(executionMeta, 'selectedAt') && !isNonEmpty(executionMeta.selectedAt)) {
+        errors.push('executionMeta.selectedAt must be non-empty');
+      }
+    }
+  }
+
   return {
     ok: errors.length === 0,
     errors,
@@ -414,6 +527,26 @@ function normalizeSeed(seed) {
     });
   }
 
+  if (out.executionCriteria && typeof out.executionCriteria === 'object') {
+    out.executionCriteria = { ...out.executionCriteria };
+    Object.keys(out.executionCriteria).forEach((k) => {
+      const value = out.executionCriteria[k];
+      if (typeof value === 'string' || value == null) {
+        out.executionCriteria[k] = normStr(value);
+      }
+    });
+  }
+
+  if (out.executionMeta && typeof out.executionMeta === 'object') {
+    out.executionMeta = { ...out.executionMeta };
+    Object.keys(out.executionMeta).forEach((k) => {
+      const value = out.executionMeta[k];
+      if (typeof value === 'string' || value == null) {
+        out.executionMeta[k] = normStr(value);
+      }
+    });
+  }
+
   if (isArray(out.keyPoints)) {
     out.keyPoints = out.keyPoints.map(normStr).filter(Boolean);
   }
@@ -428,12 +561,16 @@ function normalizeSeed(seed) {
 module.exports = {
   ALLOWED_LABELS,
   REVIEW_LABELS,
+  NON_REVIEW_LABELS,
   REQUIRED_COMMON_FIELDS,
   REQUIRED_REVIEW_FIELDS,
+  REQUIRED_NON_REVIEW_FIELDS,
   ENTITY_SCHEMAS,
   REVIEW_ENTITY_SCHEMAS,
   REVIEW_SELECTION_CRITERIA_SCHEMAS,
   REVIEW_SELECTION_META_SCHEMA,
+  NON_REVIEW_EXECUTION_CRITERIA_SCHEMAS,
+  NON_REVIEW_EXECUTION_META_SCHEMA,
   validateSeedStructure,
   normalizeSeed,
 };
