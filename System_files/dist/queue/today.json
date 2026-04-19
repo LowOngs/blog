@@ -1,18 +1,18 @@
 {
-  "date": "2026-04-18",
+  "date": "2026-04-19",
   "timezone": "Asia/Seoul",
   "cutoff": "10:00",
   "items": [
     {
-      "date": "2026-04-18",
+      "date": "2026-04-19",
       "label": "smart-savings",
       "seedLabel": "smart-savings",
       "requestedSlotLabel": "smart-savings",
       "mode": "trend",
-      "id": "ss-tr-016",
-      "title": "Which VPN Plan Saves the Most in 2025?",
-      "angle": "VPN pricing fluctuates heavily; global comparisons trend.",
-      "audience": "Remote workers and privacy-focused users",
+      "id": "ss-tr-017",
+      "title": "How to Minimize Food Delivery Fees Using 2025 Membership Models",
+      "angle": "Uber Eats, DoorDash, and GrabPass updated benefits.",
+      "audience": "Heavy food delivery users",
       "intent": "saving",
       "priority": 1,
       "notes": ""

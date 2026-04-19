@@ -1,6 +1,6 @@
 {
   "mode": "local",
-  "next": 25,
+  "next": 26,
   "map": {
     "app-20251207-001": "page000001",
     "device-20251207-001": "page000004",
@@ -20,7 +20,8 @@
     "subscription-20260416-001": "page000021",
     "app-20260417-001": "page000022",
     "howto-20260417-001": "page000023",
-    "smartsavings-20260418-001": "page000024"
+    "smartsavings-20260418-001": "page000024",
+    "smartsavings-20260419-001": "page000025"
   },
   "bySlug": {
     "app-20251207-001": "page000001",
@@ -41,7 +42,8 @@
     "subscription-20260416-001": "page000021",
     "app-20260417-001": "page000022",
     "howto-20260417-001": "page000023",
-    "smartsavings-20260418-001": "page000024"
+    "smartsavings-20260418-001": "page000024",
+    "smartsavings-20260419-001": "page000025"
   },
-  "updatedAt": "2026-04-18T04:40:20.204Z"
+  "updatedAt": "2026-04-19T05:10:47.061Z"
 }
