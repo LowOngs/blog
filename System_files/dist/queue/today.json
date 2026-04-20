@@ -1,21 +1,40 @@
 {
-  "date": "2026-04-19",
+  "date": "2026-04-20",
   "timezone": "Asia/Seoul",
   "cutoff": "10:00",
   "items": [
     {
-      "date": "2026-04-19",
-      "label": "smart-savings",
-      "seedLabel": "smart-savings",
-      "requestedSlotLabel": "smart-savings",
+      "date": "2026-04-20",
+      "label": "how-to-playbooks",
+      "seedLabel": "how-to-playbooks",
+      "requestedSlotLabel": "how-to-playbooks",
       "mode": "trend",
-      "id": "ss-tr-017",
-      "title": "How to Minimize Food Delivery Fees Using 2025 Membership Models",
-      "angle": "Uber Eats, DoorDash, and GrabPass updated benefits.",
-      "audience": "Heavy food delivery users",
-      "intent": "saving",
+      "id": "ht-tr-027",
+      "title": "How to use AI to schedule tasks and automate reminders",
+      "angle": "AI scheduling is now a daily use case.",
+      "audience": "Busy professionals and students",
+      "intent": "howto",
       "priority": 1,
       "notes": ""
+    },
+    {
+      "date": "2026-04-20",
+      "label": "app-reviews",
+      "seedLabel": "app-reviews",
+      "requestedSlotLabel": "app-reviews",
+      "mode": "trend",
+      "id": "ar-tr-003",
+      "title": "The New Calendar App With Automated Time Blocking: Does It Work?",
+      "angle": "Real-world performance in busy schedules",
+      "audience": "Professionals",
+      "intent": "review/usability",
+      "priority": 0,
+      "notes": "",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Automated Time Blocking Calendar App",
+        "platform": "android"
+      }
     }
   ]
 }
