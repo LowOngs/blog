@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-04-20T05:20:59.285Z",
+  "updatedAt": "2026-04-21T05:08:56.596Z",
   "byDate": {
     "2026-04-05": {
       "smart-savings": 1
@@ -36,6 +36,10 @@
     "2026-04-20": {
       "how-to-playbooks": 1,
       "app-reviews": 1
+    },
+    "2026-04-21": {
+      "how-to-playbooks": 1,
+      "device-reviews": 1
     }
   }
 }

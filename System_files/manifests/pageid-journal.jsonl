@@ -20,3 +20,5 @@
 {"ts":"2026-04-19T05:10:47.061Z","mode":"local","slug":"smartsavings-20260419-001","pageId":"page000025","ledger":"page-ids.local.json","action":"assign_new"}
 {"ts":"2026-04-20T05:20:59.403Z","mode":"local","slug":"app-20260420-001","pageId":"page000026","ledger":"page-ids.local.json","action":"assign_new"}
 {"ts":"2026-04-20T05:20:59.406Z","mode":"local","slug":"howto-20260420-001","pageId":"page000027","ledger":"page-ids.local.json","action":"assign_new"}
+{"ts":"2026-04-21T05:08:56.735Z","mode":"local","slug":"device-20260421-001","pageId":"page000028","ledger":"page-ids.local.json","action":"assign_new"}
+{"ts":"2026-04-21T05:08:56.737Z","mode":"local","slug":"howto-20260421-001","pageId":"page000029","ledger":"page-ids.local.json","action":"assign_new"}

@@ -5,15 +5,6 @@
   },
   "trend": [
     {
-      "id": "ht-tr-028",
-      "title": "How to speed up Chrome, Safari, and Edge browsers",
-      "angle": "Browser performance drops frequently affect users.",
-      "audience": "All web users",
-      "intent": "howto",
-      "priority": 1,
-      "fingerprint": "fp1:7f695e6804678afc6c33f99856d706c7e4153a09"
-    },
-    {
       "id": "ht-tr-029",
       "title": "How to fix GPS not working on Android/iPhone",
       "angle": "Navigation errors are a top AI-troubleshooting topic.",

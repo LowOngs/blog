@@ -5,21 +5,6 @@
   },
   "trend": [
     {
-      "id": "dr-tr-002",
-      "title": "Which Foldable Phone Has the Stronger Hinge This Year?",
-      "angle": "Flex durability + crease visibility",
-      "audience": "Early adopters",
-      "intent": "review/durability",
-      "environment": "foldables",
-      "timing": "new model cycle",
-      "goal": "pick the foldable with lowest mechanical wear",
-      "fingerprint": "fp1:1e284558dad6c580267680321c831a68bac8ee36",
-      "reviewEntity": {
-        "type": "device",
-        "model": "Foldables"
-      }
-    },
-    {
       "id": "dr-tr-003",
       "title": "The Latest AI Camera Phones: Which One Nails Low-Light?",
       "angle": "Sensor size + noise model accuracy",
