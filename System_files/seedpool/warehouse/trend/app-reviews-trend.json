@@ -5,21 +5,6 @@
   },
   "trend": [
     {
-      "id": "ar-tr-004",
-      "title": "Should You Switch to the Latest Password Manager?",
-      "angle": "Evaluate breach history + sync speed changes",
-      "audience": "Security-conscious users",
-      "intent": "review/security-check",
-      "environment": "password managers",
-      "timing": "major version launch",
-      "goal": "ensure upgrade does not introduce new risks",
-      "reviewEntity": {
-        "type": "app",
-        "appName": "Password Manager App",
-        "platform": "android"
-      }
-    },
-    {
       "id": "ar-tr-005",
       "title": "How Good Is the New Cross-Device Clipboard App?",
       "angle": "Latency + file-type compatibility",

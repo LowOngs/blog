@@ -5,15 +5,6 @@
   },
   "trend": [
     {
-      "id": "ht-tr-029",
-      "title": "How to fix GPS not working on Android/iPhone",
-      "angle": "Navigation errors are a top AI-troubleshooting topic.",
-      "audience": "Drivers, delivery workers, travelers",
-      "intent": "howto",
-      "priority": 1,
-      "fingerprint": "fp1:32c24a6a2cdc80f36735e206d3c8aae9899d42ed"
-    },
-    {
       "id": "ht-tr-030",
       "title": "How to clean malware/adware from Windows and macOS in 2025",
       "angle": "AI receives nonstop malware removal requests.",

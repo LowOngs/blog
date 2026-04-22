@@ -8,7 +8,7 @@
     ],
     "title": "Minimalist productivity apps that actually stick in 2025",
     "description": "A practical guide to choosing one main productivity app that you can really stick with across work, study, and side projects.",
-    "updated": "2026-04-20T14:21:04+09:00"
+    "updated": "2026-04-21T14:09:03+09:00"
   },
   {
     "slug": "device-20251207-001",
@@ -19,7 +19,7 @@
     ],
     "title": "Best budget laptops under $800 for work, study, and side projects",
     "description": "A grounded guide to picking a budget laptop under $800 that can handle studying, remote work, and light side projects without frustration.",
-    "updated": "2026-04-20T14:21:04+09:00"
+    "updated": "2026-04-21T14:09:03+09:00"
   },
   {
     "slug": "origin-verify-updates",
@@ -30,7 +30,7 @@
     ],
     "title": "How Ongs Blog Verifies Updates (90-day refresh + version tags)",
     "description": "We update guides on a fixed cadence and keep change visibility. Every post is version-tagged and source-linked.",
-    "updated": "2026-04-20T14:21:04+09:00"
+    "updated": "2026-04-21T14:09:03+09:00"
   },
   {
     "slug": "subscription-20251207-001",
@@ -41,7 +41,29 @@
     ],
     "title": "When productivity app subscriptions are really worth paying for in 2025",
     "description": "A clear, numbers-based look at when it makes sense to pay for productivity app subscriptions and when free plans are enough.",
-    "updated": "2026-04-20T14:21:04+09:00"
+    "updated": "2026-04-21T14:09:03+09:00"
+  },
+  {
+    "slug": "device-20260421-001",
+    "pageId": "page000028",
+    "url": "https://ongsblog.com/device-20260421-001.html",
+    "labels": [
+      "device-reviews"
+    ],
+    "title": "Which Foldable Phone Has the Stronger Hinge This Year?",
+    "description": "Which Foldable Phone Has the Stronger Hinge This Year? should be read as a review of Foldables, not as a general article about devices. The first question is wh…",
+    "updated": "2026-04-21T10:00:00+09:00"
+  },
+  {
+    "slug": "howto-20260421-001",
+    "pageId": "page000029",
+    "url": "https://ongsblog.com/howto-20260421-001.html",
+    "labels": [
+      "how-to-playbooks"
+    ],
+    "title": "How to speed up Chrome, Safari, and Edge browsers",
+    "description": "How to speed up Chrome, Safari, and Edge browsers should be read as a practical execution guide. The goal is not to sound technical for its own sake, but to mak…",
+    "updated": "2026-04-21T10:00:00+09:00"
   },
   {
     "slug": "app-20260420-001",

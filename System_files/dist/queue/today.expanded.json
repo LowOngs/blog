@@ -1,45 +1,46 @@
 {
-  "date": "2026-04-21",
+  "date": "2026-04-22",
   "timezone": "Asia/Seoul",
   "cutoff": "10:00",
   "items": [
     {
-      "date": "2026-04-21",
+      "date": "2026-04-22",
       "label": "how-to-playbooks",
       "seedLabel": "how-to-playbooks",
       "requestedSlotLabel": "how-to-playbooks",
       "mode": "trend",
-      "id": "ht-tr-028",
-      "title": "How to speed up Chrome, Safari, and Edge browsers",
-      "angle": "Browser performance drops frequently affect users.",
-      "audience": "All web users",
+      "id": "ht-tr-029",
+      "title": "How to fix GPS not working on Android/iPhone",
+      "angle": "Navigation errors are a top AI-troubleshooting topic.",
+      "audience": "Drivers, delivery workers, travelers",
       "intent": "howto",
       "priority": 1,
       "notes": "",
-      "generatedSlug": "howto-20260421-001",
-      "postId": "06ETWW88HRS0TPFZC01A0FS3AT"
+      "generatedSlug": "howto-20260422-001",
+      "postId": "06EV75DANRY0QSRZ16YZD82421"
     },
     {
-      "date": "2026-04-21",
-      "label": "device-reviews",
-      "seedLabel": "device-reviews",
-      "requestedSlotLabel": "device-reviews",
+      "date": "2026-04-22",
+      "label": "app-reviews",
+      "seedLabel": "app-reviews",
+      "requestedSlotLabel": "app-reviews",
       "mode": "trend",
-      "id": "dr-tr-002",
-      "title": "Which Foldable Phone Has the Stronger Hinge This Year?",
-      "angle": "Flex durability + crease visibility",
-      "audience": "Early adopters",
-      "intent": "review/durability",
+      "id": "ar-tr-004",
+      "title": "Should You Switch to the Latest Password Manager?",
+      "angle": "Evaluate breach history + sync speed changes",
+      "audience": "Security-conscious users",
+      "intent": "review/security-check",
       "priority": 0,
       "notes": "",
       "reviewEntity": {
-        "type": "device",
-        "model": "Foldables"
+        "type": "app",
+        "appName": "Password Manager App",
+        "platform": "android"
       },
-      "generatedSlug": "device-20260421-001",
-      "postId": "06ETWW88J4DHRK3FXCP9KT6N7A",
-      "reviewId": "06ETWW88J4E2NS1ERBRMX6NH5H"
+      "generatedSlug": "app-20260422-001",
+      "postId": "06EV75DAP4GHEBB27WWN0RYDKV",
+      "reviewId": "06EV75DAP494T45VFBCCX1H6TM"
     }
   ],
-  "expandedAt": "2026-04-21T05:08:56.593Z"
+  "expandedAt": "2026-04-22T05:07:03.473Z"
 }
