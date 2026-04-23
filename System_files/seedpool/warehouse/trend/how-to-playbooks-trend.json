@@ -5,15 +5,6 @@
   },
   "trend": [
     {
-      "id": "ht-tr-030",
-      "title": "How to clean malware/adware from Windows and macOS in 2025",
-      "angle": "AI receives nonstop malware removal requests.",
-      "audience": "General computer users",
-      "intent": "howto",
-      "priority": 1,
-      "fingerprint": "fp1:3656414f0512fe7f38952fabe4de0f74e6d817d2"
-    },
-    {
       "id": "ht-tr-031",
       "title": "How to fix AirDrop/Quick Share not working",
       "angle": "Cross-device file transfer failures are extremely common.",

@@ -8,7 +8,7 @@
     ],
     "title": "Minimalist productivity apps that actually stick in 2025",
     "description": "A practical guide to choosing one main productivity app that you can really stick with across work, study, and side projects.",
-    "updated": "2026-04-21T14:09:03+09:00"
+    "updated": "2026-04-22T14:07:10+09:00"
   },
   {
     "slug": "device-20251207-001",
@@ -19,7 +19,7 @@
     ],
     "title": "Best budget laptops under $800 for work, study, and side projects",
     "description": "A grounded guide to picking a budget laptop under $800 that can handle studying, remote work, and light side projects without frustration.",
-    "updated": "2026-04-21T14:09:03+09:00"
+    "updated": "2026-04-22T14:07:10+09:00"
   },
   {
     "slug": "origin-verify-updates",
@@ -30,7 +30,7 @@
     ],
     "title": "How Ongs Blog Verifies Updates (90-day refresh + version tags)",
     "description": "We update guides on a fixed cadence and keep change visibility. Every post is version-tagged and source-linked.",
-    "updated": "2026-04-21T14:09:03+09:00"
+    "updated": "2026-04-22T14:07:10+09:00"
   },
   {
     "slug": "subscription-20251207-001",
@@ -41,7 +41,29 @@
     ],
     "title": "When productivity app subscriptions are really worth paying for in 2025",
     "description": "A clear, numbers-based look at when it makes sense to pay for productivity app subscriptions and when free plans are enough.",
-    "updated": "2026-04-21T14:09:03+09:00"
+    "updated": "2026-04-22T14:07:10+09:00"
+  },
+  {
+    "slug": "app-20260422-001",
+    "pageId": "page000030",
+    "url": "https://ongsblog.com/app-20260422-001.html",
+    "labels": [
+      "app-reviews"
+    ],
+    "title": "Should You Switch to the Latest Password Manager?",
+    "description": "Should You Switch to the Latest Password Manager? should be read as a review of Password Manager App, not as a general article about apps. The first question is…",
+    "updated": "2026-04-22T10:00:00+09:00"
+  },
+  {
+    "slug": "howto-20260422-001",
+    "pageId": "page000031",
+    "url": "https://ongsblog.com/howto-20260422-001.html",
+    "labels": [
+      "how-to-playbooks"
+    ],
+    "title": "How to fix GPS not working on Android/iPhone",
+    "description": "How to fix GPS not working on Android/iPhone should be read as a practical execution guide. The goal is not to sound technical for its own sake, but to make the…",
+    "updated": "2026-04-22T10:00:00+09:00"
   },
   {
     "slug": "device-20260421-001",
