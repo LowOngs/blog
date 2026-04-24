@@ -1,0 +1,58 @@
+{
+  "postId": "06EVVTM1XWTHWZKMTENMD06H0Q",
+  "reviewId": null,
+  "slug": "howto-20260424-001",
+  "title": "How to fix AirDrop/Quick Share not working",
+  "labels": [
+    "how-to-playbooks"
+  ],
+  "updated": "2026-04-24T10:00:00+09:00",
+  "bodyPrompt": "Title: How to fix AirDrop/Quick Share not working\nLabel: how-to-playbooks\nQueueDate: 2026-04-24\nIntent: howto\n\nWrite the article body in natural English for a real blog reader.\nFollow the Google blog standard and keep the article aligned to the exact intent.\nUse practical reasoning, real decision context, and useful explanation.\nDo not use generic filler, robotic repetition, or shallow statements.",
+  "body": "<h2>Overview</h2>\n<p>How to fix AirDrop/Quick Share not working should be read as a practical execution guide. The goal is not to sound technical for its own sake, but to make the task feel controllable from the first step to the final verification.</p>\n<p>The most common reason a how-to fails is that people jump into action before checking environment, version, or dependency conditions. In the current setup, the setup around the task matters almost as much as the steps themselves. The article also needs to stay aligned with this writing direction: Write the article body in natural English for a real blog reader. Follow the Google blog standard and keep the article aligned to the exact intent. Use practical reasoning, real decision context, and useful explanation. Do not use generic filler, robotic repetition, or shallow statements..</p>\n\n<h2>Before You Start</h2>\n<p>Preparation is what prevents a simple task from turning into a long recovery session. Before making changes, it is worth checking version, access rights, backup state, and whether the expected result is clearly defined.</p>\n<p>This stage often feels slower, but it usually saves the most time later because it removes avoidable confusion.</p>\n<ul>\n  <li>Check version and environment first.</li>\n  <li>Confirm required permissions or access.</li>\n  <li>Know what successful completion should look like before starting.</li>\n</ul>\n\n<h2>Step-by-Step</h2>\n<p>the safer way to execute is to move in a sequence that can be verified after each stage. That means one change, one check, then the next change. This is slower than guessing, but much faster than undoing a broken configuration.</p>\n<p>When something does not match the expected result, it is better to stop at the current step and compare conditions than to keep stacking changes on top of uncertainty.</p>\n\n<h2>Common Mistakes & Fixes</h2>\n<p>Most failures come from three patterns: skipped prerequisites, mismatch between environment and instruction, or an assumption that a visible change automatically means success. These are common because the task can look finished before it is truly verified.</p>\n<p>The practical fix is to check the smallest dependable signal first. If the expected outcome is missing, go back to the step where the environment, permission, or setting first diverged from the assumption.</p>\n\n<h2>Checklist</h2>\n<p>A checklist is useful because execution problems usually come from omission rather than complexity. When the task is written as a compact sequence, people are less likely to forget a condition that looked minor at the time but becomes critical later.</p>\n<ul>\n  <li>Environment confirmed</li>\n  <li>Required setting or resource prepared</li>\n  <li>Main step completed</li>\n  <li>Result verified</li>\n  <li>Fallback path ready if the result fails</li>\n</ul>\n\n<h2>Next Steps</h2>\n<p>Once the task works, the next step is to stabilize it. That may mean documenting the setup, saving a repeatable checklist, or linking the result to a broader workflow so the same problem does not need to be solved from scratch again.</p>\n<p>A how-to becomes genuinely useful when it helps the reader avoid repeating the same confusion later.</p>",
+  "seedMeta": {
+    "queueDate": "2026-04-24",
+    "cutoff": "10:00",
+    "label": "how-to-playbooks",
+    "profileId": "howto_playbooks_v1",
+    "id": "ht-tr-031",
+    "intent": "howto",
+    "postId": "06EVVTM1XWTHWZKMTENMD06H0Q",
+    "reviewId": null
+  },
+  "pageId": "page000035",
+  "bodyGen": {
+    "mode": "skeleton-h2",
+    "updatedAt": "2026-04-24T05:15:56.073Z",
+    "writeMode": "local",
+    "strict": true,
+    "label": "how-to-playbooks",
+    "kind": "non-review",
+    "h2Count": 6,
+    "headingHash": "89e09429ea6c8a812c5090e11416b8a1c6f91e9d",
+    "headingPlan": [
+      "Overview",
+      "Before You Start",
+      "Step-by-Step",
+      "Common Mistakes & Fixes",
+      "Checklist",
+      "Next Steps"
+    ],
+    "intent": "execute",
+    "timing": "present",
+    "context": null
+  },
+  "contentGen": {
+    "mode": "section-content-fill",
+    "updatedAt": "2026-04-24T05:15:56.216Z",
+    "writeMode": "local",
+    "label": "how-to-playbooks",
+    "bodyPromptUsed": true,
+    "selfReviewLoop": [
+      "A:factuality",
+      "C:criteria-check",
+      "D:anti-ai-tone"
+    ],
+    "repairMode": false,
+    "repairIssueCount": 0
+  }
+}

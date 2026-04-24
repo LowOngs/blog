@@ -1,45 +1,46 @@
 {
-  "date": "2026-04-23",
+  "date": "2026-04-24",
   "timezone": "Asia/Seoul",
   "cutoff": "10:00",
   "items": [
     {
-      "date": "2026-04-23",
+      "date": "2026-04-24",
       "label": "how-to-playbooks",
       "seedLabel": "how-to-playbooks",
       "requestedSlotLabel": "how-to-playbooks",
       "mode": "trend",
-      "id": "ht-tr-030",
-      "title": "How to clean malware/adware from Windows and macOS in 2025",
-      "angle": "AI receives nonstop malware removal requests.",
-      "audience": "General computer users",
+      "id": "ht-tr-031",
+      "title": "How to fix AirDrop/Quick Share not working",
+      "angle": "Cross-device file transfer failures are extremely common.",
+      "audience": "Apple and Samsung users",
       "intent": "howto",
       "priority": 1,
       "notes": "",
-      "generatedSlug": "howto-20260423-001",
-      "postId": "06EVHFXCV0SJT9ZZAX04VM5Z5Z"
+      "generatedSlug": "howto-20260424-001",
+      "postId": "06EVVTM1XWTHWZKMTENMD06H0Q"
     },
     {
-      "date": "2026-04-23",
-      "label": "subscription-services",
-      "seedLabel": "subscription-services",
-      "requestedSlotLabel": "subscription-services",
+      "date": "2026-04-24",
+      "label": "app-reviews",
+      "seedLabel": "app-reviews",
+      "requestedSlotLabel": "app-reviews",
       "mode": "trend",
-      "id": "ss-tr-003",
-      "title": "Which Music Streaming App Now Has the Best Audio Quality?",
-      "angle": "Lossless tiers + device support",
-      "audience": "Music listeners",
-      "intent": "review/quality",
+      "id": "ar-tr-005",
+      "title": "How Good Is the New Cross-Device Clipboard App?",
+      "angle": "Latency + file-type compatibility",
+      "audience": "Productivity users",
+      "intent": "review/utility",
       "priority": 0,
       "notes": "",
       "reviewEntity": {
-        "type": "subscription",
-        "service": "Music Streaming"
+        "type": "app",
+        "appName": "Cross-Device Clipboard App",
+        "platform": "android"
       },
-      "generatedSlug": "subscription-20260423-001",
-      "postId": "06EVHFXCVCPPEQSM0WRQ5H47KV",
-      "reviewId": "06EVHFXCVCWM2WVRPDTEKE836H"
+      "generatedSlug": "app-20260424-001",
+      "postId": "06EVVTM1Y4TN1QDP8GAAJVA76D",
+      "reviewId": "06EVVTM1Y416TN3DC365ERGYYD"
     }
   ],
-  "expandedAt": "2026-04-23T05:11:02.619Z"
+  "expandedAt": "2026-04-24T05:15:55.762Z"
 }
