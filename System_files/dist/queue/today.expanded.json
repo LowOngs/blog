@@ -1,46 +1,24 @@
 {
-  "date": "2026-04-24",
+  "date": "2026-04-25",
   "timezone": "Asia/Seoul",
   "cutoff": "10:00",
   "items": [
     {
-      "date": "2026-04-24",
-      "label": "how-to-playbooks",
-      "seedLabel": "how-to-playbooks",
-      "requestedSlotLabel": "how-to-playbooks",
+      "date": "2026-04-25",
+      "label": "smart-savings",
+      "seedLabel": "smart-savings",
+      "requestedSlotLabel": "smart-savings",
       "mode": "trend",
-      "id": "ht-tr-031",
-      "title": "How to fix AirDrop/Quick Share not working",
-      "angle": "Cross-device file transfer failures are extremely common.",
-      "audience": "Apple and Samsung users",
-      "intent": "howto",
+      "id": "ss-tr-018",
+      "title": "2025 Guide: Replacing Paid Productivity Apps With Free AI Tools",
+      "angle": "AI note and task apps replaced many paid tools.",
+      "audience": "Workers, creators, students",
+      "intent": "saving",
       "priority": 1,
       "notes": "",
-      "generatedSlug": "howto-20260424-001",
-      "postId": "06EVVTM1XWTHWZKMTENMD06H0Q"
-    },
-    {
-      "date": "2026-04-24",
-      "label": "app-reviews",
-      "seedLabel": "app-reviews",
-      "requestedSlotLabel": "app-reviews",
-      "mode": "trend",
-      "id": "ar-tr-005",
-      "title": "How Good Is the New Cross-Device Clipboard App?",
-      "angle": "Latency + file-type compatibility",
-      "audience": "Productivity users",
-      "intent": "review/utility",
-      "priority": 0,
-      "notes": "",
-      "reviewEntity": {
-        "type": "app",
-        "appName": "Cross-Device Clipboard App",
-        "platform": "android"
-      },
-      "generatedSlug": "app-20260424-001",
-      "postId": "06EVVTM1Y4TN1QDP8GAAJVA76D",
-      "reviewId": "06EVVTM1Y416TN3DC365ERGYYD"
+      "generatedSlug": "smartsavings-20260425-001",
+      "postId": "06EW5WWHB0AJJHVGSF1BD0312S"
     }
   ],
-  "expandedAt": "2026-04-24T05:15:55.762Z"
+  "expandedAt": "2026-04-25T04:43:55.609Z"
 }

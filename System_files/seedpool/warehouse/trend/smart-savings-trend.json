@@ -5,15 +5,6 @@
   },
   "trend": [
     {
-      "id": "ss-tr-018",
-      "title": "2025 Guide: Replacing Paid Productivity Apps With Free AI Tools",
-      "angle": "AI note and task apps replaced many paid tools.",
-      "audience": "Workers, creators, students",
-      "intent": "saving",
-      "priority": 1,
-      "fingerprint": "fp1:f1daec3f9c94b340ec15fce19afd73c73d16de32"
-    },
-    {
       "id": "ss-tr-019",
       "title": "How to Optimize Cloud Photo Storage and Avoid Redundancy",
       "angle": "Redundant photo backups cost users silently.",
