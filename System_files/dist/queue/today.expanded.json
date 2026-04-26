@@ -1,24 +1,24 @@
 {
-  "date": "2026-04-25",
+  "date": "2026-04-26",
   "timezone": "Asia/Seoul",
   "cutoff": "10:00",
   "items": [
     {
-      "date": "2026-04-25",
+      "date": "2026-04-26",
       "label": "smart-savings",
       "seedLabel": "smart-savings",
       "requestedSlotLabel": "smart-savings",
       "mode": "trend",
-      "id": "ss-tr-018",
-      "title": "2025 Guide: Replacing Paid Productivity Apps With Free AI Tools",
-      "angle": "AI note and task apps replaced many paid tools.",
-      "audience": "Workers, creators, students",
+      "id": "ss-tr-019",
+      "title": "How to Optimize Cloud Photo Storage and Avoid Redundancy",
+      "angle": "Redundant photo backups cost users silently.",
+      "audience": "iPhone/Android users",
       "intent": "saving",
       "priority": 1,
       "notes": "",
-      "generatedSlug": "smartsavings-20260425-001",
-      "postId": "06EW5WWHB0AJJHVGSF1BD0312S"
+      "generatedSlug": "smartsavings-20260426-001",
+      "postId": "06EWGEQV2CYC2W6AES51RV3HES"
     }
   ],
-  "expandedAt": "2026-04-25T04:43:55.609Z"
+  "expandedAt": "2026-04-26T05:20:01.812Z"
 }

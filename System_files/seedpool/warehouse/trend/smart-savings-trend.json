@@ -5,15 +5,6 @@
   },
   "trend": [
     {
-      "id": "ss-tr-019",
-      "title": "How to Optimize Cloud Photo Storage and Avoid Redundancy",
-      "angle": "Redundant photo backups cost users silently.",
-      "audience": "iPhone/Android users",
-      "intent": "saving",
-      "priority": 1,
-      "fingerprint": "fp1:fe7b52b3ffd5fbffd503aaf11c89156da1759a1a"
-    },
-    {
       "id": "ss-tr-020",
       "title": "Which AI Writing Tools Are Worth Paying for in 2025?",
       "angle": "AI writing apps exploded; users need clarity.",
