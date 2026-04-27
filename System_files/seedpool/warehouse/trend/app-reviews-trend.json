@@ -5,21 +5,6 @@
   },
   "trend": [
     {
-      "id": "ar-tr-006",
-      "title": "The Hottest Photo Editor of the Month: Hype or Real Upgrade?",
-      "angle": "AI masking + RAW export test",
-      "audience": "Mobile photographers",
-      "intent": "review/feature-test",
-      "environment": "photo editing",
-      "timing": "trend peak",
-      "goal": "judge if AI editing is actually accurate",
-      "reviewEntity": {
-        "type": "app",
-        "appName": "Photo Editor App",
-        "platform": "android"
-      }
-    },
-    {
       "id": "ar-tr-007",
       "title": "Which Habit App Has the Best AI Coaching?",
       "angle": "Model personalization and consistency",
