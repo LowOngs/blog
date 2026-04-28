@@ -5,21 +5,6 @@
   },
   "trend": [
     {
-      "id": "dr-tr-003",
-      "title": "The Latest AI Camera Phones: Which One Nails Low-Light?",
-      "angle": "Sensor size + noise model accuracy",
-      "audience": "Photography-focused users",
-      "intent": "review/camera-quality",
-      "environment": "camera phones",
-      "timing": "launch wave",
-      "goal": "identify best night photo engine",
-      "fingerprint": "fp1:91274eaaa6b09544f7ea17db852f39bb225ded13",
-      "reviewEntity": {
-        "type": "device",
-        "model": "Camera Phones"
-      }
-    },
-    {
       "id": "dr-tr-004",
       "title": "Is the New Gaming Laptop Worth the Price Hike?",
       "angle": "GPU wattage + cooling redesign",

@@ -5,15 +5,6 @@
   },
   "trend": [
     {
-      "id": "ht-tr-033",
-      "title": "How to recover your Google or Apple account after lockout",
-      "angle": "Account recovery is a top trust-breaking issue.",
-      "audience": "All smartphone users",
-      "intent": "howto",
-      "priority": 1,
-      "fingerprint": "fp1:c8cc1146d3ee96d44f3bd73acf156b49155bea23"
-    },
-    {
       "id": "ht-tr-034",
       "title": "How to upgrade your home office for 2025 productivity standards",
       "angle": "AI-assisted workspace design is trending.",
