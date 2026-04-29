@@ -376,6 +376,31 @@
       "insights": [],
       "sources": [],
       "bucket": "device"
+    },
+    "app-20260429-001": {
+      "reviewId": "06EXFEQEGCER4Y5B4F3FT7BS7V",
+      "postId": "06EXFEQEGCCPTJF97AE2M4GS63",
+      "lastChecked": null,
+      "status": "queued",
+      "store": "unknown",
+      "source": "seed",
+      "storeId": "AI Habit App",
+      "ratingCurrent": 0,
+      "ratingPrevious": 0,
+      "ratingDiff": 0,
+      "votesCurrent": 0,
+      "votesPrevious": 0,
+      "votesDiff": 0,
+      "histogram": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0
+      },
+      "insights": [],
+      "sources": [],
+      "bucket": "app"
     }
   },
   "updatedAt": "2026-01-15"

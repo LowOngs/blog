@@ -5,21 +5,6 @@
   },
   "trend": [
     {
-      "id": "ar-tr-007",
-      "title": "Which Habit App Has the Best AI Coaching?",
-      "angle": "Model personalization and consistency",
-      "audience": "Self-improvement users",
-      "intent": "review/personalization",
-      "environment": "habit trackers",
-      "timing": "trend cycle",
-      "goal": "pick app with meaningful habit guidance",
-      "reviewEntity": {
-        "type": "app",
-        "appName": "AI Habit App",
-        "platform": "android"
-      }
-    },
-    {
       "id": "ar-tr-008",
       "title": "The New All-in-One Finance App: Too Much or Just Right?",
       "angle": "Categorization AI accuracy",

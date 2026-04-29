@@ -1,45 +1,46 @@
 {
-  "date": "2026-04-28",
+  "date": "2026-04-29",
   "timezone": "Asia/Seoul",
   "cutoff": "10:00",
   "items": [
     {
-      "date": "2026-04-28",
+      "date": "2026-04-29",
       "label": "how-to-playbooks",
       "seedLabel": "how-to-playbooks",
       "requestedSlotLabel": "how-to-playbooks",
       "mode": "trend",
-      "id": "ht-tr-033",
-      "title": "How to recover your Google or Apple account after lockout",
-      "angle": "Account recovery is a top trust-breaking issue.",
-      "audience": "All smartphone users",
+      "id": "ht-tr-034",
+      "title": "How to upgrade your home office for 2025 productivity standards",
+      "angle": "AI-assisted workspace design is trending.",
+      "audience": "Remote workers and creators",
       "intent": "howto",
       "priority": 1,
       "notes": "",
-      "generatedSlug": "howto-20260428-001",
-      "postId": "06EX567VT45PYTWD536QZSFGD0"
+      "generatedSlug": "howto-20260429-001",
+      "postId": "06EXFEQEG0RTHGQY8AZKFFQ9ZS"
     },
     {
-      "date": "2026-04-28",
-      "label": "device-reviews",
-      "seedLabel": "device-reviews",
-      "requestedSlotLabel": "device-reviews",
+      "date": "2026-04-29",
+      "label": "app-reviews",
+      "seedLabel": "app-reviews",
+      "requestedSlotLabel": "app-reviews",
       "mode": "trend",
-      "id": "dr-tr-003",
-      "title": "The Latest AI Camera Phones: Which One Nails Low-Light?",
-      "angle": "Sensor size + noise model accuracy",
-      "audience": "Photography-focused users",
-      "intent": "review/camera-quality",
+      "id": "ar-tr-007",
+      "title": "Which Habit App Has the Best AI Coaching?",
+      "angle": "Model personalization and consistency",
+      "audience": "Self-improvement users",
+      "intent": "review/personalization",
       "priority": 0,
       "notes": "",
       "reviewEntity": {
-        "type": "device",
-        "model": "Camera Phones"
+        "type": "app",
+        "appName": "AI Habit App",
+        "platform": "android"
       },
-      "generatedSlug": "device-20260428-001",
-      "postId": "06EX567VTGDG189WQSHNF2B470",
-      "reviewId": "06EX567VTG9GATJERWX8M3J6CC"
+      "generatedSlug": "app-20260429-001",
+      "postId": "06EXFEQEGCCPTJF97AE2M4GS63",
+      "reviewId": "06EXFEQEGCER4Y5B4F3FT7BS7V"
     }
   ],
-  "expandedAt": "2026-04-28T05:38:54.549Z"
+  "expandedAt": "2026-04-29T05:34:05.443Z"
 }
