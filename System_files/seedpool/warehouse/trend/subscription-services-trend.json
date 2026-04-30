@@ -5,21 +5,6 @@
   },
   "trend": [
     {
-      "id": "ss-tr-004",
-      "title": "Is the New Cloud Storage Tier Worth the Upgrade?",
-      "angle": "Speed + retention changes",
-      "audience": "Students/office users",
-      "intent": "review/performance",
-      "environment": "cloud storage",
-      "timing": "plan refresh",
-      "goal": "judge real transfer speed",
-      "fingerprint": "fp1:9bff1d86ae1466208ceebf73269b03d8eee313be",
-      "reviewEntity": {
-        "type": "subscription",
-        "service": "Cloud Storage"
-      }
-    },
-    {
       "id": "ss-tr-005",
       "title": "Which VPN Just Updated Its Server Network?",
       "angle": "Latency + streaming unlock performance",

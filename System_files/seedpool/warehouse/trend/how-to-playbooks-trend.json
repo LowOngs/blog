@@ -5,15 +5,6 @@
   },
   "trend": [
     {
-      "id": "ht-tr-035",
-      "title": "How to fix camera not working for video calls",
-      "angle": "A persistent issue for hybrid workers.",
-      "audience": "Remote teams and students",
-      "intent": "howto",
-      "priority": 1,
-      "fingerprint": "fp1:b8280235a75c4e66c9402538f0ca953b2e4a0067"
-    },
-    {
       "id": "ht-tr-036",
       "title": "How to switch phones without losing eSIM profiles",
       "angle": "eSIM migration remains highly confusing.",

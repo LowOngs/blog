@@ -1,46 +1,45 @@
 {
-  "date": "2026-04-29",
+  "date": "2026-04-30",
   "timezone": "Asia/Seoul",
   "cutoff": "10:00",
   "items": [
     {
-      "date": "2026-04-29",
+      "date": "2026-04-30",
       "label": "how-to-playbooks",
       "seedLabel": "how-to-playbooks",
       "requestedSlotLabel": "how-to-playbooks",
       "mode": "trend",
-      "id": "ht-tr-034",
-      "title": "How to upgrade your home office for 2025 productivity standards",
-      "angle": "AI-assisted workspace design is trending.",
-      "audience": "Remote workers and creators",
+      "id": "ht-tr-035",
+      "title": "How to fix camera not working for video calls",
+      "angle": "A persistent issue for hybrid workers.",
+      "audience": "Remote teams and students",
       "intent": "howto",
       "priority": 1,
       "notes": "",
-      "generatedSlug": "howto-20260429-001",
-      "postId": "06EXFEQEG0RTHGQY8AZKFFQ9ZS"
+      "generatedSlug": "howto-20260430-001",
+      "postId": "06EXSS94HCH0SA24D63VQYWCKN"
     },
     {
-      "date": "2026-04-29",
-      "label": "app-reviews",
-      "seedLabel": "app-reviews",
-      "requestedSlotLabel": "app-reviews",
+      "date": "2026-04-30",
+      "label": "subscription-services",
+      "seedLabel": "subscription-services",
+      "requestedSlotLabel": "subscription-services",
       "mode": "trend",
-      "id": "ar-tr-007",
-      "title": "Which Habit App Has the Best AI Coaching?",
-      "angle": "Model personalization and consistency",
-      "audience": "Self-improvement users",
-      "intent": "review/personalization",
+      "id": "ss-tr-004",
+      "title": "Is the New Cloud Storage Tier Worth the Upgrade?",
+      "angle": "Speed + retention changes",
+      "audience": "Students/office users",
+      "intent": "review/performance",
       "priority": 0,
       "notes": "",
       "reviewEntity": {
-        "type": "app",
-        "appName": "AI Habit App",
-        "platform": "android"
+        "type": "subscription",
+        "service": "Cloud Storage"
       },
-      "generatedSlug": "app-20260429-001",
-      "postId": "06EXFEQEGCCPTJF97AE2M4GS63",
-      "reviewId": "06EXFEQEGCER4Y5B4F3FT7BS7V"
+      "generatedSlug": "subscription-20260430-001",
+      "postId": "06EXSS94HR9J8R7CQZ0KEM5135",
+      "reviewId": "06EXSS94HR0WTYM6RK3RSDG74V"
     }
   ],
-  "expandedAt": "2026-04-29T05:34:05.443Z"
+  "expandedAt": "2026-04-30T05:38:17.871Z"
 }

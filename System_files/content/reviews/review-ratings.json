@@ -401,6 +401,31 @@
       "insights": [],
       "sources": [],
       "bucket": "app"
+    },
+    "subscription-20260430-001": {
+      "reviewId": "06EXSS94HR0WTYM6RK3RSDG74V",
+      "postId": "06EXSS94HR9J8R7CQZ0KEM5135",
+      "lastChecked": null,
+      "status": "queued",
+      "store": "unknown",
+      "source": "seed",
+      "storeId": "Cloud Storage",
+      "ratingCurrent": 0,
+      "ratingPrevious": 0,
+      "ratingDiff": 0,
+      "votesCurrent": 0,
+      "votesPrevious": 0,
+      "votesDiff": 0,
+      "histogram": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0
+      },
+      "insights": [],
+      "sources": [],
+      "bucket": "subscription"
     }
   },
   "updatedAt": "2026-01-15"
