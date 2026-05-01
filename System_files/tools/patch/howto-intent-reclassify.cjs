@@ -159,7 +159,65 @@ function collectText(seed) {
     .join(' ');
 }
 
+function classifyByEntity(seed) {
+  const entityName = lowerText(seed && seed.entity && seed.entity.name);
+
+  if (!entityName) {
+    return null;
+  }
+
+  if (
+    /forgotten password|password|account recovery|login|2fa|two-factor|privacy|security|hacked|phishing|credential/.test(entityName)
+  ) {
+    return 'security';
+  }
+
+  if (
+    /battery drain|slow computer|slow pc|slow mac|slow wi-fi|slow wifi|browser cache|cache|storage full|low storage|cleanup|clean up|performance|startup/.test(entityName)
+  ) {
+    return 'cleanup';
+  }
+
+  if (
+    /photos between devices|between devices|transfer|move files|move photos|sync|migration|migrate|copy files|share files/.test(entityName)
+  ) {
+    return 'transfer';
+  }
+
+  if (
+    /important files|file backup|data backup|backup|back up|restore files|restore backup|data loss|lost data|backup integrity/.test(entityName)
+  ) {
+    return 'backup';
+  }
+
+  if (
+    /new device|first time setup|initial setup|install app|pair device|pairing device|set up a new device/.test(entityName)
+  ) {
+    return 'setup';
+  }
+
+  if (
+    /common smartphone problems|router connectivity|connectivity issues|bluetooth connection|connection problems|apps that will not open|not opening|not working|crash|freezes|broken|error|failure/.test(entityName)
+  ) {
+    return 'fix';
+  }
+
+  if (
+    /choose|compare|which|select|decision|decide|right choice|best option|before buying|before choosing/.test(entityName)
+  ) {
+    return 'decision';
+  }
+
+  return null;
+}
+
 function classifyType(seed) {
+  const entityType = classifyByEntity(seed);
+
+  if (entityType) {
+    return entityType;
+  }
+
   const text = lowerText(collectText(seed));
 
   if (
@@ -187,7 +245,7 @@ function classifyType(seed) {
   }
 
   if (
-    /setup|set up|install|configure|configuration|pair|pairing|new device|first time|initial/.test(text)
+    /new device|first time setup|initial setup|install app|pair device|pairing device/.test(text)
   ) {
     return 'setup';
   }
