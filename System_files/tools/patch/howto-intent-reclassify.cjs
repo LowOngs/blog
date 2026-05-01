@@ -10,6 +10,7 @@
  * - intent 재분류 후 title / steps / expectedOutcome / difficulty / timeRequired를 다시 정렬한다.
  * - 기존 id / priority 등 무관 필드는 삭제하지 않는다.
  * - fingerprint는 재설계된 의미 단위 기준으로 갱신한다.
+ * - 최종 evergreen 배열은 intent별 라운드로빈 방식으로 분산 재배치한다.
  */
 
 const fs = require('fs');
@@ -855,6 +856,38 @@ function patchSeed(seed, type, index) {
   return changed;
 }
 
+function reorderEvergreenByIntent(seeds) {
+  const buckets = {};
+
+  for (const type of INTENT_ORDER) {
+    buckets[type] = [];
+  }
+
+  for (const seed of seeds) {
+    const intent = lowerText(seed && seed.intent).replace(/^how-to\//, '');
+    const type = INTENT_ORDER.includes(intent) ? intent : 'decision';
+    buckets[type].push(seed);
+  }
+
+  const reordered = [];
+  let moved = true;
+
+  while (moved) {
+    moved = false;
+
+    for (const type of INTENT_ORDER) {
+      const next = buckets[type].shift();
+
+      if (next) {
+        reordered.push(next);
+        moved = true;
+      }
+    }
+  }
+
+  return reordered;
+}
+
 function main() {
   console.log('[howto-intent-reclassify] start');
   console.log(`[howto-intent-reclassify] target = ${TARGET_FILE}`);
@@ -889,6 +922,8 @@ function main() {
 
     typeIndex[type] += 1;
   }
+
+  data.evergreen = reorderEvergreenByIntent(seeds);
 
   writeJson(TARGET_FILE, data);
 
