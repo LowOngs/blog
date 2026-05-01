@@ -148,7 +148,6 @@ function fixCase(title) {
 
 function collectText(seed) {
   return [
-    seed.title,
     seed.angle,
     seed.audience,
     seed.environment,
@@ -162,12 +161,6 @@ function collectText(seed) {
 
 function classifyType(seed) {
   const text = lowerText(collectText(seed));
-
-  if (
-    /problem|issue|error|fail|failed|failure|broken|not working|not opening|crash|crashes|freezes|freeze|disconnect|connectivity issue|connection problem|bluetooth connection problem|router connectivity|common smartphone problems/.test(text)
-  ) {
-    return 'fix';
-  }
 
   if (
     /password|secure|security|privacy|protect|account|login|2fa|two-factor|credential|hacked|phishing|forgotten password/.test(text)
@@ -188,7 +181,13 @@ function classifyType(seed) {
   }
 
   if (
-    /setup|set up|install|configure|configuration|connect|pair|pairing|new device|first time|initial/.test(text)
+    /backup|back up|restore files|restore backup|file backup|data backup|backup method|backup integrity|data loss|lost data|important files/.test(text)
+  ) {
+    return 'backup';
+  }
+
+  if (
+    /setup|set up|install|configure|configuration|pair|pairing|new device|first time|initial/.test(text)
   ) {
     return 'setup';
   }
@@ -200,9 +199,9 @@ function classifyType(seed) {
   }
 
   if (
-    /backup|back up|restore files|restore backup|file backup|data backup|backup method|backup integrity|data loss|lost data|important files/.test(text)
+    /error|fail|failed|failure|broken|not working|not opening|crash|crashes|freezes|freeze|disconnect|connectivity|connection problem|bluetooth connection|router connectivity/.test(text)
   ) {
-    return 'backup';
+    return 'fix';
   }
 
   return 'decision';
