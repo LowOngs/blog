@@ -18,7 +18,7 @@
  * - cleanup은 느림/성능/저장공간/캐시 중심.
  * - security는 계정/비밀번호/보안/개인정보 중심.
  * - transfer는 이동/동기화/마이그레이션 중심.
- * - backup은 백업/복구/데이터 보호 중심.
+ * - backup은 파일/데이터 백업·복구·데이터 보호 중심으로만 제한한다.
  * - decision은 선택/비교/판단 중심.
  */
 
@@ -166,18 +166,6 @@ function classifyType(seed) {
   const text = lowerText(collectText(seed));
 
   if (
-    /backup|back up|restore|recovery|recover files|file recovery|data loss|lost data|important files/.test(text)
-  ) {
-    return 'backup';
-  }
-
-  if (
-    /transfer|move files|move photos|sync|migrate|migration|between devices|copy files|share files/.test(text)
-  ) {
-    return 'transfer';
-  }
-
-  if (
     /password|secure|security|privacy|protect|account|login|2fa|two-factor|credential|hacked|phishing|forgotten password/.test(text)
   ) {
     return 'security';
@@ -196,15 +184,27 @@ function classifyType(seed) {
   }
 
   if (
-    /choose|compare|which|select|decision|decide|right choice|best option|before buying|before choosing/.test(text)
+    /transfer|move files|move photos|sync|migrate|migration|between devices|copy files|share files|photos between devices/.test(text)
   ) {
-    return 'decision';
+    return 'transfer';
+  }
+
+  if (
+    /backup|back up|restore files|restore backup|file backup|data backup|backup method|backup integrity|data loss|lost data|important files/.test(text)
+  ) {
+    return 'backup';
   }
 
   if (
     /setup|set up|install|configure|configuration|connect|pair|pairing|new device|first time|initial/.test(text)
   ) {
     return 'setup';
+  }
+
+  if (
+    /choose|compare|which|select|decision|decide|right choice|best option|before buying|before choosing/.test(text)
+  ) {
+    return 'decision';
   }
 
   return 'decision';
