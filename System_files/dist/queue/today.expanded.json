@@ -1,45 +1,46 @@
 {
-  "date": "2026-04-30",
+  "date": "2026-05-01",
   "timezone": "Asia/Seoul",
   "cutoff": "10:00",
   "items": [
     {
-      "date": "2026-04-30",
+      "date": "2026-05-01",
       "label": "how-to-playbooks",
       "seedLabel": "how-to-playbooks",
       "requestedSlotLabel": "how-to-playbooks",
       "mode": "trend",
-      "id": "ht-tr-035",
-      "title": "How to fix camera not working for video calls",
-      "angle": "A persistent issue for hybrid workers.",
-      "audience": "Remote teams and students",
+      "id": "ht-tr-036",
+      "title": "How to switch phones without losing eSIM profiles",
+      "angle": "eSIM migration remains highly confusing.",
+      "audience": "Travelers and frequent upgraders",
       "intent": "howto",
       "priority": 1,
       "notes": "",
-      "generatedSlug": "howto-20260430-001",
-      "postId": "06EXSS94HCH0SA24D63VQYWCKN"
+      "generatedSlug": "howto-20260501-001",
+      "postId": "06EY45CEG82W332NHMWGE5FNR0"
     },
     {
-      "date": "2026-04-30",
-      "label": "subscription-services",
-      "seedLabel": "subscription-services",
-      "requestedSlotLabel": "subscription-services",
+      "date": "2026-05-01",
+      "label": "app-reviews",
+      "seedLabel": "app-reviews",
+      "requestedSlotLabel": "app-reviews",
       "mode": "trend",
-      "id": "ss-tr-004",
-      "title": "Is the New Cloud Storage Tier Worth the Upgrade?",
-      "angle": "Speed + retention changes",
-      "audience": "Students/office users",
-      "intent": "review/performance",
+      "id": "ar-tr-008",
+      "title": "The New All-in-One Finance App: Too Much or Just Right?",
+      "angle": "Categorization AI accuracy",
+      "audience": "Budgeting beginners",
+      "intent": "review/data-handling",
       "priority": 0,
       "notes": "",
       "reviewEntity": {
-        "type": "subscription",
-        "service": "Cloud Storage"
+        "type": "app",
+        "appName": "All-in-One Finance App",
+        "platform": "android"
       },
-      "generatedSlug": "subscription-20260430-001",
-      "postId": "06EXSS94HR9J8R7CQZ0KEM5135",
-      "reviewId": "06EXSS94HR0WTYM6RK3RSDG74V"
+      "generatedSlug": "app-20260501-001",
+      "postId": "06EY45CEGR2GMA129KTA3T8FR6",
+      "reviewId": "06EY45CEGR72GKNJT71HQQDMN9"
     }
   ],
-  "expandedAt": "2026-04-30T05:38:17.871Z"
+  "expandedAt": "2026-05-01T05:49:16.806Z"
 }

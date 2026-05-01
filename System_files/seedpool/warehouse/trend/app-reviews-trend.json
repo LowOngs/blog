@@ -5,21 +5,6 @@
   },
   "trend": [
     {
-      "id": "ar-tr-008",
-      "title": "The New All-in-One Finance App: Too Much or Just Right?",
-      "angle": "Categorization AI accuracy",
-      "audience": "Budgeting beginners",
-      "intent": "review/data-handling",
-      "environment": "finance apps",
-      "timing": "launch wave",
-      "goal": "avoid apps with messy transaction labeling",
-      "reviewEntity": {
-        "type": "app",
-        "appName": "All-in-One Finance App",
-        "platform": "android"
-      }
-    },
-    {
       "id": "ar-tr-009",
       "title": "Are AI-Powered Email Apps Actually Reducing Inbox Stress?",
       "angle": "Smart filters + auto-summary accuracy",

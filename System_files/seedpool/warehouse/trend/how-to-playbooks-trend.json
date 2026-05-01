@@ -5,15 +5,6 @@
   },
   "trend": [
     {
-      "id": "ht-tr-036",
-      "title": "How to switch phones without losing eSIM profiles",
-      "angle": "eSIM migration remains highly confusing.",
-      "audience": "Travelers and frequent upgraders",
-      "intent": "howto",
-      "priority": 1,
-      "fingerprint": "fp1:937ffe9446ed613a37dc61f158689cf65ed803fa"
-    },
-    {
       "id": "ht-tr-037",
       "title": "How to fix laptop battery not charging issues",
       "angle": "Battery failures spike during seasonal temperature changes.",
