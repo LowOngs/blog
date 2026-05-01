@@ -6,12 +6,15 @@
  *
  * 역할:
  * - how-to-playbooks evergreen 시드를 사용자 행동 구조 기반 quota로 재분류한다.
+ * - intent에 맞지 않는 seed는 entity / angle / goal / keyPoints까지 함께 재설계한다.
  * - intent 재분류 후 title / steps / expectedOutcome / difficulty / timeRequired를 다시 정렬한다.
- * - 기존 id / fingerprint / entity / keyPoints / priority는 삭제하지 않는다.
+ * - 기존 id / priority 등 무관 필드는 삭제하지 않는다.
+ * - fingerprint는 재설계된 의미 단위 기준으로 갱신한다.
  */
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const TARGET_FILE = path.join(
@@ -32,6 +35,158 @@ const TARGET_RATIO = {
   backup: 0.10,
   setup: 0.05,
   decision: 0.03,
+};
+
+const PLAN_LIBRARY = {
+  fix: [
+    'common smartphone problems',
+    'router connectivity issues',
+    'Bluetooth connection problems',
+    'apps that will not open',
+    'printer connection problems',
+    'email sync errors',
+    'video call audio problems',
+    'mobile hotspot connection failures',
+    'cloud sync errors',
+    'keyboard input problems',
+    'screen sharing failures',
+    'app notification problems',
+    'Wi-Fi connection drops',
+    'browser loading errors',
+    'file download failures',
+    'camera not working on a laptop',
+    'microphone not detected',
+    'smart TV connection problems',
+    'USB device not recognized',
+    'two devices that will not pair',
+  ],
+  cleanup: [
+    'a slow computer',
+    'battery drain on your phone',
+    'slow Wi-Fi at home',
+    'browser cache safely',
+    'low storage on your phone',
+    'startup apps on a laptop',
+    'unused mobile apps',
+    'duplicate photos on your phone',
+    'large files on a computer',
+    'background apps on Android',
+    'old downloads on a laptop',
+    'browser extensions slowing things down',
+    'temporary files on Windows',
+    'storage warnings on iPhone',
+    'slow tablet performance',
+    'cluttered cloud storage',
+    'old screenshots and media files',
+    'slow home network basics',
+    'unused email attachments',
+    'messy desktop files',
+  ],
+  security: [
+    'a forgotten password securely',
+    'your main email account',
+    'two-factor authentication',
+    'a password manager',
+    'account recovery settings',
+    'suspicious login alerts',
+    'shared device privacy',
+    'browser saved passwords',
+    'phone lock screen settings',
+    'cloud account security',
+    'public Wi-Fi safety',
+    'phishing message checks',
+    'app permission settings',
+    'social account recovery',
+    'family device privacy',
+    'work account login safety',
+    'backup codes',
+    'recovery email settings',
+    'personal data on an old phone',
+    'privacy settings before selling a device',
+  ],
+  transfer: [
+    'photos between devices',
+    'files from an old phone to a new phone',
+    'contacts between phones',
+    'browser bookmarks to a new computer',
+    'documents between cloud drives',
+    'photos from phone to laptop',
+    'files between Windows and Mac',
+    'notes to a new device',
+    'calendar data between accounts',
+    'music files to a new phone',
+    'chat backup to a new phone',
+    'email data to a new account',
+    'screenshots to cloud storage',
+    'large files without corruption',
+    'files from USB to cloud storage',
+    'contacts from Android to iPhone',
+    'photos from iPhone to Windows',
+    'documents from laptop to tablet',
+    'app data before changing phones',
+    'work files to a new laptop',
+  ],
+  backup: [
+    'important files safely',
+    'phone photos before a reset',
+    'laptop documents before repair',
+    'family photos to cloud storage',
+    'work files before changing computers',
+    'browser bookmarks before reinstalling',
+    'contacts before switching phones',
+    'two-factor backup codes',
+    'important PDFs and receipts',
+    'school files before a device reset',
+    'cloud files to a second location',
+    'external drive backups',
+    'email attachments worth keeping',
+    'phone notes before migration',
+    'tax documents safely',
+    'project files before cleanup',
+    'photos before deleting duplicates',
+    'backup integrity after copying files',
+    'files before factory reset',
+    'data loss prevention basics',
+  ],
+  setup: [
+    'a new device the right way',
+    'a home Wi-Fi router',
+    'a password manager for the first time',
+    'two-factor authentication for a new account',
+    'a cloud backup app',
+    'a new laptop for daily use',
+    'a new phone before installing apps',
+    'a browser profile on a new computer',
+    'email on a new phone',
+    'a printer on a home network',
+    'a video call app before a meeting',
+    'family sharing on a phone',
+    'cloud storage on a new device',
+    'a smart TV connection',
+    'a Bluetooth headset',
+    'a mobile hotspot',
+    'a new tablet for study',
+    'a work profile on Android',
+    'a basic home office setup',
+    'a secure login method',
+  ],
+  decision: [
+    'whether to repair or replace a slow device',
+    'whether cloud backup is enough',
+    'which files should be backed up first',
+    'whether to reset a phone or clean it up',
+    'whether to use Wi-Fi or mobile hotspot',
+    'which password manager setup is safer',
+    'whether to move files manually or use cloud sync',
+    'which old apps are safe to remove',
+    'whether to buy storage or clean up files',
+    'whether to use browser sync',
+    'which device should store family photos',
+    'whether to keep local or cloud copies',
+    'which account recovery method is safer',
+    'whether to factory reset a device',
+    'which transfer method fits large files',
+  ],
 };
 
 function fatal(message) {
@@ -102,29 +257,7 @@ function stripLeadingHowTo(value) {
 }
 
 function polishBase(base) {
-  let out = stripLeadingHowTo(base);
-
-  const replacements = [
-    [/^Reset Any Router to Fix Connectivity Issues$/i, 'router connectivity issues'],
-    [/^router connectivity issues$/i, 'router connectivity issues'],
-    [/^Bluetooth Connection Problems$/i, 'Bluetooth connection problems'],
-    [/^Reduce Battery Drain on Any Phone$/i, 'battery drain on your phone'],
-    [/^Slow Wi-Fi Without Calling Your ISP$/i, 'slow Wi-Fi at home'],
-    [/^Recover a Forgotten Password Securely$/i, 'a forgotten password securely'],
-    [/^Clear Cache Safely Across Browsers$/i, 'browser cache safely'],
-    [/^Apps Not Opening on Any Device$/i, 'apps that will not open'],
-    [/^a New Device the Right Way$/i, 'a new device the right way'],
-    [/^Any Smartphone$/i, 'common smartphone problems'],
-    [/^Cleaning Up Slow Computers$/i, 'a slow computer'],
-    [/^Important Files Safely$/i, 'important files safely'],
-    [/^Photos Between Any Two Devices$/i, 'photos between devices'],
-  ];
-
-  for (const [pattern, replacement] of replacements) {
-    out = out.replace(pattern, replacement);
-  }
-
-  out = out
+  return stripLeadingHowTo(base)
     .replace(/\bAny Two Devices\b/g, 'devices')
     .replace(/\bAny Device\b/g, 'your device')
     .replace(/\bAny Phone\b/g, 'your phone')
@@ -132,18 +265,20 @@ function polishBase(base) {
     .replace(/\bAny Router\b/g, 'your router')
     .replace(/\s+without losing data without losing data$/i, ' without losing data')
     .replace(/\s+/g, ' ')
-    .trim();
-
-  return out || 'the task';
+    .trim() || 'the task';
 }
 
 function fixCase(title) {
   return normalizeText(title)
     .replace(/\bwi-fi\b/gi, 'Wi-Fi')
+    .replace(/\bwifi\b/gi, 'Wi-Fi')
     .replace(/\bisp\b/gi, 'ISP')
     .replace(/\bpc\b/gi, 'PC')
     .replace(/\bmac\b/gi, 'Mac')
-    .replace(/\bbluetooth\b/gi, 'Bluetooth');
+    .replace(/\bbluetooth\b/gi, 'Bluetooth')
+    .replace(/\biphone\b/gi, 'iPhone')
+    .replace(/\bandroid\b/gi, 'Android')
+    .replace(/\busb\b/gi, 'USB');
 }
 
 function collectText(seed) {
@@ -192,31 +327,31 @@ function scoreSeed(seed) {
     decision: 0,
   };
 
-  if (/common smartphone problems|router connectivity|connectivity issues|bluetooth connection|connection problems|apps that will not open|not opening|not working|crash|freezes|broken|error|failure|disconnect/.test(text)) {
+  if (/connectivity|connection problem|not opening|not working|crash|freeze|broken|error|failure|disconnect|router|bluetooth/.test(text)) {
     scores.fix += 10;
   }
 
-  if (/slow|speed|lag|lags|cleanup|clean up|optimize|performance|startup|cache|storage full|low storage|battery drain|drains too fast|browser cache/.test(text)) {
+  if (/slow|speed|cleanup|clean up|performance|startup|cache|storage full|low storage|battery drain|browser cache|duplicate|large files/.test(text)) {
     scores.cleanup += 10;
   }
 
-  if (/password|secure|security|privacy|protect|account|login|2fa|two-factor|credential|hacked|phishing|forgotten password/.test(text)) {
+  if (/password|secure|security|privacy|protect|account|login|2fa|two-factor|credential|hacked|phishing|recovery/.test(text)) {
     scores.security += 10;
   }
 
-  if (/transfer|move files|move photos|sync|migrate|migration|between devices|copy files|share files|photos between devices/.test(text)) {
+  if (/transfer|move files|move photos|sync|migrate|migration|between devices|copy files|share files/.test(text)) {
     scores.transfer += 10;
   }
 
-  if (/backup|back up|restore files|restore backup|file backup|data backup|backup method|backup integrity|data loss|lost data|important files/.test(text)) {
+  if (/backup|back up|restore files|restore backup|file backup|data backup|data loss|lost data|important files|backup codes/.test(text)) {
     scores.backup += 10;
   }
 
-  if (/new device|first time setup|initial setup|install app|pair device|pairing device|set up a new device|first time|initial/.test(text)) {
+  if (/new device|first time setup|initial setup|install app|pair device|pairing device|set up a new device|home office setup/.test(text)) {
     scores.setup += 10;
   }
 
-  if (/choose|compare|which|select|decision|decide|right choice|best option|before buying|before choosing/.test(text)) {
+  if (/choose|compare|which|select|decision|decide|right choice|best option|whether/.test(text)) {
     scores.decision += 10;
   }
 
@@ -285,6 +420,15 @@ function assignTypes(seeds) {
     }
 
     if (!picked) {
+      for (const type of INTENT_ORDER) {
+        if (used[type] < quota[type]) {
+          picked = type;
+          break;
+        }
+      }
+    }
+
+    if (!picked) {
       picked = 'decision';
     }
 
@@ -296,6 +440,16 @@ function assignTypes(seeds) {
     assigned,
     quota,
     used,
+  };
+}
+
+function buildPlan(type, index) {
+  const list = PLAN_LIBRARY[type] || PLAN_LIBRARY.decision;
+  const base = list[index % list.length];
+  const variant = Math.floor(index / list.length) + 1;
+
+  return {
+    entityName: variant > 1 ? `${base} checklist ${variant}` : base,
   };
 }
 
@@ -335,6 +489,118 @@ function buildTitle(type, base) {
   }
 
   return fixCase(`How to complete ${cleanBase}`);
+}
+
+function buildAngle(type, base) {
+  if (type === 'fix') {
+    return `Troubleshoot ${base} with a safe step-by-step repair path.`;
+  }
+
+  if (type === 'cleanup') {
+    return `Improve ${base} by removing avoidable clutter and performance drag.`;
+  }
+
+  if (type === 'security') {
+    return `Protect ${base} against common account, privacy, or access risks.`;
+  }
+
+  if (type === 'transfer') {
+    return `Move ${base} without losing files, settings, or access.`;
+  }
+
+  if (type === 'backup') {
+    return `Protect ${base} with a restorable backup workflow.`;
+  }
+
+  if (type === 'setup') {
+    return `Set up ${base} correctly before normal use.`;
+  }
+
+  return `Decide whether ${base} fits the user’s practical need.`;
+}
+
+function buildGoal(type, base) {
+  if (type === 'fix') {
+    return `restore normal operation for ${base}`;
+  }
+
+  if (type === 'cleanup') {
+    return `improve performance or storage condition for ${base}`;
+  }
+
+  if (type === 'security') {
+    return `reduce avoidable security or privacy risk for ${base}`;
+  }
+
+  if (type === 'transfer') {
+    return `move ${base} safely between devices or accounts`;
+  }
+
+  if (type === 'backup') {
+    return `make ${base} recoverable if something goes wrong`;
+  }
+
+  if (type === 'setup') {
+    return `prepare ${base} for reliable first use`;
+  }
+
+  return `help the user choose the safest practical option for ${base}`;
+}
+
+function buildKeyPoints(type) {
+  if (type === 'fix') {
+    return [
+      'identify the symptom before changing settings',
+      'start with reversible fixes first',
+      'verify the issue after each step',
+    ];
+  }
+
+  if (type === 'cleanup') {
+    return [
+      'remove only low-risk clutter',
+      'avoid deleting unknown system files',
+      'check storage or speed after cleanup',
+    ];
+  }
+
+  if (type === 'security') {
+    return [
+      'confirm account ownership and recovery options',
+      'enable stronger protection settings',
+      'check for suspicious access or weak credentials',
+    ];
+  }
+
+  if (type === 'transfer') {
+    return [
+      'confirm source and destination before moving data',
+      'use a transfer method that preserves file integrity',
+      'verify files after transfer',
+    ];
+  }
+
+  if (type === 'backup') {
+    return [
+      'choose data that must not be lost',
+      'store a copy in a separate location',
+      'test restore access before trusting the backup',
+    ];
+  }
+
+  if (type === 'setup') {
+    return [
+      'prepare account and device requirements first',
+      'complete setup in the correct order',
+      'confirm the setup before relying on it',
+    ];
+  }
+
+  return [
+    'define the user need clearly',
+    'compare options by risk and effort',
+    'choose the option that avoids unnecessary work',
+  ];
 }
 
 function buildSteps(type) {
@@ -453,13 +719,44 @@ function buildTimeRequired(type) {
   return '5-20 minutes';
 }
 
-function patchSeed(seed, type) {
+function buildFingerprint(seed) {
+  const source = [
+    normalizeText(seed.title).toLowerCase(),
+    normalizeText(seed.angle).toLowerCase(),
+    normalizeText(seed.audience).toLowerCase(),
+    normalizeText(seed.intent).toLowerCase(),
+  ].join('|');
+
+  return `fp1:${crypto.createHash('sha1').update(source).digest('hex')}`;
+}
+
+function patchSeed(seed, type, index) {
   let changed = 0;
 
+  const plan = buildPlan(type, index);
   const intent = `how-to/${type}`;
-  const base = (seed.entity && seed.entity.name) || seed.title || 'the task';
+  const base = plan.entityName;
+
+  const entity = ensureObject(seed, 'entity');
+  if (entity.name !== base) {
+    entity.name = base;
+    changed += 1;
+  }
+
+  if (entity.type !== 'how-to-topic') {
+    entity.type = 'how-to-topic';
+    changed += 1;
+  }
+
+  if (entity.intentFamily !== type) {
+    entity.intentFamily = type;
+    changed += 1;
+  }
 
   const nextTitle = buildTitle(type, base);
+  const nextAngle = buildAngle(type, base);
+  const nextGoal = buildGoal(type, base);
+  const nextKeyPoints = buildKeyPoints(type);
   const nextSteps = buildSteps(type);
   const nextOutcome = buildExpectedOutcome(type);
   const nextDifficulty = buildDifficulty(type);
@@ -472,6 +769,21 @@ function patchSeed(seed, type) {
 
   if (seed.title !== nextTitle) {
     seed.title = nextTitle;
+    changed += 1;
+  }
+
+  if (seed.angle !== nextAngle) {
+    seed.angle = nextAngle;
+    changed += 1;
+  }
+
+  if (seed.goal !== nextGoal) {
+    seed.goal = nextGoal;
+    changed += 1;
+  }
+
+  if (!Array.isArray(seed.keyPoints) || seed.keyPoints.join('|') !== nextKeyPoints.join('|')) {
+    seed.keyPoints = nextKeyPoints;
     changed += 1;
   }
 
@@ -505,6 +817,7 @@ function patchSeed(seed, type) {
     typeSpecificSteps: true,
     intentReclassified: true,
     evergreenQuotaBalanced: true,
+    semanticRedesigned: true,
   };
 
   for (const [key, value] of Object.entries(nextCriteria)) {
@@ -517,8 +830,8 @@ function patchSeed(seed, type) {
   const meta = ensureObject(seed, 'selectionMeta');
   const nextMeta = {
     validated: true,
-    sourceType: 'how-to evergreen behavior quota rule',
-    selectionReason: `assigned as ${intent} by evergreen behavior quota`,
+    sourceType: 'how-to evergreen behavior quota redesign rule',
+    selectionReason: `redesigned as ${intent} by evergreen behavior quota`,
   };
 
   for (const [key, value] of Object.entries(nextMeta)) {
@@ -530,6 +843,12 @@ function patchSeed(seed, type) {
 
   if (!normalizeText(meta.selectedAt)) {
     meta.selectedAt = new Date().toISOString();
+    changed += 1;
+  }
+
+  const nextFingerprint = buildFingerprint(seed);
+  if (seed.fingerprint !== nextFingerprint) {
+    seed.fingerprint = nextFingerprint;
     changed += 1;
   }
 
@@ -552,13 +871,23 @@ function main() {
 
   const seeds = data.evergreen.filter((seed) => seed && typeof seed === 'object');
   const assignment = assignTypes(seeds);
+  const typeIndex = {};
+
+  for (const type of INTENT_ORDER) {
+    typeIndex[type] = 0;
+  }
 
   let checked = 0;
   let changed = 0;
 
   for (const seed of seeds) {
+    const type = assignment.assigned.get(seed);
+    const index = typeIndex[type];
+
     checked += 1;
-    changed += patchSeed(seed, assignment.assigned.get(seed));
+    changed += patchSeed(seed, type, index);
+
+    typeIndex[type] += 1;
   }
 
   writeJson(TARGET_FILE, data);
