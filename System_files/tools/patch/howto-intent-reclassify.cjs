@@ -5,21 +5,9 @@
  * System_files/tools/patch/howto-intent-reclassify.cjs
  *
  * 역할:
- * - how-to-playbooks evergreen 시드의 intent를 의미 기준으로 재분류한다.
+ * - how-to-playbooks evergreen 시드를 사용자 행동 구조 기반 quota로 재분류한다.
  * - intent 재분류 후 title / steps / expectedOutcome / difficulty / timeRequired를 다시 정렬한다.
  * - 기존 id / fingerprint / entity / keyPoints / priority는 삭제하지 않는다.
- *
- * 사용:
- * - node ./System_files/tools/patch/howto-intent-reclassify.cjs
- *
- * 원칙:
- * - 문제/오류/불량/연결 실패는 setup이 아니라 fix.
- * - setup은 처음 설치, 초기 구성, 새 기기 설정에만 사용.
- * - cleanup은 느림/성능/저장공간/캐시 중심.
- * - security는 계정/비밀번호/보안/개인정보 중심.
- * - transfer는 이동/동기화/마이그레이션 중심.
- * - backup은 파일/데이터 백업·복구·데이터 보호 중심으로만 제한한다.
- * - decision은 선택/비교/판단 중심.
  */
 
 const fs = require('fs');
@@ -33,6 +21,18 @@ const TARGET_FILE = path.join(
   'evergreen',
   'how-to-playbooks-evergreen.json'
 );
+
+const INTENT_ORDER = ['fix', 'cleanup', 'security', 'transfer', 'backup', 'setup', 'decision'];
+
+const TARGET_RATIO = {
+  fix: 0.39,
+  cleanup: 0.18,
+  security: 0.13,
+  transfer: 0.12,
+  backup: 0.10,
+  setup: 0.05,
+  decision: 0.03,
+};
 
 function fatal(message) {
   console.error('[howto-intent-reclassify][FATAL]', message);
@@ -159,110 +159,144 @@ function collectText(seed) {
     .join(' ');
 }
 
-function classifyByEntity(seed) {
-  const entityName = lowerText(seed && seed.entity && seed.entity.name);
+function createQuota(total) {
+  const quota = {};
+  let used = 0;
 
-  if (!entityName) {
-    return null;
+  for (const type of INTENT_ORDER) {
+    quota[type] = Math.floor(total * TARGET_RATIO[type]);
+    used += quota[type];
   }
 
-  if (
-    /forgotten password|password|account recovery|login|2fa|two-factor|privacy|security|hacked|phishing|credential/.test(entityName)
-  ) {
-    return 'security';
+  let remain = total - used;
+  let index = 0;
+
+  while (remain > 0) {
+    quota[INTENT_ORDER[index % INTENT_ORDER.length]] += 1;
+    remain -= 1;
+    index += 1;
   }
 
-  if (
-    /battery drain|slow computer|slow pc|slow mac|slow wi-fi|slow wifi|browser cache|cache|storage full|low storage|cleanup|clean up|performance|startup/.test(entityName)
-  ) {
-    return 'cleanup';
-  }
-
-  if (
-    /photos between devices|between devices|transfer|move files|move photos|sync|migration|migrate|copy files|share files/.test(entityName)
-  ) {
-    return 'transfer';
-  }
-
-  if (
-    /important files|file backup|data backup|backup|back up|restore files|restore backup|data loss|lost data|backup integrity/.test(entityName)
-  ) {
-    return 'backup';
-  }
-
-  if (
-    /new device|first time setup|initial setup|install app|pair device|pairing device|set up a new device/.test(entityName)
-  ) {
-    return 'setup';
-  }
-
-  if (
-    /common smartphone problems|router connectivity|connectivity issues|bluetooth connection|connection problems|apps that will not open|not opening|not working|crash|freezes|broken|error|failure/.test(entityName)
-  ) {
-    return 'fix';
-  }
-
-  if (
-    /choose|compare|which|select|decision|decide|right choice|best option|before buying|before choosing/.test(entityName)
-  ) {
-    return 'decision';
-  }
-
-  return null;
+  return quota;
 }
 
-function classifyType(seed) {
-  const entityType = classifyByEntity(seed);
-
-  if (entityType) {
-    return entityType;
-  }
-
+function scoreSeed(seed) {
   const text = lowerText(collectText(seed));
+  const scores = {
+    fix: 0,
+    cleanup: 0,
+    security: 0,
+    transfer: 0,
+    backup: 0,
+    setup: 0,
+    decision: 0,
+  };
 
-  if (
-    /password|secure|security|privacy|protect|account|login|2fa|two-factor|credential|hacked|phishing|forgotten password/.test(text)
-  ) {
-    return 'security';
+  if (/common smartphone problems|router connectivity|connectivity issues|bluetooth connection|connection problems|apps that will not open|not opening|not working|crash|freezes|broken|error|failure|disconnect/.test(text)) {
+    scores.fix += 10;
   }
 
-  if (
-    /slow|speed|lag|lags|cleanup|clean up|optimize|performance|startup|cache|storage full|low storage|battery drain|drains too fast/.test(text)
-  ) {
-    return 'cleanup';
+  if (/slow|speed|lag|lags|cleanup|clean up|optimize|performance|startup|cache|storage full|low storage|battery drain|drains too fast|browser cache/.test(text)) {
+    scores.cleanup += 10;
   }
 
-  if (
-    /transfer|move files|move photos|sync|migrate|migration|between devices|copy files|share files|photos between devices/.test(text)
-  ) {
-    return 'transfer';
+  if (/password|secure|security|privacy|protect|account|login|2fa|two-factor|credential|hacked|phishing|forgotten password/.test(text)) {
+    scores.security += 10;
   }
 
-  if (
-    /backup|back up|restore files|restore backup|file backup|data backup|backup method|backup integrity|data loss|lost data|important files/.test(text)
-  ) {
-    return 'backup';
+  if (/transfer|move files|move photos|sync|migrate|migration|between devices|copy files|share files|photos between devices/.test(text)) {
+    scores.transfer += 10;
   }
 
-  if (
-    /new device|first time setup|initial setup|install app|pair device|pairing device/.test(text)
-  ) {
-    return 'setup';
+  if (/backup|back up|restore files|restore backup|file backup|data backup|backup method|backup integrity|data loss|lost data|important files/.test(text)) {
+    scores.backup += 10;
   }
 
-  if (
-    /choose|compare|which|select|decision|decide|right choice|best option|before buying|before choosing/.test(text)
-  ) {
-    return 'decision';
+  if (/new device|first time setup|initial setup|install app|pair device|pairing device|set up a new device|first time|initial/.test(text)) {
+    scores.setup += 10;
   }
 
-  if (
-    /error|fail|failed|failure|broken|not working|not opening|crash|crashes|freezes|freeze|disconnect|connectivity|connection problem|bluetooth connection|router connectivity/.test(text)
-  ) {
-    return 'fix';
+  if (/choose|compare|which|select|decision|decide|right choice|best option|before buying|before choosing/.test(text)) {
+    scores.decision += 10;
   }
 
-  return 'decision';
+  if (scores.fix === 0 && /problem|issue|troubleshoot|troubleshooting/.test(text)) {
+    scores.fix += 3;
+  }
+
+  if (scores.decision === 0) {
+    scores.decision += 1;
+  }
+
+  return scores;
+}
+
+function rankTypes(scores) {
+  return INTENT_ORDER
+    .map((type) => ({ type, score: scores[type] || 0 }))
+    .sort((a, b) => {
+      if (b.score !== a.score) {
+        return b.score - a.score;
+      }
+
+      return INTENT_ORDER.indexOf(a.type) - INTENT_ORDER.indexOf(b.type);
+    });
+}
+
+function assignTypes(seeds) {
+  const quota = createQuota(seeds.length);
+  const used = {};
+  const assigned = new Map();
+
+  for (const type of INTENT_ORDER) {
+    used[type] = 0;
+  }
+
+  const candidates = seeds.map((seed, index) => {
+    const scores = scoreSeed(seed);
+    const ranked = rankTypes(scores);
+    const confidence = ranked[0].score - ranked[1].score;
+
+    return {
+      seed,
+      index,
+      scores,
+      ranked,
+      confidence,
+    };
+  });
+
+  candidates.sort((a, b) => {
+    if (b.confidence !== a.confidence) {
+      return b.confidence - a.confidence;
+    }
+
+    return a.index - b.index;
+  });
+
+  for (const item of candidates) {
+    let picked = null;
+
+    for (const rank of item.ranked) {
+      if (used[rank.type] < quota[rank.type]) {
+        picked = rank.type;
+        break;
+      }
+    }
+
+    if (!picked) {
+      picked = 'decision';
+    }
+
+    used[picked] += 1;
+    assigned.set(item.seed, picked);
+  }
+
+  return {
+    assigned,
+    quota,
+    used,
+  };
 }
 
 function buildTitle(type, base) {
@@ -419,10 +453,9 @@ function buildTimeRequired(type) {
   return '5-20 minutes';
 }
 
-function patchSeed(seed) {
+function patchSeed(seed, type) {
   let changed = 0;
 
-  const type = classifyType(seed);
   const intent = `how-to/${type}`;
   const base = (seed.entity && seed.entity.name) || seed.title || 'the task';
 
@@ -471,6 +504,7 @@ function patchSeed(seed) {
     hasVerificationStep: true,
     typeSpecificSteps: true,
     intentReclassified: true,
+    evergreenQuotaBalanced: true,
   };
 
   for (const [key, value] of Object.entries(nextCriteria)) {
@@ -483,8 +517,8 @@ function patchSeed(seed) {
   const meta = ensureObject(seed, 'selectionMeta');
   const nextMeta = {
     validated: true,
-    sourceType: 'how-to intent reclassification rule',
-    selectionReason: `reclassified as ${intent} from task semantics`,
+    sourceType: 'how-to evergreen behavior quota rule',
+    selectionReason: `assigned as ${intent} by evergreen behavior quota`,
   };
 
   for (const [key, value] of Object.entries(nextMeta)) {
@@ -516,16 +550,15 @@ function main() {
     fatal('missing evergreen array');
   }
 
+  const seeds = data.evergreen.filter((seed) => seed && typeof seed === 'object');
+  const assignment = assignTypes(seeds);
+
   let checked = 0;
   let changed = 0;
 
-  for (const seed of data.evergreen) {
-    if (!seed || typeof seed !== 'object') {
-      continue;
-    }
-
+  for (const seed of seeds) {
     checked += 1;
-    changed += patchSeed(seed);
+    changed += patchSeed(seed, assignment.assigned.get(seed));
   }
 
   writeJson(TARGET_FILE, data);
@@ -538,8 +571,13 @@ function main() {
 
   console.log('[howto-intent-reclassify] checked =', checked);
   console.log('[howto-intent-reclassify] changed =', changed);
-  console.log('[howto-intent-reclassify] intent distribution =');
 
+  console.log('[howto-intent-reclassify] target quota =');
+  for (const type of INTENT_ORDER) {
+    console.log(`  - how-to/${type}: ${assignment.quota[type]}`);
+  }
+
+  console.log('[howto-intent-reclassify] actual distribution =');
   Object.keys(byIntent)
     .sort()
     .forEach((intent) => {
