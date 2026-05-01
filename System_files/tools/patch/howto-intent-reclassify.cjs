@@ -249,6 +249,7 @@ function stripLeadingHowTo(value) {
     .replace(/^(how to secure)\s+/i, '')
     .replace(/^(how to protect)\s+/i, '')
     .replace(/^(how to decide whether)\s+/i, '')
+    .replace(/^(how to decide)\s+/i, '')
     .replace(/^(how to complete)\s+/i, '')
     .replace(/^(how to)\s+/i, '')
     .replace(/^(beginner’s guide to)\s+/i, '')
@@ -486,6 +487,10 @@ function buildTitle(type, base) {
   }
 
   if (type === 'decision') {
+    if (/^(whether|which)\b/i.test(cleanBase)) {
+      return fixCase(`How to decide ${cleanBase}`);
+    }
+
     return fixCase(`How to decide whether ${cleanBase} is the right choice`);
   }
 
