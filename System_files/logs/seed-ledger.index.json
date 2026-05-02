@@ -1,6 +1,6 @@
 {
   "version": 4,
-  "updatedAt": "2026-05-01T05:49:16.965Z",
+  "updatedAt": "2026-05-02T05:19:01.392Z",
   "offsetByKey": {
     "slug:ledger_smoke": 0,
     "pid:page000012": 8226,
@@ -133,7 +133,10 @@
     "pid:page000046": 35165,
     "slug:app-20260501-001": 35165,
     "pid:page000047": 35496,
-    "slug:howto-20260501-001": 35496
+    "slug:howto-20260501-001": 35496,
+    "fp:fp1:bd4a8bdf89c222c450fee8106fa92a2d118e4b68": 35834,
+    "pid:page000048": 36248,
+    "slug:smartsavings-20260502-001": 36248
   },
   "alias": {
     "slug:app-20260109-001": "pid:page000012",
@@ -184,6 +187,7 @@
     "slug:howto-20260430-001": "pid:page000044",
     "slug:subscription-20260430-001": "pid:page000045",
     "slug:app-20260501-001": "pid:page000046",
-    "slug:howto-20260501-001": "pid:page000047"
+    "slug:howto-20260501-001": "pid:page000047",
+    "slug:smartsavings-20260502-001": "pid:page000048"
   }
 }
