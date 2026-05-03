@@ -18,6 +18,7 @@
  *
  * 정책:
  * - nextCheck 우선(있으면 사용), 없으면 lastChecked + 90일로 계산
+ * - trend 글은 trendContext.contextDate를 보조 기준일로 허용
  * - overdue(기한 초과) / dueSoon(임박) / ok 로 분류
  * - 임박 기준은 기본 7일, 환경변수 DUE_SOON_DAYS 로 변경 가능
  */
@@ -31,6 +32,15 @@ const DIST_DIR = path.join(ROOT, 'dist');
 const OUT_DIR = path.join(DIST_DIR, 'reviews');
 
 const BUCKETS = ['app', 'device', 'subscription'];
+
+const TREND_REFRESH_INTENTS = new Set([
+  'review/update',
+  'review/recheck',
+  'review/compare-now',
+  'review/still-worth',
+  'review/switch-or-keep',
+  'review/risk-watch',
+]);
 
 function ensureDir(p) {
   if (!fs.existsSync(p)) fs.mkdirSync(p, { recursive: true });
@@ -101,21 +111,74 @@ function pickRatingsPath(bucket) {
   return fs.existsSync(p1) ? p1 : p2;
 }
 
+function normalizeString(value) {
+  return String(value == null ? '' : value).trim();
+}
+
+function normalizeTrendContext(rec) {
+  const raw = rec && rec.trendContext && typeof rec.trendContext === 'object'
+    ? rec.trendContext
+    : {};
+
+  const contextDateRaw = normalizeString(raw.contextDate);
+  const contextDateParsed = parseKstDate(contextDateRaw);
+  const contextDate = contextDateParsed ? formatYmdKst(contextDateParsed) : '';
+
+  return {
+    timing: normalizeString(raw.timing),
+    contextDate,
+    changeReason: normalizeString(raw.changeReason),
+    marketSignal: normalizeString(raw.marketSignal),
+    decisionContext: normalizeString(raw.decisionContext),
+    historicalValue: raw.historicalValue === true,
+    currentUse: normalizeString(raw.currentUse),
+    laterUse: normalizeString(raw.laterUse),
+    reviewWindow: normalizeString(raw.reviewWindow),
+    sourceType: normalizeString(raw.sourceType),
+    intent: normalizeString(raw.intent),
+  };
+}
+
+function isTrendRecord(rec, trendContext, intent) {
+  if (!rec || typeof rec !== 'object') return false;
+
+  if (rec.mode === 'trend') return true;
+  if (rec.trend === true) return true;
+  if (trendContext && trendContext.contextDate) return true;
+  if (trendContext && trendContext.historicalValue) return true;
+  if (typeof intent === 'string' && TREND_REFRESH_INTENTS.has(intent)) return true;
+
+  return false;
+}
+
+function isTrendRefreshEligible(intent) {
+  if (!intent) return true;
+  return TREND_REFRESH_INTENTS.has(intent);
+}
+
 function normalizeRecord(bucket, slug, rec) {
   if (!rec || typeof rec !== 'object') return null;
 
   const lastChecked = typeof rec.lastChecked === 'string' ? rec.lastChecked : '';
   const nextCheck = typeof rec.nextCheck === 'string' ? rec.nextCheck : '';
 
+  const intent = normalizeString(rec.intent);
+  const trendContext = normalizeTrendContext(rec);
+  const trend = isTrendRecord(rec, trendContext, intent);
+  const trendRefreshEligible = trend ? isTrendRefreshEligible(intent || trendContext.intent) : false;
+
   const lcDate = parseKstDate(lastChecked);
   const ncDate = parseKstDate(nextCheck);
+  const tcDate = parseKstDate(trendContext.contextDate);
 
-  // nextCheck가 있으면 우선, 없으면 lastChecked+90
+  // nextCheck가 있으면 우선, 없으면 lastChecked+90, trend 글은 contextDate+90까지 보조 기준으로 허용
   let nextCheckYmd = '';
   if (ncDate) nextCheckYmd = formatYmdKst(ncDate);
   else if (lcDate) nextCheckYmd = addDaysYmd(formatYmdKst(lcDate), 90);
+  else if (trend && tcDate) nextCheckYmd = addDaysYmd(formatYmdKst(tcDate), 90);
 
   const lastCheckedYmd = lcDate ? formatYmdKst(lcDate) : '';
+  const trendContextDateYmd = tcDate ? formatYmdKst(tcDate) : '';
 
   // ratingCurrent/votesCurrent는 없어도 due-list는 생성 가능(운영 표시용)
   const ratingCurrent = Number(rec.ratingCurrent);
@@ -134,10 +197,25 @@ function normalizeRecord(bucket, slug, rec) {
     votesCurrent: Number.isFinite(votesCurrent) ? votesCurrent : null,
     platform,
     source,
+    intent,
+    decisionType: normalizeString(rec.decisionType),
+    decisionSummary: normalizeString(rec.decisionSummary),
+    trend,
+    trendRefreshEligible,
+    trendContextDate: trendContextDateYmd,
+    trendChangeReason: trendContext.changeReason,
+    trendTiming: trendContext.timing,
+    trendHistoricalValue: trendContext.historicalValue,
   };
 }
 
-function classify(nowYmd, nextCheckYmd, dueSoonDays) {
+function classify(nowYmd, rec, dueSoonDays) {
+  const nextCheckYmd = rec && rec.nextCheck ? rec.nextCheck : '';
+
+  if (rec && rec.trend && rec.trendRefreshEligible === false) {
+    return 'ok';
+  }
+
   if (!nextCheckYmd) return 'unknown';
 
   if (nowYmd > nextCheckYmd) return 'overdue';
@@ -176,6 +254,8 @@ function main() {
       dueSoon: 0,
       ok: 0,
       unknown: 0,
+      trend: 0,
+      trendRefreshEligible: 0,
     },
     buckets: {
       app: { overdue: [], dueSoon: [], ok: [], unknown: [] },
@@ -204,9 +284,17 @@ function main() {
       const rec = normalizeRecord(bucket, slug, bySlug[slug]);
       if (!rec) continue;
 
-      const cls = classify(now, rec.nextCheck, dueSoonDays);
+      const cls = classify(now, rec, dueSoonDays);
       result.summary.total += 1;
       result.summary[cls] += 1;
+
+      if (rec.trend) {
+        result.summary.trend += 1;
+      }
+
+      if (rec.trendRefreshEligible) {
+        result.summary.trendRefreshEligible += 1;
+      }
 
       result.buckets[bucket][cls].push(rec);
       result.flat[cls].push(rec);
@@ -222,6 +310,14 @@ function main() {
         votesCurrent: rec.votesCurrent,
         platform: rec.platform,
         source: rec.source,
+        intent: rec.intent,
+        decisionType: rec.decisionType,
+        trend: rec.trend,
+        trendRefreshEligible: rec.trendRefreshEligible,
+        trendContextDate: rec.trendContextDate,
+        trendChangeReason: rec.trendChangeReason,
+        trendTiming: rec.trendTiming,
+        trendHistoricalValue: rec.trendHistoricalValue,
         ts: new Date().toISOString(),
       });
     }
