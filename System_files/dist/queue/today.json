@@ -1,18 +1,18 @@
 {
-  "date": "2026-05-02",
+  "date": "2026-05-03",
   "timezone": "Asia/Seoul",
   "cutoff": "10:00",
   "items": [
     {
-      "date": "2026-05-02",
+      "date": "2026-05-03",
       "label": "smart-savings",
       "seedLabel": "smart-savings",
       "requestedSlotLabel": "smart-savings",
       "mode": "trend",
-      "id": "ss-tr-020",
-      "title": "Which AI Writing Tools Are Worth Paying for in 2025?",
-      "angle": "AI writing apps exploded; users need clarity.",
-      "audience": "Students, creators, marketers",
+      "id": "ss-tr-021",
+      "title": "How to Save Money by Using Multi-Device Bundles",
+      "angle": "Apple One, Microsoft 365, and Google bundles gained traction.",
+      "audience": "Families and power users",
       "intent": "saving",
       "priority": 1,
       "notes": ""

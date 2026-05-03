@@ -5,15 +5,6 @@
   },
   "trend": [
     {
-      "id": "ss-tr-021",
-      "title": "How to Save Money by Using Multi-Device Bundles",
-      "angle": "Apple One, Microsoft 365, and Google bundles gained traction.",
-      "audience": "Families and power users",
-      "intent": "saving",
-      "priority": 1,
-      "fingerprint": "fp1:6045df8fa7577dd830d78128f292fcc143ea9fae"
-    },
-    {
       "id": "ss-tr-022",
       "title": "2025 Cloud Gaming Costs: Best Value Options",
       "angle": "Cloud gaming pricing stabilized in 2025.",
