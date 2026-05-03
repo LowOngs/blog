@@ -16,6 +16,8 @@
  * - baseline({bucket}-ratings.json)에서 해당 slug 레코드를 가져와 next에 넣는다.
  * - baseline에 없는 신규 리뷰 slug는 최소 stub 레코드를 생성해 next에 넣는다.
  * - 레코드에 status가 없으면 status='due'로 넣는다.
+ * - due-list의 trend 의미 필드는 next 레코드에 보존한다.
+ * - trendRefreshEligible=false 인 trend 레코드는 next 큐에서 제외한다.
  * - next 파일은 bySlug 구조를 유지하며, 다른 slug는 건드리지 않는다(멱등).
  *
  * 사용:
@@ -75,6 +77,14 @@ function normalizeClass(v) {
   const s = String(v || '').trim();
   if (!s) return '';
   return s;
+}
+
+function normalizeString(v) {
+  return String(v == null ? '' : v).trim();
+}
+
+function normalizeBoolean(v) {
+  return v === true;
 }
 
 function collectDueItems(due) {
@@ -137,6 +147,70 @@ function collectDueItems(due) {
   }
 
   return items;
+}
+
+function buildDueMeta(it) {
+  return {
+    class: normalizeClass(it.class || it.status),
+    nextCheck: normalizeString(it.nextCheck),
+    lastChecked: normalizeString(it.lastChecked),
+    source: normalizeString(it.source),
+    platform: normalizeString(it.platform),
+    generatedFrom: 'due-90days',
+  };
+}
+
+function buildTrendMeta(it) {
+  return {
+    trend: normalizeBoolean(it.trend),
+    trendRefreshEligible: normalizeBoolean(it.trendRefreshEligible),
+    intent: normalizeString(it.intent),
+    decisionType: normalizeString(it.decisionType),
+    decisionSummary: normalizeString(it.decisionSummary),
+    trendContextDate: normalizeString(it.trendContextDate),
+    trendChangeReason: normalizeString(it.trendChangeReason),
+    trendTiming: normalizeString(it.trendTiming),
+    trendHistoricalValue: normalizeBoolean(it.trendHistoricalValue),
+  };
+}
+
+function applyDueAndTrendFields(candidate, dueItem) {
+  const dueMeta = buildDueMeta(dueItem);
+  const trendMeta = buildTrendMeta(dueItem);
+
+  candidate.status = candidate.status || 'due';
+  candidate.dueMeta = {
+    ...(candidate.dueMeta && typeof candidate.dueMeta === 'object' ? candidate.dueMeta : {}),
+    ...dueMeta,
+  };
+
+  if (trendMeta.intent) {
+    candidate.intent = trendMeta.intent;
+  }
+
+  if (trendMeta.decisionType) {
+    candidate.decisionType = trendMeta.decisionType;
+  }
+
+  if (trendMeta.decisionSummary) {
+    candidate.decisionSummary = trendMeta.decisionSummary;
+  }
+
+  if (trendMeta.trend) {
+    candidate.trend = true;
+    candidate.trendRefreshEligible = trendMeta.trendRefreshEligible;
+    candidate.trendContext = {
+      ...(candidate.trendContext && typeof candidate.trendContext === 'object' ? candidate.trendContext : {}),
+      contextDate: trendMeta.trendContextDate,
+      changeReason: trendMeta.trendChangeReason,
+      timing: trendMeta.trendTiming,
+      historicalValue: trendMeta.trendHistoricalValue,
+      sourceType: 'due-90days',
+      laterUse: 'historical comparison record',
+    };
+  }
+
+  return candidate;
 }
 
 function buildStubRecord(slug, bucket) {
@@ -203,10 +277,12 @@ function main() {
   console.log(`[review-next] collected items = ${rawItems.length}`);
 
   const picked = { app: [], device: [], subscription: [] };
+  const pickedMeta = { app: {}, device: {}, subscription: {} };
 
   let ignoredNoSlug = 0;
   let ignoredNoBucket = 0;
   let ignoredClass = 0;
+  let ignoredTrendNotEligible = 0;
 
   for (const it of rawItems) {
     const slug = String(it && it.slug ? it.slug : '').trim();
@@ -222,12 +298,23 @@ function main() {
       continue;
     }
 
+    if (it.trend === true && it.trendRefreshEligible === false) {
+      ignoredTrendNotEligible++;
+      continue;
+    }
+
     // 우선 class 사용, 없으면 status도 보조 허용
     const cls = normalizeClass(it.class || it.status);
 
     // overdue / dueSoon / due 만 next 큐에 올림
     if (cls === 'overdue' || cls === 'dueSoon' || cls === 'due') {
       picked[bucket].push(slug);
+      pickedMeta[bucket][slug] = {
+        ...(pickedMeta[bucket][slug] || {}),
+        ...it,
+        bucket,
+        class: cls,
+      };
     } else {
       ignoredClass++;
     }
@@ -237,6 +324,7 @@ function main() {
   let totalWritten = 0;
   let totalMissingBaseline = 0;
   let totalStubCreated = 0;
+  let totalTrendQueued = 0;
 
   for (const bucket of BUCKETS) {
     const slugs = uniq(picked[bucket]);
@@ -251,9 +339,11 @@ function main() {
     let wrote = 0;
     let missingBaseline = 0;
     let stubCreated = 0;
+    let trendQueued = 0;
 
     for (const slug of slugs) {
       const baseRec = baseline.bySlug[slug];
+      const dueItem = pickedMeta[bucket][slug] || { slug, bucket, class: 'due' };
 
       let candidate;
       if (!baseRec || typeof baseRec !== 'object') {
@@ -262,6 +352,12 @@ function main() {
         candidate = buildStubRecord(slug, bucket);
       } else {
         candidate = cloneRecordWithDue(baseRec, slug, bucket);
+      }
+
+      candidate = applyDueAndTrendFields(candidate, dueItem);
+
+      if (candidate.trend === true) {
+        trendQueued++;
       }
 
       const prev = JSON.stringify(next.bySlug[slug] || null);
@@ -275,26 +371,27 @@ function main() {
 
     totalMissingBaseline += missingBaseline;
     totalStubCreated += stubCreated;
+    totalTrendQueued += trendQueued;
 
     if (wrote > 0) {
       writeJsonPretty(nextPath, next);
       totalWritten += wrote;
       console.log(
-        `[review-next] (${bucket}) next 갱신: ${nextPath} wrote=${wrote} missingBaseline=${missingBaseline} stubCreated=${stubCreated}`
+        `[review-next] (${bucket}) next 갱신: ${nextPath} wrote=${wrote} missingBaseline=${missingBaseline} stubCreated=${stubCreated} trendQueued=${trendQueued}`
       );
     } else {
       console.log(
-        `[review-next] (${bucket}) 변경 없음 (queued=${slugs.length}, missingBaseline=${missingBaseline}, stubCreated=${stubCreated})`
+        `[review-next] (${bucket}) 변경 없음 (queued=${slugs.length}, missingBaseline=${missingBaseline}, stubCreated=${stubCreated}, trendQueued=${trendQueued})`
       );
     }
   }
 
   console.log('────────────────────────────────────────────');
   console.log(
-    `[review-next] ignored(noSlug)=${ignoredNoSlug} ignored(noBucket)=${ignoredNoBucket} ignored(class)=${ignoredClass}`
+    `[review-next] ignored(noSlug)=${ignoredNoSlug} ignored(noBucket)=${ignoredNoBucket} ignored(class)=${ignoredClass} ignored(trendNotEligible)=${ignoredTrendNotEligible}`
   );
   console.log(
-    `[review-next] queued(total)=${totalQueued} | wrote(total)=${totalWritten} | missingBaseline(total)=${totalMissingBaseline} | stubCreated(total)=${totalStubCreated}`
+    `[review-next] queued(total)=${totalQueued} | wrote(total)=${totalWritten} | missingBaseline(total)=${totalMissingBaseline} | stubCreated(total)=${totalStubCreated} | trendQueued(total)=${totalTrendQueued}`
   );
   console.log('[review-next] 다음 순서: review-diff-update.cjs → review-resolver.cjs → render-posts.cjs');
   console.log('────────────────────────────────────────────');
