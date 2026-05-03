@@ -408,7 +408,7 @@ function buildTitle(intent, appName, reason, contextDate) {
   }
 
   if (intent === 'review/switch-or-keep') {
-    return `Should you keep using ${appName} or consider switching?`;
+    return `Should you keep using ${appName} after ${reason}?`;
   }
 
   if (intent === 'review/risk-watch') {
@@ -464,7 +464,7 @@ function buildGoal(intent, appName, reason) {
   }
 
   if (intent === 'review/switch-or-keep') {
-    return `decide whether to keep using ${appName} or consider switching`;
+    return `decide whether to keep using ${appName} or switch after ${reason}`;
   }
 
   if (intent === 'review/risk-watch') {
@@ -576,7 +576,7 @@ function buildDecisionSummary(intent, appName, reason) {
   }
 
   if (intent === 'review/switch-or-keep') {
-    return `${appName} is not automatically obsolete, but users should compare the cost of staying against switching.`;
+    return `${appName} is not automatically obsolete, but users should compare the cost of staying against switching after ${reason}.`;
   }
 
   if (intent === 'review/risk-watch') {
