@@ -9,6 +9,7 @@
  * - trend를 단순 유행 정보가 아니라 "시점 기반 의사결정 기록 데이터"로 만든다.
  * - intent / title / angle / goal / keyPoints / trendContext / decisionSummary / selectionCriteria / selectionMeta / fingerprint를 보정한다.
  * - 기존 id / priority / entity / reviewEntity 등 무관 필드는 삭제하지 않는다.
+ * - intent quota를 유지하면서 app entity가 한 앱에 몰리지 않도록 라운드로빈 분산한다.
  *
  * 사용:
  * - node ./System_files/tools/patch/app-review-trend-redesign.cjs
@@ -371,24 +372,8 @@ function assignIntents(seeds) {
   };
 }
 
-function pickApp(seed, index) {
-  const entityName = normalizeText(seed.entity && seed.entity.name);
-  const reviewName = normalizeText(seed.reviewEntity && seed.reviewEntity.name);
-  const fallback = APP_TREND_LIBRARY[index % APP_TREND_LIBRARY.length];
-
-  const name = reviewName || entityName || fallback.name;
-
-  const found = APP_TREND_LIBRARY.find((item) => lowerText(item.name) === lowerText(name));
-
-  if (found) {
-    return found;
-  }
-
-  return {
-    name,
-    category: normalizeText(seed.entity && seed.entity.category) || fallback.category || 'app',
-    platform: ensureArray((seed.entity && seed.entity.platform) || fallback.platform),
-  };
+function pickApp(index) {
+  return APP_TREND_LIBRARY[index % APP_TREND_LIBRARY.length];
 }
 
 function pickReason(index) {
@@ -637,12 +622,12 @@ function buildFingerprint(seed) {
   return `fp1:${crypto.createHash('sha1').update(source).digest('hex')}`;
 }
 
-function patchSeed(seed, intent, index) {
+function patchSeed(seed, intent, appIndex, reasonIndex, timingIndex) {
   let changed = 0;
 
-  const app = pickApp(seed, index);
-  const reason = pickReason(index);
-  const contextDate = getContextDate(index);
+  const app = pickApp(appIndex);
+  const reason = pickReason(reasonIndex);
+  const contextDate = getContextDate(timingIndex);
 
   const entity = ensureObject(seed, 'entity');
   if (entity.name !== app.name) {
@@ -688,7 +673,7 @@ function patchSeed(seed, intent, index) {
   const nextKeyPoints = buildKeyPoints(intent, reason);
   const nextDecisionType = buildDecisionType(intent);
   const nextDecisionSummary = buildDecisionSummary(intent, app.name, reason);
-  const nextTrendContext = buildTrendContext(intent, app, reason, index);
+  const nextTrendContext = buildTrendContext(intent, app, reason, timingIndex);
 
   if (seed.title !== nextTitle) {
     seed.title = nextTitle;
@@ -741,6 +726,7 @@ function patchSeed(seed, intent, index) {
     changeReasonRequired: true,
     appTrendReview: true,
     notEvergreen: true,
+    entityDistributed: true,
   };
 
   for (const [key, value] of Object.entries(nextCriteria)) {
@@ -780,7 +766,7 @@ function patchSeed(seed, intent, index) {
   return changed;
 }
 
-function reorderByIntent(seeds) {
+function buildIntentBuckets(seeds, assignment) {
   const buckets = {};
 
   for (const intent of INTENT_ORDER) {
@@ -788,28 +774,45 @@ function reorderByIntent(seeds) {
   }
 
   for (const seed of seeds) {
-    const intent = normalizeText(seed && seed.intent);
+    const intent = assignment.assigned.get(seed);
     const key = INTENT_ORDER.includes(intent) ? intent : 'review/recheck';
     buckets[key].push(seed);
   }
 
-  const reordered = [];
+  return buckets;
+}
+
+function buildRoundRobinPlan(seeds, assignment) {
+  const buckets = buildIntentBuckets(seeds, assignment);
+  const plan = [];
   let moved = true;
+  let globalIndex = 0;
 
   while (moved) {
     moved = false;
 
-    for (const intent of INTENT_ORDER) {
-      const next = buckets[intent].shift();
+    for (let intentOffset = 0; intentOffset < INTENT_ORDER.length; intentOffset += 1) {
+      const intent = INTENT_ORDER[intentOffset];
+      const seed = buckets[intent].shift();
 
-      if (next) {
-        reordered.push(next);
-        moved = true;
+      if (!seed) {
+        continue;
       }
+
+      plan.push({
+        seed,
+        intent,
+        appIndex: globalIndex,
+        reasonIndex: globalIndex + intentOffset,
+        timingIndex: globalIndex,
+      });
+
+      globalIndex += 1;
+      moved = true;
     }
   }
 
-  return reordered;
+  return plan;
 }
 
 function main() {
@@ -824,26 +827,23 @@ function main() {
 
   const items = getTrendItems(data).filter((seed) => seed && typeof seed === 'object');
   const assignment = assignIntents(items);
-  const intentIndex = {};
-
-  for (const intent of INTENT_ORDER) {
-    intentIndex[intent] = 0;
-  }
+  const plan = buildRoundRobinPlan(items, assignment);
 
   let checked = 0;
   let changed = 0;
 
-  for (const seed of items) {
-    const intent = assignment.assigned.get(seed);
-    const index = intentIndex[intent];
-
+  for (const item of plan) {
     checked += 1;
-    changed += patchSeed(seed, intent, index);
-
-    intentIndex[intent] += 1;
+    changed += patchSeed(
+      item.seed,
+      item.intent,
+      item.appIndex,
+      item.reasonIndex,
+      item.timingIndex
+    );
   }
 
-  setTrendItems(data, reorderByIntent(items));
+  setTrendItems(data, plan.map((item) => item.seed));
 
   data.schema = data.schema || TREND_SCHEMA.schema;
   data.mode = 'trend';
@@ -853,9 +853,14 @@ function main() {
   writeJson(TARGET_FILE, data);
 
   const byIntent = {};
+  const byEntity = {};
+
   for (const seed of getTrendItems(data)) {
     const intent = normalizeText(seed && seed.intent) || 'missing';
+    const entity = normalizeText(seed && seed.entity && seed.entity.name) || 'missing';
+
     byIntent[intent] = (byIntent[intent] || 0) + 1;
+    byEntity[entity] = (byEntity[entity] || 0) + 1;
   }
 
   console.log('[app-review-trend-redesign] checked =', checked);
@@ -873,13 +878,22 @@ function main() {
       console.log(`  - ${intent}: ${byIntent[intent]}`);
     });
 
+  console.log('[app-review-trend-redesign] entity distribution top =');
+  Object.keys(byEntity)
+    .sort((a, b) => byEntity[b] - byEntity[a] || a.localeCompare(b))
+    .slice(0, 12)
+    .forEach((entity) => {
+      console.log(`  - ${entity}: ${byEntity[entity]}`);
+    });
+
   console.log('[app-review-trend-redesign] sample =');
 
   getTrendItems(data)
-    .slice(0, 12)
+    .slice(0, 18)
     .forEach((seed) => {
       const ctx = seed.trendContext || {};
-      console.log(`  - ${seed.id}: ${seed.intent} :: ${seed.title} :: ${ctx.contextDate || 'no-date'}`);
+      const entity = seed.entity || {};
+      console.log(`  - ${seed.id}: ${seed.intent} :: ${entity.name || 'no-entity'} :: ${seed.title} :: ${ctx.contextDate || 'no-date'}`);
     });
 
   console.log('[app-review-trend-redesign] done');
