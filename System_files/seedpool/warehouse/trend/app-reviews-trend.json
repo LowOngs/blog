@@ -5,21 +5,6 @@
   },
   "trend": [
     {
-      "id": "ar-tr-009",
-      "title": "Are AI-Powered Email Apps Actually Reducing Inbox Stress?",
-      "angle": "Smart filters + auto-summary accuracy",
-      "audience": "Professionals",
-      "intent": "review/productivity-gain",
-      "environment": "email clients",
-      "timing": "post-update",
-      "goal": "measure reduction in daily inbox time",
-      "reviewEntity": {
-        "type": "app",
-        "appName": "AI Email App",
-        "platform": "android"
-      }
-    },
-    {
       "id": "ar-tr-010",
       "title": "Does This New Meditation App’s AI Coach Improve Focus?",
       "angle": "Compare session personalization quality",

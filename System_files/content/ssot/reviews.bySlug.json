@@ -451,6 +451,31 @@
       "insights": [],
       "sources": [],
       "bucket": "app"
+    },
+    "app-20260504-001": {
+      "reviewId": "06EZ30XF0WZVXS3WEVVZ1FTJMB",
+      "postId": "06EZ30XF0WAE0Z9XXQ8XPT0X4T",
+      "lastChecked": null,
+      "status": "queued",
+      "store": "unknown",
+      "source": "seed",
+      "storeId": "AI Email App",
+      "ratingCurrent": 0,
+      "ratingPrevious": 0,
+      "ratingDiff": 0,
+      "votesCurrent": 0,
+      "votesPrevious": 0,
+      "votesDiff": 0,
+      "histogram": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0
+      },
+      "insights": [],
+      "sources": [],
+      "bucket": "app"
     }
   },
   "updatedAt": "2026-01-15"

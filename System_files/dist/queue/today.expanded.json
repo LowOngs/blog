@@ -1,24 +1,46 @@
 {
-  "date": "2026-05-03",
+  "date": "2026-05-04",
   "timezone": "Asia/Seoul",
   "cutoff": "10:00",
   "items": [
     {
-      "date": "2026-05-03",
-      "label": "smart-savings",
-      "seedLabel": "smart-savings",
-      "requestedSlotLabel": "smart-savings",
+      "date": "2026-05-04",
+      "label": "how-to-playbooks",
+      "seedLabel": "how-to-playbooks",
+      "requestedSlotLabel": "how-to-playbooks",
       "mode": "trend",
-      "id": "ss-tr-021",
-      "title": "How to Save Money by Using Multi-Device Bundles",
-      "angle": "Apple One, Microsoft 365, and Google bundles gained traction.",
-      "audience": "Families and power users",
-      "intent": "saving",
+      "id": "ht-tr-037",
+      "title": "How to fix laptop battery not charging issues",
+      "angle": "Battery failures spike during seasonal temperature changes.",
+      "audience": "Laptop owners",
+      "intent": "howto",
       "priority": 1,
       "notes": "",
-      "generatedSlug": "smartsavings-20260503-001",
-      "postId": "06EYRP099RJSTVJWY21D5M7AS0"
+      "generatedSlug": "howto-20260504-001",
+      "postId": "06EZ30XF0G412X4KRV7Z9DZEXE"
+    },
+    {
+      "date": "2026-05-04",
+      "label": "app-reviews",
+      "seedLabel": "app-reviews",
+      "requestedSlotLabel": "app-reviews",
+      "mode": "trend",
+      "id": "ar-tr-009",
+      "title": "Are AI-Powered Email Apps Actually Reducing Inbox Stress?",
+      "angle": "Smart filters + auto-summary accuracy",
+      "audience": "Professionals",
+      "intent": "review/productivity-gain",
+      "priority": 0,
+      "notes": "",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "AI Email App",
+        "platform": "android"
+      },
+      "generatedSlug": "app-20260504-001",
+      "postId": "06EZ30XF0WAE0Z9XXQ8XPT0X4T",
+      "reviewId": "06EZ30XF0WZVXS3WEVVZ1FTJMB"
     }
   ],
-  "expandedAt": "2026-05-03T05:38:05.775Z"
+  "expandedAt": "2026-05-04T05:43:52.327Z"
 }
