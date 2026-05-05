@@ -8,6 +8,7 @@
  * - 외부 입력(raw signal)을 AOIA 표준 raw signal 구조로 정규화
  * - fingerprint 생성
  * - conceptKey 기반 dedupe / accumulation 갱신
+ * - novelty 자동 판단 (패치)
  * - 최소 신뢰도 판단(writeReady=false 기본)
  */
 
@@ -41,6 +42,44 @@ function normalizeKey(v) {
     .replace(/[^a-z0-9가-힣]+/g, '-')
     .replace(/^-+|-+$/g, '');
 }
+
+/* =========================
+   🔥 신규 추가 (국부 패치)
+========================= */
+const KNOWN_DEVICE_WORDS = [
+  'phone','smartphone','laptop','notebook','tablet','ipad',
+  'watch','band','earbud','headphone','keyboard','mouse',
+  'monitor','camera','router','storage','printer','console'
+];
+
+function detectNovelty(input) {
+  const words = Array.isArray(input.productTypeWords)
+    ? input.productTypeWords.map(w => normalizeText(w).toLowerCase())
+    : [];
+
+  const text = (input.rawSummary + ' ' + words.join(' ')).toLowerCase();
+
+  const hasKnown = KNOWN_DEVICE_WORDS.some(k => text.includes(k));
+  const hasNewInteraction =
+    /hologram|gesture|air|xr|spatial|projection/.test(text);
+
+  if (!hasKnown || hasNewInteraction) {
+    return {
+      type: 'new-category',
+      claim: 'new device category candidate',
+      isNewCategoryCandidate: true,
+      timeSensitivity: 'high'
+    };
+  }
+
+  return {
+    type: 'existing-category',
+    claim: '',
+    isNewCategoryCandidate: false,
+    timeSensitivity: 'medium'
+  };
+}
+/* ========================= */
 
 function readJsonSafe(file, fallback) {
   try {
@@ -249,12 +288,8 @@ function buildRawSignal(input, index) {
       capturedAt: now,
     },
 
-    novelty: {
-      type: normalizeText(input.novelty && input.novelty.type) || 'unknown',
-      claim: normalizeText(input.novelty && input.novelty.claim),
-      isNewCategoryCandidate: !!(input.novelty && input.novelty.isNewCategoryCandidate),
-      timeSensitivity: normalizeText(input.novelty && input.novelty.timeSensitivity) || 'medium',
-    },
+    /* 🔥 기존 구조 유지 + 값만 교체 */
+    novelty: detectNovelty(input),
 
     classificationHints: {
       brand: normalizeText(input.rawBrand),
