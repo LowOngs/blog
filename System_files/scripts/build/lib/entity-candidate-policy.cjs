@@ -1,21 +1,27 @@
 'use strict';
 
 /**
- * entity-candidate-policy.cjs
- *
- * 역할:
- * - raw signal → entity 후보 생성
- * - category 판정
- * - deviceClass / interactionModel 추론
- * - writeReady 판단
+ * entity-candidate-policy.cjs (FIXED)
  */
 
 function normalizeText(v) {
-  return String(v || '').trim();
+  if (typeof v !== 'string') return '';
+  return v.trim();
 }
 
 function lower(v) {
   return normalizeText(v).toLowerCase();
+}
+
+function buildRawText(input) {
+  return [
+    input.rawName,
+    input.rawBrand,
+    input.rawSummary,
+    ...(Array.isArray(input.productTypeWords) ? input.productTypeWords : [])
+  ]
+    .map(normalizeText)
+    .join(' ');
 }
 
 function detectBrand(text) {
@@ -63,14 +69,23 @@ function detectInteractionModel(text) {
   return 'unknown';
 }
 
-function extractEntityName(text) {
-  const words = normalizeText(text).split(' ');
-  return words.slice(0, 4).join(' ');
+function extractEntityName(input) {
+  if (normalizeText(input.rawName)) return input.rawName;
+  return 'Unknown Device';
 }
 
-function buildKeyPoints(text) {
-  const parts = normalizeText(text).split('.');
-  return parts.slice(0, 3).map(s => s.trim()).filter(Boolean);
+function buildKeyPoints(input) {
+  const arr = [];
+
+  if (normalizeText(input.rawSummary)) {
+    arr.push(normalizeText(input.rawSummary));
+  }
+
+  if (Array.isArray(input.productTypeWords)) {
+    arr.push(...input.productTypeWords.map(normalizeText));
+  }
+
+  return arr.filter(Boolean).slice(0, 5);
 }
 
 function buildTrendContext() {
@@ -98,16 +113,16 @@ function evaluateWriteReady(entity, keyPoints) {
   };
 }
 
-function buildEntityCandidate(rawText) {
-  const text = normalizeText(rawText);
+function buildEntityCandidate(input) {
+  const text = buildRawText(input);
 
-  const name = extractEntityName(text);
-  const brand = detectBrand(text);
+  const name = extractEntityName(input);
+  const brand = detectBrand(text) || normalizeText(input.rawBrand);
   const category = detectCategory(text);
   const deviceClass = detectDeviceClass(text);
   const interactionModel = detectInteractionModel(text);
 
-  const keyPoints = buildKeyPoints(text);
+  const keyPoints = buildKeyPoints(input);
   const trendContext = buildTrendContext();
 
   const entity = {
