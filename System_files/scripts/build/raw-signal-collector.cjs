@@ -28,6 +28,13 @@ function normalizeText(v) {
   return String(v || '').replace(/\s+/g, ' ').trim();
 }
 
+function getCliValue(name) {
+  const key = `--${name}`;
+  const index = process.argv.indexOf(key);
+  if (index < 0) return '';
+  return normalizeText(process.argv[index + 1]);
+}
+
 function normalizeKey(v) {
   return normalizeText(v)
     .toLowerCase()
@@ -301,16 +308,19 @@ function main() {
 
   const index = loadIndex();
 
+  const domain = getCliValue('domain') || 'example.com';
+  const url = getCliValue('url') || `https://${domain}/samsung-hologram-keyboard`;
+
   const sampleInput = {
     rawTitle: 'Samsung introduces hologram keyboard',
     rawName: 'Samsung Hologram Keyboard',
     rawBrand: 'Samsung',
     rawSummary: 'Wrist-worn holographic keyboard device',
     source: {
-      url: 'https://example.com/samsung-hologram-keyboard',
-      domain: 'example.com',
-      sourceType: 'sample',
-      publishedAt: '2026-05-05',
+      url,
+      domain,
+      sourceType: getCliValue('sourceType') || 'sample',
+      publishedAt: getCliValue('publishedAt') || '2026-05-05',
     },
     novelty: {
       type: 'new-category',
