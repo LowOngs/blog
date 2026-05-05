@@ -8,7 +8,7 @@
  */
 
 const crypto = require('crypto');
-const { processCandidates } = require('./lib/validate-entity-candidates.cjs');
+const { processCandidates } = require('./validate-entity-candidates.cjs');
 const { buildEntityCandidate } = require('./lib/entity-candidate-policy.cjs');
 
 const INTENTS = [
