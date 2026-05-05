@@ -7,6 +7,7 @@
  * 역할:
  * - 외부 입력(raw signal)을 AOIA 표준 raw signal 구조로 정규화
  * - fingerprint 생성
+ * - conceptKey 기반 dedupe / accumulation 갱신
  * - 최소 신뢰도 판단(writeReady=false 기본)
  */
 
@@ -17,27 +18,214 @@ const crypto = require('crypto');
 const ROOT = path.resolve(__dirname, '../..');
 const OUT_DIR = path.join(ROOT, 'logs', 'raw-signals');
 const OUT_FILE = path.join(OUT_DIR, 'raw-signals.jsonl');
+const INDEX_FILE = path.join(OUT_DIR, 'raw-signals.index.json');
 
 function ensureDir(p) {
   if (!fs.existsSync(p)) fs.mkdirSync(p, { recursive: true });
 }
 
 function normalizeText(v) {
-  return String(v || '').trim();
+  return String(v || '').replace(/\s+/g, ' ').trim();
+}
+
+function normalizeKey(v) {
+  return normalizeText(v)
+    .toLowerCase()
+    .replace(/[^a-z0-9가-힣]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+function readJsonSafe(file, fallback) {
+  try {
+    if (!fs.existsSync(file)) return fallback;
+    const raw = fs.readFileSync(file, 'utf8').trim();
+    if (!raw) return fallback;
+    return JSON.parse(raw);
+  } catch {
+    return fallback;
+  }
+}
+
+function writeJsonAtomic(file, data) {
+  ensureDir(path.dirname(file));
+  const tmp = `${file}.tmp`;
+  fs.writeFileSync(tmp, `${JSON.stringify(data, null, 2)}\n`, 'utf8');
+  fs.renameSync(tmp, file);
+}
+
+function appendJsonl(file, obj) {
+  ensureDir(path.dirname(file));
+  fs.appendFileSync(file, `${JSON.stringify(obj)}\n`, 'utf8');
+}
+
+function extractDomainFromUrl(url) {
+  const raw = normalizeText(url);
+  if (!raw) return '';
+
+  try {
+    return new URL(raw).hostname.replace(/^www\./, '').toLowerCase();
+  } catch {
+    return '';
+  }
+}
+
+function normalizeSource(input) {
+  const source = input.source && typeof input.source === 'object' ? input.source : {};
+  const url = normalizeText(source.url);
+  const explicitDomain = normalizeText(source.domain).toLowerCase();
+  const domain = explicitDomain || extractDomainFromUrl(url);
+
+  return {
+    url,
+    domain,
+    sourceType: normalizeText(source.sourceType) || 'unknown',
+    publishedAt: normalizeText(source.publishedAt),
+  };
+}
+
+function buildConceptKey(input, source) {
+  const brand = normalizeKey(input.rawBrand);
+  const name = normalizeKey(input.rawName);
+  const typeWords = Array.isArray(input.productTypeWords)
+    ? input.productTypeWords.map(normalizeKey).filter(Boolean).slice(0, 5).join('-')
+    : '';
+
+  const base = [brand, name].filter(Boolean).join('|');
+
+  if (base) return base;
+  return [typeWords, normalizeKey(source.domain)].filter(Boolean).join('|') || 'unknown-concept';
+}
+
+function buildSimilarityGroup(input) {
+  const words = Array.isArray(input.productTypeWords)
+    ? input.productTypeWords.map(normalizeKey).filter(Boolean)
+    : [];
+
+  if (words.includes('hologram') && words.includes('keyboard')) {
+    return 'holographic-input-device';
+  }
+
+  if (words.includes('gesture')) {
+    return 'gesture-input-device';
+  }
+
+  if (words.includes('wearable')) {
+    return 'wearable-device';
+  }
+
+  if (words.length > 0) {
+    return words.slice(0, 3).join('-');
+  }
+
+  return 'unknown-signal-group';
 }
 
 function buildFingerprint(signal) {
   const src = [
-    normalizeText(signal.rawName).toLowerCase(),
+    normalizeText(signal.dedupe.conceptKey),
     normalizeText(signal.rawSummary).toLowerCase(),
-    normalizeText(signal.source?.domain).toLowerCase()
+    normalizeText(signal.source.domain).toLowerCase(),
   ].join('|');
 
-  return 'fp1:' + crypto.createHash('sha1').update(src).digest('hex');
+  return `fp1:${crypto.createHash('sha1').update(src).digest('hex')}`;
 }
 
-function buildRawSignal(input) {
+function loadIndex() {
+  const index = readJsonSafe(INDEX_FILE, null);
+
+  if (!index || typeof index !== 'object') {
+    return {
+      version: 1,
+      updatedAt: null,
+      byConceptKey: {},
+    };
+  }
+
+  if (!index.byConceptKey || typeof index.byConceptKey !== 'object') {
+    index.byConceptKey = {};
+  }
+
+  return index;
+}
+
+function updateAccumulation(index, signal, now) {
+  const conceptKey = signal.dedupe.conceptKey;
+  const prev = index.byConceptKey[conceptKey];
+
+  if (!prev || typeof prev !== 'object') {
+    const sources = signal.source.domain ? [signal.source.domain] : [];
+
+    index.byConceptKey[conceptKey] = {
+      conceptKey,
+      normalizedName: signal.dedupe.normalizedName,
+      similarityGroup: signal.dedupe.similarityGroup,
+      mentionCount: 1,
+      sourceCount: sources.length,
+      sources,
+      firstSeenAt: now,
+      lastSeenAt: now,
+      lastFingerprint: signal.fingerprint,
+    };
+
+    return {
+      mentionCount: 1,
+      sourceCount: sources.length,
+      firstSeenAt: now,
+      lastSeenAt: now,
+    };
+  }
+
+  const sources = Array.isArray(prev.sources) ? prev.sources : [];
+  if (signal.source.domain && !sources.includes(signal.source.domain)) {
+    sources.push(signal.source.domain);
+  }
+
+  prev.mentionCount = Number(prev.mentionCount || 0) + 1;
+  prev.sourceCount = sources.length;
+  prev.sources = sources;
+  prev.lastSeenAt = now;
+  prev.lastFingerprint = signal.fingerprint;
+
+  if (!prev.firstSeenAt) {
+    prev.firstSeenAt = now;
+  }
+
+  return {
+    mentionCount: prev.mentionCount,
+    sourceCount: prev.sourceCount,
+    firstSeenAt: prev.firstSeenAt,
+    lastSeenAt: prev.lastSeenAt,
+  };
+}
+
+function buildTrust(accumulation, novelty) {
+  const riskFlags = [];
+
+  if (accumulation.sourceCount <= 1) riskFlags.push('single-source');
+  if (novelty.isNewCategoryCandidate) riskFlags.push('new-category-claim');
+  if (accumulation.mentionCount <= 1) riskFlags.push('first-sighting');
+
+  let confidence = 'low';
+  if (accumulation.mentionCount >= 3 && accumulation.sourceCount >= 2) {
+    confidence = 'medium';
+  }
+  if (accumulation.mentionCount >= 5 && accumulation.sourceCount >= 3) {
+    confidence = 'high';
+  }
+
+  return {
+    confidence,
+    riskFlags,
+    writeReady: confidence !== 'low',
+    needsMoreEvidence: confidence === 'low',
+  };
+}
+
+function buildRawSignal(input, index) {
   const now = new Date().toISOString();
+  const source = normalizeSource(input);
+  const conceptKey = buildConceptKey(input, source);
+  const similarityGroup = buildSimilarityGroup(input);
 
   const rawSignal = {
     type: 'rawTrendSignal',
@@ -50,88 +238,114 @@ function buildRawSignal(input) {
     rawSummary: normalizeText(input.rawSummary),
 
     source: {
-      url: normalizeText(input.source?.url),
-      domain: normalizeText(input.source?.domain),
-      sourceType: normalizeText(input.source?.sourceType) || 'unknown',
-      publishedAt: normalizeText(input.source?.publishedAt),
-      capturedAt: now
+      ...source,
+      capturedAt: now,
     },
 
     novelty: {
-      type: normalizeText(input.novelty?.type) || 'unknown',
-      claim: normalizeText(input.novelty?.claim),
-      isNewCategoryCandidate: !!input.novelty?.isNewCategoryCandidate,
-      timeSensitivity: normalizeText(input.novelty?.timeSensitivity) || 'medium'
+      type: normalizeText(input.novelty && input.novelty.type) || 'unknown',
+      claim: normalizeText(input.novelty && input.novelty.claim),
+      isNewCategoryCandidate: !!(input.novelty && input.novelty.isNewCategoryCandidate),
+      timeSensitivity: normalizeText(input.novelty && input.novelty.timeSensitivity) || 'medium',
     },
 
     classificationHints: {
       brand: normalizeText(input.rawBrand),
-      productTypeWords: input.productTypeWords || [],
+      productTypeWords: Array.isArray(input.productTypeWords) ? input.productTypeWords : [],
       formFactor: normalizeText(input.formFactor),
       interactionModel: normalizeText(input.interactionModel),
       inputMethod: normalizeText(input.inputMethod),
-      connectivity: normalizeText(input.connectivity)
+      connectivity: normalizeText(input.connectivity),
     },
 
     evidence: {
-      keyFacts: input.keyFacts || [],
-      useCases: input.useCases || [],
-      unknowns: input.unknowns || []
+      keyFacts: Array.isArray(input.keyFacts) ? input.keyFacts : [],
+      useCases: Array.isArray(input.useCases) ? input.useCases : [],
+      unknowns: Array.isArray(input.unknowns) ? input.unknowns : [],
     },
 
     dedupe: {
-      normalizedName: normalizeText(input.rawName).toLowerCase(),
-      conceptKey: '',
-      similarityGroup: ''
+      normalizedName: normalizeKey(input.rawName),
+      conceptKey,
+      similarityGroup,
     },
 
     accumulation: {
       mentionCount: 1,
-      sourceCount: 1,
+      sourceCount: source.domain ? 1 : 0,
       firstSeenAt: now,
-      lastSeenAt: now
+      lastSeenAt: now,
     },
 
     trust: {
       confidence: 'low',
       riskFlags: ['new-signal'],
       writeReady: false,
-      needsMoreEvidence: true
-    }
+      needsMoreEvidence: true,
+    },
   };
 
   rawSignal.fingerprint = buildFingerprint(rawSignal);
 
-  return rawSignal;
-}
+  const nextAccumulation = updateAccumulation(index, rawSignal, now);
+  rawSignal.accumulation = nextAccumulation;
+  rawSignal.trust = buildTrust(nextAccumulation, rawSignal.novelty);
 
-function appendJsonl(file, obj) {
-  ensureDir(path.dirname(file));
-  fs.appendFileSync(file, JSON.stringify(obj) + '\n', 'utf8');
+  index.updatedAt = now;
+
+  return rawSignal;
 }
 
 function main() {
   console.log('[raw-signal] start');
 
-  // 테스트용 입력 (실제는 외부 입력 연결 예정)
+  const index = loadIndex();
+
   const sampleInput = {
     rawTitle: 'Samsung introduces hologram keyboard',
     rawName: 'Samsung Hologram Keyboard',
     rawBrand: 'Samsung',
     rawSummary: 'Wrist-worn holographic keyboard device',
+    source: {
+      url: 'https://example.com/samsung-hologram-keyboard',
+      domain: 'example.com',
+      sourceType: 'sample',
+      publishedAt: '2026-05-05',
+    },
     novelty: {
       type: 'new-category',
-      claim: 'new input device'
+      claim: 'new input device',
+      isNewCategoryCandidate: true,
+      timeSensitivity: 'high',
     },
     productTypeWords: ['keyboard', 'hologram', 'wearable'],
+    formFactor: 'wrist-worn',
+    interactionModel: 'holographic input',
+    inputMethod: 'finger tracking',
+    connectivity: 'bluetooth',
     keyFacts: ['hologram projection', 'finger tracking'],
-    useCases: ['mobile typing']
+    useCases: ['mobile typing'],
+    unknowns: ['price', 'battery life', 'typing accuracy'],
   };
 
-  const signal = buildRawSignal(sampleInput);
+  const signal = buildRawSignal(sampleInput, index);
+
   appendJsonl(OUT_FILE, signal);
+  writeJsonAtomic(INDEX_FILE, index);
 
   console.log('[raw-signal] saved:', OUT_FILE);
+  console.log('[raw-signal] index:', INDEX_FILE);
+  console.log('[raw-signal] conceptKey:', signal.dedupe.conceptKey);
+  console.log('[raw-signal] mentionCount:', signal.accumulation.mentionCount);
+  console.log('[raw-signal] sourceCount:', signal.accumulation.sourceCount);
+  console.log('[raw-signal] confidence:', signal.trust.confidence);
 }
 
 if (require.main === module) main();
+
+module.exports = {
+  buildRawSignal,
+  buildConceptKey,
+  buildSimilarityGroup,
+  loadIndex,
+};
