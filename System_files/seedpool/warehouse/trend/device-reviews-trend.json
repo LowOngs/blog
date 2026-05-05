@@ -5,21 +5,6 @@
   },
   "trend": [
     {
-      "id": "dr-tr-004",
-      "title": "Is the New Gaming Laptop Worth the Price Hike?",
-      "angle": "GPU wattage + cooling redesign",
-      "audience": "Gamers",
-      "intent": "review/performance",
-      "environment": "gaming laptops",
-      "timing": "release window",
-      "goal": "estimate real fps gains",
-      "fingerprint": "fp1:ecbad990b50f839feeb05c9c72f685f9b9faedb8",
-      "reviewEntity": {
-        "type": "device",
-        "model": "Gaming Laptops"
-      }
-    },
-    {
       "id": "dr-tr-005",
       "title": "Which Tablet Handles Multitasking Best After Updates?",
       "angle": "RAM pressure + window manager stability",

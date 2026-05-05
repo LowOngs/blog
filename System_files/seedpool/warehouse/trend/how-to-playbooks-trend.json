@@ -5,15 +5,6 @@
   },
   "trend": [
     {
-      "id": "ht-tr-038",
-      "title": "How to declutter Windows startup processes safely",
-      "angle": "Performance optimization is a top AI category.",
-      "audience": "PC beginners",
-      "intent": "howto",
-      "priority": 1,
-      "fingerprint": "fp1:c00129a0c9a4c2203bb3cbe32af682fb374b6842"
-    },
-    {
       "id": "ht-tr-039",
       "title": "How to set up AI study workflows for exams and research",
       "angle": "Students rely on AI more than ever.",

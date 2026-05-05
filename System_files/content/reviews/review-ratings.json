@@ -476,6 +476,31 @@
       "insights": [],
       "sources": [],
       "bucket": "app"
+    },
+    "device-20260505-001": {
+      "reviewId": "06EZD5MPDCGG8KCHBD4K32Z54T",
+      "postId": "06EZD5MPDCGPAD9M08FTQFSMQ4",
+      "lastChecked": null,
+      "status": "queued",
+      "store": "unknown",
+      "source": "seed",
+      "storeId": "Gaming Laptops",
+      "ratingCurrent": 0,
+      "ratingPrevious": 0,
+      "ratingDiff": 0,
+      "votesCurrent": 0,
+      "votesPrevious": 0,
+      "votesDiff": 0,
+      "histogram": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0
+      },
+      "insights": [],
+      "sources": [],
+      "bucket": "device"
     }
   },
   "updatedAt": "2026-01-15"
