@@ -1,45 +1,46 @@
 {
-  "date": "2026-05-05",
+  "date": "2026-05-06",
   "timezone": "Asia/Seoul",
   "cutoff": "10:00",
   "items": [
     {
-      "date": "2026-05-05",
+      "date": "2026-05-06",
       "label": "how-to-playbooks",
       "seedLabel": "how-to-playbooks",
       "requestedSlotLabel": "how-to-playbooks",
       "mode": "trend",
-      "id": "ht-tr-038",
-      "title": "How to declutter Windows startup processes safely",
-      "angle": "Performance optimization is a top AI category.",
-      "audience": "PC beginners",
+      "id": "ht-tr-039",
+      "title": "How to set up AI study workflows for exams and research",
+      "angle": "Students rely on AI more than ever.",
+      "audience": "High school and university students",
       "intent": "howto",
       "priority": 1,
       "notes": "",
-      "generatedSlug": "howto-20260505-001",
-      "postId": "06EZD5MPCRX0HW7EQJX41TZZ8S"
+      "generatedSlug": "howto-20260506-001",
+      "postId": "06EZQJFDG0NS14X4DNXHQNED0P"
     },
     {
-      "date": "2026-05-05",
-      "label": "device-reviews",
-      "seedLabel": "device-reviews",
-      "requestedSlotLabel": "device-reviews",
+      "date": "2026-05-06",
+      "label": "app-reviews",
+      "seedLabel": "app-reviews",
+      "requestedSlotLabel": "app-reviews",
       "mode": "trend",
-      "id": "dr-tr-004",
-      "title": "Is the New Gaming Laptop Worth the Price Hike?",
-      "angle": "GPU wattage + cooling redesign",
-      "audience": "Gamers",
-      "intent": "review/performance",
+      "id": "ar-tr-010",
+      "title": "Does This New Meditation App’s AI Coach Improve Focus?",
+      "angle": "Compare session personalization quality",
+      "audience": "Wellness seekers",
+      "intent": "review/effectiveness",
       "priority": 0,
       "notes": "",
       "reviewEntity": {
-        "type": "device",
-        "model": "Gaming Laptops"
+        "type": "app",
+        "appName": "AI Meditation App",
+        "platform": "android"
       },
-      "generatedSlug": "device-20260505-001",
-      "postId": "06EZD5MPDCGPAD9M08FTQFSMQ4",
-      "reviewId": "06EZD5MPDCGG8KCHBD4K32Z54T"
+      "generatedSlug": "app-20260506-001",
+      "postId": "06EZQJFDGGV8ZPK9DT1VXRF3ES",
+      "reviewId": "06EZQJFDGMVK838K2TPPE0RJFR"
     }
   ],
-  "expandedAt": "2026-05-05T05:22:37.291Z"
+  "expandedAt": "2026-05-06T05:36:48.005Z"
 }

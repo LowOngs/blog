@@ -5,15 +5,6 @@
   },
   "trend": [
     {
-      "id": "ht-tr-039",
-      "title": "How to set up AI study workflows for exams and research",
-      "angle": "Students rely on AI more than ever.",
-      "audience": "High school and university students",
-      "intent": "howto",
-      "priority": 1,
-      "fingerprint": "fp1:7dbe29bbe5f72da4bd5b9449bfc943363fcd8929"
-    },
-    {
       "id": "ht-tr-040",
       "title": "How to recover corrupted USB drives",
       "angle": "USB corruption issues still produce millions of queries.",

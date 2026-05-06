@@ -5,21 +5,6 @@
   },
   "trend": [
     {
-      "id": "ar-tr-010",
-      "title": "Does This New Meditation App’s AI Coach Improve Focus?",
-      "angle": "Compare session personalization quality",
-      "audience": "Wellness seekers",
-      "intent": "review/effectiveness",
-      "environment": "meditation apps",
-      "timing": "early release",
-      "goal": "see if AI guidance produces measurable calm",
-      "reviewEntity": {
-        "type": "app",
-        "appName": "AI Meditation App",
-        "platform": "android"
-      }
-    },
-    {
       "id": "ar-tr-011",
       "title": "The Most Viral Note App—Can It Replace Your Current Tool?",
       "angle": "Check multi-device sync + offline reliability",
