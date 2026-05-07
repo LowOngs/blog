@@ -9,12 +9,21 @@
  * - fingerprint 생성
  * - conceptKey 기반 dedupe / accumulation 갱신
  * - novelty 자동 판단 (패치)
+ * - classificationHints 자동 생성 연동 (패치)
  * - 최소 신뢰도 판단(writeReady=false 기본)
  */
 
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+
+/* =========================
+   🔥 신규 연결 (국부 패치)
+========================= */
+const {
+  buildClassificationHints,
+} = require('./lib/classification-hints-policy.cjs');
+/* ========================= */
 
 const ROOT = path.resolve(__dirname, '../..');
 const OUT_DIR = path.join(ROOT, 'logs', 'raw-signals');
@@ -252,9 +261,11 @@ function buildTrust(accumulation, novelty) {
   if (accumulation.mentionCount <= 1) riskFlags.push('first-sighting');
 
   let confidence = 'low';
+
   if (accumulation.mentionCount >= 3 && accumulation.sourceCount >= 2) {
     confidence = 'medium';
   }
+
   if (accumulation.mentionCount >= 5 && accumulation.sourceCount >= 3) {
     confidence = 'high';
   }
@@ -273,6 +284,13 @@ function buildRawSignal(input, index) {
   const conceptKey = buildConceptKey(input, source);
   const similarityGroup = buildSimilarityGroup(input);
 
+  /* =========================
+     🔥 신규 연결
+  ========================= */
+  const classificationHints =
+    buildClassificationHints(input);
+  /* ========================= */
+
   const rawSignal = {
     type: 'rawTrendSignal',
     label: input.label || 'device-reviews',
@@ -288,17 +306,14 @@ function buildRawSignal(input, index) {
       capturedAt: now,
     },
 
-    /* 🔥 기존 구조 유지 + 값만 교체 */
     novelty: detectNovelty(input),
 
-    classificationHints: {
-      brand: normalizeText(input.rawBrand),
-      productTypeWords: Array.isArray(input.productTypeWords) ? input.productTypeWords : [],
-      formFactor: normalizeText(input.formFactor),
-      interactionModel: normalizeText(input.interactionModel),
-      inputMethod: normalizeText(input.inputMethod),
-      connectivity: normalizeText(input.connectivity),
-    },
+    /* =========================
+       🔥 기존 구조 대체 아님
+       classificationHints 자동 생성 연결
+    ========================= */
+    classificationHints,
+    /* ========================= */
 
     evidence: {
       keyFacts: Array.isArray(input.keyFacts) ? input.keyFacts : [],
@@ -330,8 +345,12 @@ function buildRawSignal(input, index) {
   rawSignal.fingerprint = buildFingerprint(rawSignal);
 
   const nextAccumulation = updateAccumulation(index, rawSignal, now);
+
   rawSignal.accumulation = nextAccumulation;
-  rawSignal.trust = buildTrust(nextAccumulation, rawSignal.novelty);
+  rawSignal.trust = buildTrust(
+    nextAccumulation,
+    rawSignal.novelty
+  );
 
   index.updatedAt = now;
 
@@ -344,33 +363,55 @@ function main() {
   const index = loadIndex();
 
   const domain = getCliValue('domain') || 'example.com';
-  const url = getCliValue('url') || `https://${domain}/samsung-hologram-keyboard`;
+  const url =
+    getCliValue('url') ||
+    `https://${domain}/samsung-hologram-keyboard`;
 
   const sampleInput = {
     rawTitle: 'Samsung introduces hologram keyboard',
     rawName: 'Samsung Hologram Keyboard',
     rawBrand: 'Samsung',
     rawSummary: 'Wrist-worn holographic keyboard device',
+
     source: {
       url,
       domain,
       sourceType: getCliValue('sourceType') || 'sample',
       publishedAt: getCliValue('publishedAt') || '2026-05-05',
     },
+
     novelty: {
       type: 'new-category',
       claim: 'new input device',
       isNewCategoryCandidate: true,
       timeSensitivity: 'high',
     },
-    productTypeWords: ['keyboard', 'hologram', 'wearable'],
+
+    productTypeWords: [
+      'keyboard',
+      'hologram',
+      'wearable'
+    ],
+
     formFactor: 'wrist-worn',
     interactionModel: 'holographic input',
     inputMethod: 'finger tracking',
     connectivity: 'bluetooth',
-    keyFacts: ['hologram projection', 'finger tracking'],
-    useCases: ['mobile typing'],
-    unknowns: ['price', 'battery life', 'typing accuracy'],
+
+    keyFacts: [
+      'hologram projection',
+      'finger tracking'
+    ],
+
+    useCases: [
+      'mobile typing'
+    ],
+
+    unknowns: [
+      'price',
+      'battery life',
+      'typing accuracy'
+    ],
   };
 
   const signal = buildRawSignal(sampleInput, index);
