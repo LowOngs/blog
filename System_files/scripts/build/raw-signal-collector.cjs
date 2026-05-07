@@ -10,6 +10,7 @@
  * - conceptKey 기반 dedupe / accumulation 갱신
  * - novelty 자동 판단 (패치)
  * - classificationHints 자동 생성 연동 (패치)
+ * - trust 동적화 (패치)
  * - 최소 신뢰도 판단(writeReady=false 기본)
  */
 
@@ -69,6 +70,7 @@ function detectNovelty(input) {
   const text = (input.rawSummary + ' ' + words.join(' ')).toLowerCase();
 
   const hasKnown = KNOWN_DEVICE_WORDS.some(k => text.includes(k));
+
   const hasNewInteraction =
     /hologram|gesture|air|xr|spatial|projection/.test(text);
 
@@ -93,8 +95,11 @@ function detectNovelty(input) {
 function readJsonSafe(file, fallback) {
   try {
     if (!fs.existsSync(file)) return fallback;
+
     const raw = fs.readFileSync(file, 'utf8').trim();
+
     if (!raw) return fallback;
+
     return JSON.parse(raw);
   } catch {
     return fallback;
@@ -103,60 +108,115 @@ function readJsonSafe(file, fallback) {
 
 function writeJsonAtomic(file, data) {
   ensureDir(path.dirname(file));
+
   const tmp = `${file}.tmp`;
-  fs.writeFileSync(tmp, `${JSON.stringify(data, null, 2)}\n`, 'utf8');
+
+  fs.writeFileSync(
+    tmp,
+    `${JSON.stringify(data, null, 2)}\n`,
+    'utf8'
+  );
+
   fs.renameSync(tmp, file);
 }
 
 function appendJsonl(file, obj) {
   ensureDir(path.dirname(file));
-  fs.appendFileSync(file, `${JSON.stringify(obj)}\n`, 'utf8');
+
+  fs.appendFileSync(
+    file,
+    `${JSON.stringify(obj)}\n`,
+    'utf8'
+  );
 }
 
 function extractDomainFromUrl(url) {
   const raw = normalizeText(url);
+
   if (!raw) return '';
 
   try {
-    return new URL(raw).hostname.replace(/^www\./, '').toLowerCase();
+    return new URL(raw)
+      .hostname
+      .replace(/^www\./, '')
+      .toLowerCase();
   } catch {
     return '';
   }
 }
 
 function normalizeSource(input) {
-  const source = input.source && typeof input.source === 'object' ? input.source : {};
+  const source =
+    input.source &&
+    typeof input.source === 'object'
+      ? input.source
+      : {};
+
   const url = normalizeText(source.url);
-  const explicitDomain = normalizeText(source.domain).toLowerCase();
-  const domain = explicitDomain || extractDomainFromUrl(url);
+
+  const explicitDomain =
+    normalizeText(source.domain).toLowerCase();
+
+  const domain =
+    explicitDomain ||
+    extractDomainFromUrl(url);
 
   return {
     url,
     domain,
-    sourceType: normalizeText(source.sourceType) || 'unknown',
-    publishedAt: normalizeText(source.publishedAt),
+    sourceType:
+      normalizeText(source.sourceType) ||
+      'unknown',
+
+    publishedAt:
+      normalizeText(source.publishedAt),
   };
 }
 
 function buildConceptKey(input, source) {
   const brand = normalizeKey(input.rawBrand);
-  const name = normalizeKey(input.rawName);
-  const typeWords = Array.isArray(input.productTypeWords)
-    ? input.productTypeWords.map(normalizeKey).filter(Boolean).slice(0, 5).join('-')
-    : '';
 
-  const base = [brand, name].filter(Boolean).join('|');
+  const name = normalizeKey(input.rawName);
+
+  const typeWords =
+    Array.isArray(input.productTypeWords)
+      ? input.productTypeWords
+          .map(normalizeKey)
+          .filter(Boolean)
+          .slice(0, 5)
+          .join('-')
+      : '';
+
+  const base =
+    [brand, name]
+      .filter(Boolean)
+      .join('|');
 
   if (base) return base;
-  return [typeWords, normalizeKey(source.domain)].filter(Boolean).join('|') || 'unknown-concept';
+
+  return (
+    [
+      typeWords,
+      normalizeKey(source.domain)
+    ]
+      .filter(Boolean)
+      .join('|') ||
+    'unknown-concept'
+  );
 }
 
 function buildSimilarityGroup(input) {
-  const words = Array.isArray(input.productTypeWords)
-    ? input.productTypeWords.map(normalizeKey).filter(Boolean)
-    : [];
+  const words =
+    Array.isArray(input.productTypeWords)
+      ? input.productTypeWords
+          .map(normalizeKey)
+          .filter(Boolean)
+      : [];
 
-  if (words.includes('hologram') && words.includes('keyboard')) {
+  if (
+    words.includes('hologram') &&
+    words.includes('keyboard')
+  ) {
     return 'holographic-input-device';
   }
 
@@ -169,7 +229,9 @@ function buildSimilarityGroup(input) {
   }
 
   if (words.length > 0) {
-    return words.slice(0, 3).join('-');
+    return words
+      .slice(0, 3)
+      .join('-');
   }
 
   return 'unknown-signal-group';
@@ -177,18 +239,40 @@ function buildSimilarityGroup(input) {
 
 function buildFingerprint(signal) {
   const src = [
-    normalizeText(signal.dedupe.conceptKey),
-    normalizeText(signal.rawSummary).toLowerCase(),
-    normalizeText(signal.source.domain).toLowerCase(),
+    normalizeText(
+      signal.dedupe.conceptKey
+    ),
+
+    normalizeText(
+      signal.rawSummary
+    ).toLowerCase(),
+
+    normalizeText(
+      signal.source.domain
+    ).toLowerCase(),
   ].join('|');
 
-  return `fp1:${crypto.createHash('sha1').update(src).digest('hex')}`;
+  return (
+    `fp1:${
+      crypto
+        .createHash('sha1')
+        .update(src)
+        .digest('hex')
+    }`
+  );
 }
 
 function loadIndex() {
-  const index = readJsonSafe(INDEX_FILE, null);
+  const index =
+    readJsonSafe(
+      INDEX_FILE,
+      null
+    );
 
-  if (!index || typeof index !== 'object') {
+  if (
+    !index ||
+    typeof index !== 'object'
+  ) {
     return {
       version: 1,
       updatedAt: null,
@@ -196,161 +280,465 @@ function loadIndex() {
     };
   }
 
-  if (!index.byConceptKey || typeof index.byConceptKey !== 'object') {
+  if (
+    !index.byConceptKey ||
+    typeof index.byConceptKey !== 'object'
+  ) {
     index.byConceptKey = {};
   }
 
   return index;
 }
 
-function updateAccumulation(index, signal, now) {
-  const conceptKey = signal.dedupe.conceptKey;
-  const prev = index.byConceptKey[conceptKey];
+function updateAccumulation(
+  index,
+  signal,
+  now
+) {
+  const conceptKey =
+    signal.dedupe.conceptKey;
 
-  if (!prev || typeof prev !== 'object') {
-    const sources = signal.source.domain ? [signal.source.domain] : [];
+  const prev =
+    index.byConceptKey[conceptKey];
+
+  if (
+    !prev ||
+    typeof prev !== 'object'
+  ) {
+    const sources =
+      signal.source.domain
+        ? [signal.source.domain]
+        : [];
 
     index.byConceptKey[conceptKey] = {
       conceptKey,
-      normalizedName: signal.dedupe.normalizedName,
-      similarityGroup: signal.dedupe.similarityGroup,
+
+      normalizedName:
+        signal.dedupe.normalizedName,
+
+      similarityGroup:
+        signal.dedupe.similarityGroup,
+
       mentionCount: 1,
-      sourceCount: sources.length,
+
+      sourceCount:
+        sources.length,
+
       sources,
+
       firstSeenAt: now,
       lastSeenAt: now,
-      lastFingerprint: signal.fingerprint,
+
+      lastFingerprint:
+        signal.fingerprint,
     };
 
     return {
       mentionCount: 1,
-      sourceCount: sources.length,
+
+      sourceCount:
+        sources.length,
+
       firstSeenAt: now,
       lastSeenAt: now,
     };
   }
 
-  const sources = Array.isArray(prev.sources) ? prev.sources : [];
-  if (signal.source.domain && !sources.includes(signal.source.domain)) {
-    sources.push(signal.source.domain);
+  const sources =
+    Array.isArray(prev.sources)
+      ? prev.sources
+      : [];
+
+  if (
+    signal.source.domain &&
+    !sources.includes(
+      signal.source.domain
+    )
+  ) {
+    sources.push(
+      signal.source.domain
+    );
   }
 
-  prev.mentionCount = Number(prev.mentionCount || 0) + 1;
-  prev.sourceCount = sources.length;
+  prev.mentionCount =
+    Number(prev.mentionCount || 0) + 1;
+
+  prev.sourceCount =
+    sources.length;
+
   prev.sources = sources;
+
   prev.lastSeenAt = now;
-  prev.lastFingerprint = signal.fingerprint;
+
+  prev.lastFingerprint =
+    signal.fingerprint;
 
   if (!prev.firstSeenAt) {
     prev.firstSeenAt = now;
   }
 
   return {
-    mentionCount: prev.mentionCount,
-    sourceCount: prev.sourceCount,
-    firstSeenAt: prev.firstSeenAt,
-    lastSeenAt: prev.lastSeenAt,
+    mentionCount:
+      prev.mentionCount,
+
+    sourceCount:
+      prev.sourceCount,
+
+    firstSeenAt:
+      prev.firstSeenAt,
+
+    lastSeenAt:
+      prev.lastSeenAt,
   };
 }
 
-function buildTrust(accumulation, novelty) {
+/* =========================
+   🔥 trust 동적화 패치
+========================= */
+
+function calculateEvidenceScore(
+  evidence
+) {
+  let score = 0;
+
+  if (
+    Array.isArray(
+      evidence.keyFacts
+    )
+  ) {
+    score += Math.min(
+      evidence.keyFacts.length,
+      5
+    );
+  }
+
+  if (
+    Array.isArray(
+      evidence.useCases
+    )
+  ) {
+    score += Math.min(
+      evidence.useCases.length,
+      3
+    );
+  }
+
+  if (
+    Array.isArray(
+      evidence.unknowns
+    )
+  ) {
+    score -= Math.min(
+      evidence.unknowns.length,
+      3
+    );
+  }
+
+  return score;
+}
+
+function calculateClassificationScore(
+  classificationHints
+) {
+  let score = 0;
+
+  if (
+    classificationHints &&
+    classificationHints.categoryHints &&
+    classificationHints.categoryHints.primaryCategory
+  ) {
+    score += 2;
+  }
+
+  if (
+    classificationHints &&
+    classificationHints.interactionHints &&
+    classificationHints.interactionHints.interactionModel &&
+    classificationHints.interactionHints.interactionModel !== 'unknown'
+  ) {
+    score += 2;
+  }
+
+  if (
+    classificationHints &&
+    classificationHints.hardwareHints &&
+    classificationHints.hardwareHints.wearable
+  ) {
+    score += 1;
+  }
+
+  return score;
+}
+
+function calculateMaturityScore(
+  classificationHints
+) {
+  const maturity =
+    classificationHints &&
+    classificationHints.maturityHints;
+
+  if (!maturity) return 0;
+
+  let score = 0;
+
+  if (
+    maturity.marketStage ===
+    'prototype-commercial'
+  ) {
+    score += 1;
+  }
+
+  if (
+    maturity.evidenceLevel ===
+    'medium'
+  ) {
+    score += 1;
+  }
+
+  if (
+    maturity.productionConfidence ===
+    'medium'
+  ) {
+    score += 1;
+  }
+
+  return score;
+}
+
+function buildTrust(
+  accumulation,
+  novelty,
+  classificationHints,
+  evidence
+) {
   const riskFlags = [];
 
-  if (accumulation.sourceCount <= 1) riskFlags.push('single-source');
-  if (novelty.isNewCategoryCandidate) riskFlags.push('new-category-claim');
-  if (accumulation.mentionCount <= 1) riskFlags.push('first-sighting');
+  if (
+    accumulation.sourceCount <= 1
+  ) {
+    riskFlags.push(
+      'single-source'
+    );
+  }
+
+  if (
+    novelty.isNewCategoryCandidate
+  ) {
+    riskFlags.push(
+      'new-category-claim'
+    );
+  }
+
+  if (
+    accumulation.mentionCount <= 1
+  ) {
+    riskFlags.push(
+      'first-sighting'
+    );
+  }
+
+  const evidenceScore =
+    calculateEvidenceScore(
+      evidence
+    );
+
+  const classificationScore =
+    calculateClassificationScore(
+      classificationHints
+    );
+
+  const maturityScore =
+    calculateMaturityScore(
+      classificationHints
+    );
+
+  const accumulationScore =
+    accumulation.mentionCount +
+    accumulation.sourceCount;
+
+  const totalScore =
+    evidenceScore +
+    classificationScore +
+    maturityScore +
+    accumulationScore;
 
   let confidence = 'low';
 
-  if (accumulation.mentionCount >= 3 && accumulation.sourceCount >= 2) {
+  if (totalScore >= 8) {
     confidence = 'medium';
   }
 
-  if (accumulation.mentionCount >= 5 && accumulation.sourceCount >= 3) {
+  if (totalScore >= 14) {
     confidence = 'high';
   }
 
   return {
     confidence,
+
+    trustScore:
+      totalScore,
+
+    scoreBreakdown: {
+      accumulationScore,
+      evidenceScore,
+      classificationScore,
+      maturityScore,
+    },
+
     riskFlags,
-    writeReady: confidence !== 'low',
-    needsMoreEvidence: confidence === 'low',
+
+    writeReady:
+      confidence !== 'low',
+
+    needsMoreEvidence:
+      confidence === 'low',
   };
 }
+/* ========================= */
 
-function buildRawSignal(input, index) {
-  const now = new Date().toISOString();
-  const source = normalizeSource(input);
-  const conceptKey = buildConceptKey(input, source);
-  const similarityGroup = buildSimilarityGroup(input);
+function buildRawSignal(
+  input,
+  index
+) {
+  const now =
+    new Date().toISOString();
+
+  const source =
+    normalizeSource(input);
+
+  const conceptKey =
+    buildConceptKey(
+      input,
+      source
+    );
+
+  const similarityGroup =
+    buildSimilarityGroup(input);
 
   /* =========================
      🔥 신규 연결
   ========================= */
   const classificationHints =
-    buildClassificationHints(input);
+    buildClassificationHints(
+      input
+    );
   /* ========================= */
 
   const rawSignal = {
     type: 'rawTrendSignal',
-    label: input.label || 'device-reviews',
+
+    label:
+      input.label ||
+      'device-reviews',
+
     mode: 'trend',
 
-    rawTitle: normalizeText(input.rawTitle),
-    rawName: normalizeText(input.rawName),
-    rawBrand: normalizeText(input.rawBrand),
-    rawSummary: normalizeText(input.rawSummary),
+    rawTitle:
+      normalizeText(
+        input.rawTitle
+      ),
+
+    rawName:
+      normalizeText(
+        input.rawName
+      ),
+
+    rawBrand:
+      normalizeText(
+        input.rawBrand
+      ),
+
+    rawSummary:
+      normalizeText(
+        input.rawSummary
+      ),
 
     source: {
       ...source,
       capturedAt: now,
     },
 
-    novelty: detectNovelty(input),
+    novelty:
+      detectNovelty(input),
 
-    /* =========================
-       🔥 기존 구조 대체 아님
-       classificationHints 자동 생성 연결
-    ========================= */
     classificationHints,
-    /* ========================= */
 
     evidence: {
-      keyFacts: Array.isArray(input.keyFacts) ? input.keyFacts : [],
-      useCases: Array.isArray(input.useCases) ? input.useCases : [],
-      unknowns: Array.isArray(input.unknowns) ? input.unknowns : [],
+      keyFacts:
+        Array.isArray(
+          input.keyFacts
+        )
+          ? input.keyFacts
+          : [],
+
+      useCases:
+        Array.isArray(
+          input.useCases
+        )
+          ? input.useCases
+          : [],
+
+      unknowns:
+        Array.isArray(
+          input.unknowns
+        )
+          ? input.unknowns
+          : [],
     },
 
     dedupe: {
-      normalizedName: normalizeKey(input.rawName),
+      normalizedName:
+        normalizeKey(
+          input.rawName
+        ),
+
       conceptKey,
+
       similarityGroup,
     },
 
     accumulation: {
       mentionCount: 1,
-      sourceCount: source.domain ? 1 : 0,
+
+      sourceCount:
+        source.domain
+          ? 1
+          : 0,
+
       firstSeenAt: now,
       lastSeenAt: now,
     },
 
     trust: {
       confidence: 'low',
-      riskFlags: ['new-signal'],
+      riskFlags: [
+        'new-signal'
+      ],
       writeReady: false,
       needsMoreEvidence: true,
     },
   };
 
-  rawSignal.fingerprint = buildFingerprint(rawSignal);
+  rawSignal.fingerprint =
+    buildFingerprint(rawSignal);
 
-  const nextAccumulation = updateAccumulation(index, rawSignal, now);
+  const nextAccumulation =
+    updateAccumulation(
+      index,
+      rawSignal,
+      now
+    );
 
-  rawSignal.accumulation = nextAccumulation;
-  rawSignal.trust = buildTrust(
-    nextAccumulation,
-    rawSignal.novelty
-  );
+  rawSignal.accumulation =
+    nextAccumulation;
+
+  rawSignal.trust =
+    buildTrust(
+      nextAccumulation,
+      rawSignal.novelty,
+      rawSignal.classificationHints,
+      rawSignal.evidence
+    );
 
   index.updatedAt = now;
 
@@ -358,33 +746,61 @@ function buildRawSignal(input, index) {
 }
 
 function main() {
-  console.log('[raw-signal] start');
+  console.log(
+    '[raw-signal] start'
+  );
 
-  const index = loadIndex();
+  const index =
+    loadIndex();
 
-  const domain = getCliValue('domain') || 'example.com';
+  const domain =
+    getCliValue(
+      'domain'
+    ) || 'example.com';
+
   const url =
     getCliValue('url') ||
     `https://${domain}/samsung-hologram-keyboard`;
 
   const sampleInput = {
-    rawTitle: 'Samsung introduces hologram keyboard',
-    rawName: 'Samsung Hologram Keyboard',
-    rawBrand: 'Samsung',
-    rawSummary: 'Wrist-worn holographic keyboard device',
+    rawTitle:
+      'Samsung introduces hologram keyboard',
+
+    rawName:
+      'Samsung Hologram Keyboard',
+
+    rawBrand:
+      'Samsung',
+
+    rawSummary:
+      'Wrist-worn holographic keyboard device',
 
     source: {
       url,
       domain,
-      sourceType: getCliValue('sourceType') || 'sample',
-      publishedAt: getCliValue('publishedAt') || '2026-05-05',
+
+      sourceType:
+        getCliValue(
+          'sourceType'
+        ) || 'sample',
+
+      publishedAt:
+        getCliValue(
+          'publishedAt'
+        ) || '2026-05-05',
     },
 
     novelty: {
-      type: 'new-category',
-      claim: 'new input device',
+      type:
+        'new-category',
+
+      claim:
+        'new input device',
+
       isNewCategoryCandidate: true,
-      timeSensitivity: 'high',
+
+      timeSensitivity:
+        'high',
     },
 
     productTypeWords: [
@@ -393,10 +809,17 @@ function main() {
       'wearable'
     ],
 
-    formFactor: 'wrist-worn',
-    interactionModel: 'holographic input',
-    inputMethod: 'finger tracking',
-    connectivity: 'bluetooth',
+    formFactor:
+      'wrist-worn',
+
+    interactionModel:
+      'holographic input',
+
+    inputMethod:
+      'finger tracking',
+
+    connectivity:
+      'bluetooth',
 
     keyFacts: [
       'hologram projection',
@@ -414,20 +837,56 @@ function main() {
     ],
   };
 
-  const signal = buildRawSignal(sampleInput, index);
+  const signal =
+    buildRawSignal(
+      sampleInput,
+      index
+    );
 
-  appendJsonl(OUT_FILE, signal);
-  writeJsonAtomic(INDEX_FILE, index);
+  appendJsonl(
+    OUT_FILE,
+    signal
+  );
 
-  console.log('[raw-signal] saved:', OUT_FILE);
-  console.log('[raw-signal] index:', INDEX_FILE);
-  console.log('[raw-signal] conceptKey:', signal.dedupe.conceptKey);
-  console.log('[raw-signal] mentionCount:', signal.accumulation.mentionCount);
-  console.log('[raw-signal] sourceCount:', signal.accumulation.sourceCount);
-  console.log('[raw-signal] confidence:', signal.trust.confidence);
+  writeJsonAtomic(
+    INDEX_FILE,
+    index
+  );
+
+  console.log(
+    '[raw-signal] saved:',
+    OUT_FILE
+  );
+
+  console.log(
+    '[raw-signal] index:',
+    INDEX_FILE
+  );
+
+  console.log(
+    '[raw-signal] conceptKey:',
+    signal.dedupe.conceptKey
+  );
+
+  console.log(
+    '[raw-signal] mentionCount:',
+    signal.accumulation.mentionCount
+  );
+
+  console.log(
+    '[raw-signal] sourceCount:',
+    signal.accumulation.sourceCount
+  );
+
+  console.log(
+    '[raw-signal] confidence:',
+    signal.trust.confidence
+  );
 }
 
-if (require.main === module) main();
+if (require.main === module) {
+  main();
+}
 
 module.exports = {
   buildRawSignal,
