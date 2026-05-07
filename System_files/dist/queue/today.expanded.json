@@ -1,46 +1,45 @@
 {
-  "date": "2026-05-06",
+  "date": "2026-05-07",
   "timezone": "Asia/Seoul",
   "cutoff": "10:00",
   "items": [
     {
-      "date": "2026-05-06",
+      "date": "2026-05-07",
       "label": "how-to-playbooks",
       "seedLabel": "how-to-playbooks",
       "requestedSlotLabel": "how-to-playbooks",
       "mode": "trend",
-      "id": "ht-tr-039",
-      "title": "How to set up AI study workflows for exams and research",
-      "angle": "Students rely on AI more than ever.",
-      "audience": "High school and university students",
+      "id": "ht-tr-040",
+      "title": "How to recover corrupted USB drives",
+      "angle": "USB corruption issues still produce millions of queries.",
+      "audience": "Students and office workers",
       "intent": "howto",
       "priority": 1,
       "notes": "",
-      "generatedSlug": "howto-20260506-001",
-      "postId": "06EZQJFDG0NS14X4DNXHQNED0P"
+      "generatedSlug": "howto-20260507-001",
+      "postId": "06F01WRJKC70RYF5Z423700FQN"
     },
     {
-      "date": "2026-05-06",
-      "label": "app-reviews",
-      "seedLabel": "app-reviews",
-      "requestedSlotLabel": "app-reviews",
+      "date": "2026-05-07",
+      "label": "subscription-services",
+      "seedLabel": "subscription-services",
+      "requestedSlotLabel": "subscription-services",
       "mode": "trend",
-      "id": "ar-tr-010",
-      "title": "Does This New Meditation App’s AI Coach Improve Focus?",
-      "angle": "Compare session personalization quality",
-      "audience": "Wellness seekers",
-      "intent": "review/effectiveness",
+      "id": "ss-tr-005",
+      "title": "Which VPN Just Updated Its Server Network?",
+      "angle": "Latency + streaming unlock performance",
+      "audience": "Privacy and travel users",
+      "intent": "review/network",
       "priority": 0,
       "notes": "",
       "reviewEntity": {
-        "type": "app",
-        "appName": "AI Meditation App",
-        "platform": "android"
+        "type": "subscription",
+        "service": "Vpn Services"
       },
-      "generatedSlug": "app-20260506-001",
-      "postId": "06EZQJFDGGV8ZPK9DT1VXRF3ES",
-      "reviewId": "06EZQJFDGMVK838K2TPPE0RJFR"
+      "generatedSlug": "subscription-20260507-001",
+      "postId": "06F01WRJM025HCK0TJ0XRE6V7D",
+      "reviewId": "06F01WRJM0KG56M2R8D8QVS9QS"
     }
   ],
-  "expandedAt": "2026-05-06T05:36:48.005Z"
+  "expandedAt": "2026-05-07T05:39:50.561Z"
 }

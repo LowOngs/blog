@@ -5,21 +5,6 @@
   },
   "trend": [
     {
-      "id": "ss-tr-005",
-      "title": "Which VPN Just Updated Its Server Network?",
-      "angle": "Latency + streaming unlock performance",
-      "audience": "Privacy and travel users",
-      "intent": "review/network",
-      "environment": "vpn services",
-      "timing": "network update",
-      "goal": "find fastest new routes",
-      "fingerprint": "fp1:74d33a70b21b44e0304c464d5d2246ddc1b1e47d",
-      "reviewEntity": {
-        "type": "subscription",
-        "service": "Vpn Services"
-      }
-    },
-    {
       "id": "ss-tr-006",
       "title": "Are New AI Photo Editors Worth Subscribing To?",
       "angle": "Model accuracy + export quality",

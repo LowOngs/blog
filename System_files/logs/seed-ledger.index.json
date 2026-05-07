@@ -1,6 +1,6 @@
 {
   "version": 4,
-  "updatedAt": "2026-05-06T05:36:48.173Z",
+  "updatedAt": "2026-05-07T05:39:50.730Z",
   "offsetByKey": {
     "slug:ledger_smoke": 0,
     "pid:page000012": 8226,
@@ -157,7 +157,13 @@
     "pid:page000054": 41180,
     "slug:app-20260506-001": 41180,
     "pid:page000055": 41511,
-    "slug:howto-20260506-001": 41511
+    "slug:howto-20260506-001": 41511,
+    "fp:fp1:3348821e3c5407bb66c27485a4cb398c25bd567c": 41849,
+    "fp:fp1:74d33a70b21b44e0304c464d5d2246ddc1b1e47d": 42266,
+    "pid:page000056": 42688,
+    "slug:howto-20260507-001": 42688,
+    "pid:page000057": 43026,
+    "slug:subscription-20260507-001": 43026
   },
   "alias": {
     "slug:app-20260109-001": "pid:page000012",
@@ -216,6 +222,8 @@
     "slug:device-20260505-001": "pid:page000052",
     "slug:howto-20260505-001": "pid:page000053",
     "slug:app-20260506-001": "pid:page000054",
-    "slug:howto-20260506-001": "pid:page000055"
+    "slug:howto-20260506-001": "pid:page000055",
+    "slug:howto-20260507-001": "pid:page000056",
+    "slug:subscription-20260507-001": "pid:page000057"
   }
 }

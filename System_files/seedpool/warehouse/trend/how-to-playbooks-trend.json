@@ -5,15 +5,6 @@
   },
   "trend": [
     {
-      "id": "ht-tr-040",
-      "title": "How to recover corrupted USB drives",
-      "angle": "USB corruption issues still produce millions of queries.",
-      "audience": "Students and office workers",
-      "intent": "howto",
-      "priority": 1,
-      "fingerprint": "fp1:3348821e3c5407bb66c27485a4cb398c25bd567c"
-    },
-    {
       "id": "ht-tr-041",
       "title": "How to set up multi-cloud sync between iCloud, Google Drive, and Dropbox",
       "angle": "Hybrid cloud workflows increase each year.",
