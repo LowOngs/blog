@@ -423,17 +423,6 @@ function calculateEvidenceScore(
     );
   }
 
-  if (
-    Array.isArray(
-      evidence.unknowns
-    )
-  ) {
-    score -= Math.min(
-      evidence.unknowns.length,
-      3
-    );
-  }
-
   return score;
 }
 
@@ -505,6 +494,41 @@ function calculateMaturityScore(
   return score;
 }
 
+function collectEvidenceRiskFlags(
+  evidence
+) {
+  const flags = [];
+
+  const unknownCount =
+    Array.isArray(evidence.unknowns)
+      ? evidence.unknowns.length
+      : 0;
+
+  const keyFactCount =
+    Array.isArray(evidence.keyFacts)
+      ? evidence.keyFacts.length
+      : 0;
+
+  const useCaseCount =
+    Array.isArray(evidence.useCases)
+      ? evidence.useCases.length
+      : 0;
+
+  if (unknownCount > 0) {
+    flags.push('evidence-unknowns');
+  }
+
+  if (keyFactCount === 0) {
+    flags.push('no-key-facts');
+  }
+
+  if (useCaseCount === 0) {
+    flags.push('no-use-cases');
+  }
+
+  return flags;
+}
+
 function buildTrust(
   accumulation,
   novelty,
@@ -535,6 +559,16 @@ function buildTrust(
     riskFlags.push(
       'first-sighting'
     );
+  }
+
+  for (
+    const flag of collectEvidenceRiskFlags(
+      evidence
+    )
+  ) {
+    if (!riskFlags.includes(flag)) {
+      riskFlags.push(flag);
+    }
   }
 
   const evidenceScore =
