@@ -1,38 +1,39 @@
 {
-  "date": "2026-05-07",
+  "date": "2026-05-08",
   "timezone": "Asia/Seoul",
   "cutoff": "10:00",
   "items": [
     {
-      "date": "2026-05-07",
+      "date": "2026-05-08",
       "label": "how-to-playbooks",
       "seedLabel": "how-to-playbooks",
       "requestedSlotLabel": "how-to-playbooks",
       "mode": "trend",
-      "id": "ht-tr-040",
-      "title": "How to recover corrupted USB drives",
-      "angle": "USB corruption issues still produce millions of queries.",
-      "audience": "Students and office workers",
+      "id": "ht-tr-041",
+      "title": "How to set up multi-cloud sync between iCloud, Google Drive, and Dropbox",
+      "angle": "Hybrid cloud workflows increase each year.",
+      "audience": "Productivity power-users",
       "intent": "howto",
       "priority": 1,
       "notes": ""
     },
     {
-      "date": "2026-05-07",
-      "label": "subscription-services",
-      "seedLabel": "subscription-services",
-      "requestedSlotLabel": "subscription-services",
+      "date": "2026-05-08",
+      "label": "app-reviews",
+      "seedLabel": "app-reviews",
+      "requestedSlotLabel": "app-reviews",
       "mode": "trend",
-      "id": "ss-tr-005",
-      "title": "Which VPN Just Updated Its Server Network?",
-      "angle": "Latency + streaming unlock performance",
-      "audience": "Privacy and travel users",
-      "intent": "review/network",
+      "id": "ar-tr-011",
+      "title": "The Most Viral Note App—Can It Replace Your Current Tool?",
+      "angle": "Check multi-device sync + offline reliability",
+      "audience": "Students and knowledge workers",
+      "intent": "review/replacement-check",
       "priority": 0,
       "notes": "",
       "reviewEntity": {
-        "type": "subscription",
-        "service": "Vpn Services"
+        "type": "app",
+        "appName": "Note App",
+        "platform": "android"
       }
     }
   ]

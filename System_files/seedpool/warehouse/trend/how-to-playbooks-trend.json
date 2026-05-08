@@ -5,15 +5,6 @@
   },
   "trend": [
     {
-      "id": "ht-tr-041",
-      "title": "How to set up multi-cloud sync between iCloud, Google Drive, and Dropbox",
-      "angle": "Hybrid cloud workflows increase each year.",
-      "audience": "Productivity power-users",
-      "intent": "howto",
-      "priority": 1,
-      "fingerprint": "fp1:982537b53d8c806152b11407fcb188316e6bf3f4"
-    },
-    {
       "id": "ht-tr-042",
       "title": "How to troubleshoot Apple ID payment failures",
       "angle": "Payment issues spike during subscription renewals.",

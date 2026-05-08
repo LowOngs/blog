@@ -5,21 +5,6 @@
   },
   "trend": [
     {
-      "id": "ar-tr-011",
-      "title": "The Most Viral Note App—Can It Replace Your Current Tool?",
-      "angle": "Check multi-device sync + offline reliability",
-      "audience": "Students and knowledge workers",
-      "intent": "review/replacement-check",
-      "environment": "note taking",
-      "timing": "trend",
-      "goal": "determine if switching is worth migration cost",
-      "reviewEntity": {
-        "type": "app",
-        "appName": "Note App",
-        "platform": "android"
-      }
-    },
-    {
       "id": "ar-tr-012",
       "title": "Which AI Scanner App Captures Documents Most Accurately?",
       "angle": "OCR error rate + export fidelity",
