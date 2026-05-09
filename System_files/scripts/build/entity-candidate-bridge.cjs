@@ -22,6 +22,7 @@
  * - entity-candidate-policy.cjs 수정 금지
  * - validate-entity-candidates.cjs 수정 금지
  * - 이 파일은 연결/변환 계층만 담당
+ * - conceptKey / fingerprint / classificationHints / trust가 없는 구버전 raw signal은 후보 생성 대상에서 제외
  */
 
 const fs = require('fs');
@@ -151,17 +152,53 @@ function getTrustScore(signal) {
   return Number.isFinite(value) ? value : 0;
 }
 
+function hasModernRawSignalShape(signal) {
+  if (!signal || typeof signal !== 'object') {
+    return false;
+  }
+
+  if (signal.type !== 'rawTrendSignal') {
+    return false;
+  }
+
+  if (signal.label !== 'device-reviews') {
+    return false;
+  }
+
+  if (!normalizeText(signal.fingerprint)) {
+    return false;
+  }
+
+  if (!getRawConceptKey(signal)) {
+    return false;
+  }
+
+  if (
+    !signal.classificationHints ||
+    typeof signal.classificationHints !== 'object'
+  ) {
+    return false;
+  }
+
+  if (
+    !signal.trust ||
+    typeof signal.trust !== 'object'
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
 function dedupeSignalsByConceptKey(signals) {
   const byConceptKey = new Map();
-  const unknownSignals = [];
 
   for (const signal of signals) {
-    const conceptKey = getRawConceptKey(signal);
-
-    if (!conceptKey) {
-      unknownSignals.push(signal);
+    if (!hasModernRawSignalShape(signal)) {
       continue;
     }
+
+    const conceptKey = getRawConceptKey(signal);
 
     const prev = byConceptKey.get(conceptKey);
 
@@ -188,16 +225,12 @@ function dedupeSignalsByConceptKey(signals) {
     }
   }
 
-  return [
-    ...Array.from(byConceptKey.values()),
-    ...unknownSignals,
-  ];
+  return Array.from(byConceptKey.values());
 }
 
 function getLatestSignals(signals, limit) {
   const clean = signals
-    .filter((signal) => signal.type === 'rawTrendSignal')
-    .filter((signal) => signal.label === 'device-reviews')
+    .filter(hasModernRawSignalShape)
     .sort((a, b) => {
       const at = getCapturedAt(a);
       const bt = getCapturedAt(b);
@@ -402,6 +435,10 @@ function buildCandidatesFromSignals(signals) {
   const candidates = [];
 
   for (const signal of signals) {
+    if (!hasModernRawSignalShape(signal)) {
+      continue;
+    }
+
     const input = rawSignalToCandidateInput(signal);
     const candidate = buildEntityCandidate(input);
     const patched = patchCandidateFromClassificationHints(
@@ -489,13 +526,24 @@ function main() {
   const validation = processCandidates(candidates);
   const rows = flattenValidationResult(validation);
 
+  const skippedSignals = signals
+    .filter((signal) => signal && signal.type === 'rawTrendSignal')
+    .length - getLatestSignals(signals, 0).length;
+
   const output = {
     generatedAt: new Date().toISOString(),
     source: {
       rawSignalFile: RAW_SIGNAL_FILE,
       picked: pickedSignals.length,
       totalSignals: signals.length,
+      skippedOldSchema: skippedSignals > 0 ? skippedSignals : 0,
       dedupe: 'conceptKey',
+      requiredShape: [
+        'fingerprint',
+        'dedupe.conceptKey',
+        'classificationHints',
+        'trust',
+      ],
     },
     summary: validation.summary || {
       total: candidates.length,
@@ -513,6 +561,7 @@ function main() {
 
   console.log('[entity-bridge] picked signals =', pickedSignals.length);
   console.log('[entity-bridge] candidates     =', candidates.length);
+  console.log('[entity-bridge] skipped old    =', output.source.skippedOldSchema);
   console.log('[entity-bridge] summary        =', JSON.stringify(output.summary));
   console.log('[entity-bridge] saved:', OUT_JSON);
   console.log('[entity-bridge] saved:', OUT_JSONL);
@@ -529,4 +578,5 @@ module.exports = {
   readJsonlSafe,
   dedupeSignalsByConceptKey,
   patchCandidateFromClassificationHints,
+  hasModernRawSignalShape,
 };
