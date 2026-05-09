@@ -292,10 +292,19 @@ function buildQueueItem(seed, index, queueDate, cutoff) {
       label,
       mode: 'trend',
       intent,
-      sourceLayer: 'trend-seed-builder',
-      upstreamSourceLayer: normalizeText(
-        seed.seedMeta && seed.seedMeta.sourceLayer
-      ),
+      
+sourceLayer:
+  normalizeText(
+    seed.seedMeta &&
+    seed.seedMeta.sourceLayer
+  ) || 'entity-candidate-bridge',
+
+queueBuilderLayer:
+  'trend-seed-to-queue',
+
+trendBuilderLayer:
+  'trend-seed-builder',
+      
       trendSeedSchemaVersion: normalizeText(seed.schemaVersion),
       rawConceptKey: normalizeText(
         seed.selectionMeta && seed.selectionMeta.rawConceptKey
