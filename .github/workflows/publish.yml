@@ -145,7 +145,23 @@ jobs:
           test -f ./System_files/scripts/build/copy-tools.cjs
           test -f ./System_files/scripts/build/build-trust-page.cjs
           test -f ./System_files/scripts/publish/blogger.cjs
+
+          test -f ./System_files/scripts/build/raw-signal-collector.cjs
+          test -f ./System_files/scripts/build/lib/classification-hints-policy.cjs
+          test -f ./System_files/scripts/build/entity-candidate-bridge.cjs
+          test -f ./System_files/scripts/build/validate-entity-candidates.cjs
+          test -f ./System_files/scripts/build/trend-seed-builder.cjs
+          test -f ./System_files/scripts/build/trend-seed-injector.cjs
+          test -f ./System_files/scripts/build/trend-seed-to-queue.cjs
+
           test -d "${POST_ARCHIVE_ROOT}"
+
+      - name: Build trend signal + seed + queue
+        run: |
+          npm run trend:bridge
+          npm run trend:seed:build
+          npm run trend:seed:inject
+          npm run trend:queue
 
       - name: Build queue + ids + body + content
         run: |
