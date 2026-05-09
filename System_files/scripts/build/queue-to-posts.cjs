@@ -713,22 +713,36 @@ for (let i = 0; i < items.length; i++) {
             .rawFingerprint
         ) || null,
 
-      sourceLayer:
-        normalizeText(
-          item.seedMeta &&
-          item.seedMeta
-            .sourceLayer
-        ) ||
-        'entity-candidate-bridge',
+sourceLayer:
+  normalizeText(
+    item.seedMeta &&
+    item.seedMeta
+      .sourceLayer
+  ) ||
+  'entity-candidate-bridge',
 
-      trendContext:
-        item.seedMeta &&
-        item.seedMeta
-          .trendContext
-          ? item.seedMeta
-              .trendContext
-          : null,
+trendBuilderLayer:
+  normalizeText(
+    item.seedMeta &&
+    item.seedMeta
+      .trendBuilderLayer
+  ) || null,
 
+queueBuilderLayer:
+  normalizeText(
+    item.seedMeta &&
+    item.seedMeta
+      .queueBuilderLayer
+  ) || null,
+
+trendContext:
+  item.seedMeta &&
+  item.seedMeta
+    .trendContext
+    ? item.seedMeta
+        .trendContext
+    : null,
+ 
       entity,
 
       postId,
