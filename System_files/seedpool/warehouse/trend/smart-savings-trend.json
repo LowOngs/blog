@@ -5,15 +5,6 @@
   },
   "trend": [
     {
-      "id": "ss-tr-022",
-      "title": "2025 Cloud Gaming Costs: Best Value Options",
-      "angle": "Cloud gaming pricing stabilized in 2025.",
-      "audience": "Gamers",
-      "intent": "saving",
-      "priority": 1,
-      "fingerprint": "fp1:245bc5834e4680770320393c06cc10d12598d51a"
-    },
-    {
       "id": "ss-tr-023",
       "title": "How to Optimize Credit Card Rewards for Digital Purchases",
       "angle": "Digital-first spending patterns changed reward systems.",
