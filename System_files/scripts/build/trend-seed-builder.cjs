@@ -7,6 +7,7 @@
  * - raw trend signal → seed 생성
  * - entity-candidate-bridge 출력 계약(entity-candidates.json)을 읽어 trend seed 생성
  * - trendReadyCandidates / passOnly 기반으로 pass 후보만 seed 생성
+ * - pass 후보 기반으로 실제 글 생성 가능한 trend seed 구조를 안정화한다.
  */
 
 const fs = require('fs');
@@ -35,6 +36,8 @@ const OUT_JSON = path.join(
   'trend-seeds.json'
 );
 
+const TREND_SEED_SCHEMA_VERSION = 'trend-seeds.v1';
+
 const INTENTS = [
   'review/update',
   'review/recheck',
@@ -49,7 +52,7 @@ function pickIntent(index) {
 }
 
 function normalizeText(v) {
-  return String(v || '').trim();
+  return String(v || '').replace(/\s+/g, ' ').trim();
 }
 
 function ensureDir(p) {
@@ -82,6 +85,26 @@ function writeJsonPretty(file, data) {
   );
 }
 
+function uniqueArray(values) {
+  const out = [];
+  const seen = new Set();
+
+  for (const value of values || []) {
+    const text = normalizeText(value);
+
+    if (!text) continue;
+
+    const key = text.toLowerCase();
+
+    if (seen.has(key)) continue;
+
+    seen.add(key);
+    out.push(text);
+  }
+
+  return out;
+}
+
 function buildTrendContext(signal, index) {
   const month = String((index % 12) + 1).padStart(2, '0');
 
@@ -97,6 +120,7 @@ function buildTrendContextFromCandidate(candidate, index) {
   const existing = candidate.trendContext || {};
   const rawSignalContext = candidate.rawSignalContext || {};
   const noveltyType = normalizeText(rawSignalContext.noveltyType);
+  const evidence = candidate.evidence || rawSignalContext.evidence || {};
   const month = String((index % 12) + 1).padStart(2, '0');
 
   return {
@@ -118,7 +142,10 @@ function buildTrendContextFromCandidate(candidate, index) {
       existing.historicalValue !== false,
 
     sourceType: 'entity-candidate-bridge',
-    candidateReady: true
+    candidateReady: true,
+    evidenceUnknowns: Array.isArray(evidence.unknowns)
+      ? evidence.unknowns
+      : []
   };
 }
 
@@ -136,11 +163,15 @@ function buildDecisionSummary(entityName, reason) {
 
 function buildFingerprint(seed) {
   const src = [
+    seed.schemaVersion,
     seed.title,
     seed.intent,
     seed.entity.name,
+    seed.angle,
+    seed.audience,
     seed.trendContext.contextDate,
-    seed.trendContext.changeReason
+    seed.trendContext.changeReason,
+    seed.selectionMeta.rawConceptKey
   ].join('|');
 
   return 'fp1:' + crypto.createHash('sha1').update(src).digest('hex');
@@ -156,6 +187,153 @@ function buildTitle(intent, name, reason) {
   return `Should you recheck ${name}?`;
 }
 
+function buildAngle(intent, entityName, reason, classificationHints) {
+  const categoryHints = classificationHints.categoryHints || {};
+  const interactionHints = classificationHints.interactionHints || {};
+
+  const emergingCategory = normalizeText(categoryHints.emergingCategory);
+  const interactionModel = normalizeText(interactionHints.interactionModel);
+
+  if (intent === 'review/update') {
+    return `Explain what changed around ${entityName} and why the ${reason} matters for current users.`;
+  }
+
+  if (intent === 'review/recheck') {
+    return `Recheck ${entityName} as a current decision item, focusing on whether ${reason} changes the original recommendation.`;
+  }
+
+  if (intent === 'review/compare-now') {
+    return `Compare ${entityName} against current alternatives, especially where ${interactionModel || emergingCategory || 'the new device model'} changes user expectations.`;
+  }
+
+  if (intent === 'review/still-worth') {
+    return `Judge whether ${entityName} is still worth considering after ${reason}, with attention to practical usage risk.`;
+  }
+
+  if (intent === 'review/switch-or-keep') {
+    return `Help users decide whether to keep watching ${entityName} or move toward a safer alternative.`;
+  }
+
+  if (intent === 'review/risk-watch') {
+    return `Identify the main risks users should verify before trusting ${entityName} as a new device category.`;
+  }
+
+  return `Review ${entityName} as a time-stamped device decision record.`;
+}
+
+function buildAudience(entity, classificationHints) {
+  const categoryHints = classificationHints.categoryHints || {};
+  const interactionHints = classificationHints.interactionHints || {};
+  const hardwareHints = classificationHints.hardwareHints || {};
+
+  const primaryCategory = normalizeText(categoryHints.primaryCategory);
+  const interactionModel = normalizeText(interactionHints.interactionModel);
+
+  if (hardwareHints.wearable && primaryCategory === 'input-device') {
+    return 'users considering wearable input devices for mobile or portable workflows';
+  }
+
+  if (interactionModel.includes('holographic')) {
+    return 'users evaluating holographic or projection-based device interactions';
+  }
+
+  if (interactionModel.includes('gesture')) {
+    return 'users considering gesture-based control devices';
+  }
+
+  if (primaryCategory) {
+    return `users comparing ${primaryCategory} options before making a practical device decision`;
+  }
+
+  return `users evaluating whether ${entity.name} is worth attention`;
+}
+
+function buildGoal(intent, entityName, reason) {
+  if (intent === 'review/update') {
+    return `record what changed in ${entityName} and explain whether ${reason} changes the recommendation`;
+  }
+
+  if (intent === 'review/recheck') {
+    return `decide whether ${entityName} deserves a fresh look after ${reason}`;
+  }
+
+  if (intent === 'review/compare-now') {
+    return `compare ${entityName} with current alternatives after ${reason}`;
+  }
+
+  if (intent === 'review/still-worth') {
+    return `decide whether ${entityName} is still worth considering after ${reason}`;
+  }
+
+  if (intent === 'review/switch-or-keep') {
+    return `decide whether users should keep watching ${entityName} or consider alternatives`;
+  }
+
+  if (intent === 'review/risk-watch') {
+    return `identify the main risks and unknowns around ${entityName}`;
+  }
+
+  return `evaluate ${entityName} after ${reason}`;
+}
+
+function normalizeKeyPoints(candidate, classificationHints, evidence, trendContext) {
+  const categoryHints = classificationHints.categoryHints || {};
+  const interactionHints = classificationHints.interactionHints || {};
+  const hardwareHints = classificationHints.hardwareHints || {};
+  const ecosystemHints = classificationHints.ecosystemHints || {};
+
+  const base = Array.isArray(candidate.keyPoints)
+    ? candidate.keyPoints
+    : [];
+
+  const evidenceFacts = Array.isArray(evidence.keyFacts)
+    ? evidence.keyFacts
+    : [];
+
+  const useCases = Array.isArray(evidence.useCases)
+    ? evidence.useCases
+    : [];
+
+  const unknowns = Array.isArray(evidence.unknowns)
+    ? evidence.unknowns
+    : [];
+
+  const generated = [
+    categoryHints.emergingCategory
+      ? `emerging category: ${categoryHints.emergingCategory}`
+      : '',
+
+    interactionHints.interactionModel
+      ? `interaction model: ${interactionHints.interactionModel}`
+      : '',
+
+    interactionHints.inputMethod
+      ? `input method: ${interactionHints.inputMethod}`
+      : '',
+
+    hardwareHints.requiresProjection
+      ? 'requires projection or holographic output'
+      : '',
+
+    ecosystemHints.dependencyType
+      ? `ecosystem dependency: ${ecosystemHints.dependencyType}`
+      : '',
+
+    trendContext.changeReason
+      ? `decision trigger: ${trendContext.changeReason}`
+      : '',
+
+    ...evidenceFacts.map((item) => `evidence: ${item}`),
+    ...useCases.map((item) => `use case: ${item}`),
+    ...unknowns.map((item) => `unknown to verify: ${item}`)
+  ];
+
+  return uniqueArray([
+    ...base,
+    ...generated
+  ]).slice(0, 12);
+}
+
 function buildSeedFromCandidate(candidate, signal, index) {
   const intent = pickIntent(index);
   const entity = candidate.entity;
@@ -164,10 +342,15 @@ function buildSeedFromCandidate(candidate, signal, index) {
   const decisionType = buildDecisionType(intent);
 
   const seed = {
+    schemaVersion: TREND_SEED_SCHEMA_VERSION,
+    label: 'device-reviews',
+    mode: 'trend',
     entity,
     reviewEntity: entity,
     intent,
     title: buildTitle(intent, entity.name, trendContext.changeReason),
+    angle: `Review ${entity.name} as a time-stamped trend decision after ${trendContext.changeReason}.`,
+    audience: `users evaluating whether ${entity.name} deserves attention now`,
     goal: `evaluate ${entity.name} after ${trendContext.changeReason}`,
     decisionType,
     decisionSummary: buildDecisionSummary(entity.name, trendContext.changeReason),
@@ -206,25 +389,56 @@ function buildSeedFromReadyCandidate(candidate, index) {
 
   const trendContext = buildTrendContextFromCandidate(candidate, index);
   const decisionType = buildDecisionType(intent);
+  const angle = buildAngle(
+    intent,
+    entity.name,
+    trendContext.changeReason,
+    classificationHints
+  );
+  const audience = buildAudience(entity, classificationHints);
+  const goal = buildGoal(
+    intent,
+    entity.name,
+    trendContext.changeReason
+  );
+  const keyPoints = normalizeKeyPoints(
+    candidate,
+    classificationHints,
+    evidence,
+    trendContext
+  );
 
   const seed = {
+    schemaVersion: TREND_SEED_SCHEMA_VERSION,
+    label: normalizeText(candidate.label) || 'device-reviews',
+    mode: normalizeText(candidate.mode) || 'trend',
+
     entity,
     reviewEntity: entity,
+
     intent,
     title: buildTitle(intent, entity.name, trendContext.changeReason),
-    goal: `evaluate ${entity.name} after ${trendContext.changeReason}`,
+    angle,
+    audience,
+    goal,
     decisionType,
     decisionSummary: buildDecisionSummary(entity.name, trendContext.changeReason),
-    keyPoints: Array.isArray(candidate.keyPoints) ? candidate.keyPoints : [],
+    keyPoints,
     trendContext,
+
     selectionCriteria: {
       trend: true,
       entityDistributed: true,
       entityCandidateValidated: true,
       bridgeOutputContract: true,
       trustReady: normalizeText(sourceTrace.trustConfidence) !== 'low',
-      sourceTraceRequired: true
+      sourceTraceRequired: true,
+      hasAngle: !!angle,
+      hasAudience: !!audience,
+      hasEvidence: Array.isArray(evidence.keyFacts) && evidence.keyFacts.length > 0,
+      hasUseCase: Array.isArray(evidence.useCases) && evidence.useCases.length > 0
     },
+
     selectionMeta: {
       source: 'trend-seed-builder',
       inputSource: 'entity-candidates.json',
@@ -242,6 +456,7 @@ function buildSeedFromReadyCandidate(candidate, index) {
       validationReason: normalizeText(validation.reason),
       createdAt: new Date().toISOString()
     },
+
     seedMeta: {
       sourceLayer: 'entity-candidate-bridge',
       candidateType: normalizeText(candidate.type),
@@ -354,7 +569,7 @@ function main() {
   );
 
   const output = {
-    schemaVersion: 'trend-seeds.v1',
+    schemaVersion: TREND_SEED_SCHEMA_VERSION,
     generatedAt: new Date().toISOString(),
     sourceFile: result.sourceFile,
     summary: result.summary,
@@ -376,5 +591,8 @@ module.exports = {
   buildTrendSeeds,
   buildTrendSeedsFromEntityCandidatesData,
   buildTrendSeedsFromEntityCandidatesFile,
-  buildSeedFromReadyCandidate
+  buildSeedFromReadyCandidate,
+  buildAngle,
+  buildAudience,
+  normalizeKeyPoints
 };
