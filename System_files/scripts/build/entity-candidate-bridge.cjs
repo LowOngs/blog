@@ -126,26 +126,98 @@ function normalizeArray(value) {
     .filter(Boolean);
 }
 
+function getRawConceptKey(signal) {
+  return normalizeText(
+    signal &&
+    signal.dedupe &&
+    signal.dedupe.conceptKey
+  );
+}
+
+function getCapturedAt(signal) {
+  return normalizeText(
+    signal &&
+    signal.source &&
+    signal.source.capturedAt
+  );
+}
+
+function getTrustScore(signal) {
+  const value =
+    signal &&
+    signal.trust &&
+    Number(signal.trust.trustScore);
+
+  return Number.isFinite(value) ? value : 0;
+}
+
+function dedupeSignalsByConceptKey(signals) {
+  const byConceptKey = new Map();
+  const unknownSignals = [];
+
+  for (const signal of signals) {
+    const conceptKey = getRawConceptKey(signal);
+
+    if (!conceptKey) {
+      unknownSignals.push(signal);
+      continue;
+    }
+
+    const prev = byConceptKey.get(conceptKey);
+
+    if (!prev) {
+      byConceptKey.set(conceptKey, signal);
+      continue;
+    }
+
+    const prevScore = getTrustScore(prev);
+    const nextScore = getTrustScore(signal);
+
+    if (nextScore > prevScore) {
+      byConceptKey.set(conceptKey, signal);
+      continue;
+    }
+
+    if (nextScore === prevScore) {
+      const prevCapturedAt = getCapturedAt(prev);
+      const nextCapturedAt = getCapturedAt(signal);
+
+      if (nextCapturedAt > prevCapturedAt) {
+        byConceptKey.set(conceptKey, signal);
+      }
+    }
+  }
+
+  return [
+    ...Array.from(byConceptKey.values()),
+    ...unknownSignals,
+  ];
+}
+
 function getLatestSignals(signals, limit) {
   const clean = signals
     .filter((signal) => signal.type === 'rawTrendSignal')
     .filter((signal) => signal.label === 'device-reviews')
     .sort((a, b) => {
-      const at = normalizeText(
-        a.source && a.source.capturedAt
-      );
-      const bt = normalizeText(
-        b.source && b.source.capturedAt
-      );
+      const at = getCapturedAt(a);
+      const bt = getCapturedAt(b);
+
+      return bt.localeCompare(at);
+    });
+
+  const deduped = dedupeSignalsByConceptKey(clean)
+    .sort((a, b) => {
+      const at = getCapturedAt(a);
+      const bt = getCapturedAt(b);
 
       return bt.localeCompare(at);
     });
 
   if (!limit || limit <= 0) {
-    return clean;
+    return deduped;
   }
 
-  return clean.slice(0, limit);
+  return deduped.slice(0, limit);
 }
 
 function buildSummaryText(signal) {
@@ -224,6 +296,64 @@ function rawSignalToCandidateInput(signal) {
   };
 }
 
+function patchCandidateFromClassificationHints(candidate, signal) {
+  const cloned = JSON.parse(JSON.stringify(candidate));
+  const hints = signal.classificationHints || {};
+  const interactionHints = hints.interactionHints || {};
+  const categoryHints = hints.categoryHints || {};
+
+  if (!cloned.entity || typeof cloned.entity !== 'object') {
+    cloned.entity = {};
+  }
+
+  const inferredInteractionModel = normalizeText(
+    interactionHints.interactionModel
+  );
+
+  if (
+    inferredInteractionModel &&
+    (
+      !cloned.entity.interactionModel ||
+      cloned.entity.interactionModel === 'unknown'
+    )
+  ) {
+    cloned.entity.interactionModel = inferredInteractionModel;
+  }
+
+  const inferredDeviceClass = normalizeText(
+    categoryHints.emergingCategory ||
+    categoryHints.secondaryCategory ||
+    categoryHints.primaryCategory
+  );
+
+  if (
+    inferredDeviceClass &&
+    (
+      !cloned.entity.deviceClass ||
+      cloned.entity.deviceClass === 'unknown-device-class'
+    )
+  ) {
+    cloned.entity.deviceClass = inferredDeviceClass;
+  }
+
+  if (
+    cloned.classification &&
+    typeof cloned.classification === 'object'
+  ) {
+    if (inferredInteractionModel) {
+      cloned.classification.inferredInteractionModel =
+        inferredInteractionModel;
+    }
+
+    if (inferredDeviceClass) {
+      cloned.classification.inferredDeviceClass =
+        inferredDeviceClass;
+    }
+  }
+
+  return cloned;
+}
+
 function attachSourceTrace(candidate, signal) {
   const cloned = JSON.parse(JSON.stringify(candidate));
 
@@ -274,7 +404,11 @@ function buildCandidatesFromSignals(signals) {
   for (const signal of signals) {
     const input = rawSignalToCandidateInput(signal);
     const candidate = buildEntityCandidate(input);
-    const traced = attachSourceTrace(candidate, signal);
+    const patched = patchCandidateFromClassificationHints(
+      candidate,
+      signal
+    );
+    const traced = attachSourceTrace(patched, signal);
 
     candidates.push(traced);
   }
@@ -361,6 +495,7 @@ function main() {
       rawSignalFile: RAW_SIGNAL_FILE,
       picked: pickedSignals.length,
       totalSignals: signals.length,
+      dedupe: 'conceptKey',
     },
     summary: validation.summary || {
       total: candidates.length,
@@ -392,4 +527,6 @@ module.exports = {
   rawSignalToCandidateInput,
   buildCandidatesFromSignals,
   readJsonlSafe,
+  dedupeSignalsByConceptKey,
+  patchCandidateFromClassificationHints,
 };
