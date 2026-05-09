@@ -9,6 +9,7 @@
  * - raw signal + classificationHints를 entity-candidate-policy 입력 형태로 변환한다.
  * - buildEntityCandidate()로 entity 후보를 생성한다.
  * - validate-entity-candidates.cjs의 processCandidates()로 pass / hold / reject를 분리한다.
+ * - trend-seed-builder가 직접 읽을 수 있는 passOnly / latestPassCandidates / trendReadyCandidates 출력 계약을 제공한다.
  *
  * 입력:
  * - System_files/logs/raw-signals/raw-signals.jsonl
@@ -59,6 +60,8 @@ const OUT_JSONL = path.join(
   OUT_DIR,
   'entity-candidates.jsonl'
 );
+
+const OUTPUT_SCHEMA_VERSION = 'entity-candidates.v1';
 
 function ensureDir(p) {
   if (!fs.existsSync(p)) {
@@ -505,6 +508,88 @@ function flattenValidationResult(result) {
   return rows;
 }
 
+function pickLatestPassCandidates(passList, limit) {
+  const arr = Array.isArray(passList) ? passList : [];
+
+  const sorted = arr
+    .slice()
+    .sort((a, b) => {
+      const at = normalizeText(
+        a.sourceTrace && a.sourceTrace.capturedAt
+      );
+      const bt = normalizeText(
+        b.sourceTrace && b.sourceTrace.capturedAt
+      );
+
+      return bt.localeCompare(at);
+    });
+
+  if (!limit || limit <= 0) {
+    return sorted;
+  }
+
+  return sorted.slice(0, limit);
+}
+
+function buildTrendReadyCandidate(candidate) {
+  const entity = candidate.entity || {};
+  const sourceTrace = candidate.sourceTrace || {};
+  const rawSignalContext = candidate.rawSignalContext || {};
+  const classificationHints = rawSignalContext.classificationHints || {};
+  const evidence = rawSignalContext.evidence || {};
+  const trust = rawSignalContext.trust || {};
+  const validation = candidate.validation || {};
+
+  return {
+    type: 'trendReadyEntityCandidate',
+    schemaVersion: OUTPUT_SCHEMA_VERSION,
+    status: 'ready',
+    label: 'device-reviews',
+    mode: 'trend',
+
+    entity,
+    keyPoints: Array.isArray(candidate.keyPoints)
+      ? candidate.keyPoints
+      : [],
+
+    trendContext: candidate.trendContext || {},
+
+    sourceTrace: {
+      rawFingerprint: normalizeText(sourceTrace.rawFingerprint),
+      rawConceptKey: normalizeText(sourceTrace.rawConceptKey),
+      rawSimilarityGroup: normalizeText(sourceTrace.rawSimilarityGroup),
+      capturedAt: normalizeText(sourceTrace.capturedAt),
+      sourceDomain: normalizeText(sourceTrace.sourceDomain),
+      trustConfidence: normalizeText(sourceTrace.trustConfidence),
+      trustScore:
+        Number.isFinite(Number(sourceTrace.trustScore))
+          ? Number(sourceTrace.trustScore)
+          : null,
+    },
+
+    classificationHints,
+    evidence,
+    trust,
+
+    validation: {
+      status: normalizeText(validation.status),
+      reason: normalizeText(validation.reason),
+      errors: Array.isArray(validation.errors)
+        ? validation.errors
+        : [],
+    },
+  };
+}
+
+function buildTrendReadyCandidates(passList) {
+  return (Array.isArray(passList) ? passList : [])
+    .filter((item) => {
+      const validation = item.validation || {};
+      return validation.status === 'pass';
+    })
+    .map(buildTrendReadyCandidate);
+}
+
 function main() {
   const limit = Math.max(
     1,
@@ -530,8 +615,22 @@ function main() {
     .filter((signal) => signal && signal.type === 'rawTrendSignal')
     .length - getLatestSignals(signals, 0).length;
 
+  const now = new Date().toISOString();
+  const passOnly = Array.isArray(validation.pass)
+    ? validation.pass
+    : [];
+  const latestPassCandidates = pickLatestPassCandidates(
+    passOnly,
+    limit
+  );
+  const trendReadyCandidates = buildTrendReadyCandidates(
+    latestPassCandidates
+  );
+
   const output = {
-    generatedAt: new Date().toISOString(),
+    generatedAt: now,
+    schemaVersion: OUTPUT_SCHEMA_VERSION,
+    exportedAt: now,
     source: {
       rawSignalFile: RAW_SIGNAL_FILE,
       picked: pickedSignals.length,
@@ -554,6 +653,10 @@ function main() {
     pass: validation.pass || [],
     hold: validation.hold || [],
     reject: validation.reject || [],
+
+    passOnly,
+    latestPassCandidates,
+    trendReadyCandidates,
   };
 
   writeJsonPretty(OUT_JSON, output);
@@ -562,6 +665,8 @@ function main() {
   console.log('[entity-bridge] picked signals =', pickedSignals.length);
   console.log('[entity-bridge] candidates     =', candidates.length);
   console.log('[entity-bridge] skipped old    =', output.source.skippedOldSchema);
+  console.log('[entity-bridge] passOnly       =', output.passOnly.length);
+  console.log('[entity-bridge] trendReady     =', output.trendReadyCandidates.length);
   console.log('[entity-bridge] summary        =', JSON.stringify(output.summary));
   console.log('[entity-bridge] saved:', OUT_JSON);
   console.log('[entity-bridge] saved:', OUT_JSONL);
@@ -579,4 +684,7 @@ module.exports = {
   dedupeSignalsByConceptKey,
   patchCandidateFromClassificationHints,
   hasModernRawSignalShape,
+  pickLatestPassCandidates,
+  buildTrendReadyCandidate,
+  buildTrendReadyCandidates,
 };
