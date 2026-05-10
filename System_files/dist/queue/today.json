@@ -1,18 +1,18 @@
 {
-  "date": "2026-05-09",
+  "date": "2026-05-10",
   "timezone": "Asia/Seoul",
   "cutoff": "10:00",
   "items": [
     {
-      "date": "2026-05-09",
+      "date": "2026-05-10",
       "label": "smart-savings",
       "seedLabel": "smart-savings",
       "requestedSlotLabel": "smart-savings",
       "mode": "trend",
-      "id": "ss-tr-022",
-      "title": "2025 Cloud Gaming Costs: Best Value Options",
-      "angle": "Cloud gaming pricing stabilized in 2025.",
-      "audience": "Gamers",
+      "id": "ss-tr-023",
+      "title": "How to Optimize Credit Card Rewards for Digital Purchases",
+      "angle": "Digital-first spending patterns changed reward systems.",
+      "audience": "Online shoppers",
       "intent": "saving",
       "priority": 1,
       "notes": ""
