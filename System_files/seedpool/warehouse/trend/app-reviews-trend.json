@@ -5,21 +5,6 @@
   },
   "trend": [
     {
-      "id": "ar-tr-012",
-      "title": "Which AI Scanner App Captures Documents Most Accurately?",
-      "angle": "OCR error rate + export fidelity",
-      "audience": "Students and office workers",
-      "intent": "review/accuracy-test",
-      "environment": "document scanning",
-      "timing": "update cycles",
-      "goal": "pick app with reliable OCR output",
-      "reviewEntity": {
-        "type": "app",
-        "appName": "AI Scanner App",
-        "platform": "android"
-      }
-    },
-    {
       "id": "ar-tr-013",
       "title": "The New Reading App With AI Summaries—Does It Deliver?",
       "angle": "Summary depth vs correctness",

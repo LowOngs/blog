@@ -5,15 +5,6 @@
   },
   "trend": [
     {
-      "id": "ht-tr-042",
-      "title": "How to troubleshoot Apple ID payment failures",
-      "angle": "Payment issues spike during subscription renewals.",
-      "audience": "iPhone/Mac users",
-      "intent": "howto",
-      "priority": 1,
-      "fingerprint": "fp1:90a4ca743db6f14b640602b98ebbc8592b022843"
-    },
-    {
       "id": "ht-tr-043",
       "title": "How to fix Windows update failures safely",
       "angle": "Update-related errors form a major troubleshooting category.",
