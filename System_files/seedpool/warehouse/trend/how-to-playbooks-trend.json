@@ -5,15 +5,6 @@
   },
   "trend": [
     {
-      "id": "ht-tr-043",
-      "title": "How to fix Windows update failures safely",
-      "angle": "Update-related errors form a major troubleshooting category.",
-      "audience": "Windows users",
-      "intent": "howto",
-      "priority": 1,
-      "fingerprint": "fp1:fb9d9732d23f6c9edd0400af086ed75c6b95512b"
-    },
-    {
       "id": "ht-tr-044",
       "title": "How to configure privacy settings across major apps (TikTok/Instagram/Meta)",
       "angle": "Privacy awareness is rising globally.",

@@ -5,21 +5,6 @@
   },
   "trend": [
     {
-      "id": "dr-tr-005",
-      "title": "Which Tablet Handles Multitasking Best After Updates?",
-      "angle": "RAM pressure + window manager stability",
-      "audience": "Students and creatives",
-      "intent": "review/usability",
-      "environment": "tablets",
-      "timing": "post-update",
-      "goal": "judge real productivity capability",
-      "fingerprint": "fp1:c9231cfae643daa17c667be03622ef790bfdbd76",
-      "reviewEntity": {
-        "type": "device",
-        "model": "Tablets"
-      }
-    },
-    {
       "id": "dr-tr-006",
       "title": "Are the New Wireless Earbuds Improving ANC or Just Marketing?",
       "angle": "ANC depth + transparency mode quality",
