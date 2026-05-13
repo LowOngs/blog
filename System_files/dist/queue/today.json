@@ -1,38 +1,39 @@
 {
-  "date": "2026-05-12",
+  "date": "2026-05-13",
   "timezone": "Asia/Seoul",
   "cutoff": "10:00",
   "items": [
     {
-      "date": "2026-05-12",
+      "date": "2026-05-13",
       "label": "how-to-playbooks",
       "seedLabel": "how-to-playbooks",
       "requestedSlotLabel": "how-to-playbooks",
       "mode": "trend",
-      "id": "ht-tr-043",
-      "title": "How to fix Windows update failures safely",
-      "angle": "Update-related errors form a major troubleshooting category.",
-      "audience": "Windows users",
+      "id": "ht-tr-044",
+      "title": "How to configure privacy settings across major apps (TikTok/Instagram/Meta)",
+      "angle": "Privacy awareness is rising globally.",
+      "audience": "Teenagers and adults",
       "intent": "howto",
       "priority": 1,
       "notes": ""
     },
     {
-      "date": "2026-05-12",
-      "label": "device-reviews",
-      "seedLabel": "device-reviews",
-      "requestedSlotLabel": "device-reviews",
+      "date": "2026-05-13",
+      "label": "app-reviews",
+      "seedLabel": "app-reviews",
+      "requestedSlotLabel": "app-reviews",
       "mode": "trend",
-      "id": "dr-tr-005",
-      "title": "Which Tablet Handles Multitasking Best After Updates?",
-      "angle": "RAM pressure + window manager stability",
-      "audience": "Students and creatives",
-      "intent": "review/usability",
+      "id": "ar-tr-013",
+      "title": "The New Reading App With AI Summaries—Does It Deliver?",
+      "angle": "Summary depth vs correctness",
+      "audience": "Readers",
+      "intent": "review/content-quality",
       "priority": 0,
       "notes": "",
       "reviewEntity": {
-        "type": "device",
-        "model": "Tablets"
+        "type": "app",
+        "appName": "AI Summary Reading App",
+        "platform": "android"
       }
     }
   ]

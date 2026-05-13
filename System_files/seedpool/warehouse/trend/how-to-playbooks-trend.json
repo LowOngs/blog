@@ -5,15 +5,6 @@
   },
   "trend": [
     {
-      "id": "ht-tr-044",
-      "title": "How to configure privacy settings across major apps (TikTok/Instagram/Meta)",
-      "angle": "Privacy awareness is rising globally.",
-      "audience": "Teenagers and adults",
-      "intent": "howto",
-      "priority": 1,
-      "fingerprint": "fp1:2254bb1e82b4365bfa1ea1c49a6805b0993fd66f"
-    },
-    {
       "id": "ht-tr-045",
       "title": "How to fix printer not connecting (Wi-Fi/LAN/USB)",
       "angle": "Printer troubleshooting remains evergreen.",
