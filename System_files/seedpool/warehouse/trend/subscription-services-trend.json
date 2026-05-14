@@ -5,21 +5,6 @@
   },
   "trend": [
     {
-      "id": "ss-tr-006",
-      "title": "Are New AI Photo Editors Worth Subscribing To?",
-      "angle": "Model accuracy + export quality",
-      "audience": "Creators",
-      "intent": "review/capability",
-      "environment": "AI photo tools",
-      "timing": "launch cycle",
-      "goal": "spot true improvements",
-      "fingerprint": "fp1:e7e00e9712ec9321ced640241630b75ca4c7b936",
-      "reviewEntity": {
-        "type": "subscription",
-        "service": "AI Photo Tools"
-      }
-    },
-    {
       "id": "ss-tr-007",
       "title": "Which Fitness App Added the Most Useful New Programs?",
       "angle": "Workout diversity + progression",

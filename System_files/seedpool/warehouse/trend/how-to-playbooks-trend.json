@@ -5,15 +5,6 @@
   },
   "trend": [
     {
-      "id": "ht-tr-045",
-      "title": "How to fix printer not connecting (Wi-Fi/LAN/USB)",
-      "angle": "Printer troubleshooting remains evergreen.",
-      "audience": "Home and office users",
-      "intent": "howto",
-      "priority": 1,
-      "fingerprint": "fp1:3726738d735322e390b3e495b59e79b3809c46d9"
-    },
-    {
       "id": "ht-tr-046",
       "title": "How to perform a clean uninstall of any program on Windows/macOS",
       "angle": "App removal issues directly impact performance.",
