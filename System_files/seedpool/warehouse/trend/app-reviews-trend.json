@@ -5,21 +5,6 @@
   },
   "trend": [
     {
-      "id": "ar-tr-014",
-      "title": "Is the New Fitness App’s Form-Tracking AI Accurate?",
-      "angle": "Camera-based motion accuracy test",
-      "audience": "Fitness beginners",
-      "intent": "review/accuracy",
-      "environment": "fitness apps",
-      "timing": "early adoption",
-      "goal": "avoid apps giving unsafe workout guidance",
-      "reviewEntity": {
-        "type": "app",
-        "appName": "AI Form-Tracking Fitness App",
-        "platform": "android"
-      }
-    },
-    {
       "id": "ar-tr-015",
       "title": "The Best AI Translation App Right Now?",
       "angle": "Latency + offline model quality",

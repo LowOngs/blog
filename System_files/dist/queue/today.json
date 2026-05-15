@@ -1,38 +1,39 @@
 {
-  "date": "2026-05-14",
+  "date": "2026-05-15",
   "timezone": "Asia/Seoul",
   "cutoff": "10:00",
   "items": [
     {
-      "date": "2026-05-14",
+      "date": "2026-05-15",
       "label": "how-to-playbooks",
       "seedLabel": "how-to-playbooks",
       "requestedSlotLabel": "how-to-playbooks",
       "mode": "trend",
-      "id": "ht-tr-045",
-      "title": "How to fix printer not connecting (Wi-Fi/LAN/USB)",
-      "angle": "Printer troubleshooting remains evergreen.",
-      "audience": "Home and office users",
+      "id": "ht-tr-046",
+      "title": "How to perform a clean uninstall of any program on Windows/macOS",
+      "angle": "App removal issues directly impact performance.",
+      "audience": "General users",
       "intent": "howto",
       "priority": 1,
       "notes": ""
     },
     {
-      "date": "2026-05-14",
-      "label": "subscription-services",
-      "seedLabel": "subscription-services",
-      "requestedSlotLabel": "subscription-services",
+      "date": "2026-05-15",
+      "label": "app-reviews",
+      "seedLabel": "app-reviews",
+      "requestedSlotLabel": "app-reviews",
       "mode": "trend",
-      "id": "ss-tr-006",
-      "title": "Are New AI Photo Editors Worth Subscribing To?",
-      "angle": "Model accuracy + export quality",
-      "audience": "Creators",
-      "intent": "review/capability",
+      "id": "ar-tr-014",
+      "title": "Is the New Fitness App’s Form-Tracking AI Accurate?",
+      "angle": "Camera-based motion accuracy test",
+      "audience": "Fitness beginners",
+      "intent": "review/accuracy",
       "priority": 0,
       "notes": "",
       "reviewEntity": {
-        "type": "subscription",
-        "service": "AI Photo Tools"
+        "type": "app",
+        "appName": "AI Form-Tracking Fitness App",
+        "platform": "android"
       }
     }
   ]
