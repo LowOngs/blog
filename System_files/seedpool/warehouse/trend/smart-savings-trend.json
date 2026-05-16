@@ -5,15 +5,6 @@
   },
   "trend": [
     {
-      "id": "ss-tr-024",
-      "title": "How to Reduce Mobile Gaming Costs with Smart Budgeting",
-      "angle": "In-app purchase spending became a top AI query.",
-      "audience": "Mobile gamers",
-      "intent": "saving",
-      "priority": 1,
-      "fingerprint": "fp1:d4c50b16750879fe6c3d2e9a96e10ddb9b018332"
-    },
-    {
       "id": "ss-tr-025",
       "title": "How to Avoid 2025 Hidden Fees in Travel Apps",
       "angle": "Travel platform fees increased quietly this year.",
