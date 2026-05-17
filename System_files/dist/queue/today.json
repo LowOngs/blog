@@ -1,18 +1,18 @@
 {
-  "date": "2026-05-16",
+  "date": "2026-05-17",
   "timezone": "Asia/Seoul",
   "cutoff": "10:00",
   "items": [
     {
-      "date": "2026-05-16",
+      "date": "2026-05-17",
       "label": "smart-savings",
       "seedLabel": "smart-savings",
       "requestedSlotLabel": "smart-savings",
       "mode": "trend",
-      "id": "ss-tr-024",
-      "title": "How to Reduce Mobile Gaming Costs with Smart Budgeting",
-      "angle": "In-app purchase spending became a top AI query.",
-      "audience": "Mobile gamers",
+      "id": "ss-tr-025",
+      "title": "How to Avoid 2025 Hidden Fees in Travel Apps",
+      "angle": "Travel platform fees increased quietly this year.",
+      "audience": "Travelers",
       "intent": "saving",
       "priority": 1,
       "notes": ""
