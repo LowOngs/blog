@@ -5,15 +5,6 @@
   },
   "trend": [
     {
-      "id": "ht-tr-047",
-      "title": "How to fix YouTube not loading issues (2025 network guide)",
-      "angle": "Stream interruptions remain a high-frequency problem.",
-      "audience": "General web users",
-      "intent": "howto",
-      "priority": 1,
-      "fingerprint": "fp1:aca587fc6aefabe14b6459c9cba7fbd042ceeabe"
-    },
-    {
       "id": "ht-tr-048",
       "title": "How to use AI to organize your photo library automatically",
       "angle": "Photo clutter is a major cross-platform issue.",

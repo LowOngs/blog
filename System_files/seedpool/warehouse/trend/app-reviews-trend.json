@@ -5,21 +5,6 @@
   },
   "trend": [
     {
-      "id": "ar-tr-015",
-      "title": "The Best AI Translation App Right Now?",
-      "angle": "Latency + offline model quality",
-      "audience": "Travelers and students",
-      "intent": "review/comparison",
-      "environment": "translation apps",
-      "timing": "update frequency",
-      "goal": "pick app with accurate conversational translation",
-      "reviewEntity": {
-        "type": "app",
-        "appName": "AI Translation App",
-        "platform": "android"
-      }
-    },
-    {
       "id": "ar-tr-016",
       "title": "Which Video Editing App Handles AI Cutouts Best?",
       "angle": "Edge detection and export quality test",
