@@ -1,39 +1,38 @@
 {
-  "date": "2026-05-18",
+  "date": "2026-05-19",
   "timezone": "Asia/Seoul",
   "cutoff": "10:00",
   "items": [
     {
-      "date": "2026-05-18",
+      "date": "2026-05-19",
       "label": "how-to-playbooks",
       "seedLabel": "how-to-playbooks",
       "requestedSlotLabel": "how-to-playbooks",
       "mode": "trend",
-      "id": "ht-tr-047",
-      "title": "How to fix YouTube not loading issues (2025 network guide)",
-      "angle": "Stream interruptions remain a high-frequency problem.",
-      "audience": "General web users",
+      "id": "ht-tr-048",
+      "title": "How to use AI to organize your photo library automatically",
+      "angle": "Photo clutter is a major cross-platform issue.",
+      "audience": "All smartphone users",
       "intent": "howto",
       "priority": 1,
       "notes": ""
     },
     {
-      "date": "2026-05-18",
-      "label": "app-reviews",
-      "seedLabel": "app-reviews",
-      "requestedSlotLabel": "app-reviews",
+      "date": "2026-05-19",
+      "label": "device-reviews",
+      "seedLabel": "device-reviews",
+      "requestedSlotLabel": "device-reviews",
       "mode": "trend",
-      "id": "ar-tr-015",
-      "title": "The Best AI Translation App Right Now?",
-      "angle": "Latency + offline model quality",
-      "audience": "Travelers and students",
-      "intent": "review/comparison",
+      "id": "dr-tr-006",
+      "title": "Are the New Wireless Earbuds Improving ANC or Just Marketing?",
+      "angle": "ANC depth + transparency mode quality",
+      "audience": "Music consumers",
+      "intent": "review/audio",
       "priority": 0,
       "notes": "",
       "reviewEntity": {
-        "type": "app",
-        "appName": "AI Translation App",
-        "platform": "android"
+        "type": "device",
+        "model": "Earbuds"
       }
     }
   ]

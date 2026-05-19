@@ -5,21 +5,6 @@
   },
   "trend": [
     {
-      "id": "dr-tr-006",
-      "title": "Are the New Wireless Earbuds Improving ANC or Just Marketing?",
-      "angle": "ANC depth + transparency mode quality",
-      "audience": "Music consumers",
-      "intent": "review/audio",
-      "environment": "earbuds",
-      "timing": "annual refresh",
-      "goal": "detect real acoustic improvements",
-      "fingerprint": "fp1:7b3a7921ad857dd6255e65fdd649c9ed9a17e3da",
-      "reviewEntity": {
-        "type": "device",
-        "model": "Earbuds"
-      }
-    },
-    {
       "id": "dr-tr-007",
       "title": "Which Fitness Tracker Measures Heart Rate Most Accurately?",
       "angle": "Sensor updates + sweat resistance",
