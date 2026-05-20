@@ -1,38 +1,39 @@
 {
-  "date": "2026-05-19",
+  "date": "2026-05-20",
   "timezone": "Asia/Seoul",
   "cutoff": "10:00",
   "items": [
     {
-      "date": "2026-05-19",
+      "date": "2026-05-20",
       "label": "how-to-playbooks",
       "seedLabel": "how-to-playbooks",
       "requestedSlotLabel": "how-to-playbooks",
       "mode": "trend",
-      "id": "ht-tr-048",
-      "title": "How to use AI to organize your photo library automatically",
-      "angle": "Photo clutter is a major cross-platform issue.",
-      "audience": "All smartphone users",
+      "id": "ht-tr-049",
+      "title": "How to fix Windows or Mac audio not working",
+      "angle": "Audio failures are one of the oldest recurring tech issues.",
+      "audience": "PC and Mac owners",
       "intent": "howto",
       "priority": 1,
       "notes": ""
     },
     {
-      "date": "2026-05-19",
-      "label": "device-reviews",
-      "seedLabel": "device-reviews",
-      "requestedSlotLabel": "device-reviews",
+      "date": "2026-05-20",
+      "label": "app-reviews",
+      "seedLabel": "app-reviews",
+      "requestedSlotLabel": "app-reviews",
       "mode": "trend",
-      "id": "dr-tr-006",
-      "title": "Are the New Wireless Earbuds Improving ANC or Just Marketing?",
-      "angle": "ANC depth + transparency mode quality",
-      "audience": "Music consumers",
-      "intent": "review/audio",
+      "id": "ar-tr-016",
+      "title": "Which Video Editing App Handles AI Cutouts Best?",
+      "angle": "Edge detection and export quality test",
+      "audience": "Creators",
+      "intent": "review/performance",
       "priority": 0,
       "notes": "",
       "reviewEntity": {
-        "type": "device",
-        "model": "Earbuds"
+        "type": "app",
+        "appName": "AI Video Editing App",
+        "platform": "android"
       }
     }
   ]
