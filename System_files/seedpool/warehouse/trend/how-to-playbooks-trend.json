@@ -5,15 +5,6 @@
   },
   "trend": [
     {
-      "id": "ht-tr-050",
-      "title": "How to configure AI-based time blocking for your week",
-      "angle": "AI-driven calendar structuring is a rising trend.",
-      "audience": "Students and productivity enthusiasts",
-      "intent": "howto",
-      "priority": 1,
-      "fingerprint": "fp1:70552bdd2b9a006316d363ff3ef153bd919c0422"
-    },
-    {
       "id": "how-to-playbooks-trend-1772546045709-638765590",
       "title": "AUTO GENERATED: how-to-playbooks (trend)",
       "angle": "Auto angle (trend)",
