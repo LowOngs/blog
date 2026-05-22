@@ -1,38 +1,39 @@
 {
-  "date": "2026-05-21",
+  "date": "2026-05-22",
   "timezone": "Asia/Seoul",
   "cutoff": "10:00",
   "items": [
     {
-      "date": "2026-05-21",
+      "date": "2026-05-22",
       "label": "how-to-playbooks",
       "seedLabel": "how-to-playbooks",
       "requestedSlotLabel": "how-to-playbooks",
       "mode": "trend",
-      "id": "ht-tr-050",
-      "title": "How to configure AI-based time blocking for your week",
-      "angle": "AI-driven calendar structuring is a rising trend.",
-      "audience": "Students and productivity enthusiasts",
-      "intent": "howto",
-      "priority": 1,
-      "notes": ""
+      "id": "how-to-playbooks-trend-1772546045709-638765590",
+      "title": "AUTO GENERATED: how-to-playbooks (trend)",
+      "angle": "Auto angle (trend)",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "notes": "Replace with real LLM generation."
     },
     {
-      "date": "2026-05-21",
-      "label": "subscription-services",
-      "seedLabel": "subscription-services",
-      "requestedSlotLabel": "subscription-services",
+      "date": "2026-05-22",
+      "label": "app-reviews",
+      "seedLabel": "app-reviews",
+      "requestedSlotLabel": "app-reviews",
       "mode": "trend",
-      "id": "ss-tr-007",
-      "title": "Which Fitness App Added the Most Useful New Programs?",
-      "angle": "Workout diversity + progression",
-      "audience": "Fitness users",
-      "intent": "review/content-update",
+      "id": "ar-tr-017",
+      "title": "Which Weather App Gives the Most Reliable Storm Alerts?",
+      "angle": "Alert precision + false alarm rate",
+      "audience": "Commuters and travelers",
+      "intent": "review/accuracy",
       "priority": 0,
       "notes": "",
       "reviewEntity": {
-        "type": "subscription",
-        "service": "Fitness Subscriptions"
+        "type": "app",
+        "appName": "Weather Alert App",
+        "platform": "android"
       }
     }
   ]

@@ -5,21 +5,6 @@
   },
   "trend": [
     {
-      "id": "ar-tr-017",
-      "title": "Which Weather App Gives the Most Reliable Storm Alerts?",
-      "angle": "Alert precision + false alarm rate",
-      "audience": "Commuters and travelers",
-      "intent": "review/accuracy",
-      "environment": "weather apps",
-      "timing": "seasonal",
-      "goal": "choose app with trustworthy notifications",
-      "reviewEntity": {
-        "type": "app",
-        "appName": "Weather Alert App",
-        "platform": "android"
-      }
-    },
-    {
       "id": "ar-tr-018",
       "title": "Is the New ‘Minimalist Email App’ Actually Better?",
       "angle": "Check if simplicity removes essential tools",
