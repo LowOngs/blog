@@ -5,15 +5,6 @@
   },
   "trend": [
     {
-      "id": "ss-tr-026",
-      "title": "Best 2025 Bundles for Cloud + AI Tools",
-      "angle": "Combining AI + cloud stacks saves significantly.",
-      "audience": "Remote workers, creators",
-      "intent": "saving",
-      "priority": 1,
-      "fingerprint": "fp1:6e85e11c2eda8cffe36f8fccf12c85bb48ab360e"
-    },
-    {
       "id": "ss-tr-027",
       "title": "How to Use ChatGPT/Gemini/Claude to Detect Overpriced Purchases",
       "angle": "Price-check queries surged in 2025.",
