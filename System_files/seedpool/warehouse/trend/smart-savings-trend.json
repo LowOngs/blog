@@ -5,15 +5,6 @@
   },
   "trend": [
     {
-      "id": "ss-tr-027",
-      "title": "How to Use ChatGPT/Gemini/Claude to Detect Overpriced Purchases",
-      "angle": "Price-check queries surged in 2025.",
-      "audience": "General consumers",
-      "intent": "saving",
-      "priority": 1,
-      "fingerprint": "fp1:f7475d2a402dfa4ae74b381b4ff021c48b2fe913"
-    },
-    {
       "id": "ss-tr-028",
       "title": "How to Optimize Smart Home Energy Costs",
       "angle": "Energy-saving smart devices exploded in adoption.",

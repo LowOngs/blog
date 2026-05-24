@@ -1,18 +1,18 @@
 {
-  "date": "2026-05-23",
+  "date": "2026-05-24",
   "timezone": "Asia/Seoul",
   "cutoff": "10:00",
   "items": [
     {
-      "date": "2026-05-23",
+      "date": "2026-05-24",
       "label": "smart-savings",
       "seedLabel": "smart-savings",
       "requestedSlotLabel": "smart-savings",
       "mode": "trend",
-      "id": "ss-tr-026",
-      "title": "Best 2025 Bundles for Cloud + AI Tools",
-      "angle": "Combining AI + cloud stacks saves significantly.",
-      "audience": "Remote workers, creators",
+      "id": "ss-tr-027",
+      "title": "How to Use ChatGPT/Gemini/Claude to Detect Overpriced Purchases",
+      "angle": "Price-check queries surged in 2025.",
+      "audience": "General consumers",
       "intent": "saving",
       "priority": 1,
       "notes": ""
