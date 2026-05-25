@@ -1,21 +1,40 @@
 {
-  "date": "2026-05-24",
+  "date": "2026-05-25",
   "timezone": "Asia/Seoul",
   "cutoff": "10:00",
   "items": [
     {
-      "date": "2026-05-24",
-      "label": "smart-savings",
-      "seedLabel": "smart-savings",
-      "requestedSlotLabel": "smart-savings",
+      "date": "2026-05-25",
+      "label": "how-to-playbooks",
+      "seedLabel": "how-to-playbooks",
+      "requestedSlotLabel": "how-to-playbooks",
       "mode": "trend",
-      "id": "ss-tr-027",
-      "title": "How to Use ChatGPT/Gemini/Claude to Detect Overpriced Purchases",
-      "angle": "Price-check queries surged in 2025.",
-      "audience": "General consumers",
-      "intent": "saving",
-      "priority": 1,
-      "notes": ""
+      "id": "how-to-playbooks-trend-1772628475971-223292269",
+      "title": "AUTO GENERATED: how-to-playbooks (trend)",
+      "angle": "Auto angle (trend)",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "notes": "Replace with real LLM generation."
+    },
+    {
+      "date": "2026-05-25",
+      "label": "app-reviews",
+      "seedLabel": "app-reviews",
+      "requestedSlotLabel": "app-reviews",
+      "mode": "trend",
+      "id": "ar-tr-018",
+      "title": "Is the New ‘Minimalist Email App’ Actually Better?",
+      "angle": "Check if simplicity removes essential tools",
+      "audience": "Busy professionals",
+      "intent": "review/usability",
+      "priority": 0,
+      "notes": "",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Minimalist Email App",
+        "platform": "android"
+      }
     }
   ]
 }
