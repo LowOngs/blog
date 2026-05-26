@@ -1,15 +1,15 @@
 {
-  "date": "2026-05-25",
+  "date": "2026-05-26",
   "timezone": "Asia/Seoul",
   "cutoff": "10:00",
   "items": [
     {
-      "date": "2026-05-25",
+      "date": "2026-05-26",
       "label": "how-to-playbooks",
       "seedLabel": "how-to-playbooks",
       "requestedSlotLabel": "how-to-playbooks",
       "mode": "trend",
-      "id": "how-to-playbooks-trend-1772628475971-223292269",
+      "id": "how-to-playbooks-trend-1772629568008-967416794",
       "title": "AUTO GENERATED: how-to-playbooks (trend)",
       "angle": "Auto angle (trend)",
       "audience": "General",
@@ -18,22 +18,21 @@
       "notes": "Replace with real LLM generation."
     },
     {
-      "date": "2026-05-25",
-      "label": "app-reviews",
-      "seedLabel": "app-reviews",
-      "requestedSlotLabel": "app-reviews",
+      "date": "2026-05-26",
+      "label": "device-reviews",
+      "seedLabel": "device-reviews",
+      "requestedSlotLabel": "device-reviews",
       "mode": "trend",
-      "id": "ar-tr-018",
-      "title": "Is the New ‘Minimalist Email App’ Actually Better?",
-      "angle": "Check if simplicity removes essential tools",
-      "audience": "Busy professionals",
-      "intent": "review/usability",
+      "id": "dr-tr-007",
+      "title": "Which Fitness Tracker Measures Heart Rate Most Accurately?",
+      "angle": "Sensor updates + sweat resistance",
+      "audience": "Fitness users",
+      "intent": "review/health-data",
       "priority": 0,
       "notes": "",
       "reviewEntity": {
-        "type": "app",
-        "appName": "Minimalist Email App",
-        "platform": "android"
+        "type": "device",
+        "model": "Wearables"
       }
     }
   ]

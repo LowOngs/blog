@@ -5,21 +5,6 @@
   },
   "trend": [
     {
-      "id": "dr-tr-007",
-      "title": "Which Fitness Tracker Measures Heart Rate Most Accurately?",
-      "angle": "Sensor updates + sweat resistance",
-      "audience": "Fitness users",
-      "intent": "review/health-data",
-      "environment": "wearables",
-      "timing": "wear test",
-      "goal": "find device with precise sports tracking",
-      "fingerprint": "fp1:de826f3b4b8234dcd7b05a6b7cc77b5378f02c86",
-      "reviewEntity": {
-        "type": "device",
-        "model": "Wearables"
-      }
-    },
-    {
       "id": "dr-tr-008",
       "title": "Is the Latest Smartwatch Battery Upgrade Real?",
       "angle": "Always-on drain + GPS endurance",
