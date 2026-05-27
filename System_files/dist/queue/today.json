@@ -1,38 +1,39 @@
 {
-  "date": "2026-05-26",
+  "date": "2026-05-27",
   "timezone": "Asia/Seoul",
   "cutoff": "10:00",
   "items": [
     {
-      "date": "2026-05-26",
+      "date": "2026-05-27",
       "label": "how-to-playbooks",
       "seedLabel": "how-to-playbooks",
       "requestedSlotLabel": "how-to-playbooks",
       "mode": "trend",
-      "id": "how-to-playbooks-trend-1772629568008-967416794",
-      "title": "AUTO GENERATED: how-to-playbooks (trend)",
-      "angle": "Auto angle (trend)",
+      "id": "how-to-playbooks-trend-1772630313744-208172881",
+      "title": "AUTO GENERATED: how-to-playbooks (trend) #1772630313744-208172881",
+      "angle": "Auto angle (trend) var=1772630313744-208172881",
       "audience": "General",
       "intent": "trend",
       "priority": 5,
       "notes": "Replace with real LLM generation."
     },
     {
-      "date": "2026-05-26",
-      "label": "device-reviews",
-      "seedLabel": "device-reviews",
-      "requestedSlotLabel": "device-reviews",
+      "date": "2026-05-27",
+      "label": "app-reviews",
+      "seedLabel": "app-reviews",
+      "requestedSlotLabel": "app-reviews",
       "mode": "trend",
-      "id": "dr-tr-007",
-      "title": "Which Fitness Tracker Measures Heart Rate Most Accurately?",
-      "angle": "Sensor updates + sweat resistance",
-      "audience": "Fitness users",
-      "intent": "review/health-data",
+      "id": "ar-tr-019",
+      "title": "The New AI Flashcard App—Does It Improve Memory Faster?",
+      "angle": "Spaced-repetition personalization",
+      "audience": "Students",
+      "intent": "review/learning-effectiveness",
       "priority": 0,
       "notes": "",
       "reviewEntity": {
-        "type": "device",
-        "model": "Wearables"
+        "type": "app",
+        "appName": "AI Flashcard App",
+        "platform": "android"
       }
     }
   ]

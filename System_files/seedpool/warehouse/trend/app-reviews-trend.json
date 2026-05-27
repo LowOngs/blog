@@ -5,21 +5,6 @@
   },
   "trend": [
     {
-      "id": "ar-tr-019",
-      "title": "The New AI Flashcard App—Does It Improve Memory Faster?",
-      "angle": "Spaced-repetition personalization",
-      "audience": "Students",
-      "intent": "review/learning-effectiveness",
-      "environment": "study apps",
-      "timing": "early trend",
-      "goal": "measure retention improvements",
-      "reviewEntity": {
-        "type": "app",
-        "appName": "AI Flashcard App",
-        "platform": "android"
-      }
-    },
-    {
       "id": "ar-tr-020",
       "title": "Which Ride-Hailing App Is the Most Efficient in Your City?",
       "angle": "Wait time + cancellation frequency",
