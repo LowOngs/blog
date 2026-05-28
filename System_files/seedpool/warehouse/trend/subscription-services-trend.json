@@ -5,21 +5,6 @@
   },
   "trend": [
     {
-      "id": "ss-tr-008",
-      "title": "Is the Latest Gaming Subscription Rotation Worth It?",
-      "angle": "Game quality + rotation pattern",
-      "audience": "Gamers",
-      "intent": "review/content",
-      "environment": "gaming services",
-      "timing": "rotation day",
-      "goal": "find strongest monthly lineup",
-      "fingerprint": "fp1:195ad508ca5166c77deb6c8e34a2e417c861cf86",
-      "reviewEntity": {
-        "type": "subscription",
-        "service": "Gaming Services"
-      }
-    },
-    {
       "id": "ss-tr-009",
       "title": "Which Productivity Suite Just Got Real AI Upgrades?",
       "angle": "Automation + document generation",

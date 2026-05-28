@@ -1,39 +1,38 @@
 {
-  "date": "2026-05-27",
+  "date": "2026-05-28",
   "timezone": "Asia/Seoul",
   "cutoff": "10:00",
   "items": [
     {
-      "date": "2026-05-27",
+      "date": "2026-05-28",
       "label": "how-to-playbooks",
       "seedLabel": "how-to-playbooks",
       "requestedSlotLabel": "how-to-playbooks",
       "mode": "trend",
-      "id": "how-to-playbooks-trend-1772630313744-208172881",
-      "title": "AUTO GENERATED: how-to-playbooks (trend) #1772630313744-208172881",
-      "angle": "Auto angle (trend) var=1772630313744-208172881",
+      "id": "how-to-playbooks-trend-1772630313744-859685923",
+      "title": "AUTO GENERATED: how-to-playbooks (trend) #1772630313744-859685923",
+      "angle": "Auto angle (trend) var=1772630313744-859685923",
       "audience": "General",
       "intent": "trend",
       "priority": 5,
       "notes": "Replace with real LLM generation."
     },
     {
-      "date": "2026-05-27",
-      "label": "app-reviews",
-      "seedLabel": "app-reviews",
-      "requestedSlotLabel": "app-reviews",
+      "date": "2026-05-28",
+      "label": "subscription-services",
+      "seedLabel": "subscription-services",
+      "requestedSlotLabel": "subscription-services",
       "mode": "trend",
-      "id": "ar-tr-019",
-      "title": "The New AI Flashcard App—Does It Improve Memory Faster?",
-      "angle": "Spaced-repetition personalization",
-      "audience": "Students",
-      "intent": "review/learning-effectiveness",
+      "id": "ss-tr-008",
+      "title": "Is the Latest Gaming Subscription Rotation Worth It?",
+      "angle": "Game quality + rotation pattern",
+      "audience": "Gamers",
+      "intent": "review/content",
       "priority": 0,
       "notes": "",
       "reviewEntity": {
-        "type": "app",
-        "appName": "AI Flashcard App",
-        "platform": "android"
+        "type": "subscription",
+        "service": "Gaming Services"
       }
     }
   ]
