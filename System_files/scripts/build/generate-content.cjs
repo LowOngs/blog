@@ -371,6 +371,54 @@ function makeTable(headers, rows) {
   ].join('\n');
 }
 
+
+function extractTrendSignals(post) {
+  const seedMeta = post?.seedMeta || {};
+  const hints = seedMeta.classificationHints || {};
+  const hardwareHints = hints.hardwareHints || {};
+  const maturityHints = hints.maturityHints || {};
+  const evidence = seedMeta.evidence || {};
+  const trendContext = post?.trendContext || post?.seedMeta?.trendContext || {};
+
+  return {
+    formFactor: hints.formFactor || '',
+    interactionModel: hints.interactionModel || '',
+    inputMethod: hints.inputMethod || '',
+    connectivity: hints.connectivity || '',
+    wearable: !!hardwareHints.wearable,
+    requiresProjection: !!hardwareHints.requiresProjection,
+    marketStage: maturityHints.marketStage || '',
+    useCases: Array.isArray(evidence.useCases) ? evidence.useCases : [],
+    unknowns: Array.isArray(evidence.unknowns) ? evidence.unknowns : [],
+    changeReason: trendContext.changeReason || ''
+  };
+}
+
+function buildSpecificDeviceObservation(targetName, trendSignals) {
+  if (!trendSignals) return '';
+
+  const details = [];
+
+  if (trendSignals.wearable) {
+    details.push(`${targetName} is positioned more like a wearable input tool than a traditional desk device.`);
+  }
+
+  if (trendSignals.requiresProjection) {
+    details.push(`Because the device depends on projection-based interaction, lighting conditions and typing accuracy may matter more than they would on a normal keyboard.`);
+  }
+
+  if (trendSignals.inputMethod) {
+    details.push(`The current interaction model relies on ${trendSignals.inputMethod}, which means hand fatigue and gesture consistency could affect longer sessions.`);
+  }
+
+  if (trendSignals.marketStage) {
+    details.push(`Its current market stage still appears closer to ${trendSignals.marketStage} than to a mature mainstream hardware category.`);
+  }
+
+  return details.join(' ');
+}
+
+
 function buildReviewSection(title, label, h2, meta, post) {
   const productType = inferProductType(label, title);
   const topic = inferTopic(title);
@@ -380,25 +428,27 @@ function buildReviewSection(title, label, h2, meta, post) {
   const provider = deriveReviewProvider(post);
   const reviewState = deriveReviewState(post);
   const identityLine = buildReviewIdentityLine(targetName, entityType, provider);
+  const trendSignals = extractTrendSignals(post);
+  const deviceSpecificObservation = buildSpecificDeviceObservation(targetName, trendSignals);
 
   if (h2 === 'Overview') {
     const introByType =
       entityType === 'device'
-        ? `${targetName} is worth a closer look when the buyer cares about day-to-day reliability, comfort, battery behavior, and whether the hardware still feels sensible after the first few days of use.`
+        ? `${targetName} is worth a closer look when the buyer cares about portability, setup practicality, input comfort, and whether the hardware still feels usable after the novelty wears off.`
         : entityType === 'subscription'
           ? `${targetName} deserves attention when the buyer wants predictable value, clear plan limits, and enough ongoing usefulness to justify another monthly payment.`
           : `${targetName} is most useful to examine through ordinary writing, editing, and repeat-use moments rather than through launch-window curiosity alone.`;
 
     return makeParagraphs([
       `${introByType} The switching question is simple: does it remove enough friction to replace the current habit, or does it merely look attractive during a first trial?`,
-      `${identityLine}${context ? ` The surrounding context also matters here, especially for ${context}.` : ''} For most readers, the answer depends on workflow speed, visible limits, trust in updates, and whether the product remains helpful after the first week.`
+      `${identityLine}${deviceSpecificObservation ? ` ${deviceSpecificObservation}` : ''}${context ? ` The surrounding context also matters here, especially for ${context}.` : ''} For most readers, the answer depends on whether the device stays practical once the first curiosity fades and regular use begins.`
     ]);
   }
 
   if (h2 === 'Key Features') {
     const featureLead =
       entityType === 'device'
-        ? `${targetName}'s useful features are the ones that affect repeated handling: display comfort, battery confidence, performance consistency, setup simplicity, and how easily the device fits into the buyer's existing routine.`
+        ? `${targetName}'s useful features are the ones that improve mobile or portable use without forcing the buyer to relearn basic typing or navigation habits.`
         : entityType === 'subscription'
           ? `${targetName}'s useful features are the ones that make the subscription feel used rather than merely owned: content depth, account flexibility, cancellation clarity, offline access, and reliable availability.`
           : `${targetName}'s useful features are the ones that support repeated work: fast draft creation, rewriting, tone adjustment, export flow, and the ability to keep editing without losing the user's train of thought.`;
@@ -406,7 +456,7 @@ function buildReviewSection(title, label, h2, meta, post) {
     return [
       makeParagraphs([
         `${featureLead}`,
-        `The feature set becomes stronger when the main task can be started quickly and finished without jumping through extra screens. If the strongest tools are hidden behind unclear limits or a disruptive upgrade prompt, the practical value drops even when the feature list looks long.`
+        `The feature set becomes stronger when the device responds consistently during ordinary use and does not require constant adjustment just to stay usable. Experimental hardware loses value quickly when setup friction or tracking inconsistency interrupts repeated tasks.`
       ]),
       makeList([
         `${targetName} needs a clear main workflow that feels easy to repeat.`,
