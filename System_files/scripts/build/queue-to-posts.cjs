@@ -742,6 +742,54 @@ trendContext:
     ? item.seedMeta
         .trendContext
     : null,
+
+classificationHints:
+  item.seedMeta &&
+  item.seedMeta
+    .classificationHints
+    ? item.seedMeta
+        .classificationHints
+    : null,
+
+hardwareHints:
+  item.seedMeta &&
+  item.seedMeta
+    .hardwareHints
+    ? item.seedMeta
+        .hardwareHints
+    : null,
+
+interactionHints:
+  item.seedMeta &&
+  item.seedMeta
+    .interactionHints
+    ? item.seedMeta
+        .interactionHints
+    : null,
+
+maturityHints:
+  item.seedMeta &&
+  item.seedMeta
+    .maturityHints
+    ? item.seedMeta
+        .maturityHints
+    : null,
+
+ecosystemHints:
+  item.seedMeta &&
+  item.seedMeta
+    .ecosystemHints
+    ? item.seedMeta
+        .ecosystemHints
+    : null,
+
+evidence:
+  item.seedMeta &&
+  item.seedMeta
+    .evidence
+    ? item.seedMeta
+        .evidence
+    : null,
  
       entity,
 
