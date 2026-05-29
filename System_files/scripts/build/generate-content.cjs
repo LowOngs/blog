@@ -249,15 +249,19 @@ function deriveReviewTargetName(post, label) {
   if (entity) {
     if (label === 'app-reviews') {
       if (normStr(entity.appName)) return normStr(entity.appName);
+      if (normStr(entity.name)) return normStr(entity.name);
       if (normStr(entity.appId)) return normStr(entity.appId);
     }
     if (label === 'device-reviews') {
+      if (normStr(entity.name)) return normStr(entity.name);
       if (normStr(entity.model)) return normStr(entity.model);
       if (normStr(entity.deviceName)) return normStr(entity.deviceName);
+      if (normStr(entity.productName)) return normStr(entity.productName);
     }
     if (label === 'subscription-services') {
       if (normStr(entity.service)) return normStr(entity.service);
       if (normStr(entity.serviceName)) return normStr(entity.serviceName);
+      if (normStr(entity.name)) return normStr(entity.name);
     }
   }
 
@@ -371,51 +375,246 @@ function makeTable(headers, rows) {
   ].join('\n');
 }
 
+function readNestedObject(...candidates) {
+  for (const candidate of candidates) {
+    if (candidate && typeof candidate === 'object' && !Array.isArray(candidate)) {
+      return candidate;
+    }
+  }
+  return {};
+}
 
 function extractTrendSignals(post) {
-  const seedMeta = post?.seedMeta || {};
-  const hints = seedMeta.classificationHints || {};
-  const hardwareHints = hints.hardwareHints || {};
-  const maturityHints = hints.maturityHints || {};
-  const evidence = seedMeta.evidence || {};
-  const trendContext = post?.trendContext || post?.seedMeta?.trendContext || {};
+  const seedMeta = post && post.seedMeta && typeof post.seedMeta === 'object' ? post.seedMeta : {};
+  const hints = readNestedObject(seedMeta.classificationHints, post && post.classificationHints);
+  const categoryHints = readNestedObject(hints.categoryHints, seedMeta.categoryHints);
+  const interactionHints = readNestedObject(seedMeta.interactionHints, hints.interactionHints);
+  const hardwareHints = readNestedObject(seedMeta.hardwareHints, hints.hardwareHints);
+  const maturityHints = readNestedObject(seedMeta.maturityHints, hints.maturityHints);
+  const ecosystemHints = readNestedObject(seedMeta.ecosystemHints, hints.ecosystemHints);
+  const evidence = readNestedObject(seedMeta.evidence, post && post.evidence);
+  const trendContext = readNestedObject(post && post.trendContext, seedMeta.trendContext);
+  const trust = readNestedObject(seedMeta.trust, post && post.trust);
+  const entity = readNestedObject(post && post.entity, post && post.reviewEntity, seedMeta.entity, seedMeta.reviewEntity);
 
   return {
-    formFactor: hints.formFactor || '',
-    interactionModel: hints.interactionModel || '',
-    inputMethod: hints.inputMethod || '',
-    connectivity: hints.connectivity || '',
+    brand: normStr(hints.brand || entity.brand || ''),
+    productTypeWords: ensureArray(hints.productTypeWords).map(normStr).filter(Boolean),
+    primaryCategory: normStr(categoryHints.primaryCategory || entity.category || ''),
+    secondaryCategory: normStr(categoryHints.secondaryCategory || ''),
+    emergingCategory: normStr(categoryHints.emergingCategory || ''),
+    formFactor: normStr(hints.formFactor || ''),
+    interactionModel: normStr(hints.interactionModel || interactionHints.interactionModel || entity.interactionModel || ''),
+    inputMethod: normStr(hints.inputMethod || interactionHints.inputMethod || ''),
+    feedbackMethod: normStr(interactionHints.feedbackMethod || ''),
+    connectivity: normStr(hints.connectivity || ecosystemHints.dependencyType || ''),
+    controlSurface: normStr(interactionHints.controlSurface || ''),
     wearable: !!hardwareHints.wearable,
+    standalone: !!hardwareHints.standalone,
+    requiresPhone: !!hardwareHints.requiresPhone,
     requiresProjection: !!hardwareHints.requiresProjection,
-    marketStage: maturityHints.marketStage || '',
-    useCases: Array.isArray(evidence.useCases) ? evidence.useCases : [],
-    unknowns: Array.isArray(evidence.unknowns) ? evidence.unknowns : [],
-    changeReason: trendContext.changeReason || ''
+    batteryPowered: !!hardwareHints.batteryPowered,
+    marketStage: normStr(maturityHints.marketStage || entity.status || ''),
+    evidenceLevel: normStr(maturityHints.evidenceLevel || ''),
+    adoptionRisk: normStr(maturityHints.adoptionRisk || ''),
+    productionConfidence: normStr(maturityHints.productionConfidence || entity.confidence || ''),
+    platformBinding: normStr(ecosystemHints.platformBinding || ''),
+    dependencyType: normStr(ecosystemHints.dependencyType || ''),
+    useCases: ensureArray(evidence.useCases).map(normStr).filter(Boolean),
+    unknowns: ensureArray(evidence.unknowns || trendContext.evidenceUnknowns).map(normStr).filter(Boolean),
+    keyFacts: ensureArray(evidence.keyFacts).map(normStr).filter(Boolean),
+    changeReason: normStr(trendContext.changeReason || ''),
+    contextDate: normStr(trendContext.contextDate || ''),
+    timing: normStr(trendContext.timing || ''),
+    historicalValue: !!trendContext.historicalValue,
+    trustConfidence: normStr(trust.confidence || seedMeta.trustConfidence || ''),
+    trustScore: Number(trust.trustScore || seedMeta.trustScore || 0),
+    riskFlags: ensureArray(trust.riskFlags).map(normStr).filter(Boolean)
   };
 }
 
+function hasTrendSignal(trendSignals) {
+  if (!trendSignals) return false;
+
+  return !!(
+    trendSignals.emergingCategory ||
+    trendSignals.marketStage ||
+    trendSignals.changeReason ||
+    trendSignals.inputMethod ||
+    trendSignals.requiresProjection ||
+    trendSignals.useCases.length ||
+    trendSignals.unknowns.length ||
+    trendSignals.keyFacts.length
+  );
+}
+
+function isEarlyStageTrend(trendSignals) {
+  const marketStage = toLower(trendSignals && trendSignals.marketStage);
+  const evidenceLevel = toLower(trendSignals && trendSignals.evidenceLevel);
+  const productionConfidence = toLower(trendSignals && trendSignals.productionConfidence);
+
+  return /prototype|concept|candidate|emerging|early|unknown/.test(marketStage) ||
+    /low|medium|unknown/.test(evidenceLevel) ||
+    /low|medium|unknown/.test(productionConfidence);
+}
+
+function readableList(items, fallback) {
+  const arr = ensureArray(items).map(normStr).filter(Boolean);
+  if (!arr.length) return fallback || '';
+
+  if (arr.length === 1) return arr[0];
+  if (arr.length === 2) return `${arr[0]} and ${arr[1]}`;
+
+  return `${arr.slice(0, -1).join(', ')}, and ${arr[arr.length - 1]}`;
+}
+
+function buildMarketStageLine(targetName, trendSignals) {
+  if (!hasTrendSignal(trendSignals)) return '';
+
+  const marketStage = normStr(trendSignals.marketStage);
+  const emergingCategory = normStr(trendSignals.emergingCategory || trendSignals.secondaryCategory || trendSignals.primaryCategory);
+  const changeReason = normStr(trendSignals.changeReason);
+  const evidenceLevel = normStr(trendSignals.evidenceLevel);
+  const contextDate = normStr(trendSignals.contextDate);
+
+  const subject =
+    emergingCategory
+      ? `${targetName} belongs in the ${emergingCategory} conversation`
+      : `${targetName} belongs in an early device category conversation`;
+
+  const when = contextDate ? ` as of ${contextDate}` : '';
+  const reason = changeReason ? ` because ${changeReason} pushed the category back into review scope` : '';
+  const maturity = marketStage ? ` Its status still reads as ${marketStage}` : ' Its status still needs caution';
+  const evidence = evidenceLevel ? `, with ${evidenceLevel} evidence rather than settled mass-market proof.` : ', so the review should keep verification ahead of certainty.';
+
+  return `${subject}${when}${reason}.${maturity}${evidence}`;
+}
+
 function buildSpecificDeviceObservation(targetName, trendSignals) {
-  if (!trendSignals) return '';
+  if (!trendSignals || !hasTrendSignal(trendSignals)) return '';
 
   const details = [];
 
-  if (trendSignals.wearable) {
-    details.push(`${targetName} is positioned more like a wearable input tool than a traditional desk device.`);
+  if (trendSignals.wearable || trendSignals.formFactor) {
+    const formFactor = trendSignals.formFactor || 'wearable';
+    details.push(`${targetName} is better framed as a ${formFactor} input concept than as a normal desk keyboard replacement.`);
   }
 
   if (trendSignals.requiresProjection) {
-    details.push(`Because the device depends on projection-based interaction, lighting conditions and typing accuracy may matter more than they would on a normal keyboard.`);
+    details.push('Projection stability, surface conditions, and ambient lighting would be part of the basic usability test, not minor edge cases.');
   }
 
   if (trendSignals.inputMethod) {
-    details.push(`The current interaction model relies on ${trendSignals.inputMethod}, which means hand fatigue and gesture consistency could affect longer sessions.`);
+    details.push(`Because input depends on ${trendSignals.inputMethod}, the review has to watch for typing accuracy, gesture consistency, and hand fatigue before treating the idea as practical.`);
   }
 
-  if (trendSignals.marketStage) {
-    details.push(`Its current market stage still appears closer to ${trendSignals.marketStage} than to a mature mainstream hardware category.`);
+  if (trendSignals.connectivity || trendSignals.dependencyType) {
+    const dependency = trendSignals.connectivity || trendSignals.dependencyType;
+    details.push(`The ${dependency} dependency also makes pairing reliability and cross-device behavior part of the buying question.`);
+  }
+
+  if (trendSignals.unknowns.length) {
+    details.push(`The unresolved points are ${readableList(trendSignals.unknowns)}, so any recommendation has to remain conditional.`);
   }
 
   return details.join(' ');
+}
+
+function buildDeviceScenarioLine(targetName, trendSignals) {
+  const useCase = readableList(trendSignals && trendSignals.useCases, '');
+
+  if (useCase) {
+    return `The most realistic scenario is ${useCase}, where the buyer wants faster input without carrying a full keyboard. In that setting, ${targetName} would need to prove that setup time, typing accuracy, and battery life do not erase the portability gain.`;
+  }
+
+  if (trendSignals && trendSignals.wearable) {
+    return `The realistic scenario is short-session mobile typing: quick notes, travel messages, or portable work where a normal keyboard is inconvenient. Longer writing sessions would still depend on comfort, accuracy, and battery behavior.`;
+  }
+
+  return `The practical scenario is not a perfect demo, but ordinary use: starting quickly, typing accurately enough, and stopping without spending more time correcting input than the device saves.`;
+}
+
+function buildDeviceComparisonLine(targetName, trendSignals) {
+  const uncertain = isEarlyStageTrend(trendSignals);
+
+  if (trendSignals && trendSignals.requiresProjection) {
+    return `Compared with a physical Bluetooth keyboard, the point is not whether ${targetName} is automatically better. The fair comparison is whether projection-based input can become portable enough without losing too much accuracy, tactile feedback, or setup reliability.`;
+  }
+
+  if (trendSignals && trendSignals.wearable) {
+    return `Compared with foldable or tablet keyboards, ${targetName} would compete on carrying convenience first. It would still need to prove that the wearable form factor does not trade too much stability for novelty.`;
+  }
+
+  if (uncertain) {
+    return `Compared with mature alternatives, ${targetName} should be treated as an early option until pricing, durability, support, and everyday reliability are clearer.`;
+  }
+
+  return `The useful comparison is with the buyer's current setup: if the product does not reduce a repeated problem, the newer category alone is not enough reason to switch.`;
+}
+
+function buildBuyerCautionLine(targetName, trendSignals) {
+  const unknowns = ensureArray(trendSignals && trendSignals.unknowns).map(normStr).filter(Boolean);
+
+  if (unknowns.length) {
+    return `Before treating ${targetName} as a real purchase candidate, the buyer should verify ${readableList(unknowns)}. These are not small details for an early device; they decide whether the concept survives normal use.`;
+  }
+
+  if (isEarlyStageTrend(trendSignals)) {
+    return `Before treating ${targetName} as ready for ordinary buyers, the buyer should look for independent proof of durability, support, battery behavior, and repeatable performance.`;
+  }
+
+  return `The safer decision is to check whether the product solves a repeated problem better than the buyer's existing setup, not whether it looks more advanced on paper.`;
+}
+
+function buildBestForNotForByTrend(targetName, trendSignals) {
+  if (!trendSignals || !hasTrendSignal(trendSignals)) {
+    return {
+      bestFor: `${targetName} is best for buyers whose daily routine clearly matches its main hardware advantage and who want that advantage enough to accept the trade-offs.`,
+      notFor: `It is not the best fit for buyers who need the safer long-term support path, the lowest total cost, or a device that must handle very broad use cases without compromise.`
+    };
+  }
+
+  const useCase = readableList(trendSignals.useCases, 'short mobile input');
+  const early = isEarlyStageTrend(trendSignals);
+
+  return {
+    bestFor: `${targetName} is best for early adopters and mobile users who specifically want to test ${useCase} and are comfortable waiting for proof around accuracy, battery behavior, and support.`,
+    notFor: early
+      ? `It is not the best fit for long-session writers, office-heavy typists, or buyers who need a dependable physical-keyboard replacement today.`
+      : `It is not the best fit for buyers whose main need is broad compatibility, the lowest cost, or a familiar physical typing feel.`
+  };
+}
+
+function buildTrendProsCons(targetName, trendSignals) {
+  if (!trendSignals || !hasTrendSignal(trendSignals)) return null;
+
+  const pros = [
+    trendSignals.wearable
+      ? 'Could reduce the need to carry a separate keyboard for short mobile input.'
+      : 'Could make a specific input task more portable if the hardware advantage holds up.',
+    trendSignals.requiresProjection
+      ? 'Projection-based input could be useful when the user has no room for a physical keyboard.'
+      : 'The category may help users who need a more compact setup.',
+    trendSignals.useCases.length
+      ? `The clearest fit is ${readableList(trendSignals.useCases)}.`
+      : 'The clearest fit is a narrow routine where the device solves a repeated inconvenience.'
+  ];
+
+  const unknownText = trendSignals.unknowns.length
+    ? readableList(trendSignals.unknowns)
+    : 'price, support, durability, and repeat accuracy';
+
+  const cons = [
+    `The recommendation stays conditional until ${unknownText} are clearer.`,
+    trendSignals.requiresProjection
+      ? 'Projection conditions, lighting, and surface behavior could weaken the experience outside controlled demos.'
+      : 'Early hardware can lose value if setup friction appears in normal environments.',
+    trendSignals.inputMethod
+      ? `The ${trendSignals.inputMethod} input method still has to prove comfort and consistency over longer sessions.`
+      : 'The main input method still has to prove comfort and consistency over longer sessions.'
+  ];
+
+  return { pros, cons };
 }
 
 
@@ -429,26 +628,55 @@ function buildReviewSection(title, label, h2, meta, post) {
   const reviewState = deriveReviewState(post);
   const identityLine = buildReviewIdentityLine(targetName, entityType, provider);
   const trendSignals = extractTrendSignals(post);
+  const isDeviceTrend = entityType === 'device' && hasTrendSignal(trendSignals);
   const deviceSpecificObservation = buildSpecificDeviceObservation(targetName, trendSignals);
+  const marketStageLine = buildMarketStageLine(targetName, trendSignals);
+  const scenarioLine = buildDeviceScenarioLine(targetName, trendSignals);
+  const comparisonLine = buildDeviceComparisonLine(targetName, trendSignals);
+  const buyerCautionLine = buildBuyerCautionLine(targetName, trendSignals);
+  const trendProsCons = buildTrendProsCons(targetName, trendSignals);
+  const bestForNotFor = buildBestForNotForByTrend(targetName, trendSignals);
 
   if (h2 === 'Overview') {
+    if (isDeviceTrend) {
+      return makeParagraphs([
+        `${targetName} is not ready to judge like a mature mainstream gadget. It is better treated as an early market evaluation: does the concept solve a real input problem, and what still needs proof before a buyer should care?`,
+        `${marketStageLine} ${deviceSpecificObservation}`,
+        `${scenarioLine}`
+      ]);
+    }
+
     const introByType =
       entityType === 'device'
-        ? `${targetName} is worth a closer look when the buyer cares about portability, setup practicality, input comfort, and whether the hardware still feels usable after the novelty wears off.`
+        ? `${targetName} is worth a closer look when the buyer cares about day-to-day reliability, comfort, battery behavior, and whether the hardware still feels sensible after the first few days of use.`
         : entityType === 'subscription'
           ? `${targetName} deserves attention when the buyer wants predictable value, clear plan limits, and enough ongoing usefulness to justify another monthly payment.`
           : `${targetName} is most useful to examine through ordinary writing, editing, and repeat-use moments rather than through launch-window curiosity alone.`;
 
     return makeParagraphs([
       `${introByType} The switching question is simple: does it remove enough friction to replace the current habit, or does it merely look attractive during a first trial?`,
-      `${identityLine}${deviceSpecificObservation ? ` ${deviceSpecificObservation}` : ''}${context ? ` The surrounding context also matters here, especially for ${context}.` : ''} For most readers, the answer depends on whether the device stays practical once the first curiosity fades and regular use begins.`
+      `${identityLine}${context ? ` The surrounding context also matters here, especially for ${context}.` : ''} For most readers, the answer depends on workflow speed, visible limits, trust in updates, and whether the product remains helpful after the first week.`
     ]);
   }
 
   if (h2 === 'Key Features') {
+    if (isDeviceTrend) {
+      return [
+        makeParagraphs([
+          `${targetName}'s important features are not a long spec list. The meaningful test is whether the input method can turn a phone or portable setup into a usable typing surface without demanding too much correction afterward.`,
+          `${comparisonLine}`
+        ]),
+        makeList([
+          trendSignals.requiresProjection ? 'Projection stability has to work in ordinary lighting and surface conditions.' : 'Setup reliability has to hold outside ideal demo conditions.',
+          trendSignals.inputMethod ? `${trendSignals.inputMethod} must remain accurate enough for repeated typing, not just short demonstrations.` : 'The input method has to prove repeatable accuracy.',
+          trendSignals.connectivity ? `${trendSignals.connectivity} pairing should be quick enough that the device still feels portable.` : 'Pairing and startup time should not erase the portability advantage.'
+        ])
+      ].join('\n');
+    }
+
     const featureLead =
       entityType === 'device'
-        ? `${targetName}'s useful features are the ones that improve mobile or portable use without forcing the buyer to relearn basic typing or navigation habits.`
+        ? `${targetName}'s useful features are the ones that affect repeated handling: display comfort, battery confidence, performance consistency, setup simplicity, and how easily the device fits into the buyer's existing routine.`
         : entityType === 'subscription'
           ? `${targetName}'s useful features are the ones that make the subscription feel used rather than merely owned: content depth, account flexibility, cancellation clarity, offline access, and reliable availability.`
           : `${targetName}'s useful features are the ones that support repeated work: fast draft creation, rewriting, tone adjustment, export flow, and the ability to keep editing without losing the user's train of thought.`;
@@ -456,7 +684,7 @@ function buildReviewSection(title, label, h2, meta, post) {
     return [
       makeParagraphs([
         `${featureLead}`,
-        `The feature set becomes stronger when the device responds consistently during ordinary use and does not require constant adjustment just to stay usable. Experimental hardware loses value quickly when setup friction or tracking inconsistency interrupts repeated tasks.`
+        `The feature set becomes stronger when the main task can be started quickly and finished without jumping through extra screens. If the strongest tools are hidden behind unclear limits or a disruptive upgrade prompt, the practical value drops even when the feature list looks long.`
       ]),
       makeList([
         `${targetName} needs a clear main workflow that feels easy to repeat.`,
@@ -467,6 +695,23 @@ function buildReviewSection(title, label, h2, meta, post) {
   }
 
   if (h2 === 'Specs & ROI') {
+    if (isDeviceTrend) {
+      return [
+        makeParagraphs([
+          `For ${targetName}, ROI cannot be treated as normal gadget math yet. The buyer first needs proof that the concept works in the situations it is supposed to improve.`,
+          `${buyerCautionLine}`
+        ]),
+        makeTable(
+          ['Decision factor', 'What to verify', 'Why it matters'],
+          [
+            ['Market status', trendSignals.marketStage || 'Release maturity', 'Separates early category interest from ready-to-buy confidence'],
+            ['Input reliability', trendSignals.inputMethod || 'Typing method', 'Decides whether the device saves time or creates correction work'],
+            ['Unknowns', readableList(trendSignals.unknowns, 'Price, battery life, and long-session behavior'), 'These decide whether the recommendation can move beyond curiosity']
+          ]
+        )
+      ].join('\n');
+    }
+
     const roiLead =
       entityType === 'device'
         ? `For ${targetName}, ROI comes from the gap between purchase cost and daily usefulness: battery life, performance headroom, repair risk, accessory needs, and how long the device can stay comfortable before replacement feels necessary.`
@@ -491,6 +736,13 @@ function buildReviewSection(title, label, h2, meta, post) {
   }
 
   if (h2 === 'Insights') {
+    if (isDeviceTrend) {
+      return makeParagraphs([
+        `${targetName} should be read through feasibility signals rather than launch excitement. The important signals are whether the concept can survive normal lighting, hand movement, pairing delays, short-session typing, and the lack of physical key feedback.`,
+        `The category position matters too. If the product remains closer to ${trendSignals.marketStage || 'an early-stage device'} than to a mature accessory, the strongest insight is caution: watch the evidence before turning the concept into a recommendation.`
+      ]);
+    }
+
     const insightLead =
       entityType === 'device'
         ? `The most useful signals for ${targetName} usually appear in comfort, heat, battery drain, durability, setup friction, and whether performance stays consistent after the first impression.`
@@ -505,6 +757,13 @@ function buildReviewSection(title, label, h2, meta, post) {
   }
 
   if (h2 === 'Ratings') {
+    if (isDeviceTrend) {
+      return makeParagraphs([
+        `For ${targetName}, ratings would be less useful than verification until enough independent usage data exists. An early device can look promising in a controlled demo and still struggle with lighting, accuracy, comfort, or battery behavior in normal use.`,
+        `This means the recommendation should stay conditional. The review can explain what changed in the category, but it should not turn an early signal into proof of real-world dependability.`
+      ]);
+    }
+
     if (reviewState === 'measured') {
       return makeParagraphs([
         `Ratings can support the case for ${targetName}, but they should not carry the whole decision. A strong score can still hide repeated complaints, while a mixed score can still be acceptable when the buyer only needs the product's strongest use case.`,
@@ -519,6 +778,13 @@ function buildReviewSection(title, label, h2, meta, post) {
   }
 
   if (h2 === 'Verdict') {
+    if (isDeviceTrend) {
+      return makeParagraphs([
+        `${targetName} is interesting as an early category signal, not as a simple buy recommendation. If it reaches a real purchase stage, the decision should depend on typing accuracy, battery life, projection stability, support clarity, and whether the use case is frequent enough to matter.`,
+        `For now, the safer verdict is conditional: watch the category, verify the unknowns, and treat the device as a possible future input option rather than a proven replacement for physical keyboards.`
+      ]);
+    }
+
     const verdictLead =
       entityType === 'device'
         ? `${targetName} is a stronger choice for buyers who need its specific hardware advantages and can accept the price, durability, or ecosystem trade-offs that come with it.`
@@ -533,6 +799,22 @@ function buildReviewSection(title, label, h2, meta, post) {
   }
 
   if (h2 === 'Pros & Cons') {
+    if (isDeviceTrend && trendProsCons) {
+      return [
+        makeParagraphs([
+          `The pros and cons for ${targetName} should stay tied to what is known and what remains unverified. That keeps the review useful without pretending the product is already proven in daily use.`
+        ]),
+        makeTable(
+          ['Potential upside', 'Risk or unknown'],
+          [
+            [trendProsCons.pros[0], trendProsCons.cons[0]],
+            [trendProsCons.pros[1], trendProsCons.cons[1]],
+            [trendProsCons.pros[2], trendProsCons.cons[2]]
+          ]
+        )
+      ].join('\n');
+    }
+
     const pros =
       entityType === 'device'
         ? [
@@ -587,6 +869,13 @@ function buildReviewSection(title, label, h2, meta, post) {
   }
 
   if (h2 === 'Best For / Not For') {
+    if (isDeviceTrend) {
+      return makeParagraphs([
+        bestForNotFor.bestFor,
+        bestForNotFor.notFor
+      ]);
+    }
+
     const bestFor =
       entityType === 'device'
         ? `${targetName} is best for buyers whose daily routine clearly matches its main hardware advantage and who want that advantage enough to accept the trade-offs.`
@@ -608,6 +897,13 @@ function buildReviewSection(title, label, h2, meta, post) {
   }
 
   if (h2 === 'Alternatives & Comparisons') {
+    if (isDeviceTrend) {
+      return makeParagraphs([
+        `${comparisonLine}`,
+        `${targetName} should not be ranked as better or worse than mature keyboards until real accuracy, battery, support, and release details are confirmed. The comparison is useful as a checklist, not as a final scoreboard.`
+      ]);
+    }
+
     return makeParagraphs([
       `Alternatives are useful because they reveal what ${targetName} emphasizes. One competing option may be stronger on price, another on maturity, and another on simplicity. That comparison makes the product easier to place in a real buying decision.`,
       `${targetName} becomes the better choice only when its strongest advantage still matters after price, limits, workflow, and long-term trust are weighed together.`
@@ -1224,7 +1520,8 @@ function main() {
         label: label || '',
         bodyPromptUsed: !!extractBodyPrompt(post),
         selfReviewLoop: ['A:factuality', 'C:criteria-check', 'D:anti-ai-tone',
-          'L:instruction-leakage-guard'],
+          'L:instruction-leakage-guard',
+          'R:trend-realism-guard'],
         repairMode: CONTENT_REPAIR_MODE,
         repairIssueCount: repairIssues.length,
       };
