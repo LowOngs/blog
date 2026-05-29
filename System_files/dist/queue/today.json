@@ -1,38 +1,39 @@
 {
-  "date": "2026-05-28",
+  "date": "2026-05-29",
   "timezone": "Asia/Seoul",
   "cutoff": "10:00",
   "items": [
     {
-      "date": "2026-05-28",
+      "date": "2026-05-29",
       "label": "how-to-playbooks",
       "seedLabel": "how-to-playbooks",
       "requestedSlotLabel": "how-to-playbooks",
       "mode": "trend",
-      "id": "how-to-playbooks-trend-1772630313744-859685923",
-      "title": "AUTO GENERATED: how-to-playbooks (trend) #1772630313744-859685923",
-      "angle": "Auto angle (trend) var=1772630313744-859685923",
+      "id": "how-to-playbooks-trend-1772630313744-668340952",
+      "title": "AUTO GENERATED: how-to-playbooks (trend) #1772630313744-668340952",
+      "angle": "Auto angle (trend) var=1772630313744-668340952",
       "audience": "General",
       "intent": "trend",
       "priority": 5,
       "notes": "Replace with real LLM generation."
     },
     {
-      "date": "2026-05-28",
-      "label": "subscription-services",
-      "seedLabel": "subscription-services",
-      "requestedSlotLabel": "subscription-services",
+      "date": "2026-05-29",
+      "label": "app-reviews",
+      "seedLabel": "app-reviews",
+      "requestedSlotLabel": "app-reviews",
       "mode": "trend",
-      "id": "ss-tr-008",
-      "title": "Is the Latest Gaming Subscription Rotation Worth It?",
-      "angle": "Game quality + rotation pattern",
-      "audience": "Gamers",
-      "intent": "review/content",
+      "id": "ar-tr-020",
+      "title": "Which Ride-Hailing App Is the Most Efficient in Your City?",
+      "angle": "Wait time + cancellation frequency",
+      "audience": "Daily commuters",
+      "intent": "review/performance-check",
       "priority": 0,
       "notes": "",
       "reviewEntity": {
-        "type": "subscription",
-        "service": "Gaming Services"
+        "type": "app",
+        "appName": "Ride-Hailing App",
+        "platform": "android"
       }
     }
   ]

@@ -5,21 +5,6 @@
   },
   "trend": [
     {
-      "id": "ar-tr-020",
-      "title": "Which Ride-Hailing App Is the Most Efficient in Your City?",
-      "angle": "Wait time + cancellation frequency",
-      "audience": "Daily commuters",
-      "intent": "review/performance-check",
-      "environment": "transport apps",
-      "timing": "seasonal",
-      "goal": "find app with consistent service stability",
-      "reviewEntity": {
-        "type": "app",
-        "appName": "Ride-Hailing App",
-        "platform": "android"
-      }
-    },
-    {
       "id": "ar-tr-021",
       "title": "Is the New Grocery Delivery App Worth the Fees?",
       "angle": "Compare delivery accuracy + substitutions",
