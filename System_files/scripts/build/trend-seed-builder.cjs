@@ -18,12 +18,14 @@ const { buildEntityCandidate } = require('./lib/entity-candidate-policy.cjs');
 
 const ROOT = path.resolve(__dirname, '../..');
 
-const ENTITY_CANDIDATES_FILE = path.join(
-  ROOT,
-  'dist',
-  'entity-candidates',
-  'entity-candidates.json'
-);
+const ENTITY_CANDIDATES_FILE =
+  process.env.ENTITY_CANDIDATES_FILE ||
+  path.join(
+    ROOT,
+    'dist',
+    'entity-candidates',
+    'entity-candidates.json'
+  );
 
 const OUT_DIR = path.join(
   ROOT,
@@ -220,6 +222,16 @@ function compactReason(reason) {
     .replace(/\bmarket\s+change\b/i, 'recent market changes');
 }
 
+function pickIndefiniteArticle(word) {
+  const s = normalizeText(word).toLowerCase();
+
+  if (/^[aeiou]/.test(s)) {
+    return 'an';
+  }
+
+  return 'a';
+}
+
 function pickTitlePattern(intent, index, signals) {
   const s = signals || {};
   const n = Number.isFinite(Number(index)) ? Number(index) : 0;
@@ -278,7 +290,8 @@ function buildTitle(intent, name, reason, classificationHints = {}, evidence = {
   }
 
   if (pattern === 'market-position') {
-    return `${targetName} as a ${signals.marketStage} ${category} candidate`;
+    const article = pickIndefiniteArticle(signals.marketStage);
+    return `${targetName} as ${article} ${signals.marketStage} ${category} candidate`;
   }
 
   if (pattern === 'comparison') {
