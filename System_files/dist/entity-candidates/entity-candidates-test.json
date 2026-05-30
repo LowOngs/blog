@@ -1,0 +1,2790 @@
+{
+  "generatedAt": "2026-05-30T00:00:00.000Z",
+  "schemaVersion": "entity-candidates.v1",
+  "exportedAt": "2026-05-30T00:00:00.000Z",
+  "source": {
+    "rawSignalFile": "manual-test",
+    "picked": 6,
+    "totalSignals": 6,
+    "skippedOldSchema": 0,
+    "dedupe": "conceptKey",
+    "requiredShape": [
+      "fingerprint",
+      "dedupe.conceptKey",
+      "classificationHints",
+      "trust"
+    ]
+  },
+  "summary": {
+    "total": 6,
+    "pass": 6,
+    "hold": 0,
+    "reject": 0
+  },
+  "pass": [
+    {
+      "type": "trendReadyEntityCandidate",
+      "schemaVersion": "entity-candidates.v1",
+      "status": "ready",
+      "label": "device-reviews",
+      "mode": "trend",
+      "entity": {
+        "name": "Samsung Hologram Keyboard",
+        "brand": "Samsung",
+        "type": "device",
+        "category": "emerging-device",
+        "deviceClass": "gesture-input-device",
+        "interactionModel": "holographic-interaction",
+        "status": "candidate",
+        "confidence": "low"
+      },
+      "keyPoints": [
+        "Samsung Hologram Keyboard candidate. holographic-input-device. wrist-worn. finger tracking. mobile typing",
+        "Samsung",
+        "holographic-input-device",
+        "wrist-worn",
+        "finger tracking"
+      ],
+      "trendContext": {
+        "contextDate": "2026-05",
+        "changeReason": "new device category emergence",
+        "historicalValue": true
+      },
+      "sourceTrace": {
+        "rawFingerprint": "fp1:test000000000000000000000000000000000000001",
+        "rawConceptKey": "samsung|samsung-hologram-keyboard",
+        "rawSimilarityGroup": "holographic-input-device",
+        "capturedAt": "2026-05-30T00:00:00.000Z",
+        "sourceDomain": "manual-test.local",
+        "trustConfidence": "high",
+        "trustScore": 18
+      },
+      "classificationHints": {
+        "brand": "Samsung",
+        "productTypeWords": [
+          "holographic",
+          "input",
+          "device"
+        ],
+        "formFactor": "wrist-worn",
+        "interactionModel": "holographic interaction",
+        "inputMethod": "finger tracking",
+        "connectivity": "bluetooth",
+        "categoryHints": {
+          "primaryCategory": "device",
+          "secondaryCategory": "gesture-input-device",
+          "emergingCategory": "holographic-input-device"
+        },
+        "interactionHints": {
+          "interactionModel": "holographic-interaction",
+          "inputMethod": "finger-tracking",
+          "feedbackMethod": "visual-or-audio",
+          "controlSurface": "unknown"
+        },
+        "hardwareHints": {
+          "wearable": true,
+          "standalone": false,
+          "requiresPhone": false,
+          "requiresProjection": true,
+          "batteryPowered": true
+        },
+        "maturityHints": {
+          "marketStage": "prototype-commercial",
+          "evidenceLevel": "medium",
+          "adoptionRisk": "medium",
+          "productionConfidence": "medium"
+        },
+        "ecosystemHints": {
+          "companionDevices": [],
+          "dependencyType": "bluetooth",
+          "platformBinding": "cross-platform"
+        }
+      },
+      "evidence": {
+        "keyFacts": [
+          "hologram projection",
+          "finger tracking"
+        ],
+        "useCases": [
+          "mobile typing"
+        ],
+        "unknowns": [
+          "price",
+          "battery life",
+          "typing accuracy"
+        ]
+      },
+      "trust": {
+        "confidence": "high",
+        "trustScore": 18,
+        "scoreBreakdown": {
+          "accumulationScore": 7,
+          "evidenceScore": 3,
+          "classificationScore": 5,
+          "maturityScore": 3
+        },
+        "riskFlags": [
+          "new-category-claim",
+          "evidence-unknowns"
+        ],
+        "writeReady": true,
+        "needsMoreEvidence": false
+      },
+      "validation": {
+        "status": "pass",
+        "reason": "ready for seed handoff",
+        "errors": []
+      }
+    },
+    {
+      "type": "trendReadyEntityCandidate",
+      "schemaVersion": "entity-candidates.v1",
+      "status": "ready",
+      "label": "device-reviews",
+      "mode": "trend",
+      "entity": {
+        "name": "Apple AR Contact Lens",
+        "brand": "Apple",
+        "type": "device",
+        "category": "emerging-device",
+        "deviceClass": "wearable-display-device",
+        "interactionModel": "eye-tracking-interface",
+        "status": "candidate",
+        "confidence": "low"
+      },
+      "keyPoints": [
+        "Apple AR Contact Lens candidate. ar-contact-lens. contact-lens. eye tracking. hands-free notifications, micro display overlays",
+        "Apple",
+        "ar-contact-lens",
+        "contact-lens",
+        "eye tracking"
+      ],
+      "trendContext": {
+        "contextDate": "2026-05",
+        "changeReason": "future wearable interface discussion",
+        "historicalValue": true
+      },
+      "sourceTrace": {
+        "rawFingerprint": "fp1:test000000000000000000000000000000000000002",
+        "rawConceptKey": "apple|ar-contact-lens",
+        "rawSimilarityGroup": "ar-contact-lens",
+        "capturedAt": "2026-05-30T00:00:00.000Z",
+        "sourceDomain": "manual-test.local",
+        "trustConfidence": "high",
+        "trustScore": 18
+      },
+      "classificationHints": {
+        "brand": "Apple",
+        "productTypeWords": [
+          "ar",
+          "contact",
+          "lens"
+        ],
+        "formFactor": "contact-lens",
+        "interactionModel": "eye tracking interface",
+        "inputMethod": "eye tracking",
+        "connectivity": "device linked",
+        "categoryHints": {
+          "primaryCategory": "device",
+          "secondaryCategory": "wearable-display-device",
+          "emergingCategory": "ar-contact-lens"
+        },
+        "interactionHints": {
+          "interactionModel": "eye-tracking-interface",
+          "inputMethod": "eye-tracking",
+          "feedbackMethod": "visual-or-audio",
+          "controlSurface": "unknown"
+        },
+        "hardwareHints": {
+          "wearable": true,
+          "standalone": false,
+          "requiresPhone": true,
+          "requiresProjection": false,
+          "batteryPowered": true
+        },
+        "maturityHints": {
+          "marketStage": "concept-stage",
+          "evidenceLevel": "medium",
+          "adoptionRisk": "medium",
+          "productionConfidence": "medium"
+        },
+        "ecosystemHints": {
+          "companionDevices": [],
+          "dependencyType": "device-linked",
+          "platformBinding": "cross-platform"
+        }
+      },
+      "evidence": {
+        "keyFacts": [
+          "eye tracking",
+          "micro display overlay"
+        ],
+        "useCases": [
+          "hands-free notifications",
+          "micro display overlays"
+        ],
+        "unknowns": [
+          "safety approval",
+          "battery life",
+          "display brightness"
+        ]
+      },
+      "trust": {
+        "confidence": "high",
+        "trustScore": 18,
+        "scoreBreakdown": {
+          "accumulationScore": 7,
+          "evidenceScore": 3,
+          "classificationScore": 5,
+          "maturityScore": 3
+        },
+        "riskFlags": [
+          "new-category-claim",
+          "evidence-unknowns"
+        ],
+        "writeReady": true,
+        "needsMoreEvidence": false
+      },
+      "validation": {
+        "status": "pass",
+        "reason": "ready for seed handoff",
+        "errors": []
+      }
+    },
+    {
+      "type": "trendReadyEntityCandidate",
+      "schemaVersion": "entity-candidates.v1",
+      "status": "ready",
+      "label": "device-reviews",
+      "mode": "trend",
+      "entity": {
+        "name": "Meta Workspace Glasses",
+        "brand": "Meta",
+        "type": "device",
+        "category": "emerging-device",
+        "deviceClass": "spatial-workspace-device",
+        "interactionModel": "spatial-computing",
+        "status": "candidate",
+        "confidence": "low"
+      },
+      "keyPoints": [
+        "Meta Workspace Glasses candidate. portable-ar-workspace. glasses. hand tracking. portable workstation, remote work display",
+        "Meta",
+        "portable-ar-workspace",
+        "glasses",
+        "hand tracking"
+      ],
+      "trendContext": {
+        "contextDate": "2026-05",
+        "changeReason": "portable workspace category growth",
+        "historicalValue": true
+      },
+      "sourceTrace": {
+        "rawFingerprint": "fp1:test000000000000000000000000000000000000003",
+        "rawConceptKey": "meta|workspace-glasses",
+        "rawSimilarityGroup": "portable-ar-workspace",
+        "capturedAt": "2026-05-30T00:00:00.000Z",
+        "sourceDomain": "manual-test.local",
+        "trustConfidence": "high",
+        "trustScore": 18
+      },
+      "classificationHints": {
+        "brand": "Meta",
+        "productTypeWords": [
+          "portable",
+          "ar",
+          "workspace"
+        ],
+        "formFactor": "glasses",
+        "interactionModel": "spatial computing",
+        "inputMethod": "hand tracking",
+        "connectivity": "cloud linked",
+        "categoryHints": {
+          "primaryCategory": "device",
+          "secondaryCategory": "spatial-workspace-device",
+          "emergingCategory": "portable-ar-workspace"
+        },
+        "interactionHints": {
+          "interactionModel": "spatial-computing",
+          "inputMethod": "hand-tracking",
+          "feedbackMethod": "visual-or-audio",
+          "controlSurface": "unknown"
+        },
+        "hardwareHints": {
+          "wearable": true,
+          "standalone": false,
+          "requiresPhone": false,
+          "requiresProjection": false,
+          "batteryPowered": true
+        },
+        "maturityHints": {
+          "marketStage": "early-commercial",
+          "evidenceLevel": "medium",
+          "adoptionRisk": "medium",
+          "productionConfidence": "medium"
+        },
+        "ecosystemHints": {
+          "companionDevices": [],
+          "dependencyType": "cloud-linked",
+          "platformBinding": "cross-platform"
+        }
+      },
+      "evidence": {
+        "keyFacts": [
+          "spatial display",
+          "hand tracking"
+        ],
+        "useCases": [
+          "portable workstation",
+          "remote work display"
+        ],
+        "unknowns": [
+          "field of view",
+          "comfort",
+          "app compatibility"
+        ]
+      },
+      "trust": {
+        "confidence": "high",
+        "trustScore": 18,
+        "scoreBreakdown": {
+          "accumulationScore": 7,
+          "evidenceScore": 3,
+          "classificationScore": 5,
+          "maturityScore": 3
+        },
+        "riskFlags": [
+          "new-category-claim",
+          "evidence-unknowns"
+        ],
+        "writeReady": true,
+        "needsMoreEvidence": false
+      },
+      "validation": {
+        "status": "pass",
+        "reason": "ready for seed handoff",
+        "errors": []
+      }
+    },
+    {
+      "type": "trendReadyEntityCandidate",
+      "schemaVersion": "entity-candidates.v1",
+      "status": "ready",
+      "label": "device-reviews",
+      "mode": "trend",
+      "entity": {
+        "name": "Sony Neural Earbuds",
+        "brand": "Sony",
+        "type": "device",
+        "category": "emerging-device",
+        "deviceClass": "audio-ai-device",
+        "interactionModel": "voice-and-context-interface",
+        "status": "candidate",
+        "confidence": "low"
+      },
+      "keyPoints": [
+        "Sony Neural Earbuds candidate. neural-audio-assistant. earbuds. voice control. real-time translation, contextual audio assistant",
+        "Sony",
+        "neural-audio-assistant",
+        "earbuds",
+        "voice control"
+      ],
+      "trendContext": {
+        "contextDate": "2026-05",
+        "changeReason": "AI audio assistant expansion",
+        "historicalValue": true
+      },
+      "sourceTrace": {
+        "rawFingerprint": "fp1:test000000000000000000000000000000000000004",
+        "rawConceptKey": "sony|neural-earbuds",
+        "rawSimilarityGroup": "neural-audio-assistant",
+        "capturedAt": "2026-05-30T00:00:00.000Z",
+        "sourceDomain": "manual-test.local",
+        "trustConfidence": "high",
+        "trustScore": 18
+      },
+      "classificationHints": {
+        "brand": "Sony",
+        "productTypeWords": [
+          "neural",
+          "audio",
+          "assistant"
+        ],
+        "formFactor": "earbuds",
+        "interactionModel": "voice and context interface",
+        "inputMethod": "voice control",
+        "connectivity": "phone linked",
+        "categoryHints": {
+          "primaryCategory": "device",
+          "secondaryCategory": "audio-ai-device",
+          "emergingCategory": "neural-audio-assistant"
+        },
+        "interactionHints": {
+          "interactionModel": "voice-and-context-interface",
+          "inputMethod": "voice-control",
+          "feedbackMethod": "visual-or-audio",
+          "controlSurface": "unknown"
+        },
+        "hardwareHints": {
+          "wearable": true,
+          "standalone": false,
+          "requiresPhone": true,
+          "requiresProjection": false,
+          "batteryPowered": true
+        },
+        "maturityHints": {
+          "marketStage": "prototype-commercial",
+          "evidenceLevel": "medium",
+          "adoptionRisk": "medium",
+          "productionConfidence": "medium"
+        },
+        "ecosystemHints": {
+          "companionDevices": [],
+          "dependencyType": "phone-linked",
+          "platformBinding": "cross-platform"
+        }
+      },
+      "evidence": {
+        "keyFacts": [
+          "voice control",
+          "real-time translation"
+        ],
+        "useCases": [
+          "real-time translation",
+          "contextual audio assistant"
+        ],
+        "unknowns": [
+          "privacy handling",
+          "translation latency",
+          "offline support"
+        ]
+      },
+      "trust": {
+        "confidence": "high",
+        "trustScore": 18,
+        "scoreBreakdown": {
+          "accumulationScore": 7,
+          "evidenceScore": 3,
+          "classificationScore": 5,
+          "maturityScore": 3
+        },
+        "riskFlags": [
+          "new-category-claim",
+          "evidence-unknowns"
+        ],
+        "writeReady": true,
+        "needsMoreEvidence": false
+      },
+      "validation": {
+        "status": "pass",
+        "reason": "ready for seed handoff",
+        "errors": []
+      }
+    },
+    {
+      "type": "trendReadyEntityCandidate",
+      "schemaVersion": "entity-candidates.v1",
+      "status": "ready",
+      "label": "device-reviews",
+      "mode": "trend",
+      "entity": {
+        "name": "Google AI Ring",
+        "brand": "Google",
+        "type": "device",
+        "category": "emerging-device",
+        "deviceClass": "ambient-ai-wearable",
+        "interactionModel": "gesture-and-health-sensing",
+        "status": "candidate",
+        "confidence": "low"
+      },
+      "keyPoints": [
+        "Google AI Ring candidate. ai-smart-ring. ring. gesture sensing. quick AI prompts, health context capture",
+        "Google",
+        "ai-smart-ring",
+        "ring",
+        "gesture sensing"
+      ],
+      "trendContext": {
+        "contextDate": "2026-05",
+        "changeReason": "ambient wearable AI interface trend",
+        "historicalValue": true
+      },
+      "sourceTrace": {
+        "rawFingerprint": "fp1:test000000000000000000000000000000000000005",
+        "rawConceptKey": "google|ai-ring",
+        "rawSimilarityGroup": "ai-smart-ring",
+        "capturedAt": "2026-05-30T00:00:00.000Z",
+        "sourceDomain": "manual-test.local",
+        "trustConfidence": "high",
+        "trustScore": 18
+      },
+      "classificationHints": {
+        "brand": "Google",
+        "productTypeWords": [
+          "ai",
+          "smart",
+          "ring"
+        ],
+        "formFactor": "ring",
+        "interactionModel": "gesture and health sensing",
+        "inputMethod": "gesture sensing",
+        "connectivity": "phone linked",
+        "categoryHints": {
+          "primaryCategory": "device",
+          "secondaryCategory": "ambient-ai-wearable",
+          "emergingCategory": "ai-smart-ring"
+        },
+        "interactionHints": {
+          "interactionModel": "gesture-and-health-sensing",
+          "inputMethod": "gesture-sensing",
+          "feedbackMethod": "visual-or-audio",
+          "controlSurface": "unknown"
+        },
+        "hardwareHints": {
+          "wearable": true,
+          "standalone": false,
+          "requiresPhone": true,
+          "requiresProjection": false,
+          "batteryPowered": true
+        },
+        "maturityHints": {
+          "marketStage": "concept-stage",
+          "evidenceLevel": "medium",
+          "adoptionRisk": "medium",
+          "productionConfidence": "medium"
+        },
+        "ecosystemHints": {
+          "companionDevices": [],
+          "dependencyType": "phone-linked",
+          "platformBinding": "cross-platform"
+        }
+      },
+      "evidence": {
+        "keyFacts": [
+          "gesture sensing",
+          "health context"
+        ],
+        "useCases": [
+          "quick AI prompts",
+          "health context capture"
+        ],
+        "unknowns": [
+          "sensor accuracy",
+          "privacy model",
+          "battery life"
+        ]
+      },
+      "trust": {
+        "confidence": "high",
+        "trustScore": 18,
+        "scoreBreakdown": {
+          "accumulationScore": 7,
+          "evidenceScore": 3,
+          "classificationScore": 5,
+          "maturityScore": 3
+        },
+        "riskFlags": [
+          "new-category-claim",
+          "evidence-unknowns"
+        ],
+        "writeReady": true,
+        "needsMoreEvidence": false
+      },
+      "validation": {
+        "status": "pass",
+        "reason": "ready for seed handoff",
+        "errors": []
+      }
+    },
+    {
+      "type": "trendReadyEntityCandidate",
+      "schemaVersion": "entity-candidates.v1",
+      "status": "ready",
+      "label": "device-reviews",
+      "mode": "trend",
+      "entity": {
+        "name": "Microsoft Portable HoloDesk",
+        "brand": "Microsoft",
+        "type": "device",
+        "category": "emerging-device",
+        "deviceClass": "portable-display-workstation",
+        "interactionModel": "mixed-reality-workspace",
+        "status": "candidate",
+        "confidence": "low"
+      },
+      "keyPoints": [
+        "Microsoft Portable HoloDesk candidate. portable-holographic-workspace. foldable-projector. gesture and keyboard hybrid. travel workstation, temporary desk setup",
+        "Microsoft",
+        "portable-holographic-workspace",
+        "foldable-projector",
+        "gesture and keyboard hybrid"
+      ],
+      "trendContext": {
+        "contextDate": "2026-05",
+        "changeReason": "future portable workstation demand",
+        "historicalValue": true
+      },
+      "sourceTrace": {
+        "rawFingerprint": "fp1:test000000000000000000000000000000000000006",
+        "rawConceptKey": "microsoft|portable-holodesk",
+        "rawSimilarityGroup": "portable-holographic-workspace",
+        "capturedAt": "2026-05-30T00:00:00.000Z",
+        "sourceDomain": "manual-test.local",
+        "trustConfidence": "high",
+        "trustScore": 18
+      },
+      "classificationHints": {
+        "brand": "Microsoft",
+        "productTypeWords": [
+          "portable",
+          "holographic",
+          "workspace"
+        ],
+        "formFactor": "foldable-projector",
+        "interactionModel": "mixed reality workspace",
+        "inputMethod": "gesture and keyboard hybrid",
+        "connectivity": "pc linked",
+        "categoryHints": {
+          "primaryCategory": "device",
+          "secondaryCategory": "portable-display-workstation",
+          "emergingCategory": "portable-holographic-workspace"
+        },
+        "interactionHints": {
+          "interactionModel": "mixed-reality-workspace",
+          "inputMethod": "gesture-and-keyboard-hybrid",
+          "feedbackMethod": "visual-or-audio",
+          "controlSurface": "unknown"
+        },
+        "hardwareHints": {
+          "wearable": false,
+          "standalone": false,
+          "requiresPhone": false,
+          "requiresProjection": true,
+          "batteryPowered": true
+        },
+        "maturityHints": {
+          "marketStage": "concept-stage",
+          "evidenceLevel": "medium",
+          "adoptionRisk": "medium",
+          "productionConfidence": "medium"
+        },
+        "ecosystemHints": {
+          "companionDevices": [],
+          "dependencyType": "pc-linked",
+          "platformBinding": "cross-platform"
+        }
+      },
+      "evidence": {
+        "keyFacts": [
+          "mixed reality workspace",
+          "portable projection"
+        ],
+        "useCases": [
+          "travel workstation",
+          "temporary desk setup"
+        ],
+        "unknowns": [
+          "projection clarity",
+          "setup time",
+          "power draw"
+        ]
+      },
+      "trust": {
+        "confidence": "high",
+        "trustScore": 18,
+        "scoreBreakdown": {
+          "accumulationScore": 7,
+          "evidenceScore": 3,
+          "classificationScore": 5,
+          "maturityScore": 3
+        },
+        "riskFlags": [
+          "new-category-claim",
+          "evidence-unknowns"
+        ],
+        "writeReady": true,
+        "needsMoreEvidence": false
+      },
+      "validation": {
+        "status": "pass",
+        "reason": "ready for seed handoff",
+        "errors": []
+      }
+    }
+  ],
+  "hold": [],
+  "reject": [],
+  "passOnly": [
+    {
+      "type": "trendReadyEntityCandidate",
+      "schemaVersion": "entity-candidates.v1",
+      "status": "ready",
+      "label": "device-reviews",
+      "mode": "trend",
+      "entity": {
+        "name": "Samsung Hologram Keyboard",
+        "brand": "Samsung",
+        "type": "device",
+        "category": "emerging-device",
+        "deviceClass": "gesture-input-device",
+        "interactionModel": "holographic-interaction",
+        "status": "candidate",
+        "confidence": "low"
+      },
+      "keyPoints": [
+        "Samsung Hologram Keyboard candidate. holographic-input-device. wrist-worn. finger tracking. mobile typing",
+        "Samsung",
+        "holographic-input-device",
+        "wrist-worn",
+        "finger tracking"
+      ],
+      "trendContext": {
+        "contextDate": "2026-05",
+        "changeReason": "new device category emergence",
+        "historicalValue": true
+      },
+      "sourceTrace": {
+        "rawFingerprint": "fp1:test000000000000000000000000000000000000001",
+        "rawConceptKey": "samsung|samsung-hologram-keyboard",
+        "rawSimilarityGroup": "holographic-input-device",
+        "capturedAt": "2026-05-30T00:00:00.000Z",
+        "sourceDomain": "manual-test.local",
+        "trustConfidence": "high",
+        "trustScore": 18
+      },
+      "classificationHints": {
+        "brand": "Samsung",
+        "productTypeWords": [
+          "holographic",
+          "input",
+          "device"
+        ],
+        "formFactor": "wrist-worn",
+        "interactionModel": "holographic interaction",
+        "inputMethod": "finger tracking",
+        "connectivity": "bluetooth",
+        "categoryHints": {
+          "primaryCategory": "device",
+          "secondaryCategory": "gesture-input-device",
+          "emergingCategory": "holographic-input-device"
+        },
+        "interactionHints": {
+          "interactionModel": "holographic-interaction",
+          "inputMethod": "finger-tracking",
+          "feedbackMethod": "visual-or-audio",
+          "controlSurface": "unknown"
+        },
+        "hardwareHints": {
+          "wearable": true,
+          "standalone": false,
+          "requiresPhone": false,
+          "requiresProjection": true,
+          "batteryPowered": true
+        },
+        "maturityHints": {
+          "marketStage": "prototype-commercial",
+          "evidenceLevel": "medium",
+          "adoptionRisk": "medium",
+          "productionConfidence": "medium"
+        },
+        "ecosystemHints": {
+          "companionDevices": [],
+          "dependencyType": "bluetooth",
+          "platformBinding": "cross-platform"
+        }
+      },
+      "evidence": {
+        "keyFacts": [
+          "hologram projection",
+          "finger tracking"
+        ],
+        "useCases": [
+          "mobile typing"
+        ],
+        "unknowns": [
+          "price",
+          "battery life",
+          "typing accuracy"
+        ]
+      },
+      "trust": {
+        "confidence": "high",
+        "trustScore": 18,
+        "scoreBreakdown": {
+          "accumulationScore": 7,
+          "evidenceScore": 3,
+          "classificationScore": 5,
+          "maturityScore": 3
+        },
+        "riskFlags": [
+          "new-category-claim",
+          "evidence-unknowns"
+        ],
+        "writeReady": true,
+        "needsMoreEvidence": false
+      },
+      "validation": {
+        "status": "pass",
+        "reason": "ready for seed handoff",
+        "errors": []
+      }
+    },
+    {
+      "type": "trendReadyEntityCandidate",
+      "schemaVersion": "entity-candidates.v1",
+      "status": "ready",
+      "label": "device-reviews",
+      "mode": "trend",
+      "entity": {
+        "name": "Apple AR Contact Lens",
+        "brand": "Apple",
+        "type": "device",
+        "category": "emerging-device",
+        "deviceClass": "wearable-display-device",
+        "interactionModel": "eye-tracking-interface",
+        "status": "candidate",
+        "confidence": "low"
+      },
+      "keyPoints": [
+        "Apple AR Contact Lens candidate. ar-contact-lens. contact-lens. eye tracking. hands-free notifications, micro display overlays",
+        "Apple",
+        "ar-contact-lens",
+        "contact-lens",
+        "eye tracking"
+      ],
+      "trendContext": {
+        "contextDate": "2026-05",
+        "changeReason": "future wearable interface discussion",
+        "historicalValue": true
+      },
+      "sourceTrace": {
+        "rawFingerprint": "fp1:test000000000000000000000000000000000000002",
+        "rawConceptKey": "apple|ar-contact-lens",
+        "rawSimilarityGroup": "ar-contact-lens",
+        "capturedAt": "2026-05-30T00:00:00.000Z",
+        "sourceDomain": "manual-test.local",
+        "trustConfidence": "high",
+        "trustScore": 18
+      },
+      "classificationHints": {
+        "brand": "Apple",
+        "productTypeWords": [
+          "ar",
+          "contact",
+          "lens"
+        ],
+        "formFactor": "contact-lens",
+        "interactionModel": "eye tracking interface",
+        "inputMethod": "eye tracking",
+        "connectivity": "device linked",
+        "categoryHints": {
+          "primaryCategory": "device",
+          "secondaryCategory": "wearable-display-device",
+          "emergingCategory": "ar-contact-lens"
+        },
+        "interactionHints": {
+          "interactionModel": "eye-tracking-interface",
+          "inputMethod": "eye-tracking",
+          "feedbackMethod": "visual-or-audio",
+          "controlSurface": "unknown"
+        },
+        "hardwareHints": {
+          "wearable": true,
+          "standalone": false,
+          "requiresPhone": true,
+          "requiresProjection": false,
+          "batteryPowered": true
+        },
+        "maturityHints": {
+          "marketStage": "concept-stage",
+          "evidenceLevel": "medium",
+          "adoptionRisk": "medium",
+          "productionConfidence": "medium"
+        },
+        "ecosystemHints": {
+          "companionDevices": [],
+          "dependencyType": "device-linked",
+          "platformBinding": "cross-platform"
+        }
+      },
+      "evidence": {
+        "keyFacts": [
+          "eye tracking",
+          "micro display overlay"
+        ],
+        "useCases": [
+          "hands-free notifications",
+          "micro display overlays"
+        ],
+        "unknowns": [
+          "safety approval",
+          "battery life",
+          "display brightness"
+        ]
+      },
+      "trust": {
+        "confidence": "high",
+        "trustScore": 18,
+        "scoreBreakdown": {
+          "accumulationScore": 7,
+          "evidenceScore": 3,
+          "classificationScore": 5,
+          "maturityScore": 3
+        },
+        "riskFlags": [
+          "new-category-claim",
+          "evidence-unknowns"
+        ],
+        "writeReady": true,
+        "needsMoreEvidence": false
+      },
+      "validation": {
+        "status": "pass",
+        "reason": "ready for seed handoff",
+        "errors": []
+      }
+    },
+    {
+      "type": "trendReadyEntityCandidate",
+      "schemaVersion": "entity-candidates.v1",
+      "status": "ready",
+      "label": "device-reviews",
+      "mode": "trend",
+      "entity": {
+        "name": "Meta Workspace Glasses",
+        "brand": "Meta",
+        "type": "device",
+        "category": "emerging-device",
+        "deviceClass": "spatial-workspace-device",
+        "interactionModel": "spatial-computing",
+        "status": "candidate",
+        "confidence": "low"
+      },
+      "keyPoints": [
+        "Meta Workspace Glasses candidate. portable-ar-workspace. glasses. hand tracking. portable workstation, remote work display",
+        "Meta",
+        "portable-ar-workspace",
+        "glasses",
+        "hand tracking"
+      ],
+      "trendContext": {
+        "contextDate": "2026-05",
+        "changeReason": "portable workspace category growth",
+        "historicalValue": true
+      },
+      "sourceTrace": {
+        "rawFingerprint": "fp1:test000000000000000000000000000000000000003",
+        "rawConceptKey": "meta|workspace-glasses",
+        "rawSimilarityGroup": "portable-ar-workspace",
+        "capturedAt": "2026-05-30T00:00:00.000Z",
+        "sourceDomain": "manual-test.local",
+        "trustConfidence": "high",
+        "trustScore": 18
+      },
+      "classificationHints": {
+        "brand": "Meta",
+        "productTypeWords": [
+          "portable",
+          "ar",
+          "workspace"
+        ],
+        "formFactor": "glasses",
+        "interactionModel": "spatial computing",
+        "inputMethod": "hand tracking",
+        "connectivity": "cloud linked",
+        "categoryHints": {
+          "primaryCategory": "device",
+          "secondaryCategory": "spatial-workspace-device",
+          "emergingCategory": "portable-ar-workspace"
+        },
+        "interactionHints": {
+          "interactionModel": "spatial-computing",
+          "inputMethod": "hand-tracking",
+          "feedbackMethod": "visual-or-audio",
+          "controlSurface": "unknown"
+        },
+        "hardwareHints": {
+          "wearable": true,
+          "standalone": false,
+          "requiresPhone": false,
+          "requiresProjection": false,
+          "batteryPowered": true
+        },
+        "maturityHints": {
+          "marketStage": "early-commercial",
+          "evidenceLevel": "medium",
+          "adoptionRisk": "medium",
+          "productionConfidence": "medium"
+        },
+        "ecosystemHints": {
+          "companionDevices": [],
+          "dependencyType": "cloud-linked",
+          "platformBinding": "cross-platform"
+        }
+      },
+      "evidence": {
+        "keyFacts": [
+          "spatial display",
+          "hand tracking"
+        ],
+        "useCases": [
+          "portable workstation",
+          "remote work display"
+        ],
+        "unknowns": [
+          "field of view",
+          "comfort",
+          "app compatibility"
+        ]
+      },
+      "trust": {
+        "confidence": "high",
+        "trustScore": 18,
+        "scoreBreakdown": {
+          "accumulationScore": 7,
+          "evidenceScore": 3,
+          "classificationScore": 5,
+          "maturityScore": 3
+        },
+        "riskFlags": [
+          "new-category-claim",
+          "evidence-unknowns"
+        ],
+        "writeReady": true,
+        "needsMoreEvidence": false
+      },
+      "validation": {
+        "status": "pass",
+        "reason": "ready for seed handoff",
+        "errors": []
+      }
+    },
+    {
+      "type": "trendReadyEntityCandidate",
+      "schemaVersion": "entity-candidates.v1",
+      "status": "ready",
+      "label": "device-reviews",
+      "mode": "trend",
+      "entity": {
+        "name": "Sony Neural Earbuds",
+        "brand": "Sony",
+        "type": "device",
+        "category": "emerging-device",
+        "deviceClass": "audio-ai-device",
+        "interactionModel": "voice-and-context-interface",
+        "status": "candidate",
+        "confidence": "low"
+      },
+      "keyPoints": [
+        "Sony Neural Earbuds candidate. neural-audio-assistant. earbuds. voice control. real-time translation, contextual audio assistant",
+        "Sony",
+        "neural-audio-assistant",
+        "earbuds",
+        "voice control"
+      ],
+      "trendContext": {
+        "contextDate": "2026-05",
+        "changeReason": "AI audio assistant expansion",
+        "historicalValue": true
+      },
+      "sourceTrace": {
+        "rawFingerprint": "fp1:test000000000000000000000000000000000000004",
+        "rawConceptKey": "sony|neural-earbuds",
+        "rawSimilarityGroup": "neural-audio-assistant",
+        "capturedAt": "2026-05-30T00:00:00.000Z",
+        "sourceDomain": "manual-test.local",
+        "trustConfidence": "high",
+        "trustScore": 18
+      },
+      "classificationHints": {
+        "brand": "Sony",
+        "productTypeWords": [
+          "neural",
+          "audio",
+          "assistant"
+        ],
+        "formFactor": "earbuds",
+        "interactionModel": "voice and context interface",
+        "inputMethod": "voice control",
+        "connectivity": "phone linked",
+        "categoryHints": {
+          "primaryCategory": "device",
+          "secondaryCategory": "audio-ai-device",
+          "emergingCategory": "neural-audio-assistant"
+        },
+        "interactionHints": {
+          "interactionModel": "voice-and-context-interface",
+          "inputMethod": "voice-control",
+          "feedbackMethod": "visual-or-audio",
+          "controlSurface": "unknown"
+        },
+        "hardwareHints": {
+          "wearable": true,
+          "standalone": false,
+          "requiresPhone": true,
+          "requiresProjection": false,
+          "batteryPowered": true
+        },
+        "maturityHints": {
+          "marketStage": "prototype-commercial",
+          "evidenceLevel": "medium",
+          "adoptionRisk": "medium",
+          "productionConfidence": "medium"
+        },
+        "ecosystemHints": {
+          "companionDevices": [],
+          "dependencyType": "phone-linked",
+          "platformBinding": "cross-platform"
+        }
+      },
+      "evidence": {
+        "keyFacts": [
+          "voice control",
+          "real-time translation"
+        ],
+        "useCases": [
+          "real-time translation",
+          "contextual audio assistant"
+        ],
+        "unknowns": [
+          "privacy handling",
+          "translation latency",
+          "offline support"
+        ]
+      },
+      "trust": {
+        "confidence": "high",
+        "trustScore": 18,
+        "scoreBreakdown": {
+          "accumulationScore": 7,
+          "evidenceScore": 3,
+          "classificationScore": 5,
+          "maturityScore": 3
+        },
+        "riskFlags": [
+          "new-category-claim",
+          "evidence-unknowns"
+        ],
+        "writeReady": true,
+        "needsMoreEvidence": false
+      },
+      "validation": {
+        "status": "pass",
+        "reason": "ready for seed handoff",
+        "errors": []
+      }
+    },
+    {
+      "type": "trendReadyEntityCandidate",
+      "schemaVersion": "entity-candidates.v1",
+      "status": "ready",
+      "label": "device-reviews",
+      "mode": "trend",
+      "entity": {
+        "name": "Google AI Ring",
+        "brand": "Google",
+        "type": "device",
+        "category": "emerging-device",
+        "deviceClass": "ambient-ai-wearable",
+        "interactionModel": "gesture-and-health-sensing",
+        "status": "candidate",
+        "confidence": "low"
+      },
+      "keyPoints": [
+        "Google AI Ring candidate. ai-smart-ring. ring. gesture sensing. quick AI prompts, health context capture",
+        "Google",
+        "ai-smart-ring",
+        "ring",
+        "gesture sensing"
+      ],
+      "trendContext": {
+        "contextDate": "2026-05",
+        "changeReason": "ambient wearable AI interface trend",
+        "historicalValue": true
+      },
+      "sourceTrace": {
+        "rawFingerprint": "fp1:test000000000000000000000000000000000000005",
+        "rawConceptKey": "google|ai-ring",
+        "rawSimilarityGroup": "ai-smart-ring",
+        "capturedAt": "2026-05-30T00:00:00.000Z",
+        "sourceDomain": "manual-test.local",
+        "trustConfidence": "high",
+        "trustScore": 18
+      },
+      "classificationHints": {
+        "brand": "Google",
+        "productTypeWords": [
+          "ai",
+          "smart",
+          "ring"
+        ],
+        "formFactor": "ring",
+        "interactionModel": "gesture and health sensing",
+        "inputMethod": "gesture sensing",
+        "connectivity": "phone linked",
+        "categoryHints": {
+          "primaryCategory": "device",
+          "secondaryCategory": "ambient-ai-wearable",
+          "emergingCategory": "ai-smart-ring"
+        },
+        "interactionHints": {
+          "interactionModel": "gesture-and-health-sensing",
+          "inputMethod": "gesture-sensing",
+          "feedbackMethod": "visual-or-audio",
+          "controlSurface": "unknown"
+        },
+        "hardwareHints": {
+          "wearable": true,
+          "standalone": false,
+          "requiresPhone": true,
+          "requiresProjection": false,
+          "batteryPowered": true
+        },
+        "maturityHints": {
+          "marketStage": "concept-stage",
+          "evidenceLevel": "medium",
+          "adoptionRisk": "medium",
+          "productionConfidence": "medium"
+        },
+        "ecosystemHints": {
+          "companionDevices": [],
+          "dependencyType": "phone-linked",
+          "platformBinding": "cross-platform"
+        }
+      },
+      "evidence": {
+        "keyFacts": [
+          "gesture sensing",
+          "health context"
+        ],
+        "useCases": [
+          "quick AI prompts",
+          "health context capture"
+        ],
+        "unknowns": [
+          "sensor accuracy",
+          "privacy model",
+          "battery life"
+        ]
+      },
+      "trust": {
+        "confidence": "high",
+        "trustScore": 18,
+        "scoreBreakdown": {
+          "accumulationScore": 7,
+          "evidenceScore": 3,
+          "classificationScore": 5,
+          "maturityScore": 3
+        },
+        "riskFlags": [
+          "new-category-claim",
+          "evidence-unknowns"
+        ],
+        "writeReady": true,
+        "needsMoreEvidence": false
+      },
+      "validation": {
+        "status": "pass",
+        "reason": "ready for seed handoff",
+        "errors": []
+      }
+    },
+    {
+      "type": "trendReadyEntityCandidate",
+      "schemaVersion": "entity-candidates.v1",
+      "status": "ready",
+      "label": "device-reviews",
+      "mode": "trend",
+      "entity": {
+        "name": "Microsoft Portable HoloDesk",
+        "brand": "Microsoft",
+        "type": "device",
+        "category": "emerging-device",
+        "deviceClass": "portable-display-workstation",
+        "interactionModel": "mixed-reality-workspace",
+        "status": "candidate",
+        "confidence": "low"
+      },
+      "keyPoints": [
+        "Microsoft Portable HoloDesk candidate. portable-holographic-workspace. foldable-projector. gesture and keyboard hybrid. travel workstation, temporary desk setup",
+        "Microsoft",
+        "portable-holographic-workspace",
+        "foldable-projector",
+        "gesture and keyboard hybrid"
+      ],
+      "trendContext": {
+        "contextDate": "2026-05",
+        "changeReason": "future portable workstation demand",
+        "historicalValue": true
+      },
+      "sourceTrace": {
+        "rawFingerprint": "fp1:test000000000000000000000000000000000000006",
+        "rawConceptKey": "microsoft|portable-holodesk",
+        "rawSimilarityGroup": "portable-holographic-workspace",
+        "capturedAt": "2026-05-30T00:00:00.000Z",
+        "sourceDomain": "manual-test.local",
+        "trustConfidence": "high",
+        "trustScore": 18
+      },
+      "classificationHints": {
+        "brand": "Microsoft",
+        "productTypeWords": [
+          "portable",
+          "holographic",
+          "workspace"
+        ],
+        "formFactor": "foldable-projector",
+        "interactionModel": "mixed reality workspace",
+        "inputMethod": "gesture and keyboard hybrid",
+        "connectivity": "pc linked",
+        "categoryHints": {
+          "primaryCategory": "device",
+          "secondaryCategory": "portable-display-workstation",
+          "emergingCategory": "portable-holographic-workspace"
+        },
+        "interactionHints": {
+          "interactionModel": "mixed-reality-workspace",
+          "inputMethod": "gesture-and-keyboard-hybrid",
+          "feedbackMethod": "visual-or-audio",
+          "controlSurface": "unknown"
+        },
+        "hardwareHints": {
+          "wearable": false,
+          "standalone": false,
+          "requiresPhone": false,
+          "requiresProjection": true,
+          "batteryPowered": true
+        },
+        "maturityHints": {
+          "marketStage": "concept-stage",
+          "evidenceLevel": "medium",
+          "adoptionRisk": "medium",
+          "productionConfidence": "medium"
+        },
+        "ecosystemHints": {
+          "companionDevices": [],
+          "dependencyType": "pc-linked",
+          "platformBinding": "cross-platform"
+        }
+      },
+      "evidence": {
+        "keyFacts": [
+          "mixed reality workspace",
+          "portable projection"
+        ],
+        "useCases": [
+          "travel workstation",
+          "temporary desk setup"
+        ],
+        "unknowns": [
+          "projection clarity",
+          "setup time",
+          "power draw"
+        ]
+      },
+      "trust": {
+        "confidence": "high",
+        "trustScore": 18,
+        "scoreBreakdown": {
+          "accumulationScore": 7,
+          "evidenceScore": 3,
+          "classificationScore": 5,
+          "maturityScore": 3
+        },
+        "riskFlags": [
+          "new-category-claim",
+          "evidence-unknowns"
+        ],
+        "writeReady": true,
+        "needsMoreEvidence": false
+      },
+      "validation": {
+        "status": "pass",
+        "reason": "ready for seed handoff",
+        "errors": []
+      }
+    }
+  ],
+  "latestPassCandidates": [
+    {
+      "type": "trendReadyEntityCandidate",
+      "schemaVersion": "entity-candidates.v1",
+      "status": "ready",
+      "label": "device-reviews",
+      "mode": "trend",
+      "entity": {
+        "name": "Samsung Hologram Keyboard",
+        "brand": "Samsung",
+        "type": "device",
+        "category": "emerging-device",
+        "deviceClass": "gesture-input-device",
+        "interactionModel": "holographic-interaction",
+        "status": "candidate",
+        "confidence": "low"
+      },
+      "keyPoints": [
+        "Samsung Hologram Keyboard candidate. holographic-input-device. wrist-worn. finger tracking. mobile typing",
+        "Samsung",
+        "holographic-input-device",
+        "wrist-worn",
+        "finger tracking"
+      ],
+      "trendContext": {
+        "contextDate": "2026-05",
+        "changeReason": "new device category emergence",
+        "historicalValue": true
+      },
+      "sourceTrace": {
+        "rawFingerprint": "fp1:test000000000000000000000000000000000000001",
+        "rawConceptKey": "samsung|samsung-hologram-keyboard",
+        "rawSimilarityGroup": "holographic-input-device",
+        "capturedAt": "2026-05-30T00:00:00.000Z",
+        "sourceDomain": "manual-test.local",
+        "trustConfidence": "high",
+        "trustScore": 18
+      },
+      "classificationHints": {
+        "brand": "Samsung",
+        "productTypeWords": [
+          "holographic",
+          "input",
+          "device"
+        ],
+        "formFactor": "wrist-worn",
+        "interactionModel": "holographic interaction",
+        "inputMethod": "finger tracking",
+        "connectivity": "bluetooth",
+        "categoryHints": {
+          "primaryCategory": "device",
+          "secondaryCategory": "gesture-input-device",
+          "emergingCategory": "holographic-input-device"
+        },
+        "interactionHints": {
+          "interactionModel": "holographic-interaction",
+          "inputMethod": "finger-tracking",
+          "feedbackMethod": "visual-or-audio",
+          "controlSurface": "unknown"
+        },
+        "hardwareHints": {
+          "wearable": true,
+          "standalone": false,
+          "requiresPhone": false,
+          "requiresProjection": true,
+          "batteryPowered": true
+        },
+        "maturityHints": {
+          "marketStage": "prototype-commercial",
+          "evidenceLevel": "medium",
+          "adoptionRisk": "medium",
+          "productionConfidence": "medium"
+        },
+        "ecosystemHints": {
+          "companionDevices": [],
+          "dependencyType": "bluetooth",
+          "platformBinding": "cross-platform"
+        }
+      },
+      "evidence": {
+        "keyFacts": [
+          "hologram projection",
+          "finger tracking"
+        ],
+        "useCases": [
+          "mobile typing"
+        ],
+        "unknowns": [
+          "price",
+          "battery life",
+          "typing accuracy"
+        ]
+      },
+      "trust": {
+        "confidence": "high",
+        "trustScore": 18,
+        "scoreBreakdown": {
+          "accumulationScore": 7,
+          "evidenceScore": 3,
+          "classificationScore": 5,
+          "maturityScore": 3
+        },
+        "riskFlags": [
+          "new-category-claim",
+          "evidence-unknowns"
+        ],
+        "writeReady": true,
+        "needsMoreEvidence": false
+      },
+      "validation": {
+        "status": "pass",
+        "reason": "ready for seed handoff",
+        "errors": []
+      }
+    },
+    {
+      "type": "trendReadyEntityCandidate",
+      "schemaVersion": "entity-candidates.v1",
+      "status": "ready",
+      "label": "device-reviews",
+      "mode": "trend",
+      "entity": {
+        "name": "Apple AR Contact Lens",
+        "brand": "Apple",
+        "type": "device",
+        "category": "emerging-device",
+        "deviceClass": "wearable-display-device",
+        "interactionModel": "eye-tracking-interface",
+        "status": "candidate",
+        "confidence": "low"
+      },
+      "keyPoints": [
+        "Apple AR Contact Lens candidate. ar-contact-lens. contact-lens. eye tracking. hands-free notifications, micro display overlays",
+        "Apple",
+        "ar-contact-lens",
+        "contact-lens",
+        "eye tracking"
+      ],
+      "trendContext": {
+        "contextDate": "2026-05",
+        "changeReason": "future wearable interface discussion",
+        "historicalValue": true
+      },
+      "sourceTrace": {
+        "rawFingerprint": "fp1:test000000000000000000000000000000000000002",
+        "rawConceptKey": "apple|ar-contact-lens",
+        "rawSimilarityGroup": "ar-contact-lens",
+        "capturedAt": "2026-05-30T00:00:00.000Z",
+        "sourceDomain": "manual-test.local",
+        "trustConfidence": "high",
+        "trustScore": 18
+      },
+      "classificationHints": {
+        "brand": "Apple",
+        "productTypeWords": [
+          "ar",
+          "contact",
+          "lens"
+        ],
+        "formFactor": "contact-lens",
+        "interactionModel": "eye tracking interface",
+        "inputMethod": "eye tracking",
+        "connectivity": "device linked",
+        "categoryHints": {
+          "primaryCategory": "device",
+          "secondaryCategory": "wearable-display-device",
+          "emergingCategory": "ar-contact-lens"
+        },
+        "interactionHints": {
+          "interactionModel": "eye-tracking-interface",
+          "inputMethod": "eye-tracking",
+          "feedbackMethod": "visual-or-audio",
+          "controlSurface": "unknown"
+        },
+        "hardwareHints": {
+          "wearable": true,
+          "standalone": false,
+          "requiresPhone": true,
+          "requiresProjection": false,
+          "batteryPowered": true
+        },
+        "maturityHints": {
+          "marketStage": "concept-stage",
+          "evidenceLevel": "medium",
+          "adoptionRisk": "medium",
+          "productionConfidence": "medium"
+        },
+        "ecosystemHints": {
+          "companionDevices": [],
+          "dependencyType": "device-linked",
+          "platformBinding": "cross-platform"
+        }
+      },
+      "evidence": {
+        "keyFacts": [
+          "eye tracking",
+          "micro display overlay"
+        ],
+        "useCases": [
+          "hands-free notifications",
+          "micro display overlays"
+        ],
+        "unknowns": [
+          "safety approval",
+          "battery life",
+          "display brightness"
+        ]
+      },
+      "trust": {
+        "confidence": "high",
+        "trustScore": 18,
+        "scoreBreakdown": {
+          "accumulationScore": 7,
+          "evidenceScore": 3,
+          "classificationScore": 5,
+          "maturityScore": 3
+        },
+        "riskFlags": [
+          "new-category-claim",
+          "evidence-unknowns"
+        ],
+        "writeReady": true,
+        "needsMoreEvidence": false
+      },
+      "validation": {
+        "status": "pass",
+        "reason": "ready for seed handoff",
+        "errors": []
+      }
+    },
+    {
+      "type": "trendReadyEntityCandidate",
+      "schemaVersion": "entity-candidates.v1",
+      "status": "ready",
+      "label": "device-reviews",
+      "mode": "trend",
+      "entity": {
+        "name": "Meta Workspace Glasses",
+        "brand": "Meta",
+        "type": "device",
+        "category": "emerging-device",
+        "deviceClass": "spatial-workspace-device",
+        "interactionModel": "spatial-computing",
+        "status": "candidate",
+        "confidence": "low"
+      },
+      "keyPoints": [
+        "Meta Workspace Glasses candidate. portable-ar-workspace. glasses. hand tracking. portable workstation, remote work display",
+        "Meta",
+        "portable-ar-workspace",
+        "glasses",
+        "hand tracking"
+      ],
+      "trendContext": {
+        "contextDate": "2026-05",
+        "changeReason": "portable workspace category growth",
+        "historicalValue": true
+      },
+      "sourceTrace": {
+        "rawFingerprint": "fp1:test000000000000000000000000000000000000003",
+        "rawConceptKey": "meta|workspace-glasses",
+        "rawSimilarityGroup": "portable-ar-workspace",
+        "capturedAt": "2026-05-30T00:00:00.000Z",
+        "sourceDomain": "manual-test.local",
+        "trustConfidence": "high",
+        "trustScore": 18
+      },
+      "classificationHints": {
+        "brand": "Meta",
+        "productTypeWords": [
+          "portable",
+          "ar",
+          "workspace"
+        ],
+        "formFactor": "glasses",
+        "interactionModel": "spatial computing",
+        "inputMethod": "hand tracking",
+        "connectivity": "cloud linked",
+        "categoryHints": {
+          "primaryCategory": "device",
+          "secondaryCategory": "spatial-workspace-device",
+          "emergingCategory": "portable-ar-workspace"
+        },
+        "interactionHints": {
+          "interactionModel": "spatial-computing",
+          "inputMethod": "hand-tracking",
+          "feedbackMethod": "visual-or-audio",
+          "controlSurface": "unknown"
+        },
+        "hardwareHints": {
+          "wearable": true,
+          "standalone": false,
+          "requiresPhone": false,
+          "requiresProjection": false,
+          "batteryPowered": true
+        },
+        "maturityHints": {
+          "marketStage": "early-commercial",
+          "evidenceLevel": "medium",
+          "adoptionRisk": "medium",
+          "productionConfidence": "medium"
+        },
+        "ecosystemHints": {
+          "companionDevices": [],
+          "dependencyType": "cloud-linked",
+          "platformBinding": "cross-platform"
+        }
+      },
+      "evidence": {
+        "keyFacts": [
+          "spatial display",
+          "hand tracking"
+        ],
+        "useCases": [
+          "portable workstation",
+          "remote work display"
+        ],
+        "unknowns": [
+          "field of view",
+          "comfort",
+          "app compatibility"
+        ]
+      },
+      "trust": {
+        "confidence": "high",
+        "trustScore": 18,
+        "scoreBreakdown": {
+          "accumulationScore": 7,
+          "evidenceScore": 3,
+          "classificationScore": 5,
+          "maturityScore": 3
+        },
+        "riskFlags": [
+          "new-category-claim",
+          "evidence-unknowns"
+        ],
+        "writeReady": true,
+        "needsMoreEvidence": false
+      },
+      "validation": {
+        "status": "pass",
+        "reason": "ready for seed handoff",
+        "errors": []
+      }
+    },
+    {
+      "type": "trendReadyEntityCandidate",
+      "schemaVersion": "entity-candidates.v1",
+      "status": "ready",
+      "label": "device-reviews",
+      "mode": "trend",
+      "entity": {
+        "name": "Sony Neural Earbuds",
+        "brand": "Sony",
+        "type": "device",
+        "category": "emerging-device",
+        "deviceClass": "audio-ai-device",
+        "interactionModel": "voice-and-context-interface",
+        "status": "candidate",
+        "confidence": "low"
+      },
+      "keyPoints": [
+        "Sony Neural Earbuds candidate. neural-audio-assistant. earbuds. voice control. real-time translation, contextual audio assistant",
+        "Sony",
+        "neural-audio-assistant",
+        "earbuds",
+        "voice control"
+      ],
+      "trendContext": {
+        "contextDate": "2026-05",
+        "changeReason": "AI audio assistant expansion",
+        "historicalValue": true
+      },
+      "sourceTrace": {
+        "rawFingerprint": "fp1:test000000000000000000000000000000000000004",
+        "rawConceptKey": "sony|neural-earbuds",
+        "rawSimilarityGroup": "neural-audio-assistant",
+        "capturedAt": "2026-05-30T00:00:00.000Z",
+        "sourceDomain": "manual-test.local",
+        "trustConfidence": "high",
+        "trustScore": 18
+      },
+      "classificationHints": {
+        "brand": "Sony",
+        "productTypeWords": [
+          "neural",
+          "audio",
+          "assistant"
+        ],
+        "formFactor": "earbuds",
+        "interactionModel": "voice and context interface",
+        "inputMethod": "voice control",
+        "connectivity": "phone linked",
+        "categoryHints": {
+          "primaryCategory": "device",
+          "secondaryCategory": "audio-ai-device",
+          "emergingCategory": "neural-audio-assistant"
+        },
+        "interactionHints": {
+          "interactionModel": "voice-and-context-interface",
+          "inputMethod": "voice-control",
+          "feedbackMethod": "visual-or-audio",
+          "controlSurface": "unknown"
+        },
+        "hardwareHints": {
+          "wearable": true,
+          "standalone": false,
+          "requiresPhone": true,
+          "requiresProjection": false,
+          "batteryPowered": true
+        },
+        "maturityHints": {
+          "marketStage": "prototype-commercial",
+          "evidenceLevel": "medium",
+          "adoptionRisk": "medium",
+          "productionConfidence": "medium"
+        },
+        "ecosystemHints": {
+          "companionDevices": [],
+          "dependencyType": "phone-linked",
+          "platformBinding": "cross-platform"
+        }
+      },
+      "evidence": {
+        "keyFacts": [
+          "voice control",
+          "real-time translation"
+        ],
+        "useCases": [
+          "real-time translation",
+          "contextual audio assistant"
+        ],
+        "unknowns": [
+          "privacy handling",
+          "translation latency",
+          "offline support"
+        ]
+      },
+      "trust": {
+        "confidence": "high",
+        "trustScore": 18,
+        "scoreBreakdown": {
+          "accumulationScore": 7,
+          "evidenceScore": 3,
+          "classificationScore": 5,
+          "maturityScore": 3
+        },
+        "riskFlags": [
+          "new-category-claim",
+          "evidence-unknowns"
+        ],
+        "writeReady": true,
+        "needsMoreEvidence": false
+      },
+      "validation": {
+        "status": "pass",
+        "reason": "ready for seed handoff",
+        "errors": []
+      }
+    },
+    {
+      "type": "trendReadyEntityCandidate",
+      "schemaVersion": "entity-candidates.v1",
+      "status": "ready",
+      "label": "device-reviews",
+      "mode": "trend",
+      "entity": {
+        "name": "Google AI Ring",
+        "brand": "Google",
+        "type": "device",
+        "category": "emerging-device",
+        "deviceClass": "ambient-ai-wearable",
+        "interactionModel": "gesture-and-health-sensing",
+        "status": "candidate",
+        "confidence": "low"
+      },
+      "keyPoints": [
+        "Google AI Ring candidate. ai-smart-ring. ring. gesture sensing. quick AI prompts, health context capture",
+        "Google",
+        "ai-smart-ring",
+        "ring",
+        "gesture sensing"
+      ],
+      "trendContext": {
+        "contextDate": "2026-05",
+        "changeReason": "ambient wearable AI interface trend",
+        "historicalValue": true
+      },
+      "sourceTrace": {
+        "rawFingerprint": "fp1:test000000000000000000000000000000000000005",
+        "rawConceptKey": "google|ai-ring",
+        "rawSimilarityGroup": "ai-smart-ring",
+        "capturedAt": "2026-05-30T00:00:00.000Z",
+        "sourceDomain": "manual-test.local",
+        "trustConfidence": "high",
+        "trustScore": 18
+      },
+      "classificationHints": {
+        "brand": "Google",
+        "productTypeWords": [
+          "ai",
+          "smart",
+          "ring"
+        ],
+        "formFactor": "ring",
+        "interactionModel": "gesture and health sensing",
+        "inputMethod": "gesture sensing",
+        "connectivity": "phone linked",
+        "categoryHints": {
+          "primaryCategory": "device",
+          "secondaryCategory": "ambient-ai-wearable",
+          "emergingCategory": "ai-smart-ring"
+        },
+        "interactionHints": {
+          "interactionModel": "gesture-and-health-sensing",
+          "inputMethod": "gesture-sensing",
+          "feedbackMethod": "visual-or-audio",
+          "controlSurface": "unknown"
+        },
+        "hardwareHints": {
+          "wearable": true,
+          "standalone": false,
+          "requiresPhone": true,
+          "requiresProjection": false,
+          "batteryPowered": true
+        },
+        "maturityHints": {
+          "marketStage": "concept-stage",
+          "evidenceLevel": "medium",
+          "adoptionRisk": "medium",
+          "productionConfidence": "medium"
+        },
+        "ecosystemHints": {
+          "companionDevices": [],
+          "dependencyType": "phone-linked",
+          "platformBinding": "cross-platform"
+        }
+      },
+      "evidence": {
+        "keyFacts": [
+          "gesture sensing",
+          "health context"
+        ],
+        "useCases": [
+          "quick AI prompts",
+          "health context capture"
+        ],
+        "unknowns": [
+          "sensor accuracy",
+          "privacy model",
+          "battery life"
+        ]
+      },
+      "trust": {
+        "confidence": "high",
+        "trustScore": 18,
+        "scoreBreakdown": {
+          "accumulationScore": 7,
+          "evidenceScore": 3,
+          "classificationScore": 5,
+          "maturityScore": 3
+        },
+        "riskFlags": [
+          "new-category-claim",
+          "evidence-unknowns"
+        ],
+        "writeReady": true,
+        "needsMoreEvidence": false
+      },
+      "validation": {
+        "status": "pass",
+        "reason": "ready for seed handoff",
+        "errors": []
+      }
+    },
+    {
+      "type": "trendReadyEntityCandidate",
+      "schemaVersion": "entity-candidates.v1",
+      "status": "ready",
+      "label": "device-reviews",
+      "mode": "trend",
+      "entity": {
+        "name": "Microsoft Portable HoloDesk",
+        "brand": "Microsoft",
+        "type": "device",
+        "category": "emerging-device",
+        "deviceClass": "portable-display-workstation",
+        "interactionModel": "mixed-reality-workspace",
+        "status": "candidate",
+        "confidence": "low"
+      },
+      "keyPoints": [
+        "Microsoft Portable HoloDesk candidate. portable-holographic-workspace. foldable-projector. gesture and keyboard hybrid. travel workstation, temporary desk setup",
+        "Microsoft",
+        "portable-holographic-workspace",
+        "foldable-projector",
+        "gesture and keyboard hybrid"
+      ],
+      "trendContext": {
+        "contextDate": "2026-05",
+        "changeReason": "future portable workstation demand",
+        "historicalValue": true
+      },
+      "sourceTrace": {
+        "rawFingerprint": "fp1:test000000000000000000000000000000000000006",
+        "rawConceptKey": "microsoft|portable-holodesk",
+        "rawSimilarityGroup": "portable-holographic-workspace",
+        "capturedAt": "2026-05-30T00:00:00.000Z",
+        "sourceDomain": "manual-test.local",
+        "trustConfidence": "high",
+        "trustScore": 18
+      },
+      "classificationHints": {
+        "brand": "Microsoft",
+        "productTypeWords": [
+          "portable",
+          "holographic",
+          "workspace"
+        ],
+        "formFactor": "foldable-projector",
+        "interactionModel": "mixed reality workspace",
+        "inputMethod": "gesture and keyboard hybrid",
+        "connectivity": "pc linked",
+        "categoryHints": {
+          "primaryCategory": "device",
+          "secondaryCategory": "portable-display-workstation",
+          "emergingCategory": "portable-holographic-workspace"
+        },
+        "interactionHints": {
+          "interactionModel": "mixed-reality-workspace",
+          "inputMethod": "gesture-and-keyboard-hybrid",
+          "feedbackMethod": "visual-or-audio",
+          "controlSurface": "unknown"
+        },
+        "hardwareHints": {
+          "wearable": false,
+          "standalone": false,
+          "requiresPhone": false,
+          "requiresProjection": true,
+          "batteryPowered": true
+        },
+        "maturityHints": {
+          "marketStage": "concept-stage",
+          "evidenceLevel": "medium",
+          "adoptionRisk": "medium",
+          "productionConfidence": "medium"
+        },
+        "ecosystemHints": {
+          "companionDevices": [],
+          "dependencyType": "pc-linked",
+          "platformBinding": "cross-platform"
+        }
+      },
+      "evidence": {
+        "keyFacts": [
+          "mixed reality workspace",
+          "portable projection"
+        ],
+        "useCases": [
+          "travel workstation",
+          "temporary desk setup"
+        ],
+        "unknowns": [
+          "projection clarity",
+          "setup time",
+          "power draw"
+        ]
+      },
+      "trust": {
+        "confidence": "high",
+        "trustScore": 18,
+        "scoreBreakdown": {
+          "accumulationScore": 7,
+          "evidenceScore": 3,
+          "classificationScore": 5,
+          "maturityScore": 3
+        },
+        "riskFlags": [
+          "new-category-claim",
+          "evidence-unknowns"
+        ],
+        "writeReady": true,
+        "needsMoreEvidence": false
+      },
+      "validation": {
+        "status": "pass",
+        "reason": "ready for seed handoff",
+        "errors": []
+      }
+    }
+  ],
+  "trendReadyCandidates": [
+    {
+      "type": "trendReadyEntityCandidate",
+      "schemaVersion": "entity-candidates.v1",
+      "status": "ready",
+      "label": "device-reviews",
+      "mode": "trend",
+      "entity": {
+        "name": "Samsung Hologram Keyboard",
+        "brand": "Samsung",
+        "type": "device",
+        "category": "emerging-device",
+        "deviceClass": "gesture-input-device",
+        "interactionModel": "holographic-interaction",
+        "status": "candidate",
+        "confidence": "low"
+      },
+      "keyPoints": [
+        "Samsung Hologram Keyboard candidate. holographic-input-device. wrist-worn. finger tracking. mobile typing",
+        "Samsung",
+        "holographic-input-device",
+        "wrist-worn",
+        "finger tracking"
+      ],
+      "trendContext": {
+        "contextDate": "2026-05",
+        "changeReason": "new device category emergence",
+        "historicalValue": true
+      },
+      "sourceTrace": {
+        "rawFingerprint": "fp1:test000000000000000000000000000000000000001",
+        "rawConceptKey": "samsung|samsung-hologram-keyboard",
+        "rawSimilarityGroup": "holographic-input-device",
+        "capturedAt": "2026-05-30T00:00:00.000Z",
+        "sourceDomain": "manual-test.local",
+        "trustConfidence": "high",
+        "trustScore": 18
+      },
+      "classificationHints": {
+        "brand": "Samsung",
+        "productTypeWords": [
+          "holographic",
+          "input",
+          "device"
+        ],
+        "formFactor": "wrist-worn",
+        "interactionModel": "holographic interaction",
+        "inputMethod": "finger tracking",
+        "connectivity": "bluetooth",
+        "categoryHints": {
+          "primaryCategory": "device",
+          "secondaryCategory": "gesture-input-device",
+          "emergingCategory": "holographic-input-device"
+        },
+        "interactionHints": {
+          "interactionModel": "holographic-interaction",
+          "inputMethod": "finger-tracking",
+          "feedbackMethod": "visual-or-audio",
+          "controlSurface": "unknown"
+        },
+        "hardwareHints": {
+          "wearable": true,
+          "standalone": false,
+          "requiresPhone": false,
+          "requiresProjection": true,
+          "batteryPowered": true
+        },
+        "maturityHints": {
+          "marketStage": "prototype-commercial",
+          "evidenceLevel": "medium",
+          "adoptionRisk": "medium",
+          "productionConfidence": "medium"
+        },
+        "ecosystemHints": {
+          "companionDevices": [],
+          "dependencyType": "bluetooth",
+          "platformBinding": "cross-platform"
+        }
+      },
+      "evidence": {
+        "keyFacts": [
+          "hologram projection",
+          "finger tracking"
+        ],
+        "useCases": [
+          "mobile typing"
+        ],
+        "unknowns": [
+          "price",
+          "battery life",
+          "typing accuracy"
+        ]
+      },
+      "trust": {
+        "confidence": "high",
+        "trustScore": 18,
+        "scoreBreakdown": {
+          "accumulationScore": 7,
+          "evidenceScore": 3,
+          "classificationScore": 5,
+          "maturityScore": 3
+        },
+        "riskFlags": [
+          "new-category-claim",
+          "evidence-unknowns"
+        ],
+        "writeReady": true,
+        "needsMoreEvidence": false
+      },
+      "validation": {
+        "status": "pass",
+        "reason": "ready for seed handoff",
+        "errors": []
+      }
+    },
+    {
+      "type": "trendReadyEntityCandidate",
+      "schemaVersion": "entity-candidates.v1",
+      "status": "ready",
+      "label": "device-reviews",
+      "mode": "trend",
+      "entity": {
+        "name": "Apple AR Contact Lens",
+        "brand": "Apple",
+        "type": "device",
+        "category": "emerging-device",
+        "deviceClass": "wearable-display-device",
+        "interactionModel": "eye-tracking-interface",
+        "status": "candidate",
+        "confidence": "low"
+      },
+      "keyPoints": [
+        "Apple AR Contact Lens candidate. ar-contact-lens. contact-lens. eye tracking. hands-free notifications, micro display overlays",
+        "Apple",
+        "ar-contact-lens",
+        "contact-lens",
+        "eye tracking"
+      ],
+      "trendContext": {
+        "contextDate": "2026-05",
+        "changeReason": "future wearable interface discussion",
+        "historicalValue": true
+      },
+      "sourceTrace": {
+        "rawFingerprint": "fp1:test000000000000000000000000000000000000002",
+        "rawConceptKey": "apple|ar-contact-lens",
+        "rawSimilarityGroup": "ar-contact-lens",
+        "capturedAt": "2026-05-30T00:00:00.000Z",
+        "sourceDomain": "manual-test.local",
+        "trustConfidence": "high",
+        "trustScore": 18
+      },
+      "classificationHints": {
+        "brand": "Apple",
+        "productTypeWords": [
+          "ar",
+          "contact",
+          "lens"
+        ],
+        "formFactor": "contact-lens",
+        "interactionModel": "eye tracking interface",
+        "inputMethod": "eye tracking",
+        "connectivity": "device linked",
+        "categoryHints": {
+          "primaryCategory": "device",
+          "secondaryCategory": "wearable-display-device",
+          "emergingCategory": "ar-contact-lens"
+        },
+        "interactionHints": {
+          "interactionModel": "eye-tracking-interface",
+          "inputMethod": "eye-tracking",
+          "feedbackMethod": "visual-or-audio",
+          "controlSurface": "unknown"
+        },
+        "hardwareHints": {
+          "wearable": true,
+          "standalone": false,
+          "requiresPhone": true,
+          "requiresProjection": false,
+          "batteryPowered": true
+        },
+        "maturityHints": {
+          "marketStage": "concept-stage",
+          "evidenceLevel": "medium",
+          "adoptionRisk": "medium",
+          "productionConfidence": "medium"
+        },
+        "ecosystemHints": {
+          "companionDevices": [],
+          "dependencyType": "device-linked",
+          "platformBinding": "cross-platform"
+        }
+      },
+      "evidence": {
+        "keyFacts": [
+          "eye tracking",
+          "micro display overlay"
+        ],
+        "useCases": [
+          "hands-free notifications",
+          "micro display overlays"
+        ],
+        "unknowns": [
+          "safety approval",
+          "battery life",
+          "display brightness"
+        ]
+      },
+      "trust": {
+        "confidence": "high",
+        "trustScore": 18,
+        "scoreBreakdown": {
+          "accumulationScore": 7,
+          "evidenceScore": 3,
+          "classificationScore": 5,
+          "maturityScore": 3
+        },
+        "riskFlags": [
+          "new-category-claim",
+          "evidence-unknowns"
+        ],
+        "writeReady": true,
+        "needsMoreEvidence": false
+      },
+      "validation": {
+        "status": "pass",
+        "reason": "ready for seed handoff",
+        "errors": []
+      }
+    },
+    {
+      "type": "trendReadyEntityCandidate",
+      "schemaVersion": "entity-candidates.v1",
+      "status": "ready",
+      "label": "device-reviews",
+      "mode": "trend",
+      "entity": {
+        "name": "Meta Workspace Glasses",
+        "brand": "Meta",
+        "type": "device",
+        "category": "emerging-device",
+        "deviceClass": "spatial-workspace-device",
+        "interactionModel": "spatial-computing",
+        "status": "candidate",
+        "confidence": "low"
+      },
+      "keyPoints": [
+        "Meta Workspace Glasses candidate. portable-ar-workspace. glasses. hand tracking. portable workstation, remote work display",
+        "Meta",
+        "portable-ar-workspace",
+        "glasses",
+        "hand tracking"
+      ],
+      "trendContext": {
+        "contextDate": "2026-05",
+        "changeReason": "portable workspace category growth",
+        "historicalValue": true
+      },
+      "sourceTrace": {
+        "rawFingerprint": "fp1:test000000000000000000000000000000000000003",
+        "rawConceptKey": "meta|workspace-glasses",
+        "rawSimilarityGroup": "portable-ar-workspace",
+        "capturedAt": "2026-05-30T00:00:00.000Z",
+        "sourceDomain": "manual-test.local",
+        "trustConfidence": "high",
+        "trustScore": 18
+      },
+      "classificationHints": {
+        "brand": "Meta",
+        "productTypeWords": [
+          "portable",
+          "ar",
+          "workspace"
+        ],
+        "formFactor": "glasses",
+        "interactionModel": "spatial computing",
+        "inputMethod": "hand tracking",
+        "connectivity": "cloud linked",
+        "categoryHints": {
+          "primaryCategory": "device",
+          "secondaryCategory": "spatial-workspace-device",
+          "emergingCategory": "portable-ar-workspace"
+        },
+        "interactionHints": {
+          "interactionModel": "spatial-computing",
+          "inputMethod": "hand-tracking",
+          "feedbackMethod": "visual-or-audio",
+          "controlSurface": "unknown"
+        },
+        "hardwareHints": {
+          "wearable": true,
+          "standalone": false,
+          "requiresPhone": false,
+          "requiresProjection": false,
+          "batteryPowered": true
+        },
+        "maturityHints": {
+          "marketStage": "early-commercial",
+          "evidenceLevel": "medium",
+          "adoptionRisk": "medium",
+          "productionConfidence": "medium"
+        },
+        "ecosystemHints": {
+          "companionDevices": [],
+          "dependencyType": "cloud-linked",
+          "platformBinding": "cross-platform"
+        }
+      },
+      "evidence": {
+        "keyFacts": [
+          "spatial display",
+          "hand tracking"
+        ],
+        "useCases": [
+          "portable workstation",
+          "remote work display"
+        ],
+        "unknowns": [
+          "field of view",
+          "comfort",
+          "app compatibility"
+        ]
+      },
+      "trust": {
+        "confidence": "high",
+        "trustScore": 18,
+        "scoreBreakdown": {
+          "accumulationScore": 7,
+          "evidenceScore": 3,
+          "classificationScore": 5,
+          "maturityScore": 3
+        },
+        "riskFlags": [
+          "new-category-claim",
+          "evidence-unknowns"
+        ],
+        "writeReady": true,
+        "needsMoreEvidence": false
+      },
+      "validation": {
+        "status": "pass",
+        "reason": "ready for seed handoff",
+        "errors": []
+      }
+    },
+    {
+      "type": "trendReadyEntityCandidate",
+      "schemaVersion": "entity-candidates.v1",
+      "status": "ready",
+      "label": "device-reviews",
+      "mode": "trend",
+      "entity": {
+        "name": "Sony Neural Earbuds",
+        "brand": "Sony",
+        "type": "device",
+        "category": "emerging-device",
+        "deviceClass": "audio-ai-device",
+        "interactionModel": "voice-and-context-interface",
+        "status": "candidate",
+        "confidence": "low"
+      },
+      "keyPoints": [
+        "Sony Neural Earbuds candidate. neural-audio-assistant. earbuds. voice control. real-time translation, contextual audio assistant",
+        "Sony",
+        "neural-audio-assistant",
+        "earbuds",
+        "voice control"
+      ],
+      "trendContext": {
+        "contextDate": "2026-05",
+        "changeReason": "AI audio assistant expansion",
+        "historicalValue": true
+      },
+      "sourceTrace": {
+        "rawFingerprint": "fp1:test000000000000000000000000000000000000004",
+        "rawConceptKey": "sony|neural-earbuds",
+        "rawSimilarityGroup": "neural-audio-assistant",
+        "capturedAt": "2026-05-30T00:00:00.000Z",
+        "sourceDomain": "manual-test.local",
+        "trustConfidence": "high",
+        "trustScore": 18
+      },
+      "classificationHints": {
+        "brand": "Sony",
+        "productTypeWords": [
+          "neural",
+          "audio",
+          "assistant"
+        ],
+        "formFactor": "earbuds",
+        "interactionModel": "voice and context interface",
+        "inputMethod": "voice control",
+        "connectivity": "phone linked",
+        "categoryHints": {
+          "primaryCategory": "device",
+          "secondaryCategory": "audio-ai-device",
+          "emergingCategory": "neural-audio-assistant"
+        },
+        "interactionHints": {
+          "interactionModel": "voice-and-context-interface",
+          "inputMethod": "voice-control",
+          "feedbackMethod": "visual-or-audio",
+          "controlSurface": "unknown"
+        },
+        "hardwareHints": {
+          "wearable": true,
+          "standalone": false,
+          "requiresPhone": true,
+          "requiresProjection": false,
+          "batteryPowered": true
+        },
+        "maturityHints": {
+          "marketStage": "prototype-commercial",
+          "evidenceLevel": "medium",
+          "adoptionRisk": "medium",
+          "productionConfidence": "medium"
+        },
+        "ecosystemHints": {
+          "companionDevices": [],
+          "dependencyType": "phone-linked",
+          "platformBinding": "cross-platform"
+        }
+      },
+      "evidence": {
+        "keyFacts": [
+          "voice control",
+          "real-time translation"
+        ],
+        "useCases": [
+          "real-time translation",
+          "contextual audio assistant"
+        ],
+        "unknowns": [
+          "privacy handling",
+          "translation latency",
+          "offline support"
+        ]
+      },
+      "trust": {
+        "confidence": "high",
+        "trustScore": 18,
+        "scoreBreakdown": {
+          "accumulationScore": 7,
+          "evidenceScore": 3,
+          "classificationScore": 5,
+          "maturityScore": 3
+        },
+        "riskFlags": [
+          "new-category-claim",
+          "evidence-unknowns"
+        ],
+        "writeReady": true,
+        "needsMoreEvidence": false
+      },
+      "validation": {
+        "status": "pass",
+        "reason": "ready for seed handoff",
+        "errors": []
+      }
+    },
+    {
+      "type": "trendReadyEntityCandidate",
+      "schemaVersion": "entity-candidates.v1",
+      "status": "ready",
+      "label": "device-reviews",
+      "mode": "trend",
+      "entity": {
+        "name": "Google AI Ring",
+        "brand": "Google",
+        "type": "device",
+        "category": "emerging-device",
+        "deviceClass": "ambient-ai-wearable",
+        "interactionModel": "gesture-and-health-sensing",
+        "status": "candidate",
+        "confidence": "low"
+      },
+      "keyPoints": [
+        "Google AI Ring candidate. ai-smart-ring. ring. gesture sensing. quick AI prompts, health context capture",
+        "Google",
+        "ai-smart-ring",
+        "ring",
+        "gesture sensing"
+      ],
+      "trendContext": {
+        "contextDate": "2026-05",
+        "changeReason": "ambient wearable AI interface trend",
+        "historicalValue": true
+      },
+      "sourceTrace": {
+        "rawFingerprint": "fp1:test000000000000000000000000000000000000005",
+        "rawConceptKey": "google|ai-ring",
+        "rawSimilarityGroup": "ai-smart-ring",
+        "capturedAt": "2026-05-30T00:00:00.000Z",
+        "sourceDomain": "manual-test.local",
+        "trustConfidence": "high",
+        "trustScore": 18
+      },
+      "classificationHints": {
+        "brand": "Google",
+        "productTypeWords": [
+          "ai",
+          "smart",
+          "ring"
+        ],
+        "formFactor": "ring",
+        "interactionModel": "gesture and health sensing",
+        "inputMethod": "gesture sensing",
+        "connectivity": "phone linked",
+        "categoryHints": {
+          "primaryCategory": "device",
+          "secondaryCategory": "ambient-ai-wearable",
+          "emergingCategory": "ai-smart-ring"
+        },
+        "interactionHints": {
+          "interactionModel": "gesture-and-health-sensing",
+          "inputMethod": "gesture-sensing",
+          "feedbackMethod": "visual-or-audio",
+          "controlSurface": "unknown"
+        },
+        "hardwareHints": {
+          "wearable": true,
+          "standalone": false,
+          "requiresPhone": true,
+          "requiresProjection": false,
+          "batteryPowered": true
+        },
+        "maturityHints": {
+          "marketStage": "concept-stage",
+          "evidenceLevel": "medium",
+          "adoptionRisk": "medium",
+          "productionConfidence": "medium"
+        },
+        "ecosystemHints": {
+          "companionDevices": [],
+          "dependencyType": "phone-linked",
+          "platformBinding": "cross-platform"
+        }
+      },
+      "evidence": {
+        "keyFacts": [
+          "gesture sensing",
+          "health context"
+        ],
+        "useCases": [
+          "quick AI prompts",
+          "health context capture"
+        ],
+        "unknowns": [
+          "sensor accuracy",
+          "privacy model",
+          "battery life"
+        ]
+      },
+      "trust": {
+        "confidence": "high",
+        "trustScore": 18,
+        "scoreBreakdown": {
+          "accumulationScore": 7,
+          "evidenceScore": 3,
+          "classificationScore": 5,
+          "maturityScore": 3
+        },
+        "riskFlags": [
+          "new-category-claim",
+          "evidence-unknowns"
+        ],
+        "writeReady": true,
+        "needsMoreEvidence": false
+      },
+      "validation": {
+        "status": "pass",
+        "reason": "ready for seed handoff",
+        "errors": []
+      }
+    },
+    {
+      "type": "trendReadyEntityCandidate",
+      "schemaVersion": "entity-candidates.v1",
+      "status": "ready",
+      "label": "device-reviews",
+      "mode": "trend",
+      "entity": {
+        "name": "Microsoft Portable HoloDesk",
+        "brand": "Microsoft",
+        "type": "device",
+        "category": "emerging-device",
+        "deviceClass": "portable-display-workstation",
+        "interactionModel": "mixed-reality-workspace",
+        "status": "candidate",
+        "confidence": "low"
+      },
+      "keyPoints": [
+        "Microsoft Portable HoloDesk candidate. portable-holographic-workspace. foldable-projector. gesture and keyboard hybrid. travel workstation, temporary desk setup",
+        "Microsoft",
+        "portable-holographic-workspace",
+        "foldable-projector",
+        "gesture and keyboard hybrid"
+      ],
+      "trendContext": {
+        "contextDate": "2026-05",
+        "changeReason": "future portable workstation demand",
+        "historicalValue": true
+      },
+      "sourceTrace": {
+        "rawFingerprint": "fp1:test000000000000000000000000000000000000006",
+        "rawConceptKey": "microsoft|portable-holodesk",
+        "rawSimilarityGroup": "portable-holographic-workspace",
+        "capturedAt": "2026-05-30T00:00:00.000Z",
+        "sourceDomain": "manual-test.local",
+        "trustConfidence": "high",
+        "trustScore": 18
+      },
+      "classificationHints": {
+        "brand": "Microsoft",
+        "productTypeWords": [
+          "portable",
+          "holographic",
+          "workspace"
+        ],
+        "formFactor": "foldable-projector",
+        "interactionModel": "mixed reality workspace",
+        "inputMethod": "gesture and keyboard hybrid",
+        "connectivity": "pc linked",
+        "categoryHints": {
+          "primaryCategory": "device",
+          "secondaryCategory": "portable-display-workstation",
+          "emergingCategory": "portable-holographic-workspace"
+        },
+        "interactionHints": {
+          "interactionModel": "mixed-reality-workspace",
+          "inputMethod": "gesture-and-keyboard-hybrid",
+          "feedbackMethod": "visual-or-audio",
+          "controlSurface": "unknown"
+        },
+        "hardwareHints": {
+          "wearable": false,
+          "standalone": false,
+          "requiresPhone": false,
+          "requiresProjection": true,
+          "batteryPowered": true
+        },
+        "maturityHints": {
+          "marketStage": "concept-stage",
+          "evidenceLevel": "medium",
+          "adoptionRisk": "medium",
+          "productionConfidence": "medium"
+        },
+        "ecosystemHints": {
+          "companionDevices": [],
+          "dependencyType": "pc-linked",
+          "platformBinding": "cross-platform"
+        }
+      },
+      "evidence": {
+        "keyFacts": [
+          "mixed reality workspace",
+          "portable projection"
+        ],
+        "useCases": [
+          "travel workstation",
+          "temporary desk setup"
+        ],
+        "unknowns": [
+          "projection clarity",
+          "setup time",
+          "power draw"
+        ]
+      },
+      "trust": {
+        "confidence": "high",
+        "trustScore": 18,
+        "scoreBreakdown": {
+          "accumulationScore": 7,
+          "evidenceScore": 3,
+          "classificationScore": 5,
+          "maturityScore": 3
+        },
+        "riskFlags": [
+          "new-category-claim",
+          "evidence-unknowns"
+        ],
+        "writeReady": true,
+        "needsMoreEvidence": false
+      },
+      "validation": {
+        "status": "pass",
+        "reason": "ready for seed handoff",
+        "errors": []
+      }
+    }
+  ]
+}
