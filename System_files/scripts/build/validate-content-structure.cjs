@@ -141,6 +141,307 @@ function hasRobotPattern(text) {
   return /\b(lorem ipsum|generated content|placeholder|template text|test content)\b/i.test(String(text || ''));
 }
 
+function escapeRegExp(s) {
+  return String(s || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function normalizeBodyText(body) {
+  return stripHtml(body)
+    .replace(/[“”]/g, '"')
+    .replace(/[‘’]/g, "'")
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function extractClassificationHints(post) {
+  const seedMeta = post && post.seedMeta && typeof post.seedMeta === 'object' ? post.seedMeta : {};
+  const direct = post && post.classificationHints && typeof post.classificationHints === 'object'
+    ? post.classificationHints
+    : null;
+
+  return seedMeta.classificationHints || direct || {};
+}
+
+function extractMaturityHints(post) {
+  const hints = extractClassificationHints(post);
+
+  return hints && hints.maturityHints && typeof hints.maturityHints === 'object'
+    ? hints.maturityHints
+    : {};
+}
+
+function extractEvidence(post) {
+  const seedMeta = post && post.seedMeta && typeof post.seedMeta === 'object' ? post.seedMeta : {};
+  const direct = post && post.evidence && typeof post.evidence === 'object'
+    ? post.evidence
+    : null;
+
+  return seedMeta.evidence || direct || {};
+}
+
+function extractUnknowns(post) {
+  const evidence = extractEvidence(post);
+  const seedMeta = post && post.seedMeta && typeof post.seedMeta === 'object' ? post.seedMeta : {};
+  const trendContext = seedMeta.trendContext && typeof seedMeta.trendContext === 'object'
+    ? seedMeta.trendContext
+    : {};
+
+  return [
+    ...ensureArray(evidence.unknowns),
+    ...ensureArray(trendContext.evidenceUnknowns),
+  ]
+    .map(normStr)
+    .filter(Boolean);
+}
+
+function extractMarketStage(post) {
+  const maturityHints = extractMaturityHints(post);
+  const seedMeta = post && post.seedMeta && typeof post.seedMeta === 'object' ? post.seedMeta : {};
+  const trendContext = seedMeta.trendContext && typeof seedMeta.trendContext === 'object'
+    ? seedMeta.trendContext
+    : {};
+
+  return normStr(
+    maturityHints.marketStage ||
+    trendContext.marketStage ||
+    ''
+  );
+}
+
+function isEarlyOrUncertainMarketStage(stage) {
+  const s = normStr(stage).toLowerCase();
+
+  if (!s) return false;
+
+  return (
+    s.includes('concept') ||
+    s.includes('prototype') ||
+    s.includes('candidate') ||
+    s.includes('pre-commercial') ||
+    s.includes('unverified')
+  );
+}
+
+function hasUncertaintySignals(post) {
+  const unknowns = extractUnknowns(post);
+  const stage = extractMarketStage(post);
+  const entity = post && post.entity && typeof post.entity === 'object' ? post.entity : {};
+  const reviewEntity = post && post.reviewEntity && typeof post.reviewEntity === 'object' ? post.reviewEntity : {};
+  const confidence = normStr(entity.confidence || reviewEntity.confidence).toLowerCase();
+  const status = normStr(entity.status || reviewEntity.status).toLowerCase();
+
+  return (
+    unknowns.length > 0 ||
+    isEarlyOrUncertainMarketStage(stage) ||
+    confidence === 'low' ||
+    status === 'candidate'
+  );
+}
+
+function inspectQualityGate(post, label, body, sections) {
+  const issues = [];
+  const text = normalizeBodyText(body);
+  const lower = text.toLowerCase();
+  const marketStage = extractMarketStage(post);
+  const unknowns = extractUnknowns(post);
+  const uncertain = hasUncertaintySignals(post);
+  const title = normStr(post && post.title);
+  const entityName = normStr(
+    post &&
+    post.entity &&
+    post.entity.name
+  ) || normStr(
+    post &&
+    post.reviewEntity &&
+    post.reviewEntity.name
+  );
+
+  const leakagePatterns = [
+    {
+      code: 'INSTRUCTION_LEAKAGE_SHOULD_BE_READ_AS',
+      re: /\bshould be read as\b/i,
+      message: '본문에 작성 지시문형 문장(should be read as)이 남아 있음',
+    },
+    {
+      code: 'INSTRUCTION_LEAKAGE_TREATED_HERE_AS',
+      re: /\bis treated here as\b/i,
+      message: '본문에 작성 지시문형 문장(is treated here as)이 남아 있음',
+    },
+    {
+      code: 'INSTRUCTION_LEAKAGE_THE_GOAL_IS',
+      re: /\bthe goal is\b/i,
+      message: '본문에 작성 목표 설명문(The goal is)이 남아 있음',
+    },
+    {
+      code: 'INSTRUCTION_LEAKAGE_WRITING_DIRECTION',
+      re: /\bwriting direction\b/i,
+      message: '본문에 bodyPrompt/guidance 누수 표현이 남아 있음',
+    },
+    {
+      code: 'INSTRUCTION_LEAKAGE_PROMPT_PHRASE',
+      re: /\b(write a practical|avoid robotic filler|use natural human explanation|focus on decision context)\b/i,
+      message: '본문에 프롬프트 원문 계열 문구가 남아 있음',
+    },
+  ];
+
+  for (const item of leakagePatterns) {
+    if (item.re.test(text)) {
+      issues.push({
+        level: 'fail',
+        code: item.code,
+        message: item.message,
+      });
+    }
+  }
+
+  const metaWritingPatterns = [
+    {
+      code: 'META_WRITING_THIS_ARTICLE',
+      re: /\b(this article|the article)\b/i,
+      message: '본문이 제품/문제가 아니라 article 자체를 설명하는 문장으로 흐름',
+    },
+    {
+      code: 'META_WRITING_THIS_SECTION',
+      re: /\b(this section|the section)\b/i,
+      message: '본문이 section 자체를 설명하는 문장으로 흐름',
+    },
+    {
+      code: 'META_WRITING_REVIEW_SHOULD',
+      re: /\b(the review should|this review should|a useful review should)\b/i,
+      message: '본문이 실제 리뷰가 아니라 리뷰 작성법을 설명하는 문장으로 흐름',
+    },
+  ];
+
+  for (const item of metaWritingPatterns) {
+    if (item.re.test(text)) {
+      issues.push({
+        level: 'fail',
+        code: item.code,
+        message: item.message,
+      });
+    }
+  }
+
+  const aiSelfExplanationPatterns = [
+    {
+      code: 'AI_SELF_EXPLANATION',
+      re: /\b(as an ai|i cannot|i do not have access|i don't have access|based on the information provided|as a language model)\b/i,
+      message: 'AI 자기설명 또는 한계 고백 문장이 본문에 포함됨',
+    },
+    {
+      code: 'SOURCELESS_CLAIM_FRAME',
+      re: /\b(no real-world data is available|without real-world data|there is no information available)\b/i,
+      message: '자료 한계를 본문 품질 문장으로 처리하지 못하고 설명문으로 노출함',
+    },
+  ];
+
+  for (const item of aiSelfExplanationPatterns) {
+    if (item.re.test(text)) {
+      issues.push({
+        level: 'fail',
+        code: item.code,
+        message: item.message,
+      });
+    }
+  }
+
+  if (REVIEW_LABELS.has(label) && uncertain) {
+    const cautionTokens = /\b(if released|if it reaches|would need to|needs proof|verify|verification|conditional|early|concept|prototype|not ready|must be proven|should not treat|still needs)\b/i;
+    if (!cautionTokens.test(text)) {
+      issues.push({
+        level: 'fail',
+        code: 'UNCERTAIN_REVIEW_WITHOUT_CAUTION',
+        message: '불확실/초기 단계 리뷰인데 조건부·검증형 표현이 부족함',
+      });
+    }
+
+    const overclaimPatterns = [
+      {
+        code: 'UNVERIFIED_REAL_USE_CLAIM',
+        re: /\b(i used|we tested|hands-on|in our test|during testing|real-world test showed)\b/i,
+        message: '실제 사용/테스트 근거가 없는 대상에서 써본 척 표현이 감지됨',
+      },
+      {
+        code: 'UNVERIFIED_SUPERIORITY_CLAIM',
+        re: /\b(is better than|performs better than|outperforms|beats|is the best|is a proven replacement|is ready to replace)\b/i,
+        message: '불확실 대상에서 우열/대체 가능성을 단정하는 표현이 감지됨',
+      },
+      {
+        code: 'UNVERIFIED_PURCHASE_CLAIM',
+        re: /\b(is worth buying|you should buy|buy it|is a safe buy|clear buy recommendation)\b/i,
+        message: '불확실 대상에서 구매 권고를 단정하는 표현이 감지됨',
+      },
+    ];
+
+    for (const item of overclaimPatterns) {
+      if (item.re.test(text)) {
+        issues.push({
+          level: 'fail',
+          code: item.code,
+          message: item.message,
+        });
+      }
+    }
+  }
+
+  if (entityName && title && title.length > 80) {
+    const repeatedTitleCount = countMatches(text, new RegExp(escapeRegExp(title), 'gi'));
+    const repeatedEntityCount = countMatches(text, new RegExp(escapeRegExp(entityName), 'gi'));
+
+    if (repeatedTitleCount >= 3 && repeatedEntityCount < repeatedTitleCount) {
+      issues.push({
+        level: 'warn',
+        code: 'TITLE_REPETITION_IN_BODY',
+        message: '긴 title이 본문에서 반복됨. entity.name 중심 표현 권장',
+      });
+    }
+  }
+
+  if (unknowns.length > 0) {
+    const missingUnknownMentions = unknowns
+      .filter(item => item.length >= 3)
+      .filter(item => !new RegExp(escapeRegExp(item), 'i').test(text));
+
+    if (missingUnknownMentions.length >= Math.min(3, unknowns.length)) {
+      issues.push({
+        level: 'warn',
+        code: 'UNKNOWNS_NOT_REFLECTED',
+        message: `unknowns가 본문 판단에 충분히 반영되지 않음: ${missingUnknownMentions.slice(0, 5).join(', ')}`,
+      });
+    }
+  }
+
+  if (REVIEW_LABELS.has(label) && sections.length > 0) {
+    const sectionNames = sections.map(s => s.h2);
+    const hasVerdict = sectionNames.includes('Verdict');
+    const hasBestFor = sectionNames.includes('Best For / Not For');
+
+    if (hasVerdict) {
+      const verdict = sections.find(s => s.h2 === 'Verdict');
+      if (verdict && uncertain && !/\bconditional|verify|watch|wait|proof|not ready|if it reaches|if released\b/i.test(verdict.text)) {
+        issues.push({
+          level: 'warn',
+          code: 'VERDICT_NOT_CAUTION_AWARE',
+          message: '불확실 대상의 Verdict가 조건부 판단을 충분히 드러내지 않음',
+        });
+      }
+    }
+
+    if (hasBestFor) {
+      const bestFor = sections.find(s => s.h2 === 'Best For / Not For');
+      if (bestFor && !/\bbest for\b/i.test(bestFor.text)) {
+        issues.push({
+          level: 'warn',
+          code: 'BEST_FOR_SECTION_WEAK',
+          message: 'Best For / Not For 섹션의 추천/비추천 구분이 약함',
+        });
+      }
+    }
+  }
+
+  return issues;
+}
+
 function inspectGeneric(slug, body, sections) {
   const issues = [];
 
@@ -293,7 +594,8 @@ function inspectPostFile(fullPath) {
 
   const genericIssues = inspectGeneric(slug, body, sections);
   const labelIssues = inspectByLabel(label, sections, body);
-  const issues = dedupeIssues([...genericIssues, ...labelIssues]);
+  const qualityIssues = inspectQualityGate(post, label, body, sections);
+  const issues = dedupeIssues([...genericIssues, ...labelIssues, ...qualityIssues]);
 
   const failCount = issues.filter(x => x.level === 'fail').length;
   const warnCount = issues.filter(x => x.level === 'warn').length;
