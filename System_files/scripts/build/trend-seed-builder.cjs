@@ -177,14 +177,155 @@ function buildFingerprint(seed) {
   return 'fp1:' + crypto.createHash('sha1').update(src).digest('hex');
 }
 
-function buildTitle(intent, name, reason) {
-  if (intent === 'review/update') return `What changed in ${name} after ${reason}?`;
-  if (intent === 'review/recheck') return `Should you recheck ${name} after recent changes?`;
-  if (intent === 'review/compare-now') return `How does ${name} compare now after ${reason}?`;
-  if (intent === 'review/still-worth') return `Is ${name} still worth using after ${reason}?`;
-  if (intent === 'review/switch-or-keep') return `Should you keep using ${name} after ${reason}?`;
-  if (intent === 'review/risk-watch') return `What risks should users watch in ${name} after ${reason}?`;
-  return `Should you recheck ${name}?`;
+function buildTitleSignals(classificationHints, evidence, trendContext) {
+  const hints = classificationHints || {};
+  const categoryHints = hints.categoryHints || {};
+  const interactionHints = hints.interactionHints || {};
+  const hardwareHints = hints.hardwareHints || {};
+  const maturityHints = hints.maturityHints || {};
+  const ecosystemHints = hints.ecosystemHints || {};
+
+  const useCases = Array.isArray(evidence && evidence.useCases)
+    ? evidence.useCases.map(normalizeText).filter(Boolean)
+    : [];
+
+  const unknowns = Array.isArray(evidence && evidence.unknowns)
+    ? evidence.unknowns.map(normalizeText).filter(Boolean)
+    : [];
+
+  return {
+    emergingCategory: normalizeText(categoryHints.emergingCategory),
+    primaryCategory: normalizeText(categoryHints.primaryCategory),
+    interactionModel: normalizeText(interactionHints.interactionModel),
+    inputMethod: normalizeText(interactionHints.inputMethod),
+    feedbackMethod: normalizeText(interactionHints.feedbackMethod),
+    formFactor: normalizeText(hints.formFactor),
+    connectivity: normalizeText(hints.connectivity || ecosystemHints.dependencyType),
+    marketStage: normalizeText(maturityHints.marketStage),
+    evidenceLevel: normalizeText(maturityHints.evidenceLevel),
+    wearable: !!hardwareHints.wearable,
+    requiresProjection: !!hardwareHints.requiresProjection,
+    useCase: useCases[0] || '',
+    unknown: unknowns[0] || '',
+    changeReason: normalizeText(trendContext && trendContext.changeReason)
+  };
+}
+
+function compactReason(reason) {
+  const r = normalizeText(reason);
+  if (!r) return 'recent changes';
+
+  return r
+    .replace(/\bnew\s+device\s+category\s+emergence\b/i, 'a new device category signal')
+    .replace(/\bmarket\s+change\b/i, 'recent market changes');
+}
+
+function pickTitlePattern(intent, index, signals) {
+  const s = signals || {};
+  const n = Number.isFinite(Number(index)) ? Number(index) : 0;
+  const pool = [];
+
+  if (s.requiresProjection || /holographic|projection/i.test(`${s.interactionModel} ${s.emergingCategory}`)) {
+    pool.push('verification');
+    pool.push('concept-reality');
+  }
+
+  if (s.useCase) pool.push('use-case');
+  if (s.unknown) pool.push('concern');
+  if (s.marketStage) pool.push('market-position');
+  if (s.inputMethod || s.interactionModel) pool.push('comparison');
+  if (intent === 'review/risk-watch') pool.push('risk-watch');
+  if (intent === 'review/compare-now') pool.push('comparison');
+  if (intent === 'review/switch-or-keep') pool.push('watch-or-wait');
+  if (intent === 'review/still-worth') pool.push('still-worth-cautious');
+
+  pool.push('future-impact');
+  pool.push('update');
+
+  return pool[n % pool.length];
+}
+
+function buildTitle(intent, name, reason, classificationHints = {}, evidence = {}, trendContext = {}, index = 0) {
+  const targetName = normalizeText(name) || 'this device';
+  const signals = buildTitleSignals(classificationHints, evidence, trendContext);
+  const safeReason = compactReason(signals.changeReason || reason);
+  const category =
+    signals.emergingCategory ||
+    signals.primaryCategory ||
+    'device category';
+  const interaction =
+    signals.inputMethod ||
+    signals.interactionModel ||
+    'input method';
+  const useCase = signals.useCase || 'real use';
+  const unknown = signals.unknown || 'key unknowns';
+  const pattern = pickTitlePattern(intent, index, signals);
+
+  if (pattern === 'verification') {
+    return `${targetName}: what to verify before treating it as a real option`;
+  }
+
+  if (pattern === 'concept-reality') {
+    return `${targetName} and the gap between concept promise and daily use`;
+  }
+
+  if (pattern === 'use-case') {
+    return `${targetName} for ${useCase}: early signals and limits`;
+  }
+
+  if (pattern === 'concern') {
+    return `${targetName}: why ${unknown} still matters before any recommendation`;
+  }
+
+  if (pattern === 'market-position') {
+    return `${targetName} as a ${signals.marketStage} ${category} candidate`;
+  }
+
+  if (pattern === 'comparison') {
+    return `${targetName} versus familiar input options: what changes in the decision`;
+  }
+
+  if (pattern === 'risk-watch') {
+    return `${targetName}: risks to watch before trusting the ${interaction}`;
+  }
+
+  if (pattern === 'watch-or-wait') {
+    return `${targetName}: watch the category or wait for proof?`;
+  }
+
+  if (pattern === 'still-worth-cautious') {
+    return `${targetName}: still worth attention if the unknowns remain open?`;
+  }
+
+  if (pattern === 'future-impact') {
+    return `Could ${targetName} change how users think about ${category}?`;
+  }
+
+  if (intent === 'review/update') {
+    return `${targetName}: what ${safeReason} changes for buyers`;
+  }
+
+  if (intent === 'review/recheck') {
+    return `${targetName}: a fresh look after ${safeReason}`;
+  }
+
+  if (intent === 'review/compare-now') {
+    return `${targetName}: what to compare after ${safeReason}`;
+  }
+
+  if (intent === 'review/still-worth') {
+    return `${targetName}: still worth considering after ${safeReason}?`;
+  }
+
+  if (intent === 'review/switch-or-keep') {
+    return `${targetName}: keep watching or choose a safer alternative?`;
+  }
+
+  if (intent === 'review/risk-watch') {
+    return `${targetName}: what risks users should verify after ${safeReason}`;
+  }
+
+  return `${targetName}: early signals, limits, and buyer questions`;
 }
 
 function buildAngle(intent, entityName, reason, classificationHints) {
@@ -348,7 +489,7 @@ function buildSeedFromCandidate(candidate, signal, index) {
     entity,
     reviewEntity: entity,
     intent,
-    title: buildTitle(intent, entity.name, trendContext.changeReason),
+    title: buildTitle(intent, entity.name, trendContext.changeReason, {}, {}, trendContext, index),
     angle: `Review ${entity.name} as a time-stamped trend decision after ${trendContext.changeReason}.`,
     audience: `users evaluating whether ${entity.name} deserves attention now`,
     goal: `evaluate ${entity.name} after ${trendContext.changeReason}`,
@@ -417,7 +558,7 @@ function buildSeedFromReadyCandidate(candidate, index) {
     reviewEntity: entity,
 
     intent,
-    title: buildTitle(intent, entity.name, trendContext.changeReason),
+    title: buildTitle(intent, entity.name, trendContext.changeReason, classificationHints, evidence, trendContext, index),
     angle,
     audience,
     goal,
