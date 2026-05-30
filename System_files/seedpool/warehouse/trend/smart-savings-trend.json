@@ -5,15 +5,6 @@
   },
   "trend": [
     {
-      "id": "ss-tr-028",
-      "title": "How to Optimize Smart Home Energy Costs",
-      "angle": "Energy-saving smart devices exploded in adoption.",
-      "audience": "Smart home users",
-      "intent": "saving",
-      "priority": 1,
-      "fingerprint": "fp1:c25d865ef548e79b240fb8157ff9da560eea0e7f"
-    },
-    {
       "id": "ss-tr-029",
       "title": "How to Save on Subscription Software After Global Price Increases",
       "angle": "Major SaaS vendors raised prices in 2025.",
