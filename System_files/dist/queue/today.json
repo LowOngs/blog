@@ -1,18 +1,18 @@
 {
-  "date": "2026-05-30",
+  "date": "2026-05-31",
   "timezone": "Asia/Seoul",
   "cutoff": "10:00",
   "items": [
     {
-      "date": "2026-05-30",
+      "date": "2026-05-31",
       "label": "smart-savings",
       "seedLabel": "smart-savings",
       "requestedSlotLabel": "smart-savings",
       "mode": "trend",
-      "id": "ss-tr-028",
-      "title": "How to Optimize Smart Home Energy Costs",
-      "angle": "Energy-saving smart devices exploded in adoption.",
-      "audience": "Smart home users",
+      "id": "ss-tr-029",
+      "title": "How to Save on Subscription Software After Global Price Increases",
+      "angle": "Major SaaS vendors raised prices in 2025.",
+      "audience": "Freelancers, workers, creators",
       "intent": "saving",
       "priority": 1,
       "notes": ""
