@@ -263,6 +263,16 @@ function inspectQualityGate(post, label, body, sections) {
       message: '본문에 작성 지시문형 문장(should be read as)이 남아 있음',
     },
     {
+      code: 'INSTRUCTION_LEAKAGE_SHOULD_BE_READ_THROUGH',
+      re: /\bshould be read through\b/i,
+      message: '본문에 작성 지시문형 문장(should be read through)이 남아 있음',
+    },
+    {
+      code: 'INSTRUCTION_LEAKAGE_SHOULD_BE_INTERPRETED_AS',
+      re: /\bshould be interpreted as\b/i,
+      message: '본문에 작성 지시문형 문장(should be interpreted as)이 남아 있음',
+    },
+    {
       code: 'INSTRUCTION_LEAKAGE_TREATED_HERE_AS',
       re: /\bis treated here as\b/i,
       message: '본문에 작성 지시문형 문장(is treated here as)이 남아 있음',
@@ -309,6 +319,16 @@ function inspectQualityGate(post, label, body, sections) {
       code: 'META_WRITING_REVIEW_SHOULD',
       re: /\b(the review should|this review should|a useful review should)\b/i,
       message: '본문이 실제 리뷰가 아니라 리뷰 작성법을 설명하는 문장으로 흐름',
+    },
+    {
+      code: 'META_WRITING_BEST_UNDERSTOOD_AS',
+      re: /\bbest understood as\b/i,
+      message: '본문이 대상 자체보다 해석 방식(best understood as)을 설명하는 문장으로 흐름',
+    },
+    {
+      code: 'META_WRITING_VIEWED_AS',
+      re: /\bviewed as\b/i,
+      message: '본문이 대상 자체보다 관점 설명(viewed as)으로 흐름',
     },
   ];
 
