@@ -738,7 +738,7 @@ function buildReviewSection(title, label, h2, meta, post) {
   if (h2 === 'Insights') {
     if (isDeviceTrend) {
       return makeParagraphs([
-        `${targetName} should be read through feasibility signals rather than launch excitement. The important signals are whether the concept can survive normal lighting, hand movement, pairing delays, short-session typing, and the lack of physical key feedback.`,
+        `For ${targetName}, the useful signals are practical feasibility rather than launch excitement. The important checks are whether the concept can survive normal lighting, hand movement, pairing delays, short-session typing, and the lack of physical key feedback.`,
         `The category position matters too. If the product remains closer to ${trendSignals.marketStage || 'an early-stage device'} than to a mature accessory, the strongest insight is caution: watch the evidence before turning the concept into a recommendation.`
       ]);
     }
@@ -1005,7 +1005,7 @@ function buildHowToSection(title, h2, meta) {
 
   if (h2 === 'Overview') {
     return makeParagraphs([
-      `${title} should be read as a practical execution guide. The goal is not to sound technical for its own sake, but to make the task feel controllable from the first step to the final verification.`,
+      `${title} focuses on practical execution. The task should feel controllable from the first step to the final verification, without adding technical language for its own sake.`,
       `${buildPromptAwareLine(meta, `The most common reason a how-to fails is that people jump into action before checking environment, version, or dependency conditions. In ${context}, the setup around the task matters almost as much as the steps themselves.`)}`
     ]);
   }
@@ -1162,6 +1162,10 @@ function stripRobotPhrases(text) {
     .replace(/\bThe better way\b/g, 'A better way')
     .replace(/\bIt is better to\b/g, 'It helps to')
     .replace(/[^.?!]*\bshould be read as\b[^.?!]*[.?!]/gi, '')
+    .replace(/[^.?!]*\bshould be read through\b[^.?!]*[.?!]/gi, '')
+    .replace(/[^.?!]*\bshould be interpreted as\b[^.?!]*[.?!]/gi, '')
+    .replace(/[^.?!]*\bbest understood as\b[^.?!]*[.?!]/gi, '')
+    .replace(/[^.?!]*\bviewed as\b[^.?!]*[.?!]/gi, '')
     .replace(/[^.?!]*\bis treated here as\b[^.?!]*[.?!]/gi, '')
     .replace(/[^.?!]*\bThe goal is\b[^.?!]*[.?!]/gi, '')
     .replace(/[^.?!]*\bthis writing direction\b[^.?!]*[.?!]/gi, '')
@@ -1385,7 +1389,7 @@ function buildBodyByLabel(post, h2, repairHints) {
     html = buildTemplateSection(title, h2, meta);
   } else {
     html = makeParagraphs([
-      `${title} should be read through actual use, realistic constraints, and the quality of the decision it supports.`
+      `${title} focuses on actual use, realistic constraints, and the quality of the decision it supports.`
     ]);
   }
 
