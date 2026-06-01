@@ -5,21 +5,6 @@
   },
   "trend": [
     {
-      "id": "ar-tr-021",
-      "title": "Is the New Grocery Delivery App Worth the Fees?",
-      "angle": "Compare delivery accuracy + substitutions",
-      "audience": "Home shoppers",
-      "intent": "review/value-check",
-      "environment": "grocery delivery",
-      "timing": "launch period",
-      "goal": "judge cost-effectiveness over traditional shopping",
-      "reviewEntity": {
-        "type": "app",
-        "appName": "Grocery Delivery App",
-        "platform": "android"
-      }
-    },
-    {
       "id": "ar-tr-022",
       "title": "Which AI Camera App Gives the Best Low-Light Shots?",
       "angle": "Noise reduction + detail retention",

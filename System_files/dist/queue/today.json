@@ -1,21 +1,40 @@
 {
-  "date": "2026-05-31",
+  "date": "2026-06-01",
   "timezone": "Asia/Seoul",
   "cutoff": "10:00",
   "items": [
     {
-      "date": "2026-05-31",
-      "label": "smart-savings",
-      "seedLabel": "smart-savings",
-      "requestedSlotLabel": "smart-savings",
+      "date": "2026-06-01",
+      "label": "how-to-playbooks",
+      "seedLabel": "how-to-playbooks",
+      "requestedSlotLabel": "how-to-playbooks",
       "mode": "trend",
-      "id": "ss-tr-029",
-      "title": "How to Save on Subscription Software After Global Price Increases",
-      "angle": "Major SaaS vendors raised prices in 2025.",
-      "audience": "Freelancers, workers, creators",
-      "intent": "saving",
-      "priority": 1,
-      "notes": ""
+      "id": "how-to-playbooks-trend-1772630313744-980605429",
+      "title": "AUTO GENERATED: how-to-playbooks (trend) #1772630313744-980605429",
+      "angle": "Auto angle (trend) var=1772630313744-980605429",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "notes": "Replace with real LLM generation."
+    },
+    {
+      "date": "2026-06-01",
+      "label": "app-reviews",
+      "seedLabel": "app-reviews",
+      "requestedSlotLabel": "app-reviews",
+      "mode": "trend",
+      "id": "ar-tr-021",
+      "title": "Is the New Grocery Delivery App Worth the Fees?",
+      "angle": "Compare delivery accuracy + substitutions",
+      "audience": "Home shoppers",
+      "intent": "review/value-check",
+      "priority": 0,
+      "notes": "",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Grocery Delivery App",
+        "platform": "android"
+      }
     }
   ]
 }
