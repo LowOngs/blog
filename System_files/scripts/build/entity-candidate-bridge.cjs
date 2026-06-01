@@ -130,6 +130,61 @@ function normalizeArray(value) {
     .filter(Boolean);
 }
 
+function normalizeSourceList(value) {
+  if (!value) {
+    return [];
+  }
+
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => {
+        if (typeof item === 'string') {
+          return normalizeText(item);
+        }
+
+        if (item && typeof item === 'object') {
+          return normalizeText(
+            item.url ||
+            item.href ||
+            item.sourceUrl ||
+            item.domain ||
+            item.title
+          );
+        }
+
+        return '';
+      })
+      .filter(Boolean);
+  }
+
+  if (typeof value === 'object') {
+    return normalizeSourceList(Object.values(value));
+  }
+
+  return [normalizeText(value)].filter(Boolean);
+}
+
+function getEvidenceSourceCount(signal) {
+  const evidence = signal && signal.evidence && typeof signal.evidence === 'object'
+    ? signal.evidence
+    : {};
+
+  const sourceLists = [
+    normalizeSourceList(evidence.sources),
+    normalizeSourceList(evidence.sourceUrls),
+    normalizeSourceList(evidence.references),
+    normalizeSourceList(evidence.citations),
+  ];
+
+  const explicitCount = Number(evidence.sourceCount);
+
+  if (Number.isFinite(explicitCount) && explicitCount > 0) {
+    return explicitCount;
+  }
+
+  return Array.from(new Set(sourceLists.flat())).length;
+}
+
 function getRawConceptKey(signal) {
   return normalizeText(
     signal &&
@@ -393,6 +448,20 @@ function patchCandidateFromClassificationHints(candidate, signal) {
 function attachSourceTrace(candidate, signal) {
   const cloned = JSON.parse(JSON.stringify(candidate));
 
+  const evidence = signal.evidence && typeof signal.evidence === 'object'
+    ? signal.evidence
+    : {};
+  const source = signal.source && typeof signal.source === 'object'
+    ? signal.source
+    : {};
+  const evidenceSources = Array.from(new Set([
+    ...normalizeSourceList(evidence.sources),
+    ...normalizeSourceList(evidence.sourceUrls),
+    ...normalizeSourceList(evidence.references),
+    ...normalizeSourceList(evidence.citations),
+  ]));
+  const sourceCount = getEvidenceSourceCount(signal);
+
   cloned.sourceTrace = {
     rawFingerprint: normalizeText(signal.fingerprint),
     rawConceptKey: normalizeText(
@@ -402,10 +471,20 @@ function attachSourceTrace(candidate, signal) {
       signal.dedupe && signal.dedupe.similarityGroup
     ),
     capturedAt: normalizeText(
-      signal.source && signal.source.capturedAt
+      source.capturedAt
     ),
     sourceDomain: normalizeText(
-      signal.source && signal.source.domain
+      source.domain
+    ),
+    sourceUrl: normalizeText(
+      source.url || source.href || source.sourceUrl
+    ),
+    sourceTitle: normalizeText(
+      source.title || source.name
+    ),
+    sourceCount,
+    evidenceType: normalizeText(
+      evidence.evidenceType || evidence.sourceType || source.evidenceType || source.type
     ),
     trustConfidence: normalizeText(
       signal.trust && signal.trust.confidence
@@ -423,10 +502,26 @@ function attachSourceTrace(candidate, signal) {
     ),
     isNewCategoryCandidate:
       !!(signal.novelty && signal.novelty.isNewCategoryCandidate),
+    source: {
+      title: normalizeText(source.title || source.name),
+      url: normalizeText(source.url || source.href || source.sourceUrl),
+      domain: normalizeText(source.domain),
+      capturedAt: normalizeText(source.capturedAt),
+    },
+    realityGateInput: {
+      sourceCount,
+      sources: evidenceSources,
+      evidenceType: normalizeText(
+        evidence.evidenceType || evidence.sourceType || source.evidenceType || source.type
+      ),
+    },
     classificationHints:
       signal.classificationHints || {},
-    evidence:
-      signal.evidence || {},
+    evidence: {
+      ...evidence,
+      sourceCount,
+      sources: evidenceSources.length ? evidenceSources : evidence.sources,
+    },
     trust:
       signal.trust || {},
   };
@@ -493,6 +588,17 @@ function flattenValidationResult(result) {
         rawConceptKey: normalizeText(
           item.sourceTrace && item.sourceTrace.rawConceptKey
         ),
+        sourceDomain: normalizeText(
+          item.sourceTrace && item.sourceTrace.sourceDomain
+        ),
+        sourceUrl: normalizeText(
+          item.sourceTrace && item.sourceTrace.sourceUrl
+        ),
+        sourceCount:
+          item.sourceTrace &&
+          Number.isFinite(Number(item.sourceTrace.sourceCount))
+            ? Number(item.sourceTrace.sourceCount)
+            : 0,
         trustConfidence: normalizeText(
           item.sourceTrace && item.sourceTrace.trustConfidence
         ),
@@ -560,6 +666,13 @@ function buildTrendReadyCandidate(candidate) {
       rawSimilarityGroup: normalizeText(sourceTrace.rawSimilarityGroup),
       capturedAt: normalizeText(sourceTrace.capturedAt),
       sourceDomain: normalizeText(sourceTrace.sourceDomain),
+      sourceUrl: normalizeText(sourceTrace.sourceUrl),
+      sourceTitle: normalizeText(sourceTrace.sourceTitle),
+      sourceCount:
+        Number.isFinite(Number(sourceTrace.sourceCount))
+          ? Number(sourceTrace.sourceCount)
+          : 0,
+      evidenceType: normalizeText(sourceTrace.evidenceType),
       trustConfidence: normalizeText(sourceTrace.trustConfidence),
       trustScore:
         Number.isFinite(Number(sourceTrace.trustScore))
@@ -570,6 +683,7 @@ function buildTrendReadyCandidate(candidate) {
     classificationHints,
     evidence,
     trust,
+    realityGate: candidate.realityGate || null,
 
     validation: {
       status: normalizeText(validation.status),
@@ -687,4 +801,6 @@ module.exports = {
   pickLatestPassCandidates,
   buildTrendReadyCandidate,
   buildTrendReadyCandidates,
+  normalizeSourceList,
+  getEvidenceSourceCount,
 };
