@@ -33,6 +33,85 @@ function isUnknownDeviceClass(v) {
   return !s || s === 'unknown-device-class';
 }
 
+const REAL_WORLD_EXISTENCE_PASS_STATUSES = new Set([
+  'confirmed',
+  'announced',
+  'prototype',
+  'patent',
+]);
+
+const REAL_WORLD_EXISTENCE_HOLD_STATUSES = new Set([
+  'rumor',
+  'unknown',
+]);
+
+const REAL_WORLD_EXISTENCE_REJECT_STATUSES = new Set([
+  'speculative',
+  'imagined',
+]);
+
+function getRealityGate(candidate) {
+  if (candidate && candidate.realityGate && typeof candidate.realityGate === 'object') {
+    return candidate.realityGate;
+  }
+
+  if (
+    candidate &&
+    candidate.rawSignalContext &&
+    candidate.rawSignalContext.realityGate &&
+    typeof candidate.rawSignalContext.realityGate === 'object'
+  ) {
+    return candidate.rawSignalContext.realityGate;
+  }
+
+  return null;
+}
+
+function normalizeRealityStatus(v) {
+  return String(v || '').trim().toLowerCase();
+}
+
+function validateRealWorldExistence(candidate) {
+  const errors = [];
+  const gate = getRealityGate(candidate);
+
+  if (!gate) {
+    errors.push('missing realityGate');
+    return errors;
+  }
+
+  const status = normalizeRealityStatus(gate.status);
+  const decision = normalizeRealityStatus(gate.decision);
+
+  if (!status) {
+    errors.push('missing realityGate.status');
+  }
+
+  if (!decision) {
+    errors.push('missing realityGate.decision');
+  }
+
+  if (REAL_WORLD_EXISTENCE_REJECT_STATUSES.has(status) || decision === 'reject') {
+    errors.push('realityGate rejected');
+    return errors;
+  }
+
+  if (REAL_WORLD_EXISTENCE_HOLD_STATUSES.has(status) || decision === 'hold') {
+    errors.push('realityGate hold');
+    return errors;
+  }
+
+  if (!REAL_WORLD_EXISTENCE_PASS_STATUSES.has(status)) {
+    errors.push('realityGate status not allowed');
+  }
+
+  if (decision !== 'pass') {
+    errors.push('realityGate decision not pass');
+  }
+
+  return errors;
+}
+
 function getTrust(candidate) {
   const ctx = candidate && candidate.rawSignalContext && candidate.rawSignalContext.trust;
   if (ctx && typeof ctx === 'object') return ctx;
@@ -94,6 +173,7 @@ function validateOperationalReadiness(candidate) {
   const sourceTrace = candidate.sourceTrace || {};
   const trust = getTrust(candidate);
   const evidence = getEvidence(candidate);
+  const realityErrors = validateRealWorldExistence(candidate);
 
   const trustScore = asNumber(trust.trustScore, null);
   const keyFacts = Array.isArray(evidence.keyFacts) ? evidence.keyFacts : [];
@@ -137,6 +217,10 @@ function validateOperationalReadiness(candidate) {
     errors.push('insufficient evidence.useCases');
   }
 
+  for (const err of realityErrors) {
+    errors.push(err);
+  }
+
   return errors;
 }
 
@@ -173,7 +257,15 @@ function classifyCandidate(candidate) {
     };
   }
 
-  // HOLD: 운영 연결 필수값 부족
+  if (errors.includes('realityGate rejected')) {
+    return {
+      status: 'reject',
+      reason: 'real-world existence rejected',
+      errors
+    };
+  }
+
+  // HOLD: 실존성 게이트 대기 또는 운영 연결 필수값 부족
   if (readinessErrors.length > 0) {
     return {
       status: 'hold',
@@ -244,5 +336,7 @@ module.exports = {
   processCandidates,
   classifyCandidate,
   validateStructure,
-  validateOperationalReadiness
+  validateOperationalReadiness,
+  validateRealWorldExistence,
+  getRealityGate
 };
