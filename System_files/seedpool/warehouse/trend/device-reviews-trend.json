@@ -5,21 +5,6 @@
   },
   "trend": [
     {
-      "id": "dr-tr-008",
-      "title": "Is the Latest Smartwatch Battery Upgrade Real?",
-      "angle": "Always-on drain + GPS endurance",
-      "audience": "Lifestyle and fitness users",
-      "intent": "review/battery",
-      "environment": "wearables",
-      "timing": "first-week usage",
-      "goal": "verify if marketing matches real runtime",
-      "fingerprint": "fp1:3b27c71373bd5c8a431486dd831f98f341ca75f5",
-      "reviewEntity": {
-        "type": "device",
-        "model": "Wearables"
-      }
-    },
-    {
       "id": "dr-tr-009",
       "title": "Which Bluetooth Speaker Sounds Best at High Volume?",
       "angle": "Distortion handling",

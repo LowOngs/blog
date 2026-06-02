@@ -1,6 +1,6 @@
 {
   "version": 4,
-  "updatedAt": "2026-06-01T07:21:22.337Z",
+  "updatedAt": "2026-06-02T06:55:02.357Z",
   "offsetByKey": {
     "slug:ledger_smoke": 0,
     "pid:page000012": 8226,
@@ -209,7 +209,9 @@
     "fp:fp1:c25d865ef548e79b240fb8157ff9da560eea0e7f": 60396,
     "fp:fp1:3b6eb4088e187e1a1e60a779ea9be9610b5e715b": 60810,
     "fp:fp1:f52d2255755af4a33e5c93b189f084bc29958bb7": 61224,
-    "fp:fp1:24c713eb73fe4a25dd4366518357969d52a08b92": 61678
+    "fp:fp1:24c713eb73fe4a25dd4366518357969d52a08b92": 61678,
+    "fp:fp1:dc5a1b84dae726056228341f92703d95ac190e1c": 62090,
+    "fp:fp1:3b27c71373bd5c8a431486dd831f98f341ca75f5": 62544
   },
   "alias": {
     "slug:app-20260109-001": "pid:page000012",
