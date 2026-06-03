@@ -1,38 +1,39 @@
 {
-  "date": "2026-06-02",
+  "date": "2026-06-03",
   "timezone": "Asia/Seoul",
   "cutoff": "10:00",
   "items": [
     {
-      "date": "2026-06-02",
+      "date": "2026-06-03",
       "label": "how-to-playbooks",
       "seedLabel": "how-to-playbooks",
       "requestedSlotLabel": "how-to-playbooks",
       "mode": "trend",
-      "id": "how-to-playbooks-trend-1772630313744-199602530",
-      "title": "AUTO GENERATED: how-to-playbooks (trend) #1772630313744-199602530",
-      "angle": "Auto angle (trend) var=1772630313744-199602530",
+      "id": "how-to-playbooks-trend-1772630313744-565428775",
+      "title": "AUTO GENERATED: how-to-playbooks (trend) #1772630313744-565428775",
+      "angle": "Auto angle (trend) var=1772630313744-565428775",
       "audience": "General",
       "intent": "trend",
       "priority": 5,
       "notes": "Replace with real LLM generation."
     },
     {
-      "date": "2026-06-02",
-      "label": "device-reviews",
-      "seedLabel": "device-reviews",
-      "requestedSlotLabel": "device-reviews",
+      "date": "2026-06-03",
+      "label": "app-reviews",
+      "seedLabel": "app-reviews",
+      "requestedSlotLabel": "app-reviews",
       "mode": "trend",
-      "id": "dr-tr-008",
-      "title": "Is the Latest Smartwatch Battery Upgrade Real?",
-      "angle": "Always-on drain + GPS endurance",
-      "audience": "Lifestyle and fitness users",
-      "intent": "review/battery",
+      "id": "ar-tr-022",
+      "title": "Which AI Camera App Gives the Best Low-Light Shots?",
+      "angle": "Noise reduction + detail retention",
+      "audience": "Casual photographers",
+      "intent": "review/quality-test",
       "priority": 0,
       "notes": "",
       "reviewEntity": {
-        "type": "device",
-        "model": "Wearables"
+        "type": "app",
+        "appName": "AI Camera App",
+        "platform": "android"
       }
     }
   ]
