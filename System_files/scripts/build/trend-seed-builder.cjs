@@ -49,12 +49,51 @@ const INTENTS = [
   'review/risk-watch'
 ];
 
+const REAL_WORLD_EXISTENCE_PASS_STATUSES = new Set([
+  'confirmed',
+  'announced',
+  'prototype',
+  'patent'
+]);
+
 function pickIntent(index) {
   return INTENTS[index % INTENTS.length];
 }
 
 function normalizeText(v) {
   return String(v || '').replace(/\s+/g, ' ').trim();
+}
+
+function normalizeLower(v) {
+  return normalizeText(v).toLowerCase();
+}
+
+function getRealityGate(candidate) {
+  if (candidate && candidate.realityGate && typeof candidate.realityGate === 'object') {
+    return candidate.realityGate;
+  }
+
+  if (
+    candidate &&
+    candidate.rawSignalContext &&
+    candidate.rawSignalContext.realityGate &&
+    typeof candidate.rawSignalContext.realityGate === 'object'
+  ) {
+    return candidate.rawSignalContext.realityGate;
+  }
+
+  return null;
+}
+
+function isRealityGatePass(candidate) {
+  const gate = getRealityGate(candidate);
+
+  if (!gate) return false;
+
+  const status = normalizeLower(gate.status);
+  const decision = normalizeLower(gate.decision);
+
+  return decision === 'pass' && REAL_WORLD_EXISTENCE_PASS_STATUSES.has(status);
 }
 
 function ensureDir(p) {
@@ -222,16 +261,6 @@ function compactReason(reason) {
     .replace(/\bmarket\s+change\b/i, 'recent market changes');
 }
 
-function pickIndefiniteArticle(word) {
-  const s = normalizeText(word).toLowerCase();
-
-  if (/^[aeiou]/.test(s)) {
-    return 'an';
-  }
-
-  return 'a';
-}
-
 function pickTitlePattern(intent, index, signals) {
   const s = signals || {};
   const n = Number.isFinite(Number(index)) ? Number(index) : 0;
@@ -290,8 +319,7 @@ function buildTitle(intent, name, reason, classificationHints = {}, evidence = {
   }
 
   if (pattern === 'market-position') {
-    const article = pickIndefiniteArticle(signals.marketStage);
-    return `${targetName} as ${article} ${signals.marketStage} ${category} candidate`;
+    return `${targetName} as a ${signals.marketStage} ${category} candidate`;
   }
 
   if (pattern === 'comparison') {
@@ -339,6 +367,29 @@ function buildTitle(intent, name, reason, classificationHints = {}, evidence = {
   }
 
   return `${targetName}: early signals, limits, and buyer questions`;
+}
+
+function buildRealityStageTitle(intent, name, reason, classificationHints = {}, evidence = {}, trendContext = {}, realityGate = {}, index = 0) {
+  const status = normalizeLower(realityGate && realityGate.status);
+  const targetName = normalizeText(name) || 'this device';
+
+  if (status === 'confirmed') {
+    return buildTitle(intent, targetName, reason, classificationHints, evidence, trendContext, index);
+  }
+
+  if (status === 'announced') {
+    return `${targetName}: what to check before launch`;
+  }
+
+  if (status === 'prototype') {
+    return `${targetName}: what the prototype proves and still leaves open`;
+  }
+
+  if (status === 'patent') {
+    return `${targetName}: what the patent suggests and what remains uncertain`;
+  }
+
+  return buildTitle(intent, targetName, reason, classificationHints, evidence, trendContext, index);
 }
 
 function buildAngle(intent, entityName, reason, classificationHints) {
@@ -540,6 +591,7 @@ function buildSeedFromReadyCandidate(candidate, index) {
     rawSignalContext.evidence ||
     {};
   const validation = candidate.validation || {};
+  const realityGate = getRealityGate(candidate);
 
   const trendContext = buildTrendContextFromCandidate(candidate, index);
   const decisionType = buildDecisionType(intent);
@@ -571,7 +623,7 @@ function buildSeedFromReadyCandidate(candidate, index) {
     reviewEntity: entity,
 
     intent,
-    title: buildTitle(intent, entity.name, trendContext.changeReason, classificationHints, evidence, trendContext, index),
+    title: buildRealityStageTitle(intent, entity.name, trendContext.changeReason, classificationHints, evidence, trendContext, realityGate, index),
     angle,
     audience,
     goal,
@@ -590,7 +642,9 @@ function buildSeedFromReadyCandidate(candidate, index) {
       hasAngle: !!angle,
       hasAudience: !!audience,
       hasEvidence: Array.isArray(evidence.keyFacts) && evidence.keyFacts.length > 0,
-      hasUseCase: Array.isArray(evidence.useCases) && evidence.useCases.length > 0
+      hasUseCase: Array.isArray(evidence.useCases) && evidence.useCases.length > 0,
+      realWorldExistenceRequired: true,
+      realWorldExistencePass: isRealityGatePass(candidate)
     },
 
     selectionMeta: {
@@ -608,6 +662,14 @@ function buildSeedFromReadyCandidate(candidate, index) {
           : null,
       validationStatus: normalizeText(validation.status),
       validationReason: normalizeText(validation.reason),
+      realityGateStatus: normalizeText(realityGate && realityGate.status),
+      realityGateDecision: normalizeText(realityGate && realityGate.decision),
+      realityGateEvidenceType: normalizeText(realityGate && realityGate.evidenceType),
+      realityGateConfidence: normalizeText(realityGate && realityGate.confidence),
+      realityGateSourceCount:
+        Number.isFinite(Number(realityGate && realityGate.sourceCount))
+          ? Number(realityGate.sourceCount)
+          : null,
       createdAt: new Date().toISOString()
     },
 
@@ -619,8 +681,10 @@ function buildSeedFromReadyCandidate(candidate, index) {
       mode: normalizeText(candidate.mode) || 'trend',
       classificationHints,
       evidence,
-      trust
-    }
+      trust,
+      realityGate
+    },
+    realityGate
   };
 
   seed.fingerprint = buildFingerprint(seed);
@@ -661,6 +725,10 @@ function buildTrendSeedsFromEntityCandidatesData(entityCandidatesData) {
       continue;
     }
 
+    if (!isRealityGatePass(candidate)) {
+      continue;
+    }
+
     const seed = buildSeedFromReadyCandidate(candidate, index);
     seeds.push(seed);
     index++;
@@ -672,7 +740,8 @@ function buildTrendSeedsFromEntityCandidatesData(entityCandidatesData) {
       inputSchemaVersion: normalizeText(entityCandidatesData.schemaVersion),
       totalCandidates: candidates.length,
       seeds: seeds.length,
-      source: 'entity-candidates.json'
+      source: 'entity-candidates.json',
+      realWorldExistenceRequired: true
     }
   };
 }
@@ -748,5 +817,8 @@ module.exports = {
   buildSeedFromReadyCandidate,
   buildAngle,
   buildAudience,
-  normalizeKeyPoints
+  normalizeKeyPoints,
+  getRealityGate,
+  isRealityGatePass,
+  buildRealityStageTitle
 };
