@@ -429,8 +429,90 @@ function extractTrendSignals(post) {
     historicalValue: !!trendContext.historicalValue,
     trustConfidence: normStr(trust.confidence || seedMeta.trustConfidence || ''),
     trustScore: Number(trust.trustScore || seedMeta.trustScore || 0),
-    riskFlags: ensureArray(trust.riskFlags).map(normStr).filter(Boolean)
+    riskFlags: ensureArray(trust.riskFlags).map(normStr).filter(Boolean),
+    realityGate: readNestedObject(post && post.realityGate, seedMeta.realityGate),
+    realWorldStatus: normStr(readNestedObject(post && post.realityGate, seedMeta.realityGate).status || ''),
+    realWorldDecision: normStr(readNestedObject(post && post.realityGate, seedMeta.realityGate).decision || ''),
+    realWorldEvidenceType: normStr(readNestedObject(post && post.realityGate, seedMeta.realityGate).evidenceType || ''),
+    realWorldConfidence: normStr(readNestedObject(post && post.realityGate, seedMeta.realityGate).confidence || ''),
+    realWorldReason: normStr(readNestedObject(post && post.realityGate, seedMeta.realityGate).reason || '')
   };
+}
+
+function getRealWorldStatus(trendSignals) {
+  return toLower(trendSignals && trendSignals.realWorldStatus);
+}
+
+function getRealWorldDecision(trendSignals) {
+  return toLower(trendSignals && trendSignals.realWorldDecision);
+}
+
+function getRealityWritingMode(trendSignals) {
+  const status = getRealWorldStatus(trendSignals);
+  const marketStage = toLower(trendSignals && trendSignals.marketStage);
+
+  if (/confirmed|early-commercial|released|available/.test(status) || /early-commercial|commercial|released|available/.test(marketStage)) {
+    return 'confirmed';
+  }
+
+  if (/announced/.test(status)) return 'announced';
+  if (/prototype|demo/.test(status) || /prototype/.test(marketStage)) return 'prototype';
+  if (/patent/.test(status)) return 'patent';
+
+  return 'caution';
+}
+
+function buildRealityStageLead(targetName, trendSignals) {
+  const mode = getRealityWritingMode(trendSignals);
+  const evidenceType = normStr(trendSignals && trendSignals.realWorldEvidenceType);
+
+  if (mode === 'confirmed') {
+    return `${targetName} has enough real-world signal to discuss as a practical option, but the review still needs to separate early category interest from everyday fit.`;
+  }
+
+  if (mode === 'announced') {
+    return `${targetName} is best handled as an announced device to watch: the useful question is what has been promised, what remains unproven, and which buyers should wait.`;
+  }
+
+  if (mode === 'prototype') {
+    return `${targetName} should be handled as a prototype-stage device: the review should focus on what the demo proves, what it does not prove, and which claims need independent evidence.`;
+  }
+
+  if (mode === 'patent') {
+    return `${targetName} should be handled as a technology signal rather than a purchase candidate because ${evidenceType || 'the available evidence'} does not yet prove a ready product.`;
+  }
+
+  return `${targetName} needs cautious framing because the available real-world evidence is not strong enough to treat it as a normal purchase candidate.`;
+}
+
+function buildRealityDecisionLine(targetName, trendSignals) {
+  const mode = getRealityWritingMode(trendSignals);
+  const unknowns = readableList(trendSignals && trendSignals.unknowns, 'price, availability, support, and real-world behavior');
+
+  if (mode === 'confirmed') {
+    return `The decision can move beyond simple curiosity, but it still depends on ${unknowns} and whether the device fits a repeatable use case.`;
+  }
+
+  if (mode === 'announced') {
+    return `The decision should remain wait-and-verify until availability, pricing, support terms, and independent use reports are clearer.`;
+  }
+
+  if (mode === 'prototype') {
+    return `The useful decision is not whether to buy it now, but whether the prototype evidence is strong enough to keep watching the category.`;
+  }
+
+  if (mode === 'patent') {
+    return `The safer decision is to treat it as a future technology signal, not as a product recommendation.`;
+  }
+
+  return `The recommendation should stay cautious until the real-world evidence becomes stronger.`;
+}
+
+function hasRealityPass(trendSignals) {
+  const decision = getRealWorldDecision(trendSignals);
+  const status = getRealWorldStatus(trendSignals);
+
+  return decision === 'pass' && /confirmed|announced|prototype|patent/.test(status);
 }
 
 function hasTrendSignal(trendSignals) {
@@ -628,7 +710,7 @@ function buildReviewSection(title, label, h2, meta, post) {
   const reviewState = deriveReviewState(post);
   const identityLine = buildReviewIdentityLine(targetName, entityType, provider);
   const trendSignals = extractTrendSignals(post);
-  const isDeviceTrend = entityType === 'device' && hasTrendSignal(trendSignals);
+  const isDeviceTrend = entityType === 'device' && hasTrendSignal(trendSignals) && (hasRealityPass(trendSignals) || !trendSignals.realWorldDecision);
   const deviceSpecificObservation = buildSpecificDeviceObservation(targetName, trendSignals);
   const marketStageLine = buildMarketStageLine(targetName, trendSignals);
   const scenarioLine = buildDeviceScenarioLine(targetName, trendSignals);
@@ -640,9 +722,10 @@ function buildReviewSection(title, label, h2, meta, post) {
   if (h2 === 'Overview') {
     if (isDeviceTrend) {
       return makeParagraphs([
-        `${targetName} is not ready to judge like a mature mainstream gadget. It is better treated as an early market evaluation: does the concept solve a real input problem, and what still needs proof before a buyer should care?`,
+        `${buildRealityStageLead(targetName, trendSignals)}`,
         `${marketStageLine} ${deviceSpecificObservation}`,
-        `${scenarioLine}`
+        `${scenarioLine}`,
+        `${buildRealityDecisionLine(targetName, trendSignals)}`
       ]);
     }
 
@@ -698,7 +781,7 @@ function buildReviewSection(title, label, h2, meta, post) {
     if (isDeviceTrend) {
       return [
         makeParagraphs([
-          `For ${targetName}, ROI cannot be treated as normal gadget math yet. The buyer first needs proof that the concept works in the situations it is supposed to improve.`,
+          `For ${targetName}, ROI should follow its real-world stage. A confirmed device can be judged by practical use, while an announced, prototype, or patent-stage device needs verification before purchase math becomes useful.`,
           `${buyerCautionLine}`
         ]),
         makeTable(
@@ -738,7 +821,7 @@ function buildReviewSection(title, label, h2, meta, post) {
   if (h2 === 'Insights') {
     if (isDeviceTrend) {
       return makeParagraphs([
-        `For ${targetName}, the useful signals are practical feasibility rather than launch excitement. The important checks are whether the concept can survive normal lighting, hand movement, pairing delays, short-session typing, and the lack of physical key feedback.`,
+        `For ${targetName}, the useful signals depend on reality stage, not launch excitement. A confirmed product needs daily-use checks, while prototype or announced hardware needs evidence around comfort, setup, compatibility, support, and repeatable performance.`,
         `The category position matters too. If the product remains closer to ${trendSignals.marketStage || 'an early-stage device'} than to a mature accessory, the strongest insight is caution: watch the evidence before turning the concept into a recommendation.`
       ]);
     }
@@ -759,7 +842,7 @@ function buildReviewSection(title, label, h2, meta, post) {
   if (h2 === 'Ratings') {
     if (isDeviceTrend) {
       return makeParagraphs([
-        `For ${targetName}, ratings would be less useful than verification until enough independent usage data exists. An early device can look promising in a controlled demo and still struggle with lighting, accuracy, comfort, or battery behavior in normal use.`,
+        `For ${targetName}, ratings are useful only when they match the device's reality stage. Confirmed hardware can be weighed against user reports, while prototype or announced hardware still needs independent evidence before a score says much.`,
         `This means the recommendation should stay conditional. The review can explain what changed in the category, but it should not turn an early signal into proof of real-world dependability.`
       ]);
     }
@@ -780,7 +863,7 @@ function buildReviewSection(title, label, h2, meta, post) {
   if (h2 === 'Verdict') {
     if (isDeviceTrend) {
       return makeParagraphs([
-        `${targetName} is interesting as an early category signal, not as a simple buy recommendation. If it reaches a real purchase stage, the decision should depend on typing accuracy, battery life, projection stability, support clarity, and whether the use case is frequent enough to matter.`,
+        `${targetName} should be judged by what is actually proven at its current reality stage. If the device is confirmed, the decision can focus on fit and trade-offs; if it is only announced, prototype, or patent-stage, the verdict should stay closer to watch-and-verify.`,
         `For now, the safer verdict is conditional: watch the category, verify the unknowns, and treat the device as a possible future input option rather than a proven replacement for physical keyboards.`
       ]);
     }
@@ -1166,6 +1249,10 @@ function stripRobotPhrases(text) {
     .replace(/[^.?!]*\bshould be interpreted as\b[^.?!]*[.?!]/gi, '')
     .replace(/[^.?!]*\bbest understood as\b[^.?!]*[.?!]/gi, '')
     .replace(/[^.?!]*\bviewed as\b[^.?!]*[.?!]/gi, '')
+    .replace(/[^.?!]*\bwill replace\b[^.?!]*[.?!]/gi, '')
+    .replace(/[^.?!]*\bwill become\b[^.?!]*[.?!]/gi, '')
+    .replace(/[^.?!]*\beveryone will use\b[^.?!]*[.?!]/gi, '')
+    .replace(/[^.?!]*\bguaranteed to\b[^.?!]*[.?!]/gi, '')
     .replace(/[^.?!]*\bis treated here as\b[^.?!]*[.?!]/gi, '')
     .replace(/[^.?!]*\bThe goal is\b[^.?!]*[.?!]/gi, '')
     .replace(/[^.?!]*\bthis writing direction\b[^.?!]*[.?!]/gi, '')
@@ -1525,7 +1612,8 @@ function main() {
         bodyPromptUsed: !!extractBodyPrompt(post),
         selfReviewLoop: ['A:factuality', 'C:criteria-check', 'D:anti-ai-tone',
           'L:instruction-leakage-guard',
-          'R:trend-realism-guard'],
+          'R:trend-realism-guard',
+          'G:reality-stage-writing-guard'],
         repairMode: CONTENT_REPAIR_MODE,
         repairIssueCount: repairIssues.length,
       };
