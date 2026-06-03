@@ -370,7 +370,7 @@ function processCandidates(list) {
 }
 
 function pickInputFile() {
-  const explicit = String(process.env.ENTITY_CANDIDATES_FILE || '').trim();
+  const explicit = String(process.env.VALIDATE_ENTITY_CANDIDATES_FILE || '').trim();
   if (explicit) return explicit;
 
   if (fs.existsSync(REALITY_GATED_ENTITY_CANDIDATES_FILE)) {
