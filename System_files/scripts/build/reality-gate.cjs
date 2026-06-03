@@ -173,6 +173,19 @@ function extractCandidates(doc) {
 
   if (Array.isArray(doc.candidates)) return doc.candidates;
   if (Array.isArray(doc.items)) return doc.items;
+
+  if (
+    Array.isArray(doc.pass) ||
+    Array.isArray(doc.hold) ||
+    Array.isArray(doc.reject)
+  ) {
+    return [
+      ...ensureArray(doc.pass),
+      ...ensureArray(doc.hold),
+      ...ensureArray(doc.reject),
+    ];
+  }
+
   if (Array.isArray(doc.trendReadyCandidates)) return doc.trendReadyCandidates;
   if (Array.isArray(doc.latestPassCandidates)) return doc.latestPassCandidates;
 
