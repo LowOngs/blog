@@ -1,12 +1,13 @@
 {
   "schemaVersion": "trend-seeds.v1",
-  "generatedAt": "2026-06-03T07:06:12.014Z",
+  "generatedAt": "2026-06-04T06:54:44.857Z",
   "sourceFile": "/home/runner/work/blog/blog/System_files/dist/entity-candidates/entity-candidates.json",
   "summary": {
     "inputSchemaVersion": "entity-candidates.v1",
     "totalCandidates": 0,
     "seeds": 0,
-    "source": "entity-candidates.json"
+    "source": "entity-candidates.json",
+    "realWorldExistenceRequired": true
   },
   "seeds": []
 }

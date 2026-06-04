@@ -5,21 +5,6 @@
   },
   "trend": [
     {
-      "id": "ss-tr-009",
-      "title": "Which Productivity Suite Just Got Real AI Upgrades?",
-      "angle": "Automation + document generation",
-      "audience": "Office/remote workers",
-      "intent": "review/productivity",
-      "environment": "productivity suites",
-      "timing": "feature rollout",
-      "goal": "spot meaningful workflow benefits",
-      "fingerprint": "fp1:322fc6bbc18dddab027eec16a62d439eaf92001a",
-      "reviewEntity": {
-        "type": "subscription",
-        "service": "Productivity Suites"
-      }
-    },
-    {
       "id": "ss-tr-010",
       "title": "Are Premium Weather Apps Worth It After Recent Upgrades?",
       "angle": "Accuracy + radar update frequency",
