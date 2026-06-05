@@ -142,29 +142,38 @@ function normalizeBucketFromLabel(label) {
   return '';
 }
 
-function normalizeReviewEntity(postJson) {
-  const e1 = postJson?.reviewEntity && typeof postJson.reviewEntity === 'object' ? postJson.reviewEntity : null;
-  const e2 = postJson?.seedMeta?.entity && typeof postJson.seedMeta.entity === 'object' ? postJson.seedMeta.entity : null;
-  const e = e1 || e2;
+function normalizeReviewEntity(postJson, queueItem = null) {
+  const candidates = [
+    queueItem?.reviewEntity,
+    queueItem?.entity,
+    queueItem?.seedMeta?.reviewEntity,
+    queueItem?.seedMeta?.entity,
+    postJson?.reviewEntity,
+    postJson?.entity,
+    postJson?.seedMeta?.reviewEntity,
+    postJson?.seedMeta?.entity,
+  ].filter(v => v && typeof v === 'object' && !Array.isArray(v));
+
+  const e = candidates[0] || null;
   if (!e) return null;
 
   const type = String(e.type || '').trim().toLowerCase();
   const appId = String(e.appId || '').trim();
-  const appName = String(e.appName || '').trim();
+  const appName = String(e.appName || e.name || '').trim();
   const platform = String(e.platform || '').trim();
-  const model = String(e.model || '').trim();
-  const service = String(e.service || '').trim();
+  const model = String(e.model || e.name || '').trim();
+  const service = String(e.service || e.name || '').trim();
 
   let t = type;
   if (!t) {
-    if (service) t = 'subscription';
+    if (service && !model && !appId && !appName) t = 'subscription';
     else if (model) t = 'device';
     else if (appId || appName) t = 'app';
   }
 
   if (t === 'app') {
     if (appId) return { type: 'app', appId, platform, appName };
-    if (appName && platform) return { type: 'app', appName, platform };
+    if (appName) return { type: 'app', appName, platform };
     return null;
   }
 
@@ -352,7 +361,7 @@ function main() {
       continue;
     }
 
-    const entity = normalizeReviewEntity(postJson);
+    const entity = normalizeReviewEntity(postJson, item);
     if (!entity) {
       skippedNoEntity += 1;
       warn(`reviewEntity 없음: slug=${slug}`);
