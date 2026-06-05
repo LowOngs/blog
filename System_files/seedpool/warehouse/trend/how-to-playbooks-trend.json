@@ -5,17 +5,6 @@
   },
   "trend": [
     {
-      "id": "how-to-playbooks-trend-1772630313744-48091167",
-      "title": "AUTO GENERATED: how-to-playbooks (trend) #1772630313744-48091167",
-      "angle": "Auto angle (trend) var=1772630313744-48091167",
-      "audience": "General",
-      "intent": "trend",
-      "priority": 5,
-      "createdAt": "2026-03-04T13:18:33.744Z",
-      "notes": "Replace with real LLM generation.",
-      "fingerprint": "fp1:06368582ea3c468ac4e1392a98c392db2357749c"
-    },
-    {
       "id": "how-to-playbooks-trend-1772630313744-822986089",
       "title": "AUTO GENERATED: how-to-playbooks (trend) #1772630313744-822986089",
       "angle": "Auto angle (trend) var=1772630313744-822986089",

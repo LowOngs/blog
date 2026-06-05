@@ -1,38 +1,39 @@
 {
-  "date": "2026-06-04",
+  "date": "2026-06-05",
   "timezone": "Asia/Seoul",
   "cutoff": "10:00",
   "items": [
     {
-      "date": "2026-06-04",
+      "date": "2026-06-05",
       "label": "how-to-playbooks",
       "seedLabel": "how-to-playbooks",
       "requestedSlotLabel": "how-to-playbooks",
       "mode": "trend",
-      "id": "how-to-playbooks-trend-1772630313744-435459232",
-      "title": "AUTO GENERATED: how-to-playbooks (trend) #1772630313744-435459232",
-      "angle": "Auto angle (trend) var=1772630313744-435459232",
+      "id": "how-to-playbooks-trend-1772630313744-48091167",
+      "title": "AUTO GENERATED: how-to-playbooks (trend) #1772630313744-48091167",
+      "angle": "Auto angle (trend) var=1772630313744-48091167",
       "audience": "General",
       "intent": "trend",
       "priority": 5,
       "notes": "Replace with real LLM generation."
     },
     {
-      "date": "2026-06-04",
-      "label": "subscription-services",
-      "seedLabel": "subscription-services",
-      "requestedSlotLabel": "subscription-services",
+      "date": "2026-06-05",
+      "label": "app-reviews",
+      "seedLabel": "app-reviews",
+      "requestedSlotLabel": "app-reviews",
       "mode": "trend",
-      "id": "ss-tr-009",
-      "title": "Which Productivity Suite Just Got Real AI Upgrades?",
-      "angle": "Automation + document generation",
-      "audience": "Office/remote workers",
-      "intent": "review/productivity",
+      "id": "ar-tr-023",
+      "title": "Is the New Meal Planning App Good Enough to Replace Manual Planning?",
+      "angle": "AI nutrition suggestions accuracy",
+      "audience": "Families and fitness users",
+      "intent": "review/effectiveness",
       "priority": 0,
       "notes": "",
       "reviewEntity": {
-        "type": "subscription",
-        "service": "Productivity Suites"
+        "type": "app",
+        "appName": "Meal Planning App",
+        "platform": "android"
       }
     }
   ]

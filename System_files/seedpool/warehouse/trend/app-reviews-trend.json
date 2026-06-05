@@ -5,21 +5,6 @@
   },
   "trend": [
     {
-      "id": "ar-tr-023",
-      "title": "Is the New Meal Planning App Good Enough to Replace Manual Planning?",
-      "angle": "AI nutrition suggestions accuracy",
-      "audience": "Families and fitness users",
-      "intent": "review/effectiveness",
-      "environment": "meal planner",
-      "timing": "launch",
-      "goal": "save meal prep time while maintaining accuracy",
-      "reviewEntity": {
-        "type": "app",
-        "appName": "Meal Planning App",
-        "platform": "android"
-      }
-    },
-    {
       "id": "ar-tr-024",
       "title": "Which Music App’s Recommendation AI Improved the Most This Year?",
       "angle": "Playlist personalization test",
