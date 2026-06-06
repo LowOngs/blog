@@ -118,14 +118,14 @@ jobs:
         if: env.SKIP_PIPELINE != 'true'
         run: npm ci
 
-      - name: Resolve effective modes (BODY_WRITE_MODE + DRY_RUN)
+      - name: Resolve effective modes (BODY_WRITE_MODE + CONTENT_WRITE_MODE + DRY_RUN)
         if: env.SKIP_PIPELINE != 'true'
         shell: bash
         run: |
           set -euo pipefail
           EVENT="${{ github.event_name }}"
 
-          # BODY_WRITE_MODE:
+          # BODY_WRITE_MODE / CONTENT_WRITE_MODE:
           # - schedule: firstgate는 “명함전략 실트랙” 기준이므로 active 강제
           # - dispatch: 입력값 사용(기본 local)
           BWM="local"
@@ -147,12 +147,16 @@ jobs:
           fi
 
           echo "BODY_WRITE_MODE=$BWM" >> $GITHUB_ENV
+          echo "CONTENT_WRITE_MODE=$BWM" >> $GITHUB_ENV
+          echo "CONTENT_REPAIR_MODE=false" >> $GITHUB_ENV
+          echo "CONTENT_VALIDATE_MODE=latest" >> $GITHUB_ENV
           echo "DRY_RUN=$DR" >> $GITHUB_ENV
 
           echo "Resolved:"
           echo "  EVENT=$EVENT"
           echo "  PUBLISH_MODE=${PUBLISH_MODE}"
           echo "  BODY_WRITE_MODE=$BWM"
+          echo "  CONTENT_WRITE_MODE=$BWM"
           echo "  DRY_RUN=$DR"
 
       - name: Sanity check (required scripts exist)
@@ -165,8 +169,18 @@ jobs:
 
           test -f System_files/scripts/build/ids.cjs
           test -f System_files/scripts/build/generate-body.cjs
+          test -f System_files/scripts/build/generate-content.cjs
+          test -f System_files/scripts/build/validate-content-structure.cjs
 
+          test -f System_files/scripts/build/review-rating-next.cjs
+          test -f System_files/scripts/build/review-fetch-official.cjs
+          test -f System_files/scripts/build/review-fetch-insights-secondary.cjs
+          test -f System_files/scripts/build/review-diff-update.cjs
+          test -f System_files/scripts/build/build-ssot-reviews.cjs
+          test -f System_files/scripts/build/inject-reviews-from-ssot.cjs
           test -f System_files/scripts/build/review-resolver.cjs
+          test -f System_files/scripts/build/validate-review-ssot.cjs
+
           test -f System_files/scripts/build/validate-body-images.cjs
 
           test -f System_files/scripts/build/render-posts.cjs
@@ -195,6 +209,7 @@ jobs:
         env:
           PUBLISH_MODE: ${{ env.PUBLISH_MODE }}
           BODY_WRITE_MODE: ${{ env.BODY_WRITE_MODE }}
+          CONTENT_WRITE_MODE: ${{ env.CONTENT_WRITE_MODE }}
           DRY_RUN: ${{ env.DRY_RUN }}
         run: |
           set -euo pipefail
@@ -207,6 +222,7 @@ jobs:
         env:
           PUBLISH_MODE: ${{ env.PUBLISH_MODE }}
           BODY_WRITE_MODE: ${{ env.BODY_WRITE_MODE }}
+          CONTENT_WRITE_MODE: ${{ env.CONTENT_WRITE_MODE }}
           DRY_RUN: ${{ env.DRY_RUN }}
         run: |
           set -euo pipefail
@@ -218,18 +234,40 @@ jobs:
         env:
           PUBLISH_MODE: ${{ env.PUBLISH_MODE }}
           BODY_WRITE_MODE: ${{ env.BODY_WRITE_MODE }}
+          CONTENT_WRITE_MODE: ${{ env.CONTENT_WRITE_MODE }}
           DRY_RUN: ${{ env.DRY_RUN }}
         run: |
           set -euo pipefail
           node scripts/build/generate-body.cjs
 
-      - name: Inject reviewData (SSOT)
+      - name: Generate content + validate structure
+        if: env.SKIP_PIPELINE != 'true'
+        working-directory: System_files
+        env:
+          PUBLISH_MODE: ${{ env.PUBLISH_MODE }}
+          BODY_WRITE_MODE: ${{ env.BODY_WRITE_MODE }}
+          CONTENT_WRITE_MODE: ${{ env.CONTENT_WRITE_MODE }}
+          CONTENT_REPAIR_MODE: ${{ env.CONTENT_REPAIR_MODE }}
+          CONTENT_VALIDATE_MODE: ${{ env.CONTENT_VALIDATE_MODE }}
+          DRY_RUN: ${{ env.DRY_RUN }}
+        run: |
+          set -euo pipefail
+          node scripts/build/generate-content.cjs
+          node scripts/build/validate-content-structure.cjs
+
+      - name: Build review SSOT + inject reviews
         if: env.SKIP_PIPELINE != 'true'
         working-directory: System_files
         env:
           DRY_RUN: ${{ env.DRY_RUN }}
         run: |
           set -euo pipefail
+          node scripts/build/review-rating-next.cjs
+          node scripts/build/review-fetch-official.cjs
+          node scripts/build/review-fetch-insights-secondary.cjs
+          node scripts/build/review-diff-update.cjs
+          node scripts/build/build-ssot-reviews.cjs
+          node scripts/build/inject-reviews-from-ssot.cjs
           node scripts/build/review-resolver.cjs
 
       - name: Validate body images manifest (fail fast)
@@ -287,6 +325,8 @@ jobs:
           DRY_RUN: ${{ env.DRY_RUN }}
         run: |
           set -euo pipefail
+          node scripts/build/build-ssot-reviews.cjs
+          node scripts/build/inject-reviews-from-ssot.cjs
           node scripts/build/render-posts.cjs
           node scripts/build/normalize-body.cjs
           node scripts/build/review-meta-block.cjs
@@ -308,6 +348,15 @@ jobs:
         run: |
           set -euo pipefail
           node scripts/build/validate-repair.cjs
+
+      - name: Validate review SSOT
+        if: env.SKIP_PIPELINE != 'true'
+        working-directory: System_files
+        env:
+          DRY_RUN: ${{ env.DRY_RUN }}
+        run: |
+          set -euo pipefail
+          node scripts/build/validate-review-ssot.cjs
 
       - name: Preflight QA
         if: env.SKIP_PIPELINE != 'true'
