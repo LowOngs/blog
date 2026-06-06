@@ -71,6 +71,23 @@
 
     "publish:blogger": "node ./System_files/scripts/publish/blogger.cjs",
 
+    "pipeline:queue:trend": "npm run trend:pipeline && npm run queue:to-posts && npm run ids",
+    "pipeline:posts:generate": "npm run posts:body:generate && npm run posts:content:generate && npm run posts:content:validate && npm run posts:body-images:validate",
+    "pipeline:posts:html": "npm run posts:render && npm run posts:normalize",
+    "pipeline:reviews:new": "npm run reviews:next:new && npm run reviews:fetch:official && npm run reviews:fetch:insights && npm run reviews:diff && npm run reviews:ssot:build && npm run reviews:inject",
+    "pipeline:reviews:verify": "npm run reviews:next:new && npm run reviews:ssot:build && npm run reviews:inject",
+    "pipeline:images:og": "npm run images:renew && npm run images:build:og",
+    "pipeline:images:og:upload": "npm run images:renew && npm run images:build:og && npm run images:upload",
+    "pipeline:final:validate": "npm run posts:validate && npm run posts:review:ssot:validate && npm run posts:qa",
+    "pipeline:final:export": "npm run posts:archive && npm run feed:build && npm run feed:validate && npm run tools:copy",
+
+    "aoia1:full": "npm run pipeline:queue:trend && npm run pipeline:posts:generate && npm run pipeline:posts:html && npm run pipeline:reviews:new && npm run pipeline:images:og:upload && npm run pipeline:posts:html && npm run pipeline:reviews:verify && npm run pipeline:final:validate && npm run pipeline:final:export",
+    "aoia1:local:no-upload": "npm run pipeline:queue:trend && npm run pipeline:posts:generate && npm run pipeline:posts:html && npm run pipeline:reviews:new && npm run pipeline:images:og && npm run pipeline:posts:html && npm run pipeline:reviews:verify && npm run pipeline:final:validate && npm run pipeline:final:export",
+
+    "test:trend:device": "npm run pipeline:queue:trend && npm run pipeline:posts:generate && npm run pipeline:posts:html && npm run pipeline:reviews:new && npm run pipeline:images:og && npm run pipeline:posts:html && npm run pipeline:reviews:verify && npm run pipeline:final:validate && npm run feed:build && npm run feed:validate",
+    "test:trend:device:full": "npm run pipeline:queue:trend && npm run pipeline:posts:generate && npm run pipeline:posts:html && npm run pipeline:reviews:new && npm run pipeline:images:og:upload && npm run pipeline:posts:html && npm run pipeline:reviews:verify && npm run pipeline:final:validate && npm run feed:build && npm run feed:validate",
+    "test:trend:device:verify": "npm run pipeline:posts:html && npm run pipeline:reviews:verify && npm run pipeline:final:validate && npm run feed:build && npm run feed:validate",
+
     "build": "npm run trend:pipeline && npm run posts:body:generate && npm run posts:content:generate && npm run posts:content:validate && npm run posts:body-images:validate && npm run posts:render && npm run posts:normalize && npm run reviews:next:new && npm run reviews:fetch:official && npm run reviews:fetch:insights && npm run reviews:diff && npm run reviews:ssot:build && npm run reviews:inject && npm run posts:validate && npm run posts:review:ssot:validate && npm run posts:qa && npm run posts:archive",
 
     "posts:local:full": "npm run trend:pipeline && npm run posts:body:generate && npm run posts:content:generate && npm run posts:content:validate && npm run posts:body-images:validate && npm run posts:render && npm run posts:normalize && npm run reviews:next:new && npm run reviews:fetch:official && npm run reviews:fetch:insights && npm run reviews:diff && npm run reviews:ssot:build && npm run reviews:inject && npm run images:renew && npm run images:build:og && npm run images:upload && npm run posts:render && npm run posts:normalize && npm run reviews:ssot:build && npm run reviews:inject && npm run posts:validate && npm run posts:review:ssot:validate && npm run posts:qa && npm run posts:archive && npm run feed:build && npm run feed:validate && npm run tools:copy",
