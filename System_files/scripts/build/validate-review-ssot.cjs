@@ -96,17 +96,29 @@ function isReviewPost(postJson) {
  * B) postJson.seedMeta.entity = {...} (호환)
  */
 function pickReviewEntity(postJson) {
-  const e1 = postJson?.reviewEntity && typeof postJson.reviewEntity === 'object' ? postJson.reviewEntity : null;
-  const e2 = postJson?.seedMeta?.entity && typeof postJson.seedMeta.entity === 'object' ? postJson.seedMeta.entity : null;
-  const e = e1 || e2;
-  if (!e) return null;
+  const candidates = [
+    postJson?.reviewEntity,
+    postJson?.entity,
+    postJson?.seedMeta?.reviewEntity,
+    postJson?.seedMeta?.entity,
+  ].filter(v => v && typeof v === 'object');
 
+  for (const e of candidates) {
+    const picked = normalizeReviewEntity(e);
+    if (picked) return picked;
+  }
+
+  return null;
+}
+
+function normalizeReviewEntity(e) {
   const type = String(e.type || '').trim().toLowerCase();
+  const name = String(e.name || '').trim();
   const appId = String(e.appId || '').trim();
-  const appName = String(e.appName || '').trim();
+  const appName = String(e.appName || name || '').trim();
   const platform = String(e.platform || '').trim();
-  const model = String(e.model || '').trim();
-  const service = String(e.service || '').trim();
+  const model = String(e.model || name || '').trim();
+  const service = String(e.service || name || '').trim();
 
   // type이 비어있으면 내용으로 추론(최소)
   let t = type;
@@ -117,9 +129,9 @@ function pickReviewEntity(postJson) {
   }
 
   if (t === 'app') {
-    // appId 우선, 없으면 appName+platform
+    // appId 우선, 없으면 appName 단독도 허용(name 호환)
     if (appId) return { type: 'app', appId, platform, appName };
-    if (appName && platform) return { type: 'app', appName, platform };
+    if (appName) return { type: 'app', appName, platform };
     return null;
   }
 
