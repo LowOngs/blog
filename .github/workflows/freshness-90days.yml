@@ -145,6 +145,7 @@ jobs:
           test -f System_files/scripts/build/review-meta-block.cjs
 
           test -f System_files/scripts/build/validate-repair.cjs
+          test -f System_files/scripts/build/validate-review-ssot.cjs
           test -f System_files/scripts/build/qa-check.cjs
           test -f System_files/scripts/publish/blogger.cjs
 
@@ -210,6 +211,14 @@ jobs:
         run: |
           set -euo pipefail
           node scripts/build/validate-repair.cjs
+
+
+      - name: Validate review SSOT
+        if: env.SKIP_PIPELINE != 'true'
+        working-directory: System_files
+        run: |
+          set -euo pipefail
+          node scripts/build/validate-review-ssot.cjs
 
       - name: Preflight QA
         if: env.SKIP_PIPELINE != 'true'
