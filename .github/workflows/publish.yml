@@ -1,254 +1,81 @@
-name: publish
-
-on:
-  workflow_dispatch:
-    inputs:
-      RUN_MODE:
-        description: "auto/manual"
-        required: true
-        default: "manual"
-      MANUAL_JOB:
-        description: "schedule_once/label_once (manual only)"
-        required: false
-        default: "schedule_once"
-      DRY_RUN:
-        description: "true/false (manual only)"
-        required: false
-        default: "true"
-  schedule:
-    - cron: "15 2 * * *" # UTC 02:15 (KST 11:15)
-
-permissions:
-  contents: write
-
-concurrency:
-  group: publish-${{ github.ref }}
-  cancel-in-progress: false
-
-jobs:
-  publish:
-    runs-on: ubuntu-latest
-
-    env:
-      SYSTEM_ROOT: System_files
-
-      # ✅ Node24 강제 시험
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
-
-      CANONICAL_BASE: ${{ secrets.CANONICAL_BASE }}
-      CDN_BASE: ${{ secrets.CDN_BASE }}
-
-      BLOGGER_BLOG_ID: ${{ secrets.BLOGGER_BLOG_ID }}
-      GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
-      GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-      GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
-
-      R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
-      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-      R2_BUCKET: ${{ secrets.R2_BUCKET }}
-      R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
-
-      SCHEDULE_MODE: ${{ secrets.SCHEDULE_MODE }} # live/test
-      PUBLISH_MODE: ${{ secrets.PUBLISH_MODE }}   # enable/disable
-
-      RUN_MODE: ${{ github.event.inputs.RUN_MODE || 'auto' }}
-      MANUAL_JOB: ${{ github.event.inputs.MANUAL_JOB || 'schedule_once' }}
-      DRY_RUN_INPUT: ${{ github.event.inputs.DRY_RUN || '' }}
-
-    steps:
-      - name: Checkout blog repo
-        uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-
-      - name: Checkout post-archive repo
-        uses: actions/checkout@v5
-        with:
-          repository: LowOngs/post-archive
-          token: ${{ secrets.ARCHIVE_REPO_TOKEN }}
-          path: post-archive
-          fetch-depth: 0
-
-      - name: Setup Node
-        uses: actions/setup-node@v6
-        with:
-          node-version: "24"
-          cache: "npm"
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Decide modes
-        id: modes
-        shell: bash
-        run: |
-          parse_dry_run () {
-            v="$(echo "${1:-}" | tr '[:upper:]' '[:lower:]' | xargs)"
-            if [ "$v" = "false" ] || [ "$v" = "0" ]; then
-              echo "false"
-            else
-              echo "true"
-            fi
-          }
-
-          if [ "${{ github.event_name }}" = "schedule" ]; then
-            if [ "${SCHEDULE_MODE}" != "live" ]; then
-              echo "SKIP_SCHEDULE=true" >> "$GITHUB_OUTPUT"
-              exit 0
-            fi
-            echo "SKIP_SCHEDULE=false" >> "$GITHUB_OUTPUT"
-            echo "FINAL_DRY_RUN=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          echo "SKIP_SCHEDULE=false" >> "$GITHUB_OUTPUT"
-
-          if [ "${RUN_MODE}" = "auto" ]; then
-            echo "FINAL_DRY_RUN=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "FINAL_DRY_RUN=$(parse_dry_run "${DRY_RUN_INPUT}")" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Stop (schedule disabled)
-        if: steps.modes.outputs.SKIP_SCHEDULE == 'true'
-        run: exit 0
-
-      - name: Export runtime env
-        run: |
-          echo "DRY_RUN=${{ steps.modes.outputs.FINAL_DRY_RUN }}" >> "$GITHUB_ENV"
-          echo "CONTENT_VALIDATE_MODE=latest" >> "$GITHUB_ENV"
-          echo "POST_ARCHIVE_ROOT=${{ github.workspace }}/post-archive" >> "$GITHUB_ENV"
-
-      - name: Sanity check
-        run: |
-          test -f ./System_files/scripts/build/seed-scheduler.cjs
-          test -f ./System_files/scripts/build/queue-to-posts.cjs
-          test -f ./System_files/scripts/build/review-rating-next.cjs
-          test -f ./System_files/scripts/build/ids.cjs
-          test -f ./System_files/scripts/build/generate-body.cjs
-          test -f ./System_files/scripts/build/generate-content.cjs
-          test -f ./System_files/scripts/build/validate-content-structure.cjs
-          test -f ./System_files/scripts/build/archive-post-json.cjs
-          test -f ./System_files/scripts/build/images-body-sync.cjs
-          test -f ./System_files/scripts/build/validate-body-images.cjs
-          test -f ./System_files/scripts/build/build-ssot-reviews.cjs
-          test -f ./System_files/scripts/build/inject-reviews-from-ssot.cjs
-          test -f ./System_files/scripts/build/review-resolver.cjs
-          test -f ./System_files/scripts/build/review-meta-block.cjs
-          test -f ./System_files/scripts/build/render-posts.cjs
-          test -f ./System_files/scripts/build/normalize-body.cjs
-          test -f ./System_files/scripts/build/validate-repair.cjs
-          test -f ./System_files/scripts/build/update-posts-index.cjs
-          test -f ./System_files/scripts/build/build-feed.cjs
-          test -f ./System_files/scripts/build/validate-feed.cjs
-          test -f ./System_files/scripts/build/copy-tools.cjs
-          test -f ./System_files/scripts/build/build-trust-page.cjs
-          test -f ./System_files/scripts/publish/blogger.cjs
-
-          test -f ./System_files/scripts/build/raw-signal-collector.cjs
-          test -f ./System_files/scripts/build/lib/classification-hints-policy.cjs
-          test -f ./System_files/scripts/build/entity-candidate-bridge.cjs
-          test -f ./System_files/scripts/build/validate-entity-candidates.cjs
-          test -f ./System_files/scripts/build/trend-seed-builder.cjs
-          test -f ./System_files/scripts/build/trend-seed-injector.cjs
-          test -f ./System_files/scripts/build/trend-seed-to-queue.cjs
-
-          test -d "${POST_ARCHIVE_ROOT}"
-
-      - name: Build trend signal + seed + queue
-        run: |
-          npm run trend:bridge
-          npm run trend:seed:build
-          npm run trend:seed:inject
-          npm run trend:queue
-
-      - name: Build queue + ids + body + content
-        run: |
-          npm run queue:pick
-          npm run queue:to-posts
-          npm run ids
-          npm run posts:body:generate
-          npm run posts:content:generate
-          npm run posts:content:validate
-
-      - name: Bridge new reviews to review-ratings-next
-        run: |
-          node ./System_files/scripts/build/review-rating-next.cjs
-
-      - name: Review SSOT build
-        run: |
-          npm run reviews:ssot:build
-          npm run reviews:inject
-          npm run reviews:resolver
-
-      - name: Body image SSOT sync + validate
-        run: |
-          node ./System_files/scripts/build/images-body-sync.cjs
-          npm run posts:body-images:validate
-
-      - name: First render + normalize + review meta
-        run: |
-          npm run posts:render
-          npm run posts:normalize
-          npm run posts:review:meta
-
-      - name: Images pipeline
-        run: |
-          npm run images:renew
-          npm run images:build:og
-          npm run images:upload
-
-      - name: Re-render after image pipeline
-        run: |
-          npm run reviews:ssot:build
-          npm run reviews:inject
-          npm run posts:render
-          npm run posts:normalize
-          npm run posts:review:meta
-
-      - name: Validate + review SSOT validate + QA
-        run: |
-          npm run posts:validate
-          npm run posts:review:ssot:validate
-          npm run posts:qa
-
-      - name: Archive latest post JSON to post-archive repo
-        run: |
-          npm run posts:archive
-
-      - name: Commit post-archive changes
-        shell: bash
-        run: |
-          cd "${POST_ARCHIVE_ROOT}"
-          git config user.name "github-actions"
-          git config user.email "github-actions@users.noreply.github.com"
-          git add -A
-          git diff --cached --quiet && exit 0
-          git commit -m "archive: latest published post json backup"
-          git push
-
-      - name: AI outputs
-        run: |
-          node ./System_files/scripts/build/update-posts-index.cjs
-          npm run feed:build
-          npm run feed:validate
-
-      - name: Tools + Trust page
-        run: |
-          npm run tools:copy
-          npm run pages:trust
-
-      - name: Publish to Blogger
-        if: env.DRY_RUN != 'true' && env.PUBLISH_MODE == 'enable'
-        run: |
-          npm run publish:blogger
-
-      - name: Commit blog repo artifacts
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@users.noreply.github.com"
-          git add -A
-          git diff --cached --quiet && exit 0
-          git commit -m "build: publish pipeline output"
-          git push
+{
+  "name": "ongs-google-blog",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "ids": "node ./System_files/scripts/build/ids.cjs",
+    "seed:refill": "node ./System_files/scripts/build/seed-refill.cjs",
+    "seeds:validate": "node ./System_files/scripts/build/validate-seeds.cjs",
+    "queue:pick": "node ./System_files/scripts/build/seed-scheduler.cjs",
+    "queue:to-posts": "node ./System_files/scripts/build/queue-to-posts.cjs",
+    "slug:next": "node ./System_files/scripts/build/slug-builder.cjs",
+    "posts:body:generate": "node ./System_files/scripts/build/generate-body.cjs",
+    "posts:content:generate": "node ./System_files/scripts/build/generate-content.cjs",
+    "posts:content:validate": "node ./System_files/scripts/build/validate-content-structure.cjs",
+    "posts:archive": "node ./System_files/scripts/build/archive-post-json.cjs",
+    "posts:archive:full": "node ./System_files/scripts/build/archive-post-json.cjs",
+    "posts:markdown": "node ./System_files/scripts/build/markdown-list.cjs",
+    "posts:render": "node ./System_files/scripts/build/render-posts.cjs",
+    "posts:normalize": "node ./System_files/scripts/build/normalize-body.cjs",
+    "posts:validate": "node ./System_files/scripts/build/validate-repair.cjs",
+    "posts:qa": "node ./System_files/scripts/build/qa-check.cjs",
+    "posts:review:ssot:validate": "node ./System_files/scripts/build/validate-review-ssot.cjs",
+    "posts:body-images:validate": "node ./System_files/scripts/build/validate-body-images.cjs",
+    "images:renew": "node ./System_files/scripts/build/images-renew.cjs",
+    "images:build:og": "node ./System_files/scripts/build/images-build-og.cjs",
+    "images:upload": "node ./System_files/scripts/build/r2-upload.cjs",
+    "feed:build": "node ./System_files/scripts/build/build-feed.cjs",
+    "feed:validate": "node ./System_files/scripts/build/validate-feed.cjs",
+    "tools:copy": "node ./System_files/scripts/build/copy-tools.cjs",
+    "pages:trust": "node ./System_files/scripts/build/build-trust-page.cjs",
+    "reviews:stub": "node ./System_files/scripts/build/review-stub-fill.cjs",
+    "reviews:build-next": "node ./System_files/scripts/build/review-build-next.cjs",
+    "reviews:fetch:official": "node ./System_files/scripts/build/review-fetch-official.cjs",
+    "reviews:fetch:insights": "node ./System_files/scripts/build/review-fetch-insights-secondary.cjs",
+    "reviews:diff": "node ./System_files/scripts/build/review-diff-update.cjs",
+    "reviews:ssot:build": "node ./System_files/scripts/build/build-ssot-reviews.cjs",
+    "reviews:inject": "node ./System_files/scripts/build/inject-reviews-from-ssot.cjs",
+    "posts:review:meta": "node ./System_files/scripts/build/review-meta-block.cjs",
+    "reviews:resolver": "node ./System_files/scripts/build/review-resolver.cjs",
+    "reviews:due": "node ./System_files/scripts/build/review-due-90days.cjs",
+    "reviews:next": "node ./System_files/scripts/build/review-next-from-due.cjs",
+    "reviews:next:new": "node ./System_files/scripts/build/review-rating-next.cjs",
+    "review:ratings:update": "node ./System_files/scripts/build/update-review-ratings.cjs",
+    "posts:review:update": "node ./System_files/scripts/build/review-diff-update.cjs",
+    "reviews:bundle": "npm run reviews:stub && npm run reviews:build-next && npm run reviews:diff && npm run reviews:ssot:build",
+    "reviews:freshness": "npm run reviews:due && npm run reviews:next && npm run reviews:diff && npm run reviews:ssot:build",
+    "reviews:new:issue": "npm run reviews:next:new && npm run reviews:fetch:official && npm run reviews:fetch:insights && npm run reviews:diff && npm run reviews:ssot:build && npm run reviews:inject",
+    "trend:bridge": "node ./System_files/scripts/build/entity-candidate-bridge.cjs",
+    "trend:validate": "node ./System_files/scripts/build/validate-entity-candidates.cjs",
+    "trend:seed:build": "node ./System_files/scripts/build/trend-seed-builder.cjs",
+    "trend:seed:inject": "node ./System_files/scripts/build/trend-seed-injector.cjs",
+    "trend:queue": "node ./System_files/scripts/build/trend-seed-to-queue.cjs",
+    "trend:pipeline": "npm run trend:bridge && npm run trend:validate && npm run trend:seed:build && npm run trend:seed:inject && npm run trend:queue",
+    "publish:blogger": "node ./System_files/scripts/publish/blogger.cjs",
+    "build": "npm run aoia1:full",
+    "posts:local:full": "npm run aoia1:full",
+    "deploy": "npm run aoia1:full",
+    "local:dryrun": "npm run aoia1:local:no-upload",
+    "local:publish": "npm run publish:blogger",
+    "pipeline:seed": "npm run trend:pipeline && npm run queue:to-posts && npm run ids",
+    "pipeline:content": "npm run pipeline:seed && npm run posts:body:generate && npm run posts:content:generate && npm run posts:content:validate && npm run posts:body-images:validate",
+    "pipeline:render": "npm run posts:render && npm run posts:normalize",
+    "pipeline:reviews": "npm run reviews:next:new && npm run reviews:fetch:official && npm run reviews:fetch:insights && npm run reviews:diff && npm run reviews:ssot:build && npm run reviews:inject",
+    "pipeline:images": "npm run images:renew && npm run images:build:og && npm run images:upload",
+    "pipeline:images:local": "npm run images:renew && npm run images:build:og",
+    "pipeline:verify": "npm run posts:validate && npm run posts:review:ssot:validate && npm run posts:qa",
+    "pipeline:feed": "npm run feed:build && npm run feed:validate",
+    "pipeline:tools": "npm run tools:copy && npm run pages:trust",
+    "aoia1:full": "npm run pipeline:content && npm run pipeline:render && npm run pipeline:reviews && npm run pipeline:images && npm run pipeline:render && npm run reviews:ssot:build && npm run reviews:inject && npm run pipeline:verify && npm run posts:archive && npm run pipeline:feed && npm run pipeline:tools",
+    "aoia1:local:no-upload": "npm run pipeline:content && npm run pipeline:render && npm run pipeline:reviews && npm run pipeline:images:local && npm run pipeline:render && npm run reviews:ssot:build && npm run reviews:inject && npm run pipeline:verify && npm run posts:archive && npm run pipeline:feed && npm run pipeline:tools",
+    "test:trend:device": "npm run aoia1:local:no-upload",
+    "test:trend:device:full": "npm run aoia1:full",
+    "test:trend:device:verify": "npm run reviews:next:new && npm run reviews:ssot:build && npm run reviews:inject && npm run pipeline:render && npm run pipeline:verify"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.654.0",
+    "dotenv": "^16.4.5",
+    "fast-glob": "^3.3.2",
+    "sharp": "^0.34.5"
+  }
+}
