@@ -103,7 +103,7 @@ for (const item of json.trend) {
       "historical comparison record"
   };
 
-  item.useCases ||= [];const categoryText = (
+  const categoryText = (
   item.reviewEntity.category ||
   item.environment ||
   ""
@@ -189,10 +189,59 @@ const USE_CASE_RULES = [
       "content drafting",
       "daily productivity"
     ]
-  }
+  },
+  {
+  match: ["ai-chat", "ai chat"],
+  useCases: [
+    "research assistance",
+    "content drafting",
+    "daily productivity"
+  ]
+},
+{
+  match: ["fitness"],
+  useCases: [
+    "home workout",
+    "exercise planning",
+    "fitness tracking"
+  ]
+},
+{
+  match: ["weather"],
+  useCases: [
+    "daily forecast",
+    "travel preparation",
+    "outdoor activity planning"
+  ]
+},
+{
+  match: ["education", "learning"],
+  useCases: [
+    "skill development",
+    "exam preparation",
+    "career growth"
+  ]
+},
+{
+  match: ["travel"],
+  useCases: [
+    "trip planning",
+    "booking comparison",
+    "travel management"
+  ]
+}
 ];
 
-if (!Array.isArray(item.useCases) || item.useCases.length === 0) {
+const isDefaultUseCase =
+  Array.isArray(item.useCases) &&
+  item.useCases.join("|") ===
+    "service evaluation|value comparison|subscription decision support";
+
+if (
+  !Array.isArray(item.useCases) ||
+  item.useCases.length === 0 ||
+  isDefaultUseCase
+) {
   const matched = USE_CASE_RULES.find(rule =>
     rule.match.some(keyword => categoryText.includes(keyword))
   );
