@@ -2,7 +2,7 @@
 /**
  * ============================================================================
  * AOIA
- * File : System_files/scripts/build/tools/normalize-subscription-trend.cjs
+ * File : System_files/tools/patch/normalize-subscription-trend.cjs
  * Role : Normalize Trend Subscription Seed Structure
  * ============================================================================
  */
@@ -10,10 +10,12 @@
 const fs = require("fs");
 const path = require("path");
 
-const ROOT = path.resolve(__dirname, "../../../");
+const ROOT = path.resolve(__dirname, "../../");
 const TARGET = path.join(
   ROOT,
   "seedpool",
+  "warehouse",
+  "trend",
   "subscription-services-trend.json"
 );
 
