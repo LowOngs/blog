@@ -103,7 +103,108 @@ for (const item of json.trend) {
       "historical comparison record"
   };
 
-  item.useCases ||= [];
+  item.useCases ||= [];const categoryText = (
+  item.reviewEntity.category ||
+  item.environment ||
+  ""
+).toLowerCase();
+
+const USE_CASE_RULES = [
+  {
+    match: ["vpn"],
+    useCases: [
+      "travel streaming",
+      "public wifi privacy",
+      "remote work access"
+    ]
+  },
+  {
+    match: ["ai-photo", "ai photo"],
+    useCases: [
+      "creator image editing",
+      "product image cleanup",
+      "social media export"
+    ]
+  },
+  {
+    match: ["password"],
+    useCases: [
+      "credential management",
+      "family account sharing",
+      "security monitoring"
+    ]
+  },
+  {
+    match: ["backup"],
+    useCases: [
+      "device recovery",
+      "work file restore",
+      "family photo backup"
+    ]
+  },
+  {
+    match: ["video", "streaming"],
+    useCases: [
+      "home entertainment",
+      "family viewing",
+      "content discovery"
+    ]
+  },
+  {
+    match: ["music"],
+    useCases: [
+      "daily listening",
+      "playlist management",
+      "offline playback"
+    ]
+  },
+  {
+    match: ["cloud gaming", "gaming"],
+    useCases: [
+      "device independent gaming",
+      "high-end game access",
+      "cross-device play"
+    ]
+  },
+  {
+    match: ["language"],
+    useCases: [
+      "travel preparation",
+      "exam study",
+      "daily conversation practice"
+    ]
+  },
+  {
+    match: ["productivity"],
+    useCases: [
+      "team collaboration",
+      "task management",
+      "document workflow"
+    ]
+  },
+  {
+    match: ["ai-chat", "ai chat"],
+    useCases: [
+      "research assistance",
+      "content drafting",
+      "daily productivity"
+    ]
+  }
+];
+
+if (!Array.isArray(item.useCases) || item.useCases.length === 0) {
+  const matched = USE_CASE_RULES.find(rule =>
+    rule.match.some(keyword => categoryText.includes(keyword))
+  );
+
+  item.useCases = matched
+    ? [...matched.useCases]
+    : [
+        "service evaluation",
+        "value comparison",
+        "subscription decision support"
+      ];
+}
 
   normalized++;
 }
