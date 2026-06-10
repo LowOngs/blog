@@ -5,6 +5,81 @@
   },
   "trend": [
     {
+      "id": "ss-tr-005",
+      "title": "Which VPN Just Updated Its Server Network?",
+      "angle": "Latency + streaming unlock performance",
+      "audience": "Privacy and travel users",
+      "intent": "review/network",
+      "environment": "vpn services",
+      "timing": "network update",
+      "goal": "find fastest new routes",
+      "fingerprint": "fp1:74d33a70b21b44e0304c464d5d2246ddc1b1e47d",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Vpn Services"
+      }
+    },
+    {
+      "id": "ss-tr-006",
+      "title": "Are New AI Photo Editors Worth Subscribing To?",
+      "angle": "Model accuracy + export quality",
+      "audience": "Creators",
+      "intent": "review/capability",
+      "environment": "AI photo tools",
+      "timing": "launch cycle",
+      "goal": "spot true improvements",
+      "fingerprint": "fp1:e7e00e9712ec9321ced640241630b75ca4c7b936",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "AI Photo Tools"
+      }
+    },
+    {
+      "id": "ss-tr-007",
+      "title": "Which Fitness App Added the Most Useful New Programs?",
+      "angle": "Workout diversity + progression",
+      "audience": "Fitness users",
+      "intent": "review/content-update",
+      "environment": "fitness subscriptions",
+      "timing": "monthly update",
+      "goal": "measure long-term value",
+      "fingerprint": "fp1:04418066c8f27518f7c9877e0b0ea357680ce5d5",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Fitness Subscriptions"
+      }
+    },
+    {
+      "id": "ss-tr-008",
+      "title": "Is the Latest Gaming Subscription Rotation Worth It?",
+      "angle": "Game quality + rotation pattern",
+      "audience": "Gamers",
+      "intent": "review/content",
+      "environment": "gaming services",
+      "timing": "rotation day",
+      "goal": "find strongest monthly lineup",
+      "fingerprint": "fp1:195ad508ca5166c77deb6c8e34a2e417c861cf86",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Gaming Services"
+      }
+    },
+    {
+      "id": "ss-tr-009",
+      "title": "Which Productivity Suite Just Got Real AI Upgrades?",
+      "angle": "Automation + document generation",
+      "audience": "Office/remote workers",
+      "intent": "review/productivity",
+      "environment": "productivity suites",
+      "timing": "feature rollout",
+      "goal": "spot meaningful workflow benefits",
+      "fingerprint": "fp1:322fc6bbc18dddab027eec16a62d439eaf92001a",
+      "reviewEntity": {
+        "type": "subscription",
+        "service": "Productivity Suites"
+      }
+    },
+    {
       "id": "ss-tr-010",
       "title": "Are Premium Weather Apps Worth It After Recent Upgrades?",
       "angle": "Accuracy + radar update frequency",

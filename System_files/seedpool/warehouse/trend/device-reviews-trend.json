@@ -5,784 +5,2240 @@
   },
   "trend": [
     {
+      "id": "dr-tr-004",
+      "title": "What changed in Apple iPhone 15 after the 2026-01 new generation release?",
+      "angle": "GPU wattage + cooling redesign",
+      "audience": "Gamers",
+      "intent": "review/update",
+      "environment": "gaming laptops",
+      "timing": "release window",
+      "goal": "decide whether Apple iPhone 15 is a good purchase after new generation release",
+      "fingerprint": "fp1:2fabec468490cea7c397f4e8732891bfbe896395",
+      "reviewEntity": {
+        "name": "Apple iPhone 15",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Apple iPhone 15",
+        "type": "device",
+        "category": "smartphone"
+      },
+      "decisionType": "test",
+      "decisionSummary": "Apple iPhone 15 should be evaluated again because new generation release may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q1",
+        "contextDate": "2026-01",
+        "changeReason": "new generation release",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
+      }
+    },
+    {
+      "id": "dr-tr-005",
+      "title": "Should you recheck Samsung Galaxy S24 after recent changes?",
+      "angle": "RAM pressure + window manager stability",
+      "audience": "Students and creatives",
+      "intent": "review/recheck",
+      "environment": "tablets",
+      "timing": "post-update",
+      "goal": "decide whether Samsung Galaxy S24 is a good purchase after price drop",
+      "fingerprint": "fp1:bf775ce7ed54478bbe1be33a1bb1dfcb1cdcba3d",
+      "reviewEntity": {
+        "name": "Samsung Galaxy S24",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Samsung Galaxy S24",
+        "type": "device",
+        "category": "smartphone"
+      },
+      "decisionType": "test",
+      "decisionSummary": "Samsung Galaxy S24 should be evaluated again because price drop may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q2",
+        "contextDate": "2026-02",
+        "changeReason": "price drop",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
+      }
+    },
+    {
+      "id": "dr-tr-006",
+      "title": "How does Google Pixel 8 compare now after long-term user feedback?",
+      "angle": "ANC depth + transparency mode quality",
+      "audience": "Music consumers",
+      "intent": "review/compare-now",
+      "environment": "earbuds",
+      "timing": "annual refresh",
+      "goal": "decide whether Google Pixel 8 is a good purchase after long-term user feedback",
+      "fingerprint": "fp1:55fbf708582a0b32b582861f189399189b57ff50",
+      "reviewEntity": {
+        "name": "Google Pixel 8",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Google Pixel 8",
+        "type": "device",
+        "category": "smartphone"
+      },
+      "decisionType": "compare",
+      "decisionSummary": "Google Pixel 8 should be evaluated again because long-term user feedback may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q3",
+        "contextDate": "2026-03",
+        "changeReason": "long-term user feedback",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
+      }
+    },
+    {
+      "id": "dr-tr-007",
+      "title": "Is Apple MacBook Air M3 still worth buying after battery concern?",
+      "angle": "Sensor updates + sweat resistance",
+      "audience": "Fitness users",
+      "intent": "review/still-worth",
+      "environment": "wearables",
+      "timing": "wear test",
+      "goal": "decide whether Apple MacBook Air M3 is a good purchase after battery concern",
+      "fingerprint": "fp1:d6075cd809811f6dfaa4b93c339b09242a430970",
+      "reviewEntity": {
+        "name": "Apple MacBook Air M3",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Apple MacBook Air M3",
+        "type": "device",
+        "category": "laptop"
+      },
+      "decisionType": "buy",
+      "decisionSummary": "Apple MacBook Air M3 should be evaluated again because battery concern may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q4",
+        "contextDate": "2026-04",
+        "changeReason": "battery concern",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
+      }
+    },
+    {
+      "id": "dr-tr-008",
+      "title": "Should you buy or wait on Samsung Galaxy Book4 after software support change?",
+      "angle": "Always-on drain + GPS endurance",
+      "audience": "Lifestyle and fitness users",
+      "intent": "review/buy-or-wait",
+      "environment": "wearables",
+      "timing": "first-week usage",
+      "goal": "decide whether Samsung Galaxy Book4 is a good purchase after software support change",
+      "fingerprint": "fp1:84f986f739ebfaf14dcfbfcd79fc4b9a38d099c7",
+      "reviewEntity": {
+        "name": "Samsung Galaxy Book4",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Samsung Galaxy Book4",
+        "type": "device",
+        "category": "laptop"
+      },
+      "decisionType": "buy-or-wait",
+      "decisionSummary": "Samsung Galaxy Book4 should be evaluated again because software support change may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q1",
+        "contextDate": "2026-05",
+        "changeReason": "software support change",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
+      }
+    },
+    {
       "id": "dr-tr-009",
-      "title": "Which Bluetooth Speaker Sounds Best at High Volume?",
+      "title": "What risks should users watch in Apple iPad Pro M4 after competitor launch?",
       "angle": "Distortion handling",
       "audience": "Casual listeners",
-      "intent": "review/audio-test",
+      "intent": "review/risk-watch",
       "environment": "audio devices",
       "timing": "trend season",
-      "goal": "find speaker with clean loud output",
-      "fingerprint": "fp1:cb15a305f4dcf64f8fe84a57af0fe57df7eb4adf",
+      "goal": "decide whether Apple iPad Pro M4 is a good purchase after competitor launch",
+      "fingerprint": "fp1:3530ca4b8a893e25fa60ab642551f1709a2ddcff",
       "reviewEntity": {
+        "name": "Apple iPad Pro M4",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Apple iPad Pro M4",
         "type": "device",
-        "model": "Audio Devices"
+        "category": "tablet"
+      },
+      "decisionType": "watch",
+      "decisionSummary": "Apple iPad Pro M4 should be evaluated again because competitor launch may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q2",
+        "contextDate": "2026-06",
+        "changeReason": "competitor launch",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "dr-tr-010",
-      "title": "Are Mini PCs Finally Good Enough?",
+      "title": "What changed in Samsung Galaxy Tab S9 after the 2026-07 performance benchmark shift?",
       "angle": "Thermals + performance ceiling",
       "audience": "Home office users",
-      "intent": "review/performance",
+      "intent": "review/update",
       "environment": "mini pcs",
       "timing": "new-gen CPU launch",
-      "goal": "judge if small form factor is viable",
-      "fingerprint": "fp1:3da007d498474f6bef6914ee6535ba66e8aa02f2",
+      "goal": "decide whether Samsung Galaxy Tab S9 is a good purchase after performance benchmark shift",
+      "fingerprint": "fp1:a309490672424285b89ef195a1d9511509b85e86",
       "reviewEntity": {
+        "name": "Samsung Galaxy Tab S9",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Samsung Galaxy Tab S9",
         "type": "device",
-        "model": "Mini Pcs"
+        "category": "tablet"
+      },
+      "decisionType": "test",
+      "decisionSummary": "Samsung Galaxy Tab S9 should be evaluated again because performance benchmark shift may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q3",
+        "contextDate": "2026-07",
+        "changeReason": "performance benchmark shift",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "dr-tr-011",
-      "title": "Which Budget Phone Punches Above Its Price?",
+      "title": "Should you recheck Sony Sony WH-1000XM5 after recent changes?",
       "angle": "Camera-to-price + performance-to-price ratio",
       "audience": "Budget shoppers",
-      "intent": "review/value",
+      "intent": "review/recheck",
       "environment": "budget phones",
       "timing": "launch season",
-      "goal": "find low-price models with high real value",
-      "fingerprint": "fp1:6087f6ca73729727a8e8f523e4c94d041b41c78c",
+      "goal": "decide whether Sony Sony WH-1000XM5 is a good purchase after stock availability change",
+      "fingerprint": "fp1:6fde7d385be87c9468770d176c6c7ba50cad0986",
       "reviewEntity": {
+        "name": "Sony Sony WH-1000XM5",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Sony Sony WH-1000XM5",
         "type": "device",
-        "model": "Budget Phones"
+        "category": "audio"
+      },
+      "decisionType": "test",
+      "decisionSummary": "Sony Sony WH-1000XM5 should be evaluated again because stock availability change may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q4",
+        "contextDate": "2026-08",
+        "changeReason": "stock availability change",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "dr-tr-012",
-      "title": "Is the New E-reader Better for Your Eyes?",
+      "title": "How does Apple AirPods Pro 2 compare now after repairability concern?",
       "angle": "Warm light accuracy + glare performance",
       "audience": "Readers",
-      "intent": "review/display",
+      "intent": "review/compare-now",
       "environment": "e-readers",
       "timing": "model refresh",
-      "goal": "check comfort and readability",
-      "fingerprint": "fp1:a9351155ab0d388f252b1bd536e7d5819d32c7a1",
+      "goal": "decide whether Apple AirPods Pro 2 is a good purchase after repairability concern",
+      "fingerprint": "fp1:7271e34ee88aaebf4b3f9b202dd485239ca5b28f",
       "reviewEntity": {
+        "name": "Apple AirPods Pro 2",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Apple AirPods Pro 2",
         "type": "device",
-        "model": "E-readers"
+        "category": "audio"
+      },
+      "decisionType": "compare",
+      "decisionSummary": "Apple AirPods Pro 2 should be evaluated again because repairability concern may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q1",
+        "contextDate": "2026-09",
+        "changeReason": "repairability concern",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "dr-tr-013",
-      "title": "Which Laptop Has the Quietest Keyboard?",
+      "title": "Is Apple Apple Watch Series 9 still worth buying after new generation release?",
       "angle": "Key travel + acoustic profile",
       "audience": "Office + students",
-      "intent": "review/ergonomics",
+      "intent": "review/still-worth",
       "environment": "laptops",
       "timing": "comparison test",
-      "goal": "find quiet comfortable typing",
-      "fingerprint": "fp1:abaa42e13a62a52f01a9236f2e93c627a3bbb1f2",
+      "goal": "decide whether Apple Apple Watch Series 9 is a good purchase after new generation release",
+      "fingerprint": "fp1:9c7e1ef24fd7d8f12b22a0cfb68d3d1979ca3c73",
       "reviewEntity": {
+        "name": "Apple Apple Watch Series 9",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Apple Apple Watch Series 9",
         "type": "device",
-        "model": "Laptops"
+        "category": "wearable"
+      },
+      "decisionType": "buy",
+      "decisionSummary": "Apple Apple Watch Series 9 should be evaluated again because new generation release may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q2",
+        "contextDate": "2026-10",
+        "changeReason": "new generation release",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "dr-tr-014",
-      "title": "Is the New Smart TV OS Actually Faster?",
+      "title": "Should you buy or wait on Samsung Galaxy Watch6 after price drop?",
       "angle": "App launch speed + UI lag",
       "audience": "Home entertainment users",
-      "intent": "review/performance",
+      "intent": "review/buy-or-wait",
       "environment": "smart tvs",
       "timing": "post-update",
-      "goal": "avoid laggy smart TVs",
-      "fingerprint": "fp1:f44db1e98d0758cf474c56300614309f2719c397",
+      "goal": "decide whether Samsung Galaxy Watch6 is a good purchase after price drop",
+      "fingerprint": "fp1:5939b107d30f059aa80556cf9e8efc3b2ea7909d",
       "reviewEntity": {
+        "name": "Samsung Galaxy Watch6",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Samsung Galaxy Watch6",
         "type": "device",
-        "model": "Smart Tvs"
+        "category": "wearable"
+      },
+      "decisionType": "buy-or-wait",
+      "decisionSummary": "Samsung Galaxy Watch6 should be evaluated again because price drop may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q3",
+        "contextDate": "2026-11",
+        "changeReason": "price drop",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "dr-tr-015",
-      "title": "Which Wireless Charger Is Truly Fast?",
+      "title": "What risks should users watch in Apple iPhone 15 after long-term user feedback?",
       "angle": "Heat generation + speed consistency",
       "audience": "Phone users",
-      "intent": "review/performance",
+      "intent": "review/risk-watch",
       "environment": "charging accessories",
       "timing": "trend",
-      "goal": "pick chargers with safe fast charging",
-      "fingerprint": "fp1:7c591167449ab0eb0cb50bb7263112a9da9b9982",
+      "goal": "decide whether Apple iPhone 15 is a good purchase after long-term user feedback",
+      "fingerprint": "fp1:1a4498368a7af9d7f47d7571d0390be93131394b",
       "reviewEntity": {
+        "name": "Apple iPhone 15",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Apple iPhone 15",
         "type": "device",
-        "model": "Charging Accessories"
+        "category": "smartphone"
+      },
+      "decisionType": "watch",
+      "decisionSummary": "Apple iPhone 15 should be evaluated again because long-term user feedback may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q4",
+        "contextDate": "2026-12",
+        "changeReason": "long-term user feedback",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "dr-tr-016",
-      "title": "Are AI Cameras on Laptops Finally Good?",
+      "title": "What changed in Samsung Galaxy S24 after the 2026-01 battery concern?",
       "angle": "Noise handling + skin tones",
       "audience": "Remote workers",
-      "intent": "review/camera",
+      "intent": "review/update",
       "environment": "laptops",
       "timing": "update season",
-      "goal": "judge real webcam improvements",
-      "fingerprint": "fp1:dc0e199a89ab173ce2732fa802d07026d0571fe8",
+      "goal": "decide whether Samsung Galaxy S24 is a good purchase after battery concern",
+      "fingerprint": "fp1:2325e662a016342123c4fc681d4c58e048ca8bb0",
       "reviewEntity": {
+        "name": "Samsung Galaxy S24",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Samsung Galaxy S24",
         "type": "device",
-        "model": "Laptops"
+        "category": "smartphone"
+      },
+      "decisionType": "test",
+      "decisionSummary": "Samsung Galaxy S24 should be evaluated again because battery concern may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q1",
+        "contextDate": "2026-01",
+        "changeReason": "battery concern",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "dr-tr-017",
-      "title": "Which Robot Vacuum Navigates Most Intelligently?",
+      "title": "Should you recheck Google Pixel 8 after recent changes?",
       "angle": "Map accuracy + obstacle avoidance",
       "audience": "Home users",
-      "intent": "review/smart-home",
+      "intent": "review/recheck",
       "environment": "robot vacuums",
       "timing": "peak trend",
-      "goal": "find robot with best AI navigation",
-      "fingerprint": "fp1:fd8ebf810f2f0dafb55e49d23f735b3220de4ee4",
+      "goal": "decide whether Google Pixel 8 is a good purchase after software support change",
+      "fingerprint": "fp1:ff36f7125fb7d25ffb24214c99179b8c88a58bab",
       "reviewEntity": {
+        "name": "Google Pixel 8",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Google Pixel 8",
         "type": "device",
-        "model": "Robot Vacuums"
+        "category": "smartphone"
+      },
+      "decisionType": "test",
+      "decisionSummary": "Google Pixel 8 should be evaluated again because software support change may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q2",
+        "contextDate": "2026-02",
+        "changeReason": "software support change",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "dr-tr-018",
-      "title": "Is the New Action Camera Worth Upgrading?",
+      "title": "How does Apple MacBook Air M3 compare now after competitor launch?",
       "angle": "Stabilization + overheating test",
       "audience": "Creators and travelers",
-      "intent": "review/video-quality",
+      "intent": "review/compare-now",
       "environment": "action cams",
       "timing": "annual release",
-      "goal": "judge real improvements outdoors",
-      "fingerprint": "fp1:9f6725e2395318cc997f45093a1cd508ced4208b",
+      "goal": "decide whether Apple MacBook Air M3 is a good purchase after competitor launch",
+      "fingerprint": "fp1:d206d267d4ecdf5c8af389b55831e0d29a7c401c",
       "reviewEntity": {
+        "name": "Apple MacBook Air M3",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Apple MacBook Air M3",
         "type": "device",
-        "model": "Action Cams"
+        "category": "laptop"
+      },
+      "decisionType": "compare",
+      "decisionSummary": "Apple MacBook Air M3 should be evaluated again because competitor launch may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q3",
+        "contextDate": "2026-03",
+        "changeReason": "competitor launch",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "dr-tr-019",
-      "title": "Which Portable Monitor Works Best for Travel?",
+      "title": "Is Samsung Galaxy Book4 still worth buying after performance benchmark shift?",
       "angle": "Brightness + color accuracy",
       "audience": "Remote workers",
-      "intent": "review/portability",
+      "intent": "review/still-worth",
       "environment": "mobile monitors",
       "timing": "trend season",
-      "goal": "pick monitors that stay bright in daylight",
-      "fingerprint": "fp1:4717cca6de0b7245eb12dd5b7775b1190b80d720",
+      "goal": "decide whether Samsung Galaxy Book4 is a good purchase after performance benchmark shift",
+      "fingerprint": "fp1:6b5da211c6c651299b7d393ca059369f770fa025",
       "reviewEntity": {
+        "name": "Samsung Galaxy Book4",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Samsung Galaxy Book4",
         "type": "device",
-        "model": "Mobile Monitors"
+        "category": "laptop"
+      },
+      "decisionType": "buy",
+      "decisionSummary": "Samsung Galaxy Book4 should be evaluated again because performance benchmark shift may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q4",
+        "contextDate": "2026-04",
+        "changeReason": "performance benchmark shift",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "dr-tr-020",
-      "title": "Are Smart Home Hubs Actually Getting Better?",
+      "title": "Should you buy or wait on Apple iPad Pro M4 after stock availability change?",
       "angle": "Matter support + latency",
       "audience": "Smart home users",
-      "intent": "review/connectivity",
+      "intent": "review/buy-or-wait",
       "environment": "hubs",
       "timing": "ecosystem updates",
-      "goal": "ensure reliability across devices",
-      "fingerprint": "fp1:d2ab95b12d49f2de293c074adb733d4654322da1",
+      "goal": "decide whether Apple iPad Pro M4 is a good purchase after stock availability change",
+      "fingerprint": "fp1:fb86575f45339c20cd3597b6d4e734ae5f21d099",
       "reviewEntity": {
+        "name": "Apple iPad Pro M4",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Apple iPad Pro M4",
         "type": "device",
-        "model": "Hubs"
+        "category": "tablet"
+      },
+      "decisionType": "buy-or-wait",
+      "decisionSummary": "Apple iPad Pro M4 should be evaluated again because stock availability change may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q1",
+        "contextDate": "2026-05",
+        "changeReason": "stock availability change",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "dr-tr-021",
-      "title": "Which Drone Has the Most Stable Hover?",
+      "title": "What risks should users watch in Samsung Galaxy Tab S9 after repairability concern?",
       "angle": "Wind resistance + sensor package",
       "audience": "Aerial video users",
-      "intent": "review/stability",
+      "intent": "review/risk-watch",
       "environment": "drones",
       "timing": "new-gen launch",
-      "goal": "improve aerial shooting consistency",
-      "fingerprint": "fp1:e15994cf7a5d6630e089443e99d3a536e17e0851",
+      "goal": "decide whether Samsung Galaxy Tab S9 is a good purchase after repairability concern",
+      "fingerprint": "fp1:5652099e19e82732187cba38fdd93ebe93c3a73f",
       "reviewEntity": {
+        "name": "Samsung Galaxy Tab S9",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Samsung Galaxy Tab S9",
         "type": "device",
-        "model": "Drones"
+        "category": "tablet"
+      },
+      "decisionType": "watch",
+      "decisionSummary": "Samsung Galaxy Tab S9 should be evaluated again because repairability concern may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q2",
+        "contextDate": "2026-06",
+        "changeReason": "repairability concern",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "dr-tr-022",
-      "title": "Is the New Smart Kettle Worth It?",
+      "title": "What changed in Sony Sony WH-1000XM5 after the 2026-07 new generation release?",
       "angle": "Heating precision + connectivity usefulness",
       "audience": "Home gadget buyers",
-      "intent": "review/usability",
+      "intent": "review/update",
       "environment": "smart kitchen",
       "timing": "trend wave",
-      "goal": "judge real smart features vs gimmicks",
-      "fingerprint": "fp1:712f96f947a234526aa06064f0fe4358a8e99442",
+      "goal": "decide whether Sony Sony WH-1000XM5 is a good purchase after new generation release",
+      "fingerprint": "fp1:50b7285c075f7a172a952269f61f74ee0d2c29ab",
       "reviewEntity": {
+        "name": "Sony Sony WH-1000XM5",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Sony Sony WH-1000XM5",
         "type": "device",
-        "model": "Smart Kitchen"
+        "category": "audio"
+      },
+      "decisionType": "test",
+      "decisionSummary": "Sony Sony WH-1000XM5 should be evaluated again because new generation release may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q3",
+        "contextDate": "2026-07",
+        "changeReason": "new generation release",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "dr-tr-023",
-      "title": "Which Soundbar Has the Most Accurate Dialogue Mode?",
+      "title": "Should you recheck Apple AirPods Pro 2 after recent changes?",
       "angle": "Mid-range clarity test",
       "audience": "Home entertainment users",
-      "intent": "review/audio-quality",
+      "intent": "review/recheck",
       "environment": "soundbars",
       "timing": "update cycle",
-      "goal": "improve movie clarity",
-      "fingerprint": "fp1:2759bb00d75c63fba385603bd2bbee4fc56189c9",
+      "goal": "decide whether Apple AirPods Pro 2 is a good purchase after price drop",
+      "fingerprint": "fp1:fa28213580fd68308dbaff3eb5b5f76c2e4b5e8f",
       "reviewEntity": {
+        "name": "Apple AirPods Pro 2",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Apple AirPods Pro 2",
         "type": "device",
-        "model": "Soundbars"
+        "category": "audio"
+      },
+      "decisionType": "test",
+      "decisionSummary": "Apple AirPods Pro 2 should be evaluated again because price drop may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q4",
+        "contextDate": "2026-08",
+        "changeReason": "price drop",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "dr-tr-024",
-      "title": "Is the New Smart Scale Reliable for Daily Tracking?",
+      "title": "How does Apple Apple Watch Series 9 compare now after long-term user feedback?",
       "angle": "BMI + impedance accuracy",
       "audience": "Health users",
-      "intent": "review/accuracy",
+      "intent": "review/compare-now",
       "environment": "fitness devices",
       "timing": "first-week",
-      "goal": "ensure readings are consistent",
-      "fingerprint": "fp1:3f4742cbc32245b8914e8621c70faabb25092e46",
+      "goal": "decide whether Apple Apple Watch Series 9 is a good purchase after long-term user feedback",
+      "fingerprint": "fp1:aa3be4ca89e896cf280b0ef6ea0dd6d1a1c5f23c",
       "reviewEntity": {
+        "name": "Apple Apple Watch Series 9",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Apple Apple Watch Series 9",
         "type": "device",
-        "model": "Fitness Devices"
+        "category": "wearable"
+      },
+      "decisionType": "compare",
+      "decisionSummary": "Apple Apple Watch Series 9 should be evaluated again because long-term user feedback may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q1",
+        "contextDate": "2026-09",
+        "changeReason": "long-term user feedback",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "dr-tr-025",
-      "title": "Which Keyboard Is Best for Long Typing Sessions?",
+      "title": "Is Samsung Galaxy Watch6 still worth buying after battery concern?",
       "angle": "Travel, feedback, fatigue",
       "audience": "Writers and coders",
-      "intent": "review/ergonomics",
+      "intent": "review/still-worth",
       "environment": "mechanical keyboards",
       "timing": "trend",
-      "goal": "reduce finger fatigue",
-      "fingerprint": "fp1:3b9cd6a7e9340e13dd6beda1781070f073732552",
+      "goal": "decide whether Samsung Galaxy Watch6 is a good purchase after battery concern",
+      "fingerprint": "fp1:7c526344352661fc33a9973f3f12658df1388b8a",
       "reviewEntity": {
+        "name": "Samsung Galaxy Watch6",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Samsung Galaxy Watch6",
         "type": "device",
-        "model": "Mechanical Keyboards"
+        "category": "wearable"
+      },
+      "decisionType": "buy",
+      "decisionSummary": "Samsung Galaxy Watch6 should be evaluated again because battery concern may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q2",
+        "contextDate": "2026-10",
+        "changeReason": "battery concern",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "dr-tr-026",
-      "title": "Does This WebCam Improve Low Light Video?",
+      "title": "Should you buy or wait on Apple iPhone 15 after software support change?",
       "angle": "Sensor performance + auto-exposure",
       "audience": "Remote workers",
-      "intent": "review/camera-quality",
+      "intent": "review/buy-or-wait",
       "environment": "webcams",
       "timing": "launch",
-      "goal": "judge real indoor improvements",
-      "fingerprint": "fp1:c1bab7fc83ef381a44a65e004d577579792616cb",
+      "goal": "decide whether Apple iPhone 15 is a good purchase after software support change",
+      "fingerprint": "fp1:30128898fd0700bf4cd8a61c0587baea50d43dfb",
       "reviewEntity": {
+        "name": "Apple iPhone 15",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Apple iPhone 15",
         "type": "device",
-        "model": "Webcams"
+        "category": "smartphone"
+      },
+      "decisionType": "buy-or-wait",
+      "decisionSummary": "Apple iPhone 15 should be evaluated again because software support change may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q3",
+        "contextDate": "2026-11",
+        "changeReason": "software support change",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "dr-tr-027",
-      "title": "Which Smart Light System Has the Best Color Accuracy?",
+      "title": "What risks should users watch in Samsung Galaxy S24 after competitor launch?",
       "angle": "RGB calibration + flicker control",
       "audience": "Home users",
-      "intent": "review/quality",
+      "intent": "review/risk-watch",
       "environment": "smart lights",
       "timing": "update cycle",
-      "goal": "ensure accurate lighting scenes",
-      "fingerprint": "fp1:61b86289ce01518684d8697b90f5a1fa6a3fb85d",
+      "goal": "decide whether Samsung Galaxy S24 is a good purchase after competitor launch",
+      "fingerprint": "fp1:502a0bc4b26e126d0407c6e57c6e32a3cb2b07c6",
       "reviewEntity": {
+        "name": "Samsung Galaxy S24",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Samsung Galaxy S24",
         "type": "device",
-        "model": "Smart Lights"
+        "category": "smartphone"
+      },
+      "decisionType": "watch",
+      "decisionSummary": "Samsung Galaxy S24 should be evaluated again because competitor launch may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q4",
+        "contextDate": "2026-12",
+        "changeReason": "competitor launch",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "dr-tr-028",
-      "title": "Is the New Smart Thermostat Actually Saving Energy?",
+      "title": "What changed in Google Pixel 8 after the 2026-01 performance benchmark shift?",
       "angle": "Sensor accuracy + adaptive schedules",
       "audience": "Homeowners",
-      "intent": "review/automation",
+      "intent": "review/update",
       "environment": "thermostats",
       "timing": "post-install",
-      "goal": "confirm real-world efficiency gains",
-      "fingerprint": "fp1:1d898001fe8157164411be7b2e912b40ea75a507",
+      "goal": "decide whether Google Pixel 8 is a good purchase after performance benchmark shift",
+      "fingerprint": "fp1:43ee99c414fc263619cb912babc2a1c86679d378",
       "reviewEntity": {
+        "name": "Google Pixel 8",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Google Pixel 8",
         "type": "device",
-        "model": "Thermostats"
+        "category": "smartphone"
+      },
+      "decisionType": "test",
+      "decisionSummary": "Google Pixel 8 should be evaluated again because performance benchmark shift may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q1",
+        "contextDate": "2026-01",
+        "changeReason": "performance benchmark shift",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "dr-tr-029",
-      "title": "Which Budget Laptop Is Best for Students?",
+      "title": "Should you recheck Apple MacBook Air M3 after recent changes?",
       "angle": "Keyboard + screen + battery hierarchy",
       "audience": "Students",
-      "intent": "review/value",
+      "intent": "review/recheck",
       "environment": "laptops",
       "timing": "back-to-school",
-      "goal": "find balanced budget models",
-      "fingerprint": "fp1:2083fd7baae04b9a635d2bed0199c5876992f593",
+      "goal": "decide whether Apple MacBook Air M3 is a good purchase after stock availability change",
+      "fingerprint": "fp1:975d9b7a512e9327ddf798949b656e6187560ce9",
       "reviewEntity": {
+        "name": "Apple MacBook Air M3",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Apple MacBook Air M3",
         "type": "device",
-        "model": "Laptops"
+        "category": "laptop"
+      },
+      "decisionType": "test",
+      "decisionSummary": "Apple MacBook Air M3 should be evaluated again because stock availability change may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q2",
+        "contextDate": "2026-02",
+        "changeReason": "stock availability change",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "dr-tr-030",
-      "title": "Are the New Wi-Fi 7 Routers Worth Upgrading To?",
+      "title": "How does Samsung Galaxy Book4 compare now after repairability concern?",
       "angle": "Speed + latency + device compatibility",
       "audience": "Tech-forward home users",
-      "intent": "review/performance",
+      "intent": "review/compare-now",
       "environment": "routers",
       "timing": "technology transition",
-      "goal": "evaluate real Wi-Fi 7 gains",
-      "fingerprint": "fp1:a717839938d19056f944594495cb9fb1cb222ba4",
+      "goal": "decide whether Samsung Galaxy Book4 is a good purchase after repairability concern",
+      "fingerprint": "fp1:06189c828de30de8124fd446750e41558dc0f09c",
       "reviewEntity": {
+        "name": "Samsung Galaxy Book4",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Samsung Galaxy Book4",
         "type": "device",
-        "model": "Routers"
+        "category": "laptop"
+      },
+      "decisionType": "compare",
+      "decisionSummary": "Samsung Galaxy Book4 should be evaluated again because repairability concern may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q3",
+        "contextDate": "2026-03",
+        "changeReason": "repairability concern",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "dr-tr-031",
-      "title": "Which Mechanical Keyboard Has the Best Stabilizers?",
+      "title": "Is Apple iPad Pro M4 still worth buying after new generation release?",
       "angle": "Rattle test + key feel",
       "audience": "Enthusiasts",
-      "intent": "review/build-quality",
+      "intent": "review/still-worth",
       "environment": "keyboards",
       "timing": "trend wave",
-      "goal": "find smooth typing experience",
-      "fingerprint": "fp1:a0ec11012787ece9fec3088def58f7a5e585c54e",
+      "goal": "decide whether Apple iPad Pro M4 is a good purchase after new generation release",
+      "fingerprint": "fp1:39bcd70f74267fcab060f34e9c4d9c5e6285a99b",
       "reviewEntity": {
+        "name": "Apple iPad Pro M4",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Apple iPad Pro M4",
         "type": "device",
-        "model": "Keyboards"
+        "category": "tablet"
+      },
+      "decisionType": "buy",
+      "decisionSummary": "Apple iPad Pro M4 should be evaluated again because new generation release may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q4",
+        "contextDate": "2026-04",
+        "changeReason": "new generation release",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "dr-tr-032",
-      "title": "Is the Latest Smart Doorbell Any Better at Motion Detection?",
+      "title": "Should you buy or wait on Samsung Galaxy Tab S9 after price drop?",
       "angle": "False positive + detection range",
       "audience": "Homeowners",
-      "intent": "review/security",
+      "intent": "review/buy-or-wait",
       "environment": "doorbell cameras",
       "timing": "new model",
-      "goal": "reduce false alerts",
-      "fingerprint": "fp1:add9c4c4f1eeb261f43255d1bda5e87272606e7c",
+      "goal": "decide whether Samsung Galaxy Tab S9 is a good purchase after price drop",
+      "fingerprint": "fp1:6522dba3764bf9ea188e7074a722c95014580fe9",
       "reviewEntity": {
+        "name": "Samsung Galaxy Tab S9",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Samsung Galaxy Tab S9",
         "type": "device",
-        "model": "Doorbell Cameras"
+        "category": "tablet"
+      },
+      "decisionType": "buy-or-wait",
+      "decisionSummary": "Samsung Galaxy Tab S9 should be evaluated again because price drop may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q1",
+        "contextDate": "2026-05",
+        "changeReason": "price drop",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "dr-tr-033",
-      "title": "Which Webcam Handles Skin Tones Most Naturally?",
+      "title": "What risks should users watch in Sony Sony WH-1000XM5 after long-term user feedback?",
       "angle": "Color balance accuracy",
       "audience": "Remote workers",
-      "intent": "review/camera",
+      "intent": "review/risk-watch",
       "environment": "webcams",
       "timing": "update period",
-      "goal": "choose webcam with natural color",
-      "fingerprint": "fp1:897b971dd08279977b1e5ddbc2e06c4c73d82c4f",
+      "goal": "decide whether Sony Sony WH-1000XM5 is a good purchase after long-term user feedback",
+      "fingerprint": "fp1:a7275575f08f12549bd3c9bfc4ce200137072c94",
       "reviewEntity": {
+        "name": "Sony Sony WH-1000XM5",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Sony Sony WH-1000XM5",
         "type": "device",
-        "model": "Webcams"
+        "category": "audio"
+      },
+      "decisionType": "watch",
+      "decisionSummary": "Sony Sony WH-1000XM5 should be evaluated again because long-term user feedback may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q2",
+        "contextDate": "2026-06",
+        "changeReason": "long-term user feedback",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "dr-tr-034",
-      "title": "Is the New Portable Projector Bright Enough?",
+      "title": "What changed in Apple AirPods Pro 2 after the 2026-07 battery concern?",
       "angle": "ANSI lumen test",
       "audience": "Home + travel users",
-      "intent": "review/display",
+      "intent": "review/update",
       "environment": "projectors",
       "timing": "launch",
-      "goal": "determine if usable in lit rooms",
-      "fingerprint": "fp1:1ddac1baf5d9c33269d2328d369e796b674db5c2",
+      "goal": "decide whether Apple AirPods Pro 2 is a good purchase after battery concern",
+      "fingerprint": "fp1:21226c16ab82384fca3cd26169f72711887d368b",
       "reviewEntity": {
+        "name": "Apple AirPods Pro 2",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Apple AirPods Pro 2",
         "type": "device",
-        "model": "Projectors"
+        "category": "audio"
+      },
+      "decisionType": "test",
+      "decisionSummary": "Apple AirPods Pro 2 should be evaluated again because battery concern may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q3",
+        "contextDate": "2026-07",
+        "changeReason": "battery concern",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "dr-tr-035",
-      "title": "Which Vacuum Cleaner Has the Best Suction-to-Noise Ratio?",
+      "title": "Should you recheck Apple Apple Watch Series 9 after recent changes?",
       "angle": "Performance vs noise",
       "audience": "Households",
-      "intent": "review/efficiency",
+      "intent": "review/recheck",
       "environment": "home appliances",
       "timing": "trend cycle",
-      "goal": "maximize quiet cleaning",
-      "fingerprint": "fp1:23e21e230884b1c45daa934c18afa1e855c6df95",
+      "goal": "decide whether Apple Apple Watch Series 9 is a good purchase after software support change",
+      "fingerprint": "fp1:2b3ffe567e6dc81ff707f76528df08e829c3e12a",
       "reviewEntity": {
+        "name": "Apple Apple Watch Series 9",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Apple Apple Watch Series 9",
         "type": "device",
-        "model": "Home Appliances"
+        "category": "wearable"
+      },
+      "decisionType": "test",
+      "decisionSummary": "Apple Apple Watch Series 9 should be evaluated again because software support change may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q4",
+        "contextDate": "2026-08",
+        "changeReason": "software support change",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "dr-tr-036",
-      "title": "Are the New Smart Switches Actually Reliable?",
+      "title": "How does Samsung Galaxy Watch6 compare now after competitor launch?",
       "angle": "Latency + tap response",
       "audience": "Smart home users",
-      "intent": "review/stability",
+      "intent": "review/compare-now",
       "environment": "smart switches",
       "timing": "ecosystem updates",
-      "goal": "avoid laggy automation",
-      "fingerprint": "fp1:e11de737417070a34bcb2fdcd21f3344fae9104d",
+      "goal": "decide whether Samsung Galaxy Watch6 is a good purchase after competitor launch",
+      "fingerprint": "fp1:5a3e1eba7153c70465b8e948d1faf1493a261350",
       "reviewEntity": {
+        "name": "Samsung Galaxy Watch6",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Samsung Galaxy Watch6",
         "type": "device",
-        "model": "Smart Switches"
+        "category": "wearable"
+      },
+      "decisionType": "compare",
+      "decisionSummary": "Samsung Galaxy Watch6 should be evaluated again because competitor launch may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q1",
+        "contextDate": "2026-09",
+        "changeReason": "competitor launch",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "dr-tr-037",
-      "title": "Which Streaming Box Loads Apps the Fastest?",
+      "title": "Is Apple iPhone 15 still worth buying after performance benchmark shift?",
       "angle": "Cold start speed",
       "audience": "Home entertainment users",
-      "intent": "review/performance",
+      "intent": "review/still-worth",
       "environment": "tv boxes",
       "timing": "update cycle",
-      "goal": "improve TV app responsiveness",
-      "fingerprint": "fp1:a073573f1d6e8a13b158ae8e610a04d84e5c2a70",
+      "goal": "decide whether Apple iPhone 15 is a good purchase after performance benchmark shift",
+      "fingerprint": "fp1:3965c881c08c9df713ec2f80f61006090286ba6d",
       "reviewEntity": {
+        "name": "Apple iPhone 15",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Apple iPhone 15",
         "type": "device",
-        "model": "TV Boxes"
+        "category": "smartphone"
+      },
+      "decisionType": "buy",
+      "decisionSummary": "Apple iPhone 15 should be evaluated again because performance benchmark shift may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q2",
+        "contextDate": "2026-10",
+        "changeReason": "performance benchmark shift",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "dr-tr-038",
-      "title": "Is the New Smart Plug Safe?",
+      "title": "Should you buy or wait on Samsung Galaxy S24 after stock availability change?",
       "angle": "Heat + overload behavior",
       "audience": "Smart home users",
-      "intent": "review/safety",
+      "intent": "review/buy-or-wait",
       "environment": "smart plugs",
       "timing": "launch",
-      "goal": "avoid overheating risks",
-      "fingerprint": "fp1:711fd68973d89ce56c30984a8cb6b314e28e2962",
+      "goal": "decide whether Samsung Galaxy S24 is a good purchase after stock availability change",
+      "fingerprint": "fp1:68c0bdfae15e123c85d75dd505eeaafea43a6223",
       "reviewEntity": {
+        "name": "Samsung Galaxy S24",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Samsung Galaxy S24",
         "type": "device",
-        "model": "Smart Plugs"
+        "category": "smartphone"
+      },
+      "decisionType": "buy-or-wait",
+      "decisionSummary": "Samsung Galaxy S24 should be evaluated again because stock availability change may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q3",
+        "contextDate": "2026-11",
+        "changeReason": "stock availability change",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "dr-tr-039",
-      "title": "Which Electric Toothbrush Is Actually the Most Gentle?",
+      "title": "What risks should users watch in Google Pixel 8 after repairability concern?",
       "angle": "Vibration pattern test",
       "audience": "Households",
-      "intent": "review/ergonomics",
+      "intent": "review/risk-watch",
       "environment": "health devices",
       "timing": "trend",
-      "goal": "reduce gum irritation",
-      "fingerprint": "fp1:e4190e61eeb0f61ea8afbcdcad1b11a1ab438e19",
+      "goal": "decide whether Google Pixel 8 is a good purchase after repairability concern",
+      "fingerprint": "fp1:79423f6bd2b05794b1212affdfbec8f1b0c2a044",
       "reviewEntity": {
+        "name": "Google Pixel 8",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Google Pixel 8",
         "type": "device",
-        "model": "Health Devices"
+        "category": "smartphone"
+      },
+      "decisionType": "watch",
+      "decisionSummary": "Google Pixel 8 should be evaluated again because repairability concern may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q4",
+        "contextDate": "2026-12",
+        "changeReason": "repairability concern",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "dr-tr-040",
-      "title": "Is the New Wireless Mouse Truly Low-Latency?",
+      "title": "What changed in Apple MacBook Air M3 after the 2026-01 new generation release?",
       "angle": "Polling rate + click delay",
       "audience": "Gamers and office workers",
-      "intent": "review/performance",
+      "intent": "review/update",
       "environment": "mice",
       "timing": "update",
-      "goal": "ensure responsive pointer control",
-      "fingerprint": "fp1:f8a82de62de2c7b0116963abdf6d5d3cdfc8f75e",
+      "goal": "decide whether Apple MacBook Air M3 is a good purchase after new generation release",
+      "fingerprint": "fp1:dade802ab91ee312011ea5ad6657ee33c75d4af8",
       "reviewEntity": {
+        "name": "Apple MacBook Air M3",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Apple MacBook Air M3",
         "type": "device",
-        "model": "Mice"
+        "category": "laptop"
+      },
+      "decisionType": "test",
+      "decisionSummary": "Apple MacBook Air M3 should be evaluated again because new generation release may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q1",
+        "contextDate": "2026-01",
+        "changeReason": "new generation release",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "dr-tr-041",
-      "title": "Which Portable SSD Has the Most Stable Speed?",
+      "title": "Should you recheck Samsung Galaxy Book4 after recent changes?",
       "angle": "Thermal throttling + sustained write",
       "audience": "Creators",
-      "intent": "review/performance",
+      "intent": "review/recheck",
       "environment": "portable storage",
       "timing": "benchmark season",
-      "goal": "ensure stable large-file transfers",
-      "fingerprint": "fp1:2c32a07e123688b1dc91228f84ee5ecb094f3843",
+      "goal": "decide whether Samsung Galaxy Book4 is a good purchase after price drop",
+      "fingerprint": "fp1:bf782ba90ef7cf8cc36ad8ddd37ff1cecda8f9e0",
       "reviewEntity": {
+        "name": "Samsung Galaxy Book4",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Samsung Galaxy Book4",
         "type": "device",
-        "model": "Portable Storage"
+        "category": "laptop"
+      },
+      "decisionType": "test",
+      "decisionSummary": "Samsung Galaxy Book4 should be evaluated again because price drop may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q2",
+        "contextDate": "2026-02",
+        "changeReason": "price drop",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "dr-tr-042",
-      "title": "Is the New Smart Lock Reliable Over Bluetooth?",
+      "title": "How does Apple iPad Pro M4 compare now after long-term user feedback?",
       "angle": "Unlock latency + fail behavior",
       "audience": "Homeowners",
-      "intent": "review/security",
+      "intent": "review/compare-now",
       "environment": "smart locks",
       "timing": "launch",
-      "goal": "ensure reliable unlock every time",
-      "fingerprint": "fp1:0ba4dd203e463d4046fe175b3f8f456d765e7ee1",
+      "goal": "decide whether Apple iPad Pro M4 is a good purchase after long-term user feedback",
+      "fingerprint": "fp1:8caffe985847b4f3ea31fca31964170e0ec398df",
       "reviewEntity": {
+        "name": "Apple iPad Pro M4",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Apple iPad Pro M4",
         "type": "device",
-        "model": "Smart Locks"
+        "category": "tablet"
+      },
+      "decisionType": "compare",
+      "decisionSummary": "Apple iPad Pro M4 should be evaluated again because long-term user feedback may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q3",
+        "contextDate": "2026-03",
+        "changeReason": "long-term user feedback",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "dr-tr-043",
-      "title": "Which Robot Mop Cleans Best on Hard Floors?",
+      "title": "Is Samsung Galaxy Tab S9 still worth buying after battery concern?",
       "angle": "Pressure + pattern accuracy",
       "audience": "Households",
-      "intent": "review/cleaning-quality",
+      "intent": "review/still-worth",
       "environment": "robot mops",
       "timing": "trend",
-      "goal": "pick mop with consistent patterns",
-      "fingerprint": "fp1:16870ae238cd5d9a9e36e0200f9948c1e91ea7e9",
+      "goal": "decide whether Samsung Galaxy Tab S9 is a good purchase after battery concern",
+      "fingerprint": "fp1:ff9229e14218cf3fe4c6c82b22a5a86118f06977",
       "reviewEntity": {
+        "name": "Samsung Galaxy Tab S9",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Samsung Galaxy Tab S9",
         "type": "device",
-        "model": "Robot Mops"
+        "category": "tablet"
+      },
+      "decisionType": "buy",
+      "decisionSummary": "Samsung Galaxy Tab S9 should be evaluated again because battery concern may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q4",
+        "contextDate": "2026-04",
+        "changeReason": "battery concern",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "dr-tr-044",
-      "title": "Is the New Smart Air Purifier Worth Upgrading?",
+      "title": "Should you buy or wait on Sony Sony WH-1000XM5 after software support change?",
       "angle": "Sensor accuracy + noise at low speed",
       "audience": "Home users",
-      "intent": "review/performance",
+      "intent": "review/buy-or-wait",
       "environment": "air purifiers",
       "timing": "launch window",
-      "goal": "ensure real clean-air performance",
-      "fingerprint": "fp1:1c01f2305edb1525e4d5f0f37dcd672f19c94aaf",
+      "goal": "decide whether Sony Sony WH-1000XM5 is a good purchase after software support change",
+      "fingerprint": "fp1:c9d64ae77c69140cdadc115ad382fdbe270a6738",
       "reviewEntity": {
+        "name": "Sony Sony WH-1000XM5",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Sony Sony WH-1000XM5",
         "type": "device",
-        "model": "Air Purifiers"
+        "category": "audio"
+      },
+      "decisionType": "buy-or-wait",
+      "decisionSummary": "Sony Sony WH-1000XM5 should be evaluated again because software support change may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q1",
+        "contextDate": "2026-05",
+        "changeReason": "software support change",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "dr-tr-045",
-      "title": "Which Dashcam Handles Night Footage Best?",
+      "title": "What risks should users watch in Apple AirPods Pro 2 after competitor launch?",
       "angle": "Dynamic range + noise",
       "audience": "Drivers",
-      "intent": "review/video-quality",
+      "intent": "review/risk-watch",
       "environment": "dashcams",
       "timing": "update",
-      "goal": "capture clear night evidence",
-      "fingerprint": "fp1:0a31a799125d491d8c53ec6af4d177c0491034d5",
+      "goal": "decide whether Apple AirPods Pro 2 is a good purchase after competitor launch",
+      "fingerprint": "fp1:19abf635e8c2991df69edb03970494a03332c9e5",
       "reviewEntity": {
+        "name": "Apple AirPods Pro 2",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Apple AirPods Pro 2",
         "type": "device",
-        "model": "Dashcams"
+        "category": "audio"
+      },
+      "decisionType": "watch",
+      "decisionSummary": "Apple AirPods Pro 2 should be evaluated again because competitor launch may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q2",
+        "contextDate": "2026-06",
+        "changeReason": "competitor launch",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "dr-tr-046",
-      "title": "Is the New Gaming Controller’s Hall Sensor Worth It?",
+      "title": "What changed in Apple Apple Watch Series 9 after the 2026-07 performance benchmark shift?",
       "angle": "Stick drift resistance",
       "audience": "Gamers",
-      "intent": "review/durability",
+      "intent": "review/update",
       "environment": "controllers",
       "timing": "trend",
-      "goal": "avoid drift-prone controllers",
-      "fingerprint": "fp1:ddfd164b4d578cc5054201619bed14c3bd1c8fdb",
+      "goal": "decide whether Apple Apple Watch Series 9 is a good purchase after performance benchmark shift",
+      "fingerprint": "fp1:89e4cd08bf4b139f81a828c69b7828a478b96367",
       "reviewEntity": {
+        "name": "Apple Apple Watch Series 9",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Apple Apple Watch Series 9",
         "type": "device",
-        "model": "Controllers"
+        "category": "wearable"
+      },
+      "decisionType": "test",
+      "decisionSummary": "Apple Apple Watch Series 9 should be evaluated again because performance benchmark shift may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q3",
+        "contextDate": "2026-07",
+        "changeReason": "performance benchmark shift",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "dr-tr-047",
-      "title": "Which Smart Refrigerator Actually Maintains Temperature Evenly?",
+      "title": "Should you recheck Samsung Galaxy Watch6 after recent changes?",
       "angle": "Sensor consistency + door-open recovery",
       "audience": "Families",
-      "intent": "review/performance",
+      "intent": "review/recheck",
       "environment": "smart appliances",
       "timing": "review cycle",
-      "goal": "preserve food better",
-      "fingerprint": "fp1:b38af21c754ab82b8a56ac255d9184b7a20c4f97",
+      "goal": "decide whether Samsung Galaxy Watch6 is a good purchase after stock availability change",
+      "fingerprint": "fp1:7f192fb436d5be16c06e35cbe2923d1f2445c573",
       "reviewEntity": {
+        "name": "Samsung Galaxy Watch6",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Samsung Galaxy Watch6",
         "type": "device",
-        "model": "Smart Appliances"
+        "category": "wearable"
+      },
+      "decisionType": "test",
+      "decisionSummary": "Samsung Galaxy Watch6 should be evaluated again because stock availability change may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q4",
+        "contextDate": "2026-08",
+        "changeReason": "stock availability change",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "dr-tr-048",
-      "title": "Is the New Smart Oven’s Temperature Sensor Accurate?",
+      "title": "How does Apple iPhone 15 compare now after repairability concern?",
       "angle": "Calibration test",
       "audience": "Home cooks",
-      "intent": "review/accuracy",
+      "intent": "review/compare-now",
       "environment": "smart kitchen",
       "timing": "trend season",
-      "goal": "ensure consistent baking results",
-      "fingerprint": "fp1:304ec0b29c8f0ad920a7eba2747435bc5199eab5",
+      "goal": "decide whether Apple iPhone 15 is a good purchase after repairability concern",
+      "fingerprint": "fp1:ff84e9a2284cceffcd7bcde0b1e84ba331e642af",
       "reviewEntity": {
+        "name": "Apple iPhone 15",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Apple iPhone 15",
         "type": "device",
-        "model": "Smart Kitchen"
+        "category": "smartphone"
+      },
+      "decisionType": "compare",
+      "decisionSummary": "Apple iPhone 15 should be evaluated again because repairability concern may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q1",
+        "contextDate": "2026-09",
+        "changeReason": "repairability concern",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "dr-tr-049",
-      "title": "Which EV Charger Is Safest for Home Use?",
+      "title": "Is Samsung Galaxy S24 still worth buying after new generation release?",
       "angle": "Heat stability + cable durability",
       "audience": "EV owners",
-      "intent": "review/safety",
+      "intent": "review/still-worth",
       "environment": "home chargers",
       "timing": "install season",
-      "goal": "avoid overheating risks",
-      "fingerprint": "fp1:436f764bec86c397db2d6a8a8a259a5d8ad61948",
+      "goal": "decide whether Samsung Galaxy S24 is a good purchase after new generation release",
+      "fingerprint": "fp1:eda3bfd257b141dfc74514f0c6c509a280f6ce70",
       "reviewEntity": {
+        "name": "Samsung Galaxy S24",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Samsung Galaxy S24",
         "type": "device",
-        "model": "Home Chargers"
+        "category": "smartphone"
+      },
+      "decisionType": "buy",
+      "decisionSummary": "Samsung Galaxy S24 should be evaluated again because new generation release may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q2",
+        "contextDate": "2026-10",
+        "changeReason": "new generation release",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "dr-tr-050",
-      "title": "Are the New Noise Meters Accurate Enough for Home Testing?",
+      "title": "Should you buy or wait on Google Pixel 8 after price drop?",
       "angle": "Calibration + sensor range",
       "audience": "Homeowners",
-      "intent": "review/accuracy",
+      "intent": "review/buy-or-wait",
       "environment": "sound tools",
       "timing": "launch",
-      "goal": "measure environmental noise correctly",
-      "fingerprint": "fp1:1e24825a01452d4ca9ba0ea84aac7629be2ddd39",
+      "goal": "decide whether Google Pixel 8 is a good purchase after price drop",
+      "fingerprint": "fp1:4ce424a8e883ecf8fc1e9a582ab48d3abff62f55",
       "reviewEntity": {
+        "name": "Google Pixel 8",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Google Pixel 8",
         "type": "device",
-        "model": "Sound Tools"
+        "category": "smartphone"
+      },
+      "decisionType": "buy-or-wait",
+      "decisionSummary": "Google Pixel 8 should be evaluated again because price drop may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q3",
+        "contextDate": "2026-11",
+        "changeReason": "price drop",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "device-reviews-trend-1772546045335-548416576",
-      "title": "AUTO GENERATED: device-reviews (trend)",
+      "title": "What risks should users watch in Apple MacBook Air M3 after long-term user feedback?",
       "angle": "Auto angle (trend)",
       "audience": "General",
-      "intent": "trend",
+      "intent": "review/risk-watch",
       "priority": 5,
       "createdAt": "2026-03-03T13:54:05.335Z",
       "notes": "Replace with real LLM generation.",
-      "fingerprint": "fp1:90ebb22075dab22d906c5ce3cb563974df30cdd2",
+      "fingerprint": "fp1:c8534ff33ecaf99f7d1973e4ee1532b0e23b06b4",
       "reviewEntity": {
+        "name": "Apple MacBook Air M3",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Apple MacBook Air M3",
         "type": "device",
-        "model": "AUTO GENERATED: device-reviews (trend)"
+        "category": "laptop"
+      },
+      "goal": "decide whether Apple MacBook Air M3 is a good purchase after long-term user feedback",
+      "decisionType": "watch",
+      "decisionSummary": "Apple MacBook Air M3 should be evaluated again because long-term user feedback may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q4",
+        "contextDate": "2026-12",
+        "changeReason": "long-term user feedback",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "device-reviews-trend-1772628475585-645988913",
-      "title": "AUTO GENERATED: device-reviews (trend)",
+      "title": "What changed in Samsung Galaxy Book4 after the 2026-01 battery concern?",
       "angle": "Auto angle (trend)",
       "audience": "General",
-      "intent": "trend",
+      "intent": "review/update",
       "priority": 5,
       "createdAt": "2026-03-04T12:47:55.585Z",
       "notes": "Replace with real LLM generation.",
-      "fingerprint": "fp1:90ebb22075dab22d906c5ce3cb563974df30cdd2",
+      "fingerprint": "fp1:726c435fdd0cbe1d13157be03bec5b4c0f083008",
       "reviewEntity": {
+        "name": "Samsung Galaxy Book4",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Samsung Galaxy Book4",
         "type": "device",
-        "model": "AUTO GENERATED: device-reviews (trend)"
+        "category": "laptop"
+      },
+      "goal": "decide whether Samsung Galaxy Book4 is a good purchase after battery concern",
+      "decisionType": "test",
+      "decisionSummary": "Samsung Galaxy Book4 should be evaluated again because battery concern may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q1",
+        "contextDate": "2026-01",
+        "changeReason": "battery concern",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "device-reviews-trend-1772629567549-773002489",
-      "title": "AUTO GENERATED: device-reviews (trend)",
+      "title": "Should you recheck Apple iPad Pro M4 after recent changes?",
       "angle": "Auto angle (trend)",
       "audience": "General",
-      "intent": "trend",
+      "intent": "review/recheck",
       "priority": 5,
       "createdAt": "2026-03-04T13:06:07.549Z",
       "notes": "Replace with real LLM generation.",
-      "fingerprint": "fp1:90ebb22075dab22d906c5ce3cb563974df30cdd2",
+      "fingerprint": "fp1:d635dab3f55f4a2b03f126e1c53f8e51070b0780",
       "reviewEntity": {
+        "name": "Apple iPad Pro M4",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Apple iPad Pro M4",
         "type": "device",
-        "model": "AUTO GENERATED: device-reviews (trend)"
+        "category": "tablet"
+      },
+      "goal": "decide whether Apple iPad Pro M4 is a good purchase after software support change",
+      "decisionType": "test",
+      "decisionSummary": "Apple iPad Pro M4 should be evaluated again because software support change may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q2",
+        "contextDate": "2026-02",
+        "changeReason": "software support change",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "device-reviews-trend-1772630313674-444955",
-      "title": "AUTO GENERATED: device-reviews (trend) #1772630313674-444955",
+      "title": "How does Samsung Galaxy Tab S9 compare now after competitor launch?",
       "angle": "Auto angle (trend) var=1772630313674-444955",
       "audience": "General",
-      "intent": "trend",
+      "intent": "review/compare-now",
       "priority": 5,
       "createdAt": "2026-03-04T13:18:33.674Z",
       "notes": "Replace with real LLM generation.",
-      "fingerprint": "fp1:e722e297fbb09f1f7ae8ebed2c95f8eaef6e672a",
+      "fingerprint": "fp1:0a02d4417ebb564a4d550652dd20a6e88da8d665",
       "reviewEntity": {
+        "name": "Samsung Galaxy Tab S9",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Samsung Galaxy Tab S9",
         "type": "device",
-        "model": "AUTO GENERATED: device-reviews (trend) #1772630313674-444955"
+        "category": "tablet"
+      },
+      "goal": "decide whether Samsung Galaxy Tab S9 is a good purchase after competitor launch",
+      "decisionType": "compare",
+      "decisionSummary": "Samsung Galaxy Tab S9 should be evaluated again because competitor launch may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q3",
+        "contextDate": "2026-03",
+        "changeReason": "competitor launch",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "device-reviews-trend-1772630313674-20129397",
-      "title": "AUTO GENERATED: device-reviews (trend) #1772630313674-20129397",
+      "title": "Is Sony Sony WH-1000XM5 still worth buying after performance benchmark shift?",
       "angle": "Auto angle (trend) var=1772630313674-20129397",
       "audience": "General",
-      "intent": "trend",
+      "intent": "review/still-worth",
       "priority": 5,
       "createdAt": "2026-03-04T13:18:33.674Z",
       "notes": "Replace with real LLM generation.",
-      "fingerprint": "fp1:c36dc8216117202f7fdb91eadb2a1466b908b44c",
+      "fingerprint": "fp1:8fb362ad2ebdcb6d971358b26301a5a793cfef7e",
       "reviewEntity": {
+        "name": "Sony Sony WH-1000XM5",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Sony Sony WH-1000XM5",
         "type": "device",
-        "model": "AUTO GENERATED: device-reviews (trend) #1772630313674-20129397"
+        "category": "audio"
+      },
+      "goal": "decide whether Sony Sony WH-1000XM5 is a good purchase after performance benchmark shift",
+      "decisionType": "buy",
+      "decisionSummary": "Sony Sony WH-1000XM5 should be evaluated again because performance benchmark shift may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q4",
+        "contextDate": "2026-04",
+        "changeReason": "performance benchmark shift",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "device-reviews-trend-1772630313674-500582637",
-      "title": "AUTO GENERATED: device-reviews (trend) #1772630313674-500582637",
+      "title": "Should you buy or wait on Apple AirPods Pro 2 after stock availability change?",
       "angle": "Auto angle (trend) var=1772630313674-500582637",
       "audience": "General",
-      "intent": "trend",
+      "intent": "review/buy-or-wait",
       "priority": 5,
       "createdAt": "2026-03-04T13:18:33.674Z",
       "notes": "Replace with real LLM generation.",
-      "fingerprint": "fp1:48589cadff1c421366bc44b27ffa57db033335d9",
+      "fingerprint": "fp1:ac0f828114f444fc6642d7cfa6db63db934542ff",
       "reviewEntity": {
+        "name": "Apple AirPods Pro 2",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Apple AirPods Pro 2",
         "type": "device",
-        "model": "AUTO GENERATED: device-reviews (trend) #1772630313674-500582637"
+        "category": "audio"
+      },
+      "goal": "decide whether Apple AirPods Pro 2 is a good purchase after stock availability change",
+      "decisionType": "buy-or-wait",
+      "decisionSummary": "Apple AirPods Pro 2 should be evaluated again because stock availability change may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q1",
+        "contextDate": "2026-05",
+        "changeReason": "stock availability change",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "device-reviews-trend-1772630313674-671868703",
-      "title": "AUTO GENERATED: device-reviews (trend) #1772630313674-671868703",
+      "title": "What risks should users watch in Apple Apple Watch Series 9 after repairability concern?",
       "angle": "Auto angle (trend) var=1772630313674-671868703",
       "audience": "General",
-      "intent": "trend",
+      "intent": "review/risk-watch",
       "priority": 5,
       "createdAt": "2026-03-04T13:18:33.674Z",
       "notes": "Replace with real LLM generation.",
-      "fingerprint": "fp1:e7e189bd41cab1ceb8e25fe70e1f226d65d53905",
+      "fingerprint": "fp1:b33a741844603436518b89165685a5e8279ee3b7",
       "reviewEntity": {
+        "name": "Apple Apple Watch Series 9",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Apple Apple Watch Series 9",
         "type": "device",
-        "model": "AUTO GENERATED: device-reviews (trend) #1772630313674-671868703"
+        "category": "wearable"
+      },
+      "goal": "decide whether Apple Apple Watch Series 9 is a good purchase after repairability concern",
+      "decisionType": "watch",
+      "decisionSummary": "Apple Apple Watch Series 9 should be evaluated again because repairability concern may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q2",
+        "contextDate": "2026-06",
+        "changeReason": "repairability concern",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "device-reviews-trend-1772630313674-525078139",
-      "title": "AUTO GENERATED: device-reviews (trend) #1772630313674-525078139",
+      "title": "What changed in Samsung Galaxy Watch6 after the 2026-07 new generation release?",
       "angle": "Auto angle (trend) var=1772630313674-525078139",
       "audience": "General",
-      "intent": "trend",
+      "intent": "review/update",
       "priority": 5,
       "createdAt": "2026-03-04T13:18:33.674Z",
       "notes": "Replace with real LLM generation.",
-      "fingerprint": "fp1:fbdc0ccc16f0987d1b3500b8ad5c9502629d2247",
+      "fingerprint": "fp1:d3a44453a412c3e89f4229025a0274978dd0b272",
       "reviewEntity": {
+        "name": "Samsung Galaxy Watch6",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Samsung Galaxy Watch6",
         "type": "device",
-        "model": "AUTO GENERATED: device-reviews (trend) #1772630313674-525078139"
+        "category": "wearable"
+      },
+      "goal": "decide whether Samsung Galaxy Watch6 is a good purchase after new generation release",
+      "decisionType": "test",
+      "decisionSummary": "Samsung Galaxy Watch6 should be evaluated again because new generation release may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q3",
+        "contextDate": "2026-07",
+        "changeReason": "new generation release",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "device-reviews-trend-1772630313674-681960047",
-      "title": "AUTO GENERATED: device-reviews (trend) #1772630313674-681960047",
+      "title": "Should you recheck Apple iPhone 15 after recent changes?",
       "angle": "Auto angle (trend) var=1772630313674-681960047",
       "audience": "General",
-      "intent": "trend",
+      "intent": "review/recheck",
       "priority": 5,
       "createdAt": "2026-03-04T13:18:33.674Z",
       "notes": "Replace with real LLM generation.",
-      "fingerprint": "fp1:6da1b67b665499cc50b6ea8c463fd2c87dbe9562",
+      "fingerprint": "fp1:4689ca4ef2c4ac27e3bf5fd3fbb7c86a293a9d33",
       "reviewEntity": {
+        "name": "Apple iPhone 15",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Apple iPhone 15",
         "type": "device",
-        "model": "AUTO GENERATED: device-reviews (trend) #1772630313674-681960047"
+        "category": "smartphone"
+      },
+      "goal": "decide whether Apple iPhone 15 is a good purchase after price drop",
+      "decisionType": "test",
+      "decisionSummary": "Apple iPhone 15 should be evaluated again because price drop may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q4",
+        "contextDate": "2026-08",
+        "changeReason": "price drop",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
     },
     {
       "id": "device-reviews-trend-1772630313674-387018358",
-      "title": "AUTO GENERATED: device-reviews (trend) #1772630313674-387018358",
+      "title": "How does Samsung Galaxy S24 compare now after long-term user feedback?",
       "angle": "Auto angle (trend) var=1772630313674-387018358",
       "audience": "General",
-      "intent": "trend",
+      "intent": "review/compare-now",
       "priority": 5,
       "createdAt": "2026-03-04T13:18:33.674Z",
       "notes": "Replace with real LLM generation.",
-      "fingerprint": "fp1:7f62d35bd129329434cb045c32ee189109333cb2",
+      "fingerprint": "fp1:3311c09859f035ceec755ac8251ab370c6777edb",
       "reviewEntity": {
+        "name": "Samsung Galaxy S24",
+        "type": "device"
+      },
+      "entity": {
+        "name": "Samsung Galaxy S24",
         "type": "device",
-        "model": "AUTO GENERATED: device-reviews (trend) #1772630313674-387018358"
+        "category": "smartphone"
+      },
+      "goal": "decide whether Samsung Galaxy S24 is a good purchase after long-term user feedback",
+      "decisionType": "compare",
+      "decisionSummary": "Samsung Galaxy S24 should be evaluated again because long-term user feedback may change buying decision.",
+      "trendContext": {
+        "timing": "2026-Q1",
+        "contextDate": "2026-09",
+        "changeReason": "long-term user feedback",
+        "historicalValue": true,
+        "currentUse": "buy decision",
+        "laterUse": "historical record"
+      },
+      "selectionCriteria": {
+        "timeStamped": true,
+        "historicalValue": true,
+        "deviceTrend": true,
+        "entityDistributed": true
       }
+    },
+    {
+      "schemaVersion": "trend-seeds.v1",
+      "label": "device-reviews",
+      "mode": "trend",
+      "entity": {
+        "name": "Samsung Hologram Keyboard",
+        "brand": "Samsung",
+        "type": "device",
+        "category": "emerging-device",
+        "deviceClass": "gesture-input-device",
+        "interactionModel": "holographic-interaction",
+        "status": "candidate",
+        "confidence": "low"
+      },
+      "reviewEntity": {
+        "name": "Samsung Hologram Keyboard",
+        "brand": "Samsung",
+        "type": "device",
+        "category": "emerging-device",
+        "deviceClass": "gesture-input-device",
+        "interactionModel": "holographic-interaction",
+        "status": "candidate",
+        "confidence": "low"
+      },
+      "intent": "review/update",
+      "title": "What changed in Samsung Hologram Keyboard after new device category emergence?",
+      "angle": "Explain what changed around Samsung Hologram Keyboard and why the new device category emergence matters for current users.",
+      "audience": "users considering wearable input devices for mobile or portable workflows",
+      "goal": "record what changed in Samsung Hologram Keyboard and explain whether new device category emergence changes the recommendation",
+      "decisionType": "test",
+      "decisionSummary": "Samsung Hologram Keyboard should be re-evaluated because new device category emergence may affect current usage decisions.",
+      "keyPoints": [
+        "Wrist-worn holographic keyboard device. input-device. holographic-device. holographic-input-device. holographic-interaction. finger-tracking. holographic-visual. unknown. wearable. projection. prototype-commercial. medium. bluetooth-linked. cross-platform. hologram projection. finger tracking. mobile typing",
+        "keyboard",
+        "hologram",
+        "wearable",
+        "input-device",
+        "emerging category: holographic-input-device",
+        "interaction model: holographic-interaction",
+        "input method: finger-tracking",
+        "requires projection or holographic output",
+        "ecosystem dependency: bluetooth-linked",
+        "decision trigger: new device category emergence",
+        "evidence: hologram projection"
+      ],
+      "trendContext": {
+        "contextDate": "2026-05",
+        "changeReason": "new device category emergence",
+        "timing": "2026-Q1",
+        "historicalValue": true,
+        "sourceType": "entity-candidate-bridge",
+        "candidateReady": true,
+        "evidenceUnknowns": [
+          "price",
+          "battery life",
+          "typing accuracy"
+        ]
+      },
+      "selectionCriteria": {
+        "trend": true,
+        "entityDistributed": true,
+        "entityCandidateValidated": true,
+        "bridgeOutputContract": true,
+        "trustReady": true,
+        "sourceTraceRequired": true,
+        "hasAngle": true,
+        "hasAudience": true,
+        "hasEvidence": true,
+        "hasUseCase": true
+      },
+      "selectionMeta": {
+        "source": "trend-seed-builder",
+        "inputSource": "entity-candidates.json",
+        "bridgeSchemaVersion": "entity-candidates.v1",
+        "rawFingerprint": "fp1:92151bba377c03e082fdf5dd3c93b2ebc114f128",
+        "rawConceptKey": "samsung|samsung-hologram-keyboard",
+        "rawSimilarityGroup": "holographic-input-device",
+        "sourceDomain": "sitea.com",
+        "trustConfidence": "high",
+        "trustScore": 18,
+        "validationStatus": "pass",
+        "validationReason": "ready for seed handoff",
+        "createdAt": "2026-05-09T08:17:23.191Z",
+        "injectedAt": "2026-05-09T09:27:13.965Z",
+        "injectedBy": "trend-seed-injector"
+      },
+      "seedMeta": {
+        "sourceLayer": "entity-candidate-bridge",
+        "candidateType": "trendReadyEntityCandidate",
+        "candidateStatus": "ready",
+        "label": "device-reviews",
+        "mode": "trend",
+        "classificationHints": {
+          "brand": "Samsung",
+          "productTypeWords": [
+            "keyboard",
+            "hologram",
+            "wearable"
+          ],
+          "formFactor": "wrist-worn",
+          "interactionModel": "holographic input",
+          "inputMethod": "finger tracking",
+          "connectivity": "bluetooth",
+          "categoryHints": {
+            "primaryCategory": "input-device",
+            "secondaryCategory": "holographic-device",
+            "emergingCategory": "holographic-input-device"
+          },
+          "interactionHints": {
+            "interactionModel": "holographic-interaction",
+            "inputMethod": "finger-tracking",
+            "feedbackMethod": "holographic-visual",
+            "controlSurface": "unknown"
+          },
+          "hardwareHints": {
+            "wearable": true,
+            "standalone": true,
+            "requiresPhone": false,
+            "requiresProjection": true,
+            "batteryPowered": true
+          },
+          "maturityHints": {
+            "marketStage": "prototype-commercial",
+            "evidenceLevel": "medium",
+            "adoptionRisk": "medium",
+            "productionConfidence": "medium"
+          },
+          "ecosystemHints": {
+            "companionDevices": [],
+            "dependencyType": "bluetooth-linked",
+            "platformBinding": "cross-platform"
+          }
+        },
+        "evidence": {
+          "keyFacts": [
+            "hologram projection",
+            "finger tracking"
+          ],
+          "useCases": [
+            "mobile typing"
+          ],
+          "unknowns": [
+            "price",
+            "battery life",
+            "typing accuracy"
+          ]
+        },
+        "trust": {
+          "confidence": "high",
+          "trustScore": 18,
+          "scoreBreakdown": {
+            "accumulationScore": 7,
+            "evidenceScore": 3,
+            "classificationScore": 5,
+            "maturityScore": 3
+          },
+          "riskFlags": [
+            "new-category-claim",
+            "evidence-unknowns"
+          ],
+          "writeReady": true,
+          "needsMoreEvidence": false
+        }
+      },
+      "fingerprint": "fp1:fb4af3fbed3b61879cf59874f3a11bd443dbc87f",
+      "id": "trend-auto-samsung-samsung-hologram-keyboard-fb4af3fbed",
+      "source": "auto-trend-signal",
+      "priority": "normal",
+      "createdAt": "2026-05-09T09:27:13.965Z",
+      "updatedAt": "2026-05-09T09:27:13.965Z"
     }
-  ]
+  ],
+  "updatedAt": "2026-05-09T13:07:08.375Z",
+  "schema": "AOIA",
+  "mode": "trend"
 }

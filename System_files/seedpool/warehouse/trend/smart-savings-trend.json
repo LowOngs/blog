@@ -5,6 +5,105 @@
   },
   "trend": [
     {
+      "id": "ss-tr-020",
+      "title": "Which AI Writing Tools Are Worth Paying for in 2025?",
+      "angle": "AI writing apps exploded; users need clarity.",
+      "audience": "Students, creators, marketers",
+      "intent": "saving",
+      "priority": 1,
+      "fingerprint": "fp1:bd4a8bdf89c222c450fee8106fa92a2d118e4b68"
+    },
+    {
+      "id": "ss-tr-021",
+      "title": "How to Save Money by Using Multi-Device Bundles",
+      "angle": "Apple One, Microsoft 365, and Google bundles gained traction.",
+      "audience": "Families and power users",
+      "intent": "saving",
+      "priority": 1,
+      "fingerprint": "fp1:6045df8fa7577dd830d78128f292fcc143ea9fae"
+    },
+    {
+      "id": "ss-tr-022",
+      "title": "2025 Cloud Gaming Costs: Best Value Options",
+      "angle": "Cloud gaming pricing stabilized in 2025.",
+      "audience": "Gamers",
+      "intent": "saving",
+      "priority": 1,
+      "fingerprint": "fp1:245bc5834e4680770320393c06cc10d12598d51a"
+    },
+    {
+      "id": "ss-tr-023",
+      "title": "How to Optimize Credit Card Rewards for Digital Purchases",
+      "angle": "Digital-first spending patterns changed reward systems.",
+      "audience": "Online shoppers",
+      "intent": "saving",
+      "priority": 1,
+      "fingerprint": "fp1:950786e8e32d471af8cdb90584f61a8f6282e53c"
+    },
+    {
+      "id": "ss-tr-024",
+      "title": "How to Reduce Mobile Gaming Costs with Smart Budgeting",
+      "angle": "In-app purchase spending became a top AI query.",
+      "audience": "Mobile gamers",
+      "intent": "saving",
+      "priority": 1,
+      "fingerprint": "fp1:d4c50b16750879fe6c3d2e9a96e10ddb9b018332"
+    },
+    {
+      "id": "ss-tr-025",
+      "title": "How to Avoid 2025 Hidden Fees in Travel Apps",
+      "angle": "Travel platform fees increased quietly this year.",
+      "audience": "Travelers",
+      "intent": "saving",
+      "priority": 1,
+      "fingerprint": "fp1:fc46bde8bd08a53d497048c5b84d0e1bc6a087e3"
+    },
+    {
+      "id": "ss-tr-026",
+      "title": "Best 2025 Bundles for Cloud + AI Tools",
+      "angle": "Combining AI + cloud stacks saves significantly.",
+      "audience": "Remote workers, creators",
+      "intent": "saving",
+      "priority": 1,
+      "fingerprint": "fp1:6e85e11c2eda8cffe36f8fccf12c85bb48ab360e"
+    },
+    {
+      "id": "ss-tr-027",
+      "title": "How to Use ChatGPT/Gemini/Claude to Detect Overpriced Purchases",
+      "angle": "Price-check queries surged in 2025.",
+      "audience": "General consumers",
+      "intent": "saving",
+      "priority": 1,
+      "fingerprint": "fp1:f7475d2a402dfa4ae74b381b4ff021c48b2fe913"
+    },
+    {
+      "id": "ss-tr-028",
+      "title": "How to Optimize Smart Home Energy Costs",
+      "angle": "Energy-saving smart devices exploded in adoption.",
+      "audience": "Smart home users",
+      "intent": "saving",
+      "priority": 1,
+      "fingerprint": "fp1:c25d865ef548e79b240fb8157ff9da560eea0e7f"
+    },
+    {
+      "id": "ss-tr-029",
+      "title": "How to Save on Subscription Software After Global Price Increases",
+      "angle": "Major SaaS vendors raised prices in 2025.",
+      "audience": "Freelancers, workers, creators",
+      "intent": "saving",
+      "priority": 1,
+      "fingerprint": "fp1:3b6eb4088e187e1a1e60a779ea9be9610b5e715b"
+    },
+    {
+      "id": "ss-tr-030",
+      "title": "2025 Best Cross-Platform Password Manager Deals",
+      "angle": "Password managers now offer region-based discounts.",
+      "audience": "Security-conscious users",
+      "intent": "saving",
+      "priority": 1,
+      "fingerprint": "fp1:a56fdc8515dbb64d6a3c0096d03befd740a2fa54"
+    },
+    {
       "id": "ss-tr-031",
       "title": "How to Pick the Cheapest Global eSIM Plan for Travel",
       "angle": "Travel eSIM usage surged worldwide.",

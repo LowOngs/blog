@@ -5,6 +5,253 @@
   },
   "trend": [
     {
+      "id": "ht-tr-037",
+      "title": "How to fix laptop battery not charging issues",
+      "angle": "Battery failures spike during seasonal temperature changes.",
+      "audience": "Laptop owners",
+      "intent": "howto",
+      "priority": 1,
+      "fingerprint": "fp1:15b3675e5f879400ee33c90d3550740eef3d0221"
+    },
+    {
+      "id": "ht-tr-038",
+      "title": "How to declutter Windows startup processes safely",
+      "angle": "Performance optimization is a top AI category.",
+      "audience": "PC beginners",
+      "intent": "howto",
+      "priority": 1,
+      "fingerprint": "fp1:c00129a0c9a4c2203bb3cbe32af682fb374b6842"
+    },
+    {
+      "id": "ht-tr-039",
+      "title": "How to set up AI study workflows for exams and research",
+      "angle": "Students rely on AI more than ever.",
+      "audience": "High school and university students",
+      "intent": "howto",
+      "priority": 1,
+      "fingerprint": "fp1:7dbe29bbe5f72da4bd5b9449bfc943363fcd8929"
+    },
+    {
+      "id": "ht-tr-040",
+      "title": "How to recover corrupted USB drives",
+      "angle": "USB corruption issues still produce millions of queries.",
+      "audience": "Students and office workers",
+      "intent": "howto",
+      "priority": 1,
+      "fingerprint": "fp1:3348821e3c5407bb66c27485a4cb398c25bd567c"
+    },
+    {
+      "id": "ht-tr-041",
+      "title": "How to set up multi-cloud sync between iCloud, Google Drive, and Dropbox",
+      "angle": "Hybrid cloud workflows increase each year.",
+      "audience": "Productivity power-users",
+      "intent": "howto",
+      "priority": 1,
+      "fingerprint": "fp1:982537b53d8c806152b11407fcb188316e6bf3f4"
+    },
+    {
+      "id": "ht-tr-042",
+      "title": "How to troubleshoot Apple ID payment failures",
+      "angle": "Payment issues spike during subscription renewals.",
+      "audience": "iPhone/Mac users",
+      "intent": "howto",
+      "priority": 1,
+      "fingerprint": "fp1:90a4ca743db6f14b640602b98ebbc8592b022843"
+    },
+    {
+      "id": "ht-tr-043",
+      "title": "How to fix Windows update failures safely",
+      "angle": "Update-related errors form a major troubleshooting category.",
+      "audience": "Windows users",
+      "intent": "howto",
+      "priority": 1,
+      "fingerprint": "fp1:fb9d9732d23f6c9edd0400af086ed75c6b95512b"
+    },
+    {
+      "id": "ht-tr-044",
+      "title": "How to configure privacy settings across major apps (TikTok/Instagram/Meta)",
+      "angle": "Privacy awareness is rising globally.",
+      "audience": "Teenagers and adults",
+      "intent": "howto",
+      "priority": 1,
+      "fingerprint": "fp1:2254bb1e82b4365bfa1ea1c49a6805b0993fd66f"
+    },
+    {
+      "id": "ht-tr-045",
+      "title": "How to fix printer not connecting (Wi-Fi/LAN/USB)",
+      "angle": "Printer troubleshooting remains evergreen.",
+      "audience": "Home and office users",
+      "intent": "howto",
+      "priority": 1,
+      "fingerprint": "fp1:3726738d735322e390b3e495b59e79b3809c46d9"
+    },
+    {
+      "id": "ht-tr-046",
+      "title": "How to perform a clean uninstall of any program on Windows/macOS",
+      "angle": "App removal issues directly impact performance.",
+      "audience": "General users",
+      "intent": "howto",
+      "priority": 1,
+      "fingerprint": "fp1:d7d38947191fec5382cf5f27fdd803d31203af78"
+    },
+    {
+      "id": "ht-tr-047",
+      "title": "How to fix YouTube not loading issues (2025 network guide)",
+      "angle": "Stream interruptions remain a high-frequency problem.",
+      "audience": "General web users",
+      "intent": "howto",
+      "priority": 1,
+      "fingerprint": "fp1:aca587fc6aefabe14b6459c9cba7fbd042ceeabe"
+    },
+    {
+      "id": "ht-tr-048",
+      "title": "How to use AI to organize your photo library automatically",
+      "angle": "Photo clutter is a major cross-platform issue.",
+      "audience": "All smartphone users",
+      "intent": "howto",
+      "priority": 1,
+      "fingerprint": "fp1:566d7f8f9458431c4ee4bbce9158db3d32939d43"
+    },
+    {
+      "id": "ht-tr-049",
+      "title": "How to fix Windows or Mac audio not working",
+      "angle": "Audio failures are one of the oldest recurring tech issues.",
+      "audience": "PC and Mac owners",
+      "intent": "howto",
+      "priority": 1,
+      "fingerprint": "fp1:2c84ccb6904f29a928ef6251ca3d3959283f31e2"
+    },
+    {
+      "id": "ht-tr-050",
+      "title": "How to configure AI-based time blocking for your week",
+      "angle": "AI-driven calendar structuring is a rising trend.",
+      "audience": "Students and productivity enthusiasts",
+      "intent": "howto",
+      "priority": 1,
+      "fingerprint": "fp1:70552bdd2b9a006316d363ff3ef153bd919c0422"
+    },
+    {
+      "id": "how-to-playbooks-trend-1772546045709-638765590",
+      "title": "AUTO GENERATED: how-to-playbooks (trend)",
+      "angle": "Auto angle (trend)",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-03T13:54:05.709Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:f97ef31fd4df7c5583fa9cf305dd23324e19ac6d"
+    },
+    {
+      "id": "how-to-playbooks-trend-1772628475971-223292269",
+      "title": "AUTO GENERATED: how-to-playbooks (trend)",
+      "angle": "Auto angle (trend)",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T12:47:55.971Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:f97ef31fd4df7c5583fa9cf305dd23324e19ac6d"
+    },
+    {
+      "id": "how-to-playbooks-trend-1772629568008-967416794",
+      "title": "AUTO GENERATED: how-to-playbooks (trend)",
+      "angle": "Auto angle (trend)",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:06:08.008Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:f97ef31fd4df7c5583fa9cf305dd23324e19ac6d"
+    },
+    {
+      "id": "how-to-playbooks-trend-1772630313744-208172881",
+      "title": "AUTO GENERATED: how-to-playbooks (trend) #1772630313744-208172881",
+      "angle": "Auto angle (trend) var=1772630313744-208172881",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.744Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:b1fc0801d055fb2a115353ff42d15cd0b97b9979"
+    },
+    {
+      "id": "how-to-playbooks-trend-1772630313744-859685923",
+      "title": "AUTO GENERATED: how-to-playbooks (trend) #1772630313744-859685923",
+      "angle": "Auto angle (trend) var=1772630313744-859685923",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.744Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:776d5705fd105b003730e8ead2a7174d9f6ad566"
+    },
+    {
+      "id": "how-to-playbooks-trend-1772630313744-668340952",
+      "title": "AUTO GENERATED: how-to-playbooks (trend) #1772630313744-668340952",
+      "angle": "Auto angle (trend) var=1772630313744-668340952",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.744Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:942ed7037ecb395598c458f2e6992d75554bfcd6"
+    },
+    {
+      "id": "how-to-playbooks-trend-1772630313744-980605429",
+      "title": "AUTO GENERATED: how-to-playbooks (trend) #1772630313744-980605429",
+      "angle": "Auto angle (trend) var=1772630313744-980605429",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.744Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:f52d2255755af4a33e5c93b189f084bc29958bb7"
+    },
+    {
+      "id": "how-to-playbooks-trend-1772630313744-199602530",
+      "title": "AUTO GENERATED: how-to-playbooks (trend) #1772630313744-199602530",
+      "angle": "Auto angle (trend) var=1772630313744-199602530",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.744Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:dc5a1b84dae726056228341f92703d95ac190e1c"
+    },
+    {
+      "id": "how-to-playbooks-trend-1772630313744-565428775",
+      "title": "AUTO GENERATED: how-to-playbooks (trend) #1772630313744-565428775",
+      "angle": "Auto angle (trend) var=1772630313744-565428775",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.744Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:10a8d044b2fb4bae0498af8904614c5ee00d196e"
+    },
+    {
+      "id": "how-to-playbooks-trend-1772630313744-435459232",
+      "title": "AUTO GENERATED: how-to-playbooks (trend) #1772630313744-435459232",
+      "angle": "Auto angle (trend) var=1772630313744-435459232",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.744Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:ac377865926aef94ddb6de941ecfe6d5ed2bde40"
+    },
+    {
+      "id": "how-to-playbooks-trend-1772630313744-48091167",
+      "title": "AUTO GENERATED: how-to-playbooks (trend) #1772630313744-48091167",
+      "angle": "Auto angle (trend) var=1772630313744-48091167",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.744Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:06368582ea3c468ac4e1392a98c392db2357749c"
+    },
+    {
       "id": "how-to-playbooks-trend-1772630313744-822986089",
       "title": "AUTO GENERATED: how-to-playbooks (trend) #1772630313744-822986089",
       "angle": "Auto angle (trend) var=1772630313744-822986089",

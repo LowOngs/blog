@@ -5,409 +5,2801 @@
   },
   "trend": [
     {
-      "id": "ar-tr-024",
-      "title": "Which Music App’s Recommendation AI Improved the Most This Year?",
-      "angle": "Playlist personalization test",
-      "audience": "Music streamers",
-      "intent": "review/personalization",
-      "environment": "music apps",
-      "timing": "annual update",
-      "goal": "pick app with accurate taste prediction",
-      "reviewEntity": {
-        "type": "app",
-        "appName": "Music Recommendation App",
-        "platform": "android"
-      }
-    },
-    {
       "id": "ar-tr-025",
-      "title": "The New File Manager App: Faster or Just Prettier?",
-      "angle": "Search index speed + folder navigation",
+      "title": "What changed in Notion after the 2026-01 recent feature update?",
+      "angle": "Review Notion as a time-stamped update record after the 2026-01 recent feature update.",
       "audience": "Productivity users",
-      "intent": "review/performance",
+      "intent": "review/update",
       "environment": "file managers",
       "timing": "trend surge",
-      "goal": "verify real usability improvements",
+      "goal": "record what changed in Notion and how it affects current users",
       "reviewEntity": {
         "type": "app",
         "appName": "File Manager App",
-        "platform": "android"
-      }
-    },
-    {
-      "id": "ar-tr-026",
-      "title": "Which Podcast App Has the Best Playback AI?",
-      "angle": "Smart speed accuracy + noise removal",
-      "audience": "Podcast listeners",
-      "intent": "review/quality-test",
-      "environment": "podcast apps",
-      "timing": "feature release",
-      "goal": "improve listening efficiency",
-      "reviewEntity": {
+        "platform": "android",
+        "name": "Notion"
+      },
+      "entity": {
+        "name": "Notion",
         "type": "app",
-        "appName": "Podcast App",
-        "platform": "android"
-      }
-    },
-    {
-      "id": "ar-tr-027",
-      "title": "Is the New Focus Timer App Good Enough to Replace Pomodoro?",
-      "angle": "AI session planning",
-      "audience": "Productivity seekers",
-      "intent": "review/effectiveness",
-      "environment": "focus apps",
-      "timing": "early adoption",
-      "goal": "boost session effectiveness",
-      "reviewEntity": {
-        "type": "app",
-        "appName": "AI Focus Timer App",
-        "platform": "android"
-      }
-    },
-    {
-      "id": "ar-tr-028",
-      "title": "Which AI Voice Recorder App Transcribes Most Accurately?",
-      "angle": "Accent handling + punctuation accuracy",
-      "audience": "Students and professionals",
-      "intent": "review/accuracy-test",
-      "environment": "recording apps",
-      "timing": "update",
-      "goal": "pick best transcription engine",
-      "reviewEntity": {
-        "type": "app",
-        "appName": "AI Voice Recorder App",
-        "platform": "android"
-      }
-    },
-    {
-      "id": "ar-tr-029",
-      "title": "The Latest Mapping App: Is It Better Than Your Default?",
-      "angle": "Route accuracy + traffic predictions",
-      "audience": "Drivers and travelers",
-      "intent": "review/comparison",
-      "environment": "navigation apps",
-      "timing": "peak usage",
-      "goal": "determine if switching adds value",
-      "reviewEntity": {
-        "type": "app",
-        "appName": "Mapping App",
-        "platform": "android"
-      }
-    },
-    {
-      "id": "ar-tr-030",
-      "title": "Is the New Browser App Actually Faster?",
-      "angle": "Tab handling + memory usage",
-      "audience": "General users",
-      "intent": "review/performance-test",
-      "environment": "browsers",
-      "timing": "launch",
-      "goal": "confirm real speed gains",
-      "reviewEntity": {
-        "type": "app",
-        "appName": "Browser App",
-        "platform": "android"
-      }
-    },
-    {
-      "id": "ar-tr-031",
-      "title": "Which AI Math Solver App Explains Steps Best?",
-      "angle": "Reasoning clarity",
-      "audience": "Students",
-      "intent": "review/explanation-quality",
-      "environment": "math apps",
-      "timing": "exams cycle",
-      "goal": "choose app with strongest reasoning chain",
-      "reviewEntity": {
-        "type": "app",
-        "appName": "AI Math Solver App",
-        "platform": "android"
-      }
-    },
-    {
-      "id": "ar-tr-032",
-      "title": "The New Smart Dialer App—Does It Reduce Spam Calls?",
-      "angle": "Filter accuracy",
-      "audience": "Mobile users",
-      "intent": "review/effectiveness",
-      "environment": "phone apps",
-      "timing": "launch",
-      "goal": "minimize spam call interruptions",
-      "reviewEntity": {
-        "type": "app",
-        "appName": "Smart Dialer App",
-        "platform": "android"
-      }
-    },
-    {
-      "id": "ar-tr-033",
-      "title": "Which Cloud Storage App Syncs the Fastest?",
-      "angle": "File consistency + conflict handling",
-      "audience": "Professionals",
-      "intent": "review/performance",
-      "environment": "cloud apps",
-      "timing": "update",
-      "goal": "improve sync reliability",
-      "reviewEntity": {
-        "type": "app",
-        "appName": "Cloud Storage App",
-        "platform": "android"
-      }
-    },
-    {
-      "id": "ar-tr-034",
-      "title": "Is the New Fitness Tracker App Accurate for Steps and Calories?",
-      "angle": "Sensor calibration check",
-      "audience": "Health-conscious users",
-      "intent": "review/accuracy",
-      "environment": "fitness apps",
-      "timing": "trend",
-      "goal": "determine true tracking precision",
-      "reviewEntity": {
-        "type": "app",
-        "appName": "Fitness Tracker App",
-        "platform": "android"
-      }
-    },
-    {
-      "id": "ar-tr-035",
-      "title": "Which Booking App Gives the Best Last-Minute Deals?",
-      "angle": "Price change behavior",
-      "audience": "Travelers",
-      "intent": "review/value",
-      "environment": "booking apps",
-      "timing": "seasonal",
-      "goal": "maximize travel discounts",
-      "reviewEntity": {
-        "type": "app",
-        "appName": "Booking App",
-        "platform": "android"
-      }
+        "category": "productivity",
+        "platform": [
+          "web",
+          "ios",
+          "android"
+        ]
+      },
+      "keyPoints": [
+        "what changed: recent feature update",
+        "who is affected by the change",
+        "whether the change alters the previous recommendation"
+      ],
+      "decisionType": "test",
+      "decisionSummary": "Notion should be re-evaluated because recent feature update may change the practical recommendation.",
+      "trendContext": {
+        "timing": "2026-Q1",
+        "contextDate": "2026-01",
+        "changeReason": "recent feature update",
+        "marketSignal": "recent feature update created a current decision point for productivity users",
+        "decisionContext": "Notion needs a time-stamped review because recent feature update",
+        "historicalValue": true,
+        "currentUse": "current decision support",
+        "laterUse": "historical comparison record",
+        "reviewWindow": "30-90 days",
+        "sourceType": "curated trend seed design",
+        "intent": "review/update"
+      },
+      "selectionCriteria": {
+        "recentUpdate": true,
+        "marketMovement": true,
+        "decisionRequired": true,
+        "historicalValue": true,
+        "timeStamped": true,
+        "changeReasonRequired": true,
+        "appTrendReview": true,
+        "notEvergreen": true,
+        "entityDistributed": true
+      },
+      "selectionMeta": {
+        "validated": true,
+        "sourceType": "app trend time-stamped decision redesign rule",
+        "selectionReason": "redesigned as review/update because recent feature update",
+        "schema": "AOIA",
+        "mode": "trend",
+        "selectedAt": "2026-05-03T04:51:13.184Z"
+      },
+      "fingerprint": "fp1:b9a42886aa696146cb23d9a11cfa12ea0e6bcfd9"
     },
     {
       "id": "ar-tr-036",
-      "title": "How Accurate Is That New Air Quality App?",
-      "angle": "Compare sensor stations nearby",
+      "title": "Should you recheck Evernote after recent changes?",
+      "angle": "Recheck Evernote because recent changes may affect the user’s previous decision.",
       "audience": "Urban residents",
-      "intent": "review/accuracy-check",
+      "intent": "review/recheck",
       "environment": "environment apps",
       "timing": "daily peak",
-      "goal": "use most reliable air quality readings",
+      "goal": "decide whether Evernote deserves a fresh look after free-tier limitation",
       "reviewEntity": {
         "type": "app",
         "appName": "Air Quality App",
-        "platform": "android"
-      }
+        "platform": "android",
+        "name": "Evernote"
+      },
+      "entity": {
+        "name": "Evernote",
+        "type": "app",
+        "category": "productivity",
+        "platform": [
+          "web",
+          "ios",
+          "android"
+        ]
+      },
+      "keyPoints": [
+        "why the app deserves a fresh look now",
+        "which decision factor changed: free-tier limitation",
+        "whether existing users should keep their previous choice"
+      ],
+      "decisionType": "test",
+      "decisionSummary": "Evernote remains a valid option, but users should recheck it because free-tier limitation changed the context.",
+      "trendContext": {
+        "timing": "2026-Q2",
+        "contextDate": "2026-02",
+        "changeReason": "free-tier limitation",
+        "marketSignal": "free-tier limitation created a current decision point for productivity users",
+        "decisionContext": "Evernote needs a time-stamped review because free-tier limitation",
+        "historicalValue": true,
+        "currentUse": "current decision support",
+        "laterUse": "historical comparison record",
+        "reviewWindow": "30-90 days",
+        "sourceType": "curated trend seed design",
+        "intent": "review/recheck"
+      },
+      "selectionCriteria": {
+        "recentUpdate": true,
+        "marketMovement": true,
+        "decisionRequired": true,
+        "historicalValue": true,
+        "timeStamped": true,
+        "changeReasonRequired": true,
+        "appTrendReview": true,
+        "notEvergreen": true,
+        "entityDistributed": true
+      },
+      "selectionMeta": {
+        "validated": true,
+        "sourceType": "app trend time-stamped decision redesign rule",
+        "selectionReason": "redesigned as review/recheck because free-tier limitation",
+        "schema": "AOIA",
+        "mode": "trend",
+        "selectedAt": "2026-05-03T04:51:13.185Z"
+      },
+      "fingerprint": "fp1:4b705c244fc9aac06ee02d98fd74c549232a27e2"
     },
     {
-      "id": "ar-tr-037",
-      "title": "Which Social Media App Handles Video Uploads Best?",
-      "angle": "Compression + rendering stability",
-      "audience": "Creators",
-      "intent": "review/performance",
-      "environment": "social media",
-      "timing": "update",
-      "goal": "maintain quality during uploads",
+      "id": "ar-tr-026",
+      "title": "How does TickTick compare now after privacy or account policy change?",
+      "angle": "Compare TickTick against alternatives in the current market context after privacy or account policy change.",
+      "audience": "Podcast listeners",
+      "intent": "review/compare-now",
+      "environment": "podcast apps",
+      "timing": "feature release",
+      "goal": "compare TickTick with current alternatives after privacy or account policy change",
       "reviewEntity": {
         "type": "app",
-        "appName": "Social Media App",
-        "platform": "android"
-      }
+        "appName": "Podcast App",
+        "platform": "android",
+        "name": "TickTick"
+      },
+      "entity": {
+        "name": "TickTick",
+        "type": "app",
+        "category": "productivity",
+        "platform": [
+          "web",
+          "ios",
+          "android"
+        ]
+      },
+      "keyPoints": [
+        "which alternatives now look stronger or weaker",
+        "how the comparison changed after privacy or account policy change",
+        "what matters most for current users"
+      ],
+      "decisionType": "compare",
+      "decisionSummary": "TickTick should be compared again because privacy or account policy change may make alternatives more competitive.",
+      "trendContext": {
+        "timing": "2026-Q3",
+        "contextDate": "2026-03",
+        "changeReason": "privacy or account policy change",
+        "marketSignal": "privacy or account policy change created a current decision point for productivity users",
+        "decisionContext": "TickTick needs a time-stamped review because privacy or account policy change",
+        "historicalValue": true,
+        "currentUse": "current decision support",
+        "laterUse": "historical comparison record",
+        "reviewWindow": "30-90 days",
+        "sourceType": "curated trend seed design",
+        "intent": "review/compare-now"
+      },
+      "selectionCriteria": {
+        "recentUpdate": true,
+        "marketMovement": true,
+        "decisionRequired": true,
+        "historicalValue": true,
+        "timeStamped": true,
+        "changeReasonRequired": true,
+        "appTrendReview": true,
+        "notEvergreen": true,
+        "entityDistributed": true
+      },
+      "selectionMeta": {
+        "validated": true,
+        "sourceType": "app trend time-stamped decision redesign rule",
+        "selectionReason": "redesigned as review/compare-now because privacy or account policy change",
+        "schema": "AOIA",
+        "mode": "trend",
+        "selectedAt": "2026-05-03T04:51:13.184Z"
+      },
+      "fingerprint": "fp1:0af2b656d2d387f161408020b5694c177b5a88bf"
     },
     {
-      "id": "ar-tr-038",
-      "title": "The New Photo Management App—Does It Organize Better?",
-      "angle": "Face recognition + auto-tagging",
-      "audience": "Photo-heavy users",
-      "intent": "review/organization",
-      "environment": "gallery apps",
-      "timing": "trend",
-      "goal": "reduce manual sorting time",
+      "id": "ar-tr-013",
+      "title": "Is Todoist still worth using after workflow relevance change?",
+      "angle": "Judge whether Todoist still provides enough value after workflow relevance change.",
+      "audience": "Readers",
+      "intent": "review/still-worth",
+      "environment": "reading apps",
+      "timing": "launch phase",
+      "goal": "decide whether Todoist is still worth using after workflow relevance change",
       "reviewEntity": {
         "type": "app",
-        "appName": "Photo Management App",
-        "platform": "android"
-      }
+        "appName": "AI Summary Reading App",
+        "platform": "android",
+        "name": "Todoist"
+      },
+      "entity": {
+        "name": "Todoist",
+        "type": "app",
+        "category": "productivity",
+        "platform": [
+          "web",
+          "ios",
+          "android"
+        ]
+      },
+      "keyPoints": [
+        "whether workflow relevance change changes the value calculation",
+        "which users still benefit most",
+        "which users should reconsider"
+      ],
+      "decisionType": "keep",
+      "decisionSummary": "Todoist may still be worth using, but the value depends on how much workflow relevance change affects the user.",
+      "trendContext": {
+        "timing": "2026-Q4",
+        "contextDate": "2026-04",
+        "changeReason": "workflow relevance change",
+        "marketSignal": "workflow relevance change created a current decision point for productivity users",
+        "decisionContext": "Todoist needs a time-stamped review because workflow relevance change",
+        "historicalValue": true,
+        "currentUse": "current decision support",
+        "laterUse": "historical comparison record",
+        "reviewWindow": "30-90 days",
+        "sourceType": "curated trend seed design",
+        "intent": "review/still-worth"
+      },
+      "selectionCriteria": {
+        "recentUpdate": true,
+        "marketMovement": true,
+        "decisionRequired": true,
+        "historicalValue": true,
+        "timeStamped": true,
+        "changeReasonRequired": true,
+        "appTrendReview": true,
+        "notEvergreen": true,
+        "entityDistributed": true
+      },
+      "selectionMeta": {
+        "validated": true,
+        "sourceType": "app trend time-stamped decision redesign rule",
+        "selectionReason": "redesigned as review/still-worth because workflow relevance change",
+        "schema": "AOIA",
+        "mode": "trend",
+        "selectedAt": "2026-05-03T04:51:13.183Z"
+      },
+      "fingerprint": "fp1:5b0a75936a864a60cc607a933a77b54e729bc9a4"
     },
     {
-      "id": "ar-tr-039",
-      "title": "Which Shopping App Finds the Lowest Price Automatically?",
-      "angle": "Cross-store comparison accuracy",
-      "audience": "Deal hunters",
-      "intent": "review/effectiveness",
-      "environment": "shopping apps",
-      "timing": "sale seasons",
-      "goal": "maximize savings with automated comparisons",
+      "id": "ar-tr-018",
+      "title": "Should you keep using Google Keep after mobile app experience change?",
+      "angle": "Help users decide whether to keep using Google Keep or switch based on current signals.",
+      "audience": "Busy professionals",
+      "intent": "review/switch-or-keep",
+      "environment": "email apps",
+      "timing": "launch",
+      "goal": "decide whether to keep using Google Keep or switch after mobile app experience change",
       "reviewEntity": {
         "type": "app",
-        "appName": "Shopping Price Comparison App",
-        "platform": "android"
-      }
+        "appName": "Minimalist Email App",
+        "platform": "android",
+        "name": "Google Keep"
+      },
+      "entity": {
+        "name": "Google Keep",
+        "type": "app",
+        "category": "notes",
+        "platform": [
+          "web",
+          "ios",
+          "android"
+        ]
+      },
+      "keyPoints": [
+        "what existing users would lose by switching",
+        "what changed because of mobile app experience change",
+        "when switching becomes reasonable"
+      ],
+      "decisionType": "keep-or-switch",
+      "decisionSummary": "Google Keep is not automatically obsolete, but users should compare the cost of staying against switching after mobile app experience change.",
+      "trendContext": {
+        "timing": "2026-Q1",
+        "contextDate": "2026-05",
+        "changeReason": "mobile app experience change",
+        "marketSignal": "mobile app experience change created a current decision point for notes users",
+        "decisionContext": "Google Keep needs a time-stamped review because mobile app experience change",
+        "historicalValue": true,
+        "currentUse": "current decision support",
+        "laterUse": "historical comparison record",
+        "reviewWindow": "30-90 days",
+        "sourceType": "curated trend seed design",
+        "intent": "review/switch-or-keep"
+      },
+      "selectionCriteria": {
+        "recentUpdate": true,
+        "marketMovement": true,
+        "decisionRequired": true,
+        "historicalValue": true,
+        "timeStamped": true,
+        "changeReasonRequired": true,
+        "appTrendReview": true,
+        "notEvergreen": true,
+        "entityDistributed": true
+      },
+      "selectionMeta": {
+        "validated": true,
+        "sourceType": "app trend time-stamped decision redesign rule",
+        "selectionReason": "redesigned as review/switch-or-keep because mobile app experience change",
+        "schema": "AOIA",
+        "mode": "trend",
+        "selectedAt": "2026-05-03T04:51:13.184Z"
+      },
+      "fingerprint": "fp1:04e5827f22be9dc7fbc0ca2bfa2abee20615c068"
     },
     {
-      "id": "ar-tr-040",
-      "title": "Is the New Weather Radar App Better for Storm Tracking?",
-      "angle": "Real-time radar refresh rate",
-      "audience": "Travelers",
-      "intent": "review/performance",
-      "environment": "weather",
-      "timing": "storm season",
-      "goal": "improve severe weather awareness",
+      "id": "ar-tr-017",
+      "title": "What risks should users watch in Samsung Notes after market positioning change?",
+      "angle": "Identify decision risks in Samsung Notes that became more relevant after market positioning change.",
+      "audience": "Commuters and travelers",
+      "intent": "review/risk-watch",
+      "environment": "weather apps",
+      "timing": "seasonal",
+      "goal": "identify whether market positioning change creates new risk for Samsung Notes users",
       "reviewEntity": {
         "type": "app",
-        "appName": "Weather Radar App",
-        "platform": "android"
-      }
+        "appName": "Weather Alert App",
+        "platform": "android",
+        "name": "Samsung Notes"
+      },
+      "entity": {
+        "name": "Samsung Notes",
+        "type": "app",
+        "category": "notes",
+        "platform": [
+          "android"
+        ]
+      },
+      "keyPoints": [
+        "what risk became more visible after market positioning change",
+        "which users should be cautious",
+        "what to verify before continuing"
+      ],
+      "decisionType": "watch",
+      "decisionSummary": "Samsung Notes requires closer checking because market positioning change may increase user risk or friction.",
+      "trendContext": {
+        "timing": "2026-Q2",
+        "contextDate": "2026-06",
+        "changeReason": "market positioning change",
+        "marketSignal": "market positioning change created a current decision point for notes users",
+        "decisionContext": "Samsung Notes needs a time-stamped review because market positioning change",
+        "historicalValue": true,
+        "currentUse": "current decision support",
+        "laterUse": "historical comparison record",
+        "reviewWindow": "30-90 days",
+        "sourceType": "curated trend seed design",
+        "intent": "review/risk-watch"
+      },
+      "selectionCriteria": {
+        "recentUpdate": true,
+        "marketMovement": true,
+        "decisionRequired": true,
+        "historicalValue": true,
+        "timeStamped": true,
+        "changeReasonRequired": true,
+        "appTrendReview": true,
+        "notEvergreen": true,
+        "entityDistributed": true
+      },
+      "selectionMeta": {
+        "validated": true,
+        "sourceType": "app trend time-stamped decision redesign rule",
+        "selectionReason": "redesigned as review/risk-watch because market positioning change",
+        "schema": "AOIA",
+        "mode": "trend",
+        "selectedAt": "2026-05-03T04:51:13.183Z"
+      },
+      "fingerprint": "fp1:6f3c814d1d8db0932f3ab5185f3e2e8256ad12fd"
     },
     {
-      "id": "ar-tr-041",
-      "title": "Which Map App Has the Best Offline Navigation Right Now?",
-      "angle": "Offline routing accuracy",
-      "audience": "Travelers",
-      "intent": "review/offline-test",
-      "environment": "navigation",
-      "timing": "travel season",
-      "goal": "reliable navigation without data",
+      "id": "ar-tr-012",
+      "title": "What changed in Obsidian after the 2026-07 workflow relevance change?",
+      "angle": "Review Obsidian as a time-stamped update record after the 2026-07 workflow relevance change.",
+      "audience": "Students and office workers",
+      "intent": "review/update",
+      "environment": "document scanning",
+      "timing": "update cycles",
+      "goal": "record what changed in Obsidian and how it affects current users",
       "reviewEntity": {
         "type": "app",
-        "appName": "Offline Navigation App",
-        "platform": "android"
-      }
+        "appName": "AI Scanner App",
+        "platform": "android",
+        "name": "Obsidian"
+      },
+      "entity": {
+        "name": "Obsidian",
+        "type": "app",
+        "category": "notes",
+        "platform": [
+          "desktop",
+          "ios",
+          "android"
+        ]
+      },
+      "keyPoints": [
+        "what changed: workflow relevance change",
+        "who is affected by the change",
+        "whether the change alters the previous recommendation"
+      ],
+      "decisionType": "test",
+      "decisionSummary": "Obsidian should be re-evaluated because workflow relevance change may change the practical recommendation.",
+      "trendContext": {
+        "timing": "2026-Q3",
+        "contextDate": "2026-07",
+        "changeReason": "workflow relevance change",
+        "marketSignal": "workflow relevance change created a current decision point for notes users",
+        "decisionContext": "Obsidian needs a time-stamped review because workflow relevance change",
+        "historicalValue": true,
+        "currentUse": "current decision support",
+        "laterUse": "historical comparison record",
+        "reviewWindow": "30-90 days",
+        "sourceType": "curated trend seed design",
+        "intent": "review/update"
+      },
+      "selectionCriteria": {
+        "recentUpdate": true,
+        "marketMovement": true,
+        "decisionRequired": true,
+        "historicalValue": true,
+        "timeStamped": true,
+        "changeReasonRequired": true,
+        "appTrendReview": true,
+        "notEvergreen": true,
+        "entityDistributed": true
+      },
+      "selectionMeta": {
+        "validated": true,
+        "sourceType": "app trend time-stamped decision redesign rule",
+        "selectionReason": "redesigned as review/update because workflow relevance change",
+        "schema": "AOIA",
+        "mode": "trend",
+        "selectedAt": "2026-05-03T04:51:13.183Z"
+      },
+      "fingerprint": "fp1:38544d6b5fc0f1c3d73a74c786bb9a2a7f0db6a7"
     },
     {
       "id": "ar-tr-042",
-      "title": "Is the New Audio Cleanup App Worth the Hype?",
-      "angle": "AI noise removal consistency",
+      "title": "Should you recheck OneNote after recent changes?",
+      "angle": "Recheck OneNote because recent changes may affect the user’s previous decision.",
       "audience": "Podcasters and creators",
-      "intent": "review/quality-test",
+      "intent": "review/recheck",
       "environment": "audio tools",
       "timing": "trend",
-      "goal": "improve clarity in recordings",
+      "goal": "decide whether OneNote deserves a fresh look after mobile app experience change",
       "reviewEntity": {
         "type": "app",
         "appName": "Audio Cleanup App",
-        "platform": "android"
-      }
-    },
-    {
-      "id": "ar-tr-043",
-      "title": "Which Payment App Is Fastest at Peer Transfers?",
-      "angle": "Transfer latency + failure rate",
-      "audience": "General users",
-      "intent": "review/performance",
-      "environment": "payment apps",
-      "timing": "peak usage",
-      "goal": "ensure smooth transfers",
-      "reviewEntity": {
+        "platform": "android",
+        "name": "OneNote"
+      },
+      "entity": {
+        "name": "OneNote",
         "type": "app",
-        "appName": "Peer Transfer Payment App",
-        "platform": "android"
-      }
-    },
-    {
-      "id": "ar-tr-044",
-      "title": "Is the New AI Whiteboard App Good for Team Meetings?",
-      "angle": "Real-time sync + drawing AI",
-      "audience": "Remote teams",
-      "intent": "review/collaboration",
-      "environment": "whiteboard apps",
-      "timing": "update",
-      "goal": "enhance meeting productivity",
-      "reviewEntity": {
-        "type": "app",
-        "appName": "AI Whiteboard App",
-        "platform": "android"
-      }
+        "category": "notes",
+        "platform": [
+          "web",
+          "desktop",
+          "ios",
+          "android"
+        ]
+      },
+      "keyPoints": [
+        "why the app deserves a fresh look now",
+        "which decision factor changed: mobile app experience change",
+        "whether existing users should keep their previous choice"
+      ],
+      "decisionType": "test",
+      "decisionSummary": "OneNote remains a valid option, but users should recheck it because mobile app experience change changed the context.",
+      "trendContext": {
+        "timing": "2026-Q4",
+        "contextDate": "2026-08",
+        "changeReason": "mobile app experience change",
+        "marketSignal": "mobile app experience change created a current decision point for notes users",
+        "decisionContext": "OneNote needs a time-stamped review because mobile app experience change",
+        "historicalValue": true,
+        "currentUse": "current decision support",
+        "laterUse": "historical comparison record",
+        "reviewWindow": "30-90 days",
+        "sourceType": "curated trend seed design",
+        "intent": "review/recheck"
+      },
+      "selectionCriteria": {
+        "recentUpdate": true,
+        "marketMovement": true,
+        "decisionRequired": true,
+        "historicalValue": true,
+        "timeStamped": true,
+        "changeReasonRequired": true,
+        "appTrendReview": true,
+        "notEvergreen": true,
+        "entityDistributed": true
+      },
+      "selectionMeta": {
+        "validated": true,
+        "sourceType": "app trend time-stamped decision redesign rule",
+        "selectionReason": "redesigned as review/recheck because mobile app experience change",
+        "schema": "AOIA",
+        "mode": "trend",
+        "selectedAt": "2026-05-03T04:51:13.187Z"
+      },
+      "fingerprint": "fp1:b17d119558c96faa697db8f9844066e5d52b2a08"
     },
     {
       "id": "ar-tr-045",
-      "title": "Which Health App Has the Most Reliable Sleep Tracking?",
-      "angle": "Stage detection + wake accuracy",
+      "title": "How does Trello compare now after market positioning change?",
+      "angle": "Compare Trello against alternatives in the current market context after market positioning change.",
       "audience": "Sleep-conscious users",
-      "intent": "review/accuracy",
+      "intent": "review/compare-now",
       "environment": "health apps",
       "timing": "monthly trend",
-      "goal": "find app with consistent sleep metrics",
+      "goal": "compare Trello with current alternatives after market positioning change",
       "reviewEntity": {
         "type": "app",
         "appName": "Sleep Tracking Health App",
-        "platform": "android"
-      }
-    },
-    {
-      "id": "ar-tr-046",
-      "title": "Is the Latest File-Sharing App Actually Faster?",
-      "angle": "Wi-Fi direct throughput test",
-      "audience": "General users",
-      "intent": "review/performance",
-      "environment": "file sharing",
-      "timing": "update wave",
-      "goal": "maximize transfer speeds",
-      "reviewEntity": {
+        "platform": "android",
+        "name": "Trello"
+      },
+      "entity": {
+        "name": "Trello",
         "type": "app",
-        "appName": "File-Sharing App",
-        "platform": "android"
-      }
+        "category": "project-management",
+        "platform": [
+          "web",
+          "ios",
+          "android"
+        ]
+      },
+      "keyPoints": [
+        "which alternatives now look stronger or weaker",
+        "how the comparison changed after market positioning change",
+        "what matters most for current users"
+      ],
+      "decisionType": "compare",
+      "decisionSummary": "Trello should be compared again because market positioning change may make alternatives more competitive.",
+      "trendContext": {
+        "timing": "2026-Q1",
+        "contextDate": "2026-09",
+        "changeReason": "market positioning change",
+        "marketSignal": "market positioning change created a current decision point for project-management users",
+        "decisionContext": "Trello needs a time-stamped review because market positioning change",
+        "historicalValue": true,
+        "currentUse": "current decision support",
+        "laterUse": "historical comparison record",
+        "reviewWindow": "30-90 days",
+        "sourceType": "curated trend seed design",
+        "intent": "review/compare-now"
+      },
+      "selectionCriteria": {
+        "recentUpdate": true,
+        "marketMovement": true,
+        "decisionRequired": true,
+        "historicalValue": true,
+        "timeStamped": true,
+        "changeReasonRequired": true,
+        "appTrendReview": true,
+        "notEvergreen": true,
+        "entityDistributed": true
+      },
+      "selectionMeta": {
+        "validated": true,
+        "sourceType": "app trend time-stamped decision redesign rule",
+        "selectionReason": "redesigned as review/compare-now because market positioning change",
+        "schema": "AOIA",
+        "mode": "trend",
+        "selectedAt": "2026-05-03T04:51:13.187Z"
+      },
+      "fingerprint": "fp1:5ab2c6ca10ba2ff6ab68ced19bdb881a587229c2"
     },
     {
-      "id": "ar-tr-047",
-      "title": "Which Learning App Has the Best AI Tutor This Year?",
-      "angle": "Reasoning clarity + feedback",
+      "id": "ar-tr-031",
+      "title": "Is Asana still worth using after recent feature update?",
+      "angle": "Judge whether Asana still provides enough value after recent feature update.",
       "audience": "Students",
-      "intent": "review/personalization",
-      "environment": "education apps",
-      "timing": "academic season",
-      "goal": "improve learning efficiency",
+      "intent": "review/still-worth",
+      "environment": "math apps",
+      "timing": "exams cycle",
+      "goal": "decide whether Asana is still worth using after recent feature update",
       "reviewEntity": {
         "type": "app",
-        "appName": "AI Tutor Learning App",
-        "platform": "android"
-      }
+        "appName": "AI Math Solver App",
+        "platform": "android",
+        "name": "Asana"
+      },
+      "entity": {
+        "name": "Asana",
+        "type": "app",
+        "category": "project-management",
+        "platform": [
+          "web",
+          "ios",
+          "android"
+        ]
+      },
+      "keyPoints": [
+        "whether recent feature update changes the value calculation",
+        "which users still benefit most",
+        "which users should reconsider"
+      ],
+      "decisionType": "keep",
+      "decisionSummary": "Asana may still be worth using, but the value depends on how much recent feature update affects the user.",
+      "trendContext": {
+        "timing": "2026-Q2",
+        "contextDate": "2026-10",
+        "changeReason": "recent feature update",
+        "marketSignal": "recent feature update created a current decision point for project-management users",
+        "decisionContext": "Asana needs a time-stamped review because recent feature update",
+        "historicalValue": true,
+        "currentUse": "current decision support",
+        "laterUse": "historical comparison record",
+        "reviewWindow": "30-90 days",
+        "sourceType": "curated trend seed design",
+        "intent": "review/still-worth"
+      },
+      "selectionCriteria": {
+        "recentUpdate": true,
+        "marketMovement": true,
+        "decisionRequired": true,
+        "historicalValue": true,
+        "timeStamped": true,
+        "changeReasonRequired": true,
+        "appTrendReview": true,
+        "notEvergreen": true,
+        "entityDistributed": true
+      },
+      "selectionMeta": {
+        "validated": true,
+        "sourceType": "app trend time-stamped decision redesign rule",
+        "selectionReason": "redesigned as review/still-worth because recent feature update",
+        "schema": "AOIA",
+        "mode": "trend",
+        "selectedAt": "2026-05-03T04:51:13.185Z"
+      },
+      "fingerprint": "fp1:72fb04c8a166292ec2c0c0c27bb35790c89b9a1f"
     },
     {
-      "id": "ar-tr-048",
-      "title": "Is the New Bookmark Manager App Worth Migrating To?",
-      "angle": "Tag handling + sync reliability",
-      "audience": "Researchers and power users",
-      "intent": "review/organization",
-      "environment": "bookmark tools",
-      "timing": "trend",
-      "goal": "simplify link management",
+      "id": "ar-tr-019",
+      "title": "Should you keep using ClickUp after free-tier limitation?",
+      "angle": "Help users decide whether to keep using ClickUp or switch based on current signals.",
+      "audience": "Students",
+      "intent": "review/switch-or-keep",
+      "environment": "study apps",
+      "timing": "early trend",
+      "goal": "decide whether to keep using ClickUp or switch after free-tier limitation",
       "reviewEntity": {
         "type": "app",
-        "appName": "Bookmark Manager App",
-        "platform": "android"
-      }
+        "appName": "AI Flashcard App",
+        "platform": "android",
+        "name": "ClickUp"
+      },
+      "entity": {
+        "name": "ClickUp",
+        "type": "app",
+        "category": "project-management",
+        "platform": [
+          "web",
+          "ios",
+          "android"
+        ]
+      },
+      "keyPoints": [
+        "what existing users would lose by switching",
+        "what changed because of free-tier limitation",
+        "when switching becomes reasonable"
+      ],
+      "decisionType": "keep-or-switch",
+      "decisionSummary": "ClickUp is not automatically obsolete, but users should compare the cost of staying against switching after free-tier limitation.",
+      "trendContext": {
+        "timing": "2026-Q3",
+        "contextDate": "2026-11",
+        "changeReason": "free-tier limitation",
+        "marketSignal": "free-tier limitation created a current decision point for project-management users",
+        "decisionContext": "ClickUp needs a time-stamped review because free-tier limitation",
+        "historicalValue": true,
+        "currentUse": "current decision support",
+        "laterUse": "historical comparison record",
+        "reviewWindow": "30-90 days",
+        "sourceType": "curated trend seed design",
+        "intent": "review/switch-or-keep"
+      },
+      "selectionCriteria": {
+        "recentUpdate": true,
+        "marketMovement": true,
+        "decisionRequired": true,
+        "historicalValue": true,
+        "timeStamped": true,
+        "changeReasonRequired": true,
+        "appTrendReview": true,
+        "notEvergreen": true,
+        "entityDistributed": true
+      },
+      "selectionMeta": {
+        "validated": true,
+        "sourceType": "app trend time-stamped decision redesign rule",
+        "selectionReason": "redesigned as review/switch-or-keep because free-tier limitation",
+        "schema": "AOIA",
+        "mode": "trend",
+        "selectedAt": "2026-05-03T04:51:13.184Z"
+      },
+      "fingerprint": "fp1:97d202bc62d0aca7d191991698fd7f65452d3cd0"
+    },
+    {
+      "id": "ar-tr-037",
+      "title": "What risks should users watch in Slack after privacy or account policy change?",
+      "angle": "Identify decision risks in Slack that became more relevant after privacy or account policy change.",
+      "audience": "Creators",
+      "intent": "review/risk-watch",
+      "environment": "social media",
+      "timing": "update",
+      "goal": "identify whether privacy or account policy change creates new risk for Slack users",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Social Media App",
+        "platform": "android",
+        "name": "Slack"
+      },
+      "entity": {
+        "name": "Slack",
+        "type": "app",
+        "category": "communication",
+        "platform": [
+          "web",
+          "desktop",
+          "ios",
+          "android"
+        ]
+      },
+      "keyPoints": [
+        "what risk became more visible after privacy or account policy change",
+        "which users should be cautious",
+        "what to verify before continuing"
+      ],
+      "decisionType": "watch",
+      "decisionSummary": "Slack requires closer checking because privacy or account policy change may increase user risk or friction.",
+      "trendContext": {
+        "timing": "2026-Q4",
+        "contextDate": "2026-12",
+        "changeReason": "privacy or account policy change",
+        "marketSignal": "privacy or account policy change created a current decision point for communication users",
+        "decisionContext": "Slack needs a time-stamped review because privacy or account policy change",
+        "historicalValue": true,
+        "currentUse": "current decision support",
+        "laterUse": "historical comparison record",
+        "reviewWindow": "30-90 days",
+        "sourceType": "curated trend seed design",
+        "intent": "review/risk-watch"
+      },
+      "selectionCriteria": {
+        "recentUpdate": true,
+        "marketMovement": true,
+        "decisionRequired": true,
+        "historicalValue": true,
+        "timeStamped": true,
+        "changeReasonRequired": true,
+        "appTrendReview": true,
+        "notEvergreen": true,
+        "entityDistributed": true
+      },
+      "selectionMeta": {
+        "validated": true,
+        "sourceType": "app trend time-stamped decision redesign rule",
+        "selectionReason": "redesigned as review/risk-watch because privacy or account policy change",
+        "schema": "AOIA",
+        "mode": "trend",
+        "selectedAt": "2026-05-03T04:51:13.185Z"
+      },
+      "fingerprint": "fp1:00f945a11a2677f6b943916e209128d555a0ed49"
+    },
+    {
+      "id": "ar-tr-030",
+      "title": "What changed in Discord after the 2026-01 recent feature update?",
+      "angle": "Review Discord as a time-stamped update record after the 2026-01 recent feature update.",
+      "audience": "General users",
+      "intent": "review/update",
+      "environment": "browsers",
+      "timing": "launch",
+      "goal": "record what changed in Discord and how it affects current users",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Browser App",
+        "platform": "android",
+        "name": "Discord"
+      },
+      "entity": {
+        "name": "Discord",
+        "type": "app",
+        "category": "communication",
+        "platform": [
+          "web",
+          "desktop",
+          "ios",
+          "android"
+        ]
+      },
+      "keyPoints": [
+        "what changed: recent feature update",
+        "who is affected by the change",
+        "whether the change alters the previous recommendation"
+      ],
+      "decisionType": "test",
+      "decisionSummary": "Discord should be re-evaluated because recent feature update may change the practical recommendation.",
+      "trendContext": {
+        "timing": "2026-Q1",
+        "contextDate": "2026-01",
+        "changeReason": "recent feature update",
+        "marketSignal": "recent feature update created a current decision point for communication users",
+        "decisionContext": "Discord needs a time-stamped review because recent feature update",
+        "historicalValue": true,
+        "currentUse": "current decision support",
+        "laterUse": "historical comparison record",
+        "reviewWindow": "30-90 days",
+        "sourceType": "curated trend seed design",
+        "intent": "review/update"
+      },
+      "selectionCriteria": {
+        "recentUpdate": true,
+        "marketMovement": true,
+        "decisionRequired": true,
+        "historicalValue": true,
+        "timeStamped": true,
+        "changeReasonRequired": true,
+        "appTrendReview": true,
+        "notEvergreen": true,
+        "entityDistributed": true
+      },
+      "selectionMeta": {
+        "validated": true,
+        "sourceType": "app trend time-stamped decision redesign rule",
+        "selectionReason": "redesigned as review/update because recent feature update",
+        "schema": "AOIA",
+        "mode": "trend",
+        "selectedAt": "2026-05-03T04:51:13.185Z"
+      },
+      "fingerprint": "fp1:79d41ea07322f7724a272e3ccd08131dfb4ebacf"
+    },
+    {
+      "id": "ar-tr-014",
+      "title": "Should you recheck Zoom after recent changes?",
+      "angle": "Recheck Zoom because recent changes may affect the user’s previous decision.",
+      "audience": "Fitness beginners",
+      "intent": "review/recheck",
+      "environment": "fitness apps",
+      "timing": "early adoption",
+      "goal": "decide whether Zoom deserves a fresh look after free-tier limitation",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "AI Form-Tracking Fitness App",
+        "platform": "android",
+        "name": "Zoom"
+      },
+      "entity": {
+        "name": "Zoom",
+        "type": "app",
+        "category": "video-meetings",
+        "platform": [
+          "web",
+          "desktop",
+          "ios",
+          "android"
+        ]
+      },
+      "keyPoints": [
+        "why the app deserves a fresh look now",
+        "which decision factor changed: free-tier limitation",
+        "whether existing users should keep their previous choice"
+      ],
+      "decisionType": "test",
+      "decisionSummary": "Zoom remains a valid option, but users should recheck it because free-tier limitation changed the context.",
+      "trendContext": {
+        "timing": "2026-Q2",
+        "contextDate": "2026-02",
+        "changeReason": "free-tier limitation",
+        "marketSignal": "free-tier limitation created a current decision point for video-meetings users",
+        "decisionContext": "Zoom needs a time-stamped review because free-tier limitation",
+        "historicalValue": true,
+        "currentUse": "current decision support",
+        "laterUse": "historical comparison record",
+        "reviewWindow": "30-90 days",
+        "sourceType": "curated trend seed design",
+        "intent": "review/recheck"
+      },
+      "selectionCriteria": {
+        "recentUpdate": true,
+        "marketMovement": true,
+        "decisionRequired": true,
+        "historicalValue": true,
+        "timeStamped": true,
+        "changeReasonRequired": true,
+        "appTrendReview": true,
+        "notEvergreen": true,
+        "entityDistributed": true
+      },
+      "selectionMeta": {
+        "validated": true,
+        "sourceType": "app trend time-stamped decision redesign rule",
+        "selectionReason": "redesigned as review/recheck because free-tier limitation",
+        "schema": "AOIA",
+        "mode": "trend",
+        "selectedAt": "2026-05-03T04:51:13.183Z"
+      },
+      "fingerprint": "fp1:710ab5c437790722623226c0fef8ceb5ee1c1ee2"
+    },
+    {
+      "id": "ar-tr-024",
+      "title": "How does Google Meet compare now after privacy or account policy change?",
+      "angle": "Compare Google Meet against alternatives in the current market context after privacy or account policy change.",
+      "audience": "Music streamers",
+      "intent": "review/compare-now",
+      "environment": "music apps",
+      "timing": "annual update",
+      "goal": "compare Google Meet with current alternatives after privacy or account policy change",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Music Recommendation App",
+        "platform": "android",
+        "name": "Google Meet"
+      },
+      "entity": {
+        "name": "Google Meet",
+        "type": "app",
+        "category": "video-meetings",
+        "platform": [
+          "web",
+          "ios",
+          "android"
+        ]
+      },
+      "keyPoints": [
+        "which alternatives now look stronger or weaker",
+        "how the comparison changed after privacy or account policy change",
+        "what matters most for current users"
+      ],
+      "decisionType": "compare",
+      "decisionSummary": "Google Meet should be compared again because privacy or account policy change may make alternatives more competitive.",
+      "trendContext": {
+        "timing": "2026-Q3",
+        "contextDate": "2026-03",
+        "changeReason": "privacy or account policy change",
+        "marketSignal": "privacy or account policy change created a current decision point for video-meetings users",
+        "decisionContext": "Google Meet needs a time-stamped review because privacy or account policy change",
+        "historicalValue": true,
+        "currentUse": "current decision support",
+        "laterUse": "historical comparison record",
+        "reviewWindow": "30-90 days",
+        "sourceType": "curated trend seed design",
+        "intent": "review/compare-now"
+      },
+      "selectionCriteria": {
+        "recentUpdate": true,
+        "marketMovement": true,
+        "decisionRequired": true,
+        "historicalValue": true,
+        "timeStamped": true,
+        "changeReasonRequired": true,
+        "appTrendReview": true,
+        "notEvergreen": true,
+        "entityDistributed": true
+      },
+      "selectionMeta": {
+        "validated": true,
+        "sourceType": "app trend time-stamped decision redesign rule",
+        "selectionReason": "redesigned as review/compare-now because privacy or account policy change",
+        "schema": "AOIA",
+        "mode": "trend",
+        "selectedAt": "2026-05-03T04:51:13.184Z"
+      },
+      "fingerprint": "fp1:9a598c79d73a0a702d4b0e98ceea63ab78698c95"
+    },
+    {
+      "id": "ar-tr-021",
+      "title": "Is Canva still worth using after workflow relevance change?",
+      "angle": "Judge whether Canva still provides enough value after workflow relevance change.",
+      "audience": "Home shoppers",
+      "intent": "review/still-worth",
+      "environment": "grocery delivery",
+      "timing": "launch period",
+      "goal": "decide whether Canva is still worth using after workflow relevance change",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Grocery Delivery App",
+        "platform": "android",
+        "name": "Canva"
+      },
+      "entity": {
+        "name": "Canva",
+        "type": "app",
+        "category": "design",
+        "platform": [
+          "web",
+          "ios",
+          "android"
+        ]
+      },
+      "keyPoints": [
+        "whether workflow relevance change changes the value calculation",
+        "which users still benefit most",
+        "which users should reconsider"
+      ],
+      "decisionType": "keep",
+      "decisionSummary": "Canva may still be worth using, but the value depends on how much workflow relevance change affects the user.",
+      "trendContext": {
+        "timing": "2026-Q4",
+        "contextDate": "2026-04",
+        "changeReason": "workflow relevance change",
+        "marketSignal": "workflow relevance change created a current decision point for design users",
+        "decisionContext": "Canva needs a time-stamped review because workflow relevance change",
+        "historicalValue": true,
+        "currentUse": "current decision support",
+        "laterUse": "historical comparison record",
+        "reviewWindow": "30-90 days",
+        "sourceType": "curated trend seed design",
+        "intent": "review/still-worth"
+      },
+      "selectionCriteria": {
+        "recentUpdate": true,
+        "marketMovement": true,
+        "decisionRequired": true,
+        "historicalValue": true,
+        "timeStamped": true,
+        "changeReasonRequired": true,
+        "appTrendReview": true,
+        "notEvergreen": true,
+        "entityDistributed": true
+      },
+      "selectionMeta": {
+        "validated": true,
+        "sourceType": "app trend time-stamped decision redesign rule",
+        "selectionReason": "redesigned as review/still-worth because workflow relevance change",
+        "schema": "AOIA",
+        "mode": "trend",
+        "selectedAt": "2026-05-03T04:51:13.184Z"
+      },
+      "fingerprint": "fp1:6c9226308424fc00b583b99877a114765dfb9a33"
+    },
+    {
+      "id": "ar-tr-022",
+      "title": "Should you keep using CapCut after mobile app experience change?",
+      "angle": "Help users decide whether to keep using CapCut or switch based on current signals.",
+      "audience": "Casual photographers",
+      "intent": "review/switch-or-keep",
+      "environment": "camera apps",
+      "timing": "update",
+      "goal": "decide whether to keep using CapCut or switch after mobile app experience change",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "AI Camera App",
+        "platform": "android",
+        "name": "CapCut"
+      },
+      "entity": {
+        "name": "CapCut",
+        "type": "app",
+        "category": "video-editing",
+        "platform": [
+          "desktop",
+          "ios",
+          "android"
+        ]
+      },
+      "keyPoints": [
+        "what existing users would lose by switching",
+        "what changed because of mobile app experience change",
+        "when switching becomes reasonable"
+      ],
+      "decisionType": "keep-or-switch",
+      "decisionSummary": "CapCut is not automatically obsolete, but users should compare the cost of staying against switching after mobile app experience change.",
+      "trendContext": {
+        "timing": "2026-Q1",
+        "contextDate": "2026-05",
+        "changeReason": "mobile app experience change",
+        "marketSignal": "mobile app experience change created a current decision point for video-editing users",
+        "decisionContext": "CapCut needs a time-stamped review because mobile app experience change",
+        "historicalValue": true,
+        "currentUse": "current decision support",
+        "laterUse": "historical comparison record",
+        "reviewWindow": "30-90 days",
+        "sourceType": "curated trend seed design",
+        "intent": "review/switch-or-keep"
+      },
+      "selectionCriteria": {
+        "recentUpdate": true,
+        "marketMovement": true,
+        "decisionRequired": true,
+        "historicalValue": true,
+        "timeStamped": true,
+        "changeReasonRequired": true,
+        "appTrendReview": true,
+        "notEvergreen": true,
+        "entityDistributed": true
+      },
+      "selectionMeta": {
+        "validated": true,
+        "sourceType": "app trend time-stamped decision redesign rule",
+        "selectionReason": "redesigned as review/switch-or-keep because mobile app experience change",
+        "schema": "AOIA",
+        "mode": "trend",
+        "selectedAt": "2026-05-03T04:51:13.184Z"
+      },
+      "fingerprint": "fp1:5dca77017359b64ae0d6e00d2d0b743338de5f3d"
+    },
+    {
+      "id": "ar-tr-028",
+      "title": "What risks should users watch in Spotify after market positioning change?",
+      "angle": "Identify decision risks in Spotify that became more relevant after market positioning change.",
+      "audience": "Students and professionals",
+      "intent": "review/risk-watch",
+      "environment": "recording apps",
+      "timing": "update",
+      "goal": "identify whether market positioning change creates new risk for Spotify users",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "AI Voice Recorder App",
+        "platform": "android",
+        "name": "Spotify"
+      },
+      "entity": {
+        "name": "Spotify",
+        "type": "app",
+        "category": "music",
+        "platform": [
+          "web",
+          "desktop",
+          "ios",
+          "android"
+        ]
+      },
+      "keyPoints": [
+        "what risk became more visible after market positioning change",
+        "which users should be cautious",
+        "what to verify before continuing"
+      ],
+      "decisionType": "watch",
+      "decisionSummary": "Spotify requires closer checking because market positioning change may increase user risk or friction.",
+      "trendContext": {
+        "timing": "2026-Q2",
+        "contextDate": "2026-06",
+        "changeReason": "market positioning change",
+        "marketSignal": "market positioning change created a current decision point for music users",
+        "decisionContext": "Spotify needs a time-stamped review because market positioning change",
+        "historicalValue": true,
+        "currentUse": "current decision support",
+        "laterUse": "historical comparison record",
+        "reviewWindow": "30-90 days",
+        "sourceType": "curated trend seed design",
+        "intent": "review/risk-watch"
+      },
+      "selectionCriteria": {
+        "recentUpdate": true,
+        "marketMovement": true,
+        "decisionRequired": true,
+        "historicalValue": true,
+        "timeStamped": true,
+        "changeReasonRequired": true,
+        "appTrendReview": true,
+        "notEvergreen": true,
+        "entityDistributed": true
+      },
+      "selectionMeta": {
+        "validated": true,
+        "sourceType": "app trend time-stamped decision redesign rule",
+        "selectionReason": "redesigned as review/risk-watch because market positioning change",
+        "schema": "AOIA",
+        "mode": "trend",
+        "selectedAt": "2026-05-03T04:51:13.184Z"
+      },
+      "fingerprint": "fp1:2bb938b0312481fe73b156c0d3b9d3b2c4a243ce"
+    },
+    {
+      "id": "ar-tr-009",
+      "title": "What changed in YouTube Music after the 2026-07 workflow relevance change?",
+      "angle": "Review YouTube Music as a time-stamped update record after the 2026-07 workflow relevance change.",
+      "audience": "Professionals",
+      "intent": "review/update",
+      "environment": "email clients",
+      "timing": "post-update",
+      "goal": "record what changed in YouTube Music and how it affects current users",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "AI Email App",
+        "platform": "android",
+        "name": "YouTube Music"
+      },
+      "entity": {
+        "name": "YouTube Music",
+        "type": "app",
+        "category": "music",
+        "platform": [
+          "web",
+          "ios",
+          "android"
+        ]
+      },
+      "keyPoints": [
+        "what changed: workflow relevance change",
+        "who is affected by the change",
+        "whether the change alters the previous recommendation"
+      ],
+      "decisionType": "test",
+      "decisionSummary": "YouTube Music should be re-evaluated because workflow relevance change may change the practical recommendation.",
+      "trendContext": {
+        "timing": "2026-Q3",
+        "contextDate": "2026-07",
+        "changeReason": "workflow relevance change",
+        "marketSignal": "workflow relevance change created a current decision point for music users",
+        "decisionContext": "YouTube Music needs a time-stamped review because workflow relevance change",
+        "historicalValue": true,
+        "currentUse": "current decision support",
+        "laterUse": "historical comparison record",
+        "reviewWindow": "30-90 days",
+        "sourceType": "curated trend seed design",
+        "intent": "review/update"
+      },
+      "selectionCriteria": {
+        "recentUpdate": true,
+        "marketMovement": true,
+        "decisionRequired": true,
+        "historicalValue": true,
+        "timeStamped": true,
+        "changeReasonRequired": true,
+        "appTrendReview": true,
+        "notEvergreen": true,
+        "entityDistributed": true
+      },
+      "selectionMeta": {
+        "validated": true,
+        "sourceType": "app trend time-stamped decision redesign rule",
+        "selectionReason": "redesigned as review/update because workflow relevance change",
+        "schema": "AOIA",
+        "mode": "trend",
+        "selectedAt": "2026-05-03T04:51:13.181Z"
+      },
+      "fingerprint": "fp1:ba689dddc45bdd61473c80f477202954e16f50da"
+    },
+    {
+      "id": "ar-tr-027",
+      "title": "Should you recheck Duolingo after recent changes?",
+      "angle": "Recheck Duolingo because recent changes may affect the user’s previous decision.",
+      "audience": "Productivity seekers",
+      "intent": "review/recheck",
+      "environment": "focus apps",
+      "timing": "early adoption",
+      "goal": "decide whether Duolingo deserves a fresh look after mobile app experience change",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "AI Focus Timer App",
+        "platform": "android",
+        "name": "Duolingo"
+      },
+      "entity": {
+        "name": "Duolingo",
+        "type": "app",
+        "category": "learning",
+        "platform": [
+          "web",
+          "ios",
+          "android"
+        ]
+      },
+      "keyPoints": [
+        "why the app deserves a fresh look now",
+        "which decision factor changed: mobile app experience change",
+        "whether existing users should keep their previous choice"
+      ],
+      "decisionType": "test",
+      "decisionSummary": "Duolingo remains a valid option, but users should recheck it because mobile app experience change changed the context.",
+      "trendContext": {
+        "timing": "2026-Q4",
+        "contextDate": "2026-08",
+        "changeReason": "mobile app experience change",
+        "marketSignal": "mobile app experience change created a current decision point for learning users",
+        "decisionContext": "Duolingo needs a time-stamped review because mobile app experience change",
+        "historicalValue": true,
+        "currentUse": "current decision support",
+        "laterUse": "historical comparison record",
+        "reviewWindow": "30-90 days",
+        "sourceType": "curated trend seed design",
+        "intent": "review/recheck"
+      },
+      "selectionCriteria": {
+        "recentUpdate": true,
+        "marketMovement": true,
+        "decisionRequired": true,
+        "historicalValue": true,
+        "timeStamped": true,
+        "changeReasonRequired": true,
+        "appTrendReview": true,
+        "notEvergreen": true,
+        "entityDistributed": true
+      },
+      "selectionMeta": {
+        "validated": true,
+        "sourceType": "app trend time-stamped decision redesign rule",
+        "selectionReason": "redesigned as review/recheck because mobile app experience change",
+        "schema": "AOIA",
+        "mode": "trend",
+        "selectedAt": "2026-05-03T04:51:13.184Z"
+      },
+      "fingerprint": "fp1:a2bb07c335f49f282e987e1c5f74b684190d55e0"
     },
     {
       "id": "ar-tr-049",
-      "title": "Which AI Keyboard App Improves Typing Speed the Most?",
-      "angle": "Prediction accuracy + latency",
+      "title": "How does Google Maps compare now after market positioning change?",
+      "angle": "Compare Google Maps against alternatives in the current market context after market positioning change.",
       "audience": "Mobile users",
-      "intent": "review/performance",
+      "intent": "review/compare-now",
       "environment": "keyboard apps",
       "timing": "feature roll-out",
-      "goal": "typing efficiency boost",
+      "goal": "compare Google Maps with current alternatives after market positioning change",
       "reviewEntity": {
         "type": "app",
         "appName": "AI Keyboard App",
-        "platform": "android"
-      }
+        "platform": "android",
+        "name": "Google Maps"
+      },
+      "entity": {
+        "name": "Google Maps",
+        "type": "app",
+        "category": "navigation",
+        "platform": [
+          "web",
+          "ios",
+          "android"
+        ]
+      },
+      "keyPoints": [
+        "which alternatives now look stronger or weaker",
+        "how the comparison changed after market positioning change",
+        "what matters most for current users"
+      ],
+      "decisionType": "compare",
+      "decisionSummary": "Google Maps should be compared again because market positioning change may make alternatives more competitive.",
+      "trendContext": {
+        "timing": "2026-Q1",
+        "contextDate": "2026-09",
+        "changeReason": "market positioning change",
+        "marketSignal": "market positioning change created a current decision point for navigation users",
+        "decisionContext": "Google Maps needs a time-stamped review because market positioning change",
+        "historicalValue": true,
+        "currentUse": "current decision support",
+        "laterUse": "historical comparison record",
+        "reviewWindow": "30-90 days",
+        "sourceType": "curated trend seed design",
+        "intent": "review/compare-now"
+      },
+      "selectionCriteria": {
+        "recentUpdate": true,
+        "marketMovement": true,
+        "decisionRequired": true,
+        "historicalValue": true,
+        "timeStamped": true,
+        "changeReasonRequired": true,
+        "appTrendReview": true,
+        "notEvergreen": true,
+        "entityDistributed": true
+      },
+      "selectionMeta": {
+        "validated": true,
+        "sourceType": "app trend time-stamped decision redesign rule",
+        "selectionReason": "redesigned as review/compare-now because market positioning change",
+        "schema": "AOIA",
+        "mode": "trend",
+        "selectedAt": "2026-05-03T04:51:13.187Z"
+      },
+      "fingerprint": "fp1:5dc32fa5ee428680017257efc6153109a7ad7741"
+    },
+    {
+      "id": "ar-tr-029",
+      "title": "Is Uber still worth using after recent feature update?",
+      "angle": "Judge whether Uber still provides enough value after recent feature update.",
+      "audience": "Drivers and travelers",
+      "intent": "review/still-worth",
+      "environment": "navigation apps",
+      "timing": "peak usage",
+      "goal": "decide whether Uber is still worth using after recent feature update",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Mapping App",
+        "platform": "android",
+        "name": "Uber"
+      },
+      "entity": {
+        "name": "Uber",
+        "type": "app",
+        "category": "transportation",
+        "platform": [
+          "ios",
+          "android"
+        ]
+      },
+      "keyPoints": [
+        "whether recent feature update changes the value calculation",
+        "which users still benefit most",
+        "which users should reconsider"
+      ],
+      "decisionType": "keep",
+      "decisionSummary": "Uber may still be worth using, but the value depends on how much recent feature update affects the user.",
+      "trendContext": {
+        "timing": "2026-Q2",
+        "contextDate": "2026-10",
+        "changeReason": "recent feature update",
+        "marketSignal": "recent feature update created a current decision point for transportation users",
+        "decisionContext": "Uber needs a time-stamped review because recent feature update",
+        "historicalValue": true,
+        "currentUse": "current decision support",
+        "laterUse": "historical comparison record",
+        "reviewWindow": "30-90 days",
+        "sourceType": "curated trend seed design",
+        "intent": "review/still-worth"
+      },
+      "selectionCriteria": {
+        "recentUpdate": true,
+        "marketMovement": true,
+        "decisionRequired": true,
+        "historicalValue": true,
+        "timeStamped": true,
+        "changeReasonRequired": true,
+        "appTrendReview": true,
+        "notEvergreen": true,
+        "entityDistributed": true
+      },
+      "selectionMeta": {
+        "validated": true,
+        "sourceType": "app trend time-stamped decision redesign rule",
+        "selectionReason": "redesigned as review/still-worth because recent feature update",
+        "schema": "AOIA",
+        "mode": "trend",
+        "selectedAt": "2026-05-03T04:51:13.185Z"
+      },
+      "fingerprint": "fp1:b6782ba49a670be8ba88390e244797d14661195b"
+    },
+    {
+      "id": "ar-tr-015",
+      "title": "Should you keep using Lyft after free-tier limitation?",
+      "angle": "Help users decide whether to keep using Lyft or switch based on current signals.",
+      "audience": "Travelers and students",
+      "intent": "review/switch-or-keep",
+      "environment": "translation apps",
+      "timing": "update frequency",
+      "goal": "decide whether to keep using Lyft or switch after free-tier limitation",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "AI Translation App",
+        "platform": "android",
+        "name": "Lyft"
+      },
+      "entity": {
+        "name": "Lyft",
+        "type": "app",
+        "category": "transportation",
+        "platform": [
+          "ios",
+          "android"
+        ]
+      },
+      "keyPoints": [
+        "what existing users would lose by switching",
+        "what changed because of free-tier limitation",
+        "when switching becomes reasonable"
+      ],
+      "decisionType": "keep-or-switch",
+      "decisionSummary": "Lyft is not automatically obsolete, but users should compare the cost of staying against switching after free-tier limitation.",
+      "trendContext": {
+        "timing": "2026-Q3",
+        "contextDate": "2026-11",
+        "changeReason": "free-tier limitation",
+        "marketSignal": "free-tier limitation created a current decision point for transportation users",
+        "decisionContext": "Lyft needs a time-stamped review because free-tier limitation",
+        "historicalValue": true,
+        "currentUse": "current decision support",
+        "laterUse": "historical comparison record",
+        "reviewWindow": "30-90 days",
+        "sourceType": "curated trend seed design",
+        "intent": "review/switch-or-keep"
+      },
+      "selectionCriteria": {
+        "recentUpdate": true,
+        "marketMovement": true,
+        "decisionRequired": true,
+        "historicalValue": true,
+        "timeStamped": true,
+        "changeReasonRequired": true,
+        "appTrendReview": true,
+        "notEvergreen": true,
+        "entityDistributed": true
+      },
+      "selectionMeta": {
+        "validated": true,
+        "sourceType": "app trend time-stamped decision redesign rule",
+        "selectionReason": "redesigned as review/switch-or-keep because free-tier limitation",
+        "schema": "AOIA",
+        "mode": "trend",
+        "selectedAt": "2026-05-03T04:51:13.183Z"
+      },
+      "fingerprint": "fp1:e185e91ac296c78d1f88a1d2ae1e847cb8e54fea"
+    },
+    {
+      "id": "ar-tr-010",
+      "title": "What changed in Wise after the 2026-12 platform support change?",
+      "angle": "Review Wise as a time-stamped update record after the 2026-12 platform support change.",
+      "audience": "Wellness seekers",
+      "intent": "review/update",
+      "environment": "meditation apps",
+      "timing": "early release",
+      "goal": "record what changed in Wise and how it affects current users",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "AI Meditation App",
+        "platform": "android",
+        "name": "Wise"
+      },
+      "entity": {
+        "name": "Wise",
+        "type": "app",
+        "category": "finance",
+        "platform": [
+          "web",
+          "ios",
+          "android"
+        ]
+      },
+      "keyPoints": [
+        "what changed: platform support change",
+        "who is affected by the change",
+        "whether the change alters the previous recommendation"
+      ],
+      "decisionType": "test",
+      "decisionSummary": "Wise should be re-evaluated because platform support change may change the practical recommendation.",
+      "trendContext": {
+        "timing": "2026-Q4",
+        "contextDate": "2026-12",
+        "changeReason": "platform support change",
+        "marketSignal": "platform support change created a current decision point for finance users",
+        "decisionContext": "Wise needs a time-stamped review because platform support change",
+        "historicalValue": true,
+        "currentUse": "current decision support",
+        "laterUse": "historical comparison record",
+        "reviewWindow": "30-90 days",
+        "sourceType": "curated trend seed design",
+        "intent": "review/update"
+      },
+      "selectionCriteria": {
+        "recentUpdate": true,
+        "marketMovement": true,
+        "decisionRequired": true,
+        "historicalValue": true,
+        "timeStamped": true,
+        "changeReasonRequired": true,
+        "appTrendReview": true,
+        "notEvergreen": true,
+        "entityDistributed": true
+      },
+      "selectionMeta": {
+        "validated": true,
+        "sourceType": "app trend time-stamped decision redesign rule",
+        "selectionReason": "redesigned as review/update because platform support change",
+        "schema": "AOIA",
+        "mode": "trend",
+        "selectedAt": "2026-05-03T04:51:13.183Z"
+      },
+      "fingerprint": "fp1:e8a86062230d2925812e9eb6e74120e374a5f5ee"
+    },
+    {
+      "id": "ar-tr-039",
+      "title": "Should you recheck PayPal after recent changes?",
+      "angle": "Recheck PayPal because recent changes may affect the user’s previous decision.",
+      "audience": "Deal hunters",
+      "intent": "review/recheck",
+      "environment": "shopping apps",
+      "timing": "sale seasons",
+      "goal": "decide whether PayPal deserves a fresh look after pricing or plan change",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Shopping Price Comparison App",
+        "platform": "android",
+        "name": "PayPal"
+      },
+      "entity": {
+        "name": "PayPal",
+        "type": "app",
+        "category": "finance",
+        "platform": [
+          "web",
+          "ios",
+          "android"
+        ]
+      },
+      "keyPoints": [
+        "why the app deserves a fresh look now",
+        "which decision factor changed: pricing or plan change",
+        "whether existing users should keep their previous choice"
+      ],
+      "decisionType": "test",
+      "decisionSummary": "PayPal remains a valid option, but users should recheck it because pricing or plan change changed the context.",
+      "trendContext": {
+        "timing": "2026-Q1",
+        "contextDate": "2026-01",
+        "changeReason": "pricing or plan change",
+        "marketSignal": "pricing or plan change created a current decision point for finance users",
+        "decisionContext": "PayPal needs a time-stamped review because pricing or plan change",
+        "historicalValue": true,
+        "currentUse": "current decision support",
+        "laterUse": "historical comparison record",
+        "reviewWindow": "30-90 days",
+        "sourceType": "curated trend seed design",
+        "intent": "review/recheck"
+      },
+      "selectionCriteria": {
+        "recentUpdate": true,
+        "marketMovement": true,
+        "decisionRequired": true,
+        "historicalValue": true,
+        "timeStamped": true,
+        "changeReasonRequired": true,
+        "appTrendReview": true,
+        "notEvergreen": true,
+        "entityDistributed": true
+      },
+      "selectionMeta": {
+        "validated": true,
+        "sourceType": "app trend time-stamped decision redesign rule",
+        "selectionReason": "redesigned as review/recheck because pricing or plan change",
+        "schema": "AOIA",
+        "mode": "trend",
+        "selectedAt": "2026-05-03T04:51:13.185Z"
+      },
+      "fingerprint": "fp1:36568d60e96edb149743dac3732b25aab71da2dc"
+    },
+    {
+      "id": "ar-tr-016",
+      "title": "How does Revolut compare now after competitor improvement?",
+      "angle": "Compare Revolut against alternatives in the current market context after competitor improvement.",
+      "audience": "Creators",
+      "intent": "review/compare-now",
+      "environment": "video editing",
+      "timing": "trending app wave",
+      "goal": "compare Revolut with current alternatives after competitor improvement",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "AI Video Editing App",
+        "platform": "android",
+        "name": "Revolut"
+      },
+      "entity": {
+        "name": "Revolut",
+        "type": "app",
+        "category": "finance",
+        "platform": [
+          "web",
+          "ios",
+          "android"
+        ]
+      },
+      "keyPoints": [
+        "which alternatives now look stronger or weaker",
+        "how the comparison changed after competitor improvement",
+        "what matters most for current users"
+      ],
+      "decisionType": "compare",
+      "decisionSummary": "Revolut should be compared again because competitor improvement may make alternatives more competitive.",
+      "trendContext": {
+        "timing": "2026-Q2",
+        "contextDate": "2026-02",
+        "changeReason": "competitor improvement",
+        "marketSignal": "competitor improvement created a current decision point for finance users",
+        "decisionContext": "Revolut needs a time-stamped review because competitor improvement",
+        "historicalValue": true,
+        "currentUse": "current decision support",
+        "laterUse": "historical comparison record",
+        "reviewWindow": "30-90 days",
+        "sourceType": "curated trend seed design",
+        "intent": "review/compare-now"
+      },
+      "selectionCriteria": {
+        "recentUpdate": true,
+        "marketMovement": true,
+        "decisionRequired": true,
+        "historicalValue": true,
+        "timeStamped": true,
+        "changeReasonRequired": true,
+        "appTrendReview": true,
+        "notEvergreen": true,
+        "entityDistributed": true
+      },
+      "selectionMeta": {
+        "validated": true,
+        "sourceType": "app trend time-stamped decision redesign rule",
+        "selectionReason": "redesigned as review/compare-now because competitor improvement",
+        "schema": "AOIA",
+        "mode": "trend",
+        "selectedAt": "2026-05-03T04:51:13.183Z"
+      },
+      "fingerprint": "fp1:c264f7d1410e918e72d06ab34794de42344900da"
+    },
+    {
+      "id": "ar-tr-035",
+      "title": "Is Robinhood still worth using after user sentiment shift?",
+      "angle": "Judge whether Robinhood still provides enough value after user sentiment shift.",
+      "audience": "Travelers",
+      "intent": "review/still-worth",
+      "environment": "booking apps",
+      "timing": "seasonal",
+      "goal": "decide whether Robinhood is still worth using after user sentiment shift",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Booking App",
+        "platform": "android",
+        "name": "Robinhood"
+      },
+      "entity": {
+        "name": "Robinhood",
+        "type": "app",
+        "category": "finance",
+        "platform": [
+          "web",
+          "ios",
+          "android"
+        ]
+      },
+      "keyPoints": [
+        "whether user sentiment shift changes the value calculation",
+        "which users still benefit most",
+        "which users should reconsider"
+      ],
+      "decisionType": "keep",
+      "decisionSummary": "Robinhood may still be worth using, but the value depends on how much user sentiment shift affects the user.",
+      "trendContext": {
+        "timing": "2026-Q3",
+        "contextDate": "2026-03",
+        "changeReason": "user sentiment shift",
+        "marketSignal": "user sentiment shift created a current decision point for finance users",
+        "decisionContext": "Robinhood needs a time-stamped review because user sentiment shift",
+        "historicalValue": true,
+        "currentUse": "current decision support",
+        "laterUse": "historical comparison record",
+        "reviewWindow": "30-90 days",
+        "sourceType": "curated trend seed design",
+        "intent": "review/still-worth"
+      },
+      "selectionCriteria": {
+        "recentUpdate": true,
+        "marketMovement": true,
+        "decisionRequired": true,
+        "historicalValue": true,
+        "timeStamped": true,
+        "changeReasonRequired": true,
+        "appTrendReview": true,
+        "notEvergreen": true,
+        "entityDistributed": true
+      },
+      "selectionMeta": {
+        "validated": true,
+        "sourceType": "app trend time-stamped decision redesign rule",
+        "selectionReason": "redesigned as review/still-worth because user sentiment shift",
+        "schema": "AOIA",
+        "mode": "trend",
+        "selectedAt": "2026-05-03T04:51:13.185Z"
+      },
+      "fingerprint": "fp1:9019285a572cb2bb7aafb2b4d71a92ddbfee8b13"
+    },
+    {
+      "id": "ar-tr-040",
+      "title": "Should you keep using Webull after AI feature expansion?",
+      "angle": "Help users decide whether to keep using Webull or switch based on current signals.",
+      "audience": "Travelers",
+      "intent": "review/switch-or-keep",
+      "environment": "weather",
+      "timing": "storm season",
+      "goal": "decide whether to keep using Webull or switch after AI feature expansion",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Weather Radar App",
+        "platform": "android",
+        "name": "Webull"
+      },
+      "entity": {
+        "name": "Webull",
+        "type": "app",
+        "category": "finance",
+        "platform": [
+          "web",
+          "ios",
+          "android"
+        ]
+      },
+      "keyPoints": [
+        "what existing users would lose by switching",
+        "what changed because of AI feature expansion",
+        "when switching becomes reasonable"
+      ],
+      "decisionType": "keep-or-switch",
+      "decisionSummary": "Webull is not automatically obsolete, but users should compare the cost of staying against switching after AI feature expansion.",
+      "trendContext": {
+        "timing": "2026-Q4",
+        "contextDate": "2026-04",
+        "changeReason": "AI feature expansion",
+        "marketSignal": "AI feature expansion created a current decision point for finance users",
+        "decisionContext": "Webull needs a time-stamped review because AI feature expansion",
+        "historicalValue": true,
+        "currentUse": "current decision support",
+        "laterUse": "historical comparison record",
+        "reviewWindow": "30-90 days",
+        "sourceType": "curated trend seed design",
+        "intent": "review/switch-or-keep"
+      },
+      "selectionCriteria": {
+        "recentUpdate": true,
+        "marketMovement": true,
+        "decisionRequired": true,
+        "historicalValue": true,
+        "timeStamped": true,
+        "changeReasonRequired": true,
+        "appTrendReview": true,
+        "notEvergreen": true,
+        "entityDistributed": true
+      },
+      "selectionMeta": {
+        "validated": true,
+        "sourceType": "app trend time-stamped decision redesign rule",
+        "selectionReason": "redesigned as review/switch-or-keep because AI feature expansion",
+        "schema": "AOIA",
+        "mode": "trend",
+        "selectedAt": "2026-05-03T04:51:13.185Z"
+      },
+      "fingerprint": "fp1:e3fd32211bea9e7bce6dfda4dde1b2f2c3a9237e"
+    },
+    {
+      "id": "ar-tr-011",
+      "title": "What changed in AliExpress after the 2026-05 privacy or account policy change?",
+      "angle": "Review AliExpress as a time-stamped update record after the 2026-05 privacy or account policy change.",
+      "audience": "Students and knowledge workers",
+      "intent": "review/update",
+      "environment": "note taking",
+      "timing": "trend",
+      "goal": "record what changed in AliExpress and how it affects current users",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Note App",
+        "platform": "android",
+        "name": "AliExpress"
+      },
+      "entity": {
+        "name": "AliExpress",
+        "type": "app",
+        "category": "shopping",
+        "platform": [
+          "web",
+          "ios",
+          "android"
+        ]
+      },
+      "keyPoints": [
+        "what changed: privacy or account policy change",
+        "who is affected by the change",
+        "whether the change alters the previous recommendation"
+      ],
+      "decisionType": "test",
+      "decisionSummary": "AliExpress should be re-evaluated because privacy or account policy change may change the practical recommendation.",
+      "trendContext": {
+        "timing": "2026-Q1",
+        "contextDate": "2026-05",
+        "changeReason": "privacy or account policy change",
+        "marketSignal": "privacy or account policy change created a current decision point for shopping users",
+        "decisionContext": "AliExpress needs a time-stamped review because privacy or account policy change",
+        "historicalValue": true,
+        "currentUse": "current decision support",
+        "laterUse": "historical comparison record",
+        "reviewWindow": "30-90 days",
+        "sourceType": "curated trend seed design",
+        "intent": "review/update"
+      },
+      "selectionCriteria": {
+        "recentUpdate": true,
+        "marketMovement": true,
+        "decisionRequired": true,
+        "historicalValue": true,
+        "timeStamped": true,
+        "changeReasonRequired": true,
+        "appTrendReview": true,
+        "notEvergreen": true,
+        "entityDistributed": true
+      },
+      "selectionMeta": {
+        "validated": true,
+        "sourceType": "app trend time-stamped decision redesign rule",
+        "selectionReason": "redesigned as review/update because privacy or account policy change",
+        "schema": "AOIA",
+        "mode": "trend",
+        "selectedAt": "2026-05-03T04:51:13.183Z"
+      },
+      "fingerprint": "fp1:27db190ea8dfa6018431f6c466239b3a5da6ce88"
+    },
+    {
+      "id": "ar-tr-043",
+      "title": "Should you recheck Temu after recent changes?",
+      "angle": "Recheck Temu because recent changes may affect the user’s previous decision.",
+      "audience": "General users",
+      "intent": "review/recheck",
+      "environment": "payment apps",
+      "timing": "peak usage",
+      "goal": "decide whether Temu deserves a fresh look after workflow relevance change",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Peer Transfer Payment App",
+        "platform": "android",
+        "name": "Temu"
+      },
+      "entity": {
+        "name": "Temu",
+        "type": "app",
+        "category": "shopping",
+        "platform": [
+          "web",
+          "ios",
+          "android"
+        ]
+      },
+      "keyPoints": [
+        "why the app deserves a fresh look now",
+        "which decision factor changed: workflow relevance change",
+        "whether existing users should keep their previous choice"
+      ],
+      "decisionType": "test",
+      "decisionSummary": "Temu remains a valid option, but users should recheck it because workflow relevance change changed the context.",
+      "trendContext": {
+        "timing": "2026-Q2",
+        "contextDate": "2026-06",
+        "changeReason": "workflow relevance change",
+        "marketSignal": "workflow relevance change created a current decision point for shopping users",
+        "decisionContext": "Temu needs a time-stamped review because workflow relevance change",
+        "historicalValue": true,
+        "currentUse": "current decision support",
+        "laterUse": "historical comparison record",
+        "reviewWindow": "30-90 days",
+        "sourceType": "curated trend seed design",
+        "intent": "review/recheck"
+      },
+      "selectionCriteria": {
+        "recentUpdate": true,
+        "marketMovement": true,
+        "decisionRequired": true,
+        "historicalValue": true,
+        "timeStamped": true,
+        "changeReasonRequired": true,
+        "appTrendReview": true,
+        "notEvergreen": true,
+        "entityDistributed": true
+      },
+      "selectionMeta": {
+        "validated": true,
+        "sourceType": "app trend time-stamped decision redesign rule",
+        "selectionReason": "redesigned as review/recheck because workflow relevance change",
+        "schema": "AOIA",
+        "mode": "trend",
+        "selectedAt": "2026-05-03T04:51:13.187Z"
+      },
+      "fingerprint": "fp1:a5a90a7c2c7b00f8eb6df79436abf94e9916789b"
+    },
+    {
+      "id": "ar-tr-046",
+      "title": "How does Shopee compare now after mobile app experience change?",
+      "angle": "Compare Shopee against alternatives in the current market context after mobile app experience change.",
+      "audience": "General users",
+      "intent": "review/compare-now",
+      "environment": "file sharing",
+      "timing": "update wave",
+      "goal": "compare Shopee with current alternatives after mobile app experience change",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "File-Sharing App",
+        "platform": "android",
+        "name": "Shopee"
+      },
+      "entity": {
+        "name": "Shopee",
+        "type": "app",
+        "category": "shopping",
+        "platform": [
+          "web",
+          "ios",
+          "android"
+        ]
+      },
+      "keyPoints": [
+        "which alternatives now look stronger or weaker",
+        "how the comparison changed after mobile app experience change",
+        "what matters most for current users"
+      ],
+      "decisionType": "compare",
+      "decisionSummary": "Shopee should be compared again because mobile app experience change may make alternatives more competitive.",
+      "trendContext": {
+        "timing": "2026-Q3",
+        "contextDate": "2026-07",
+        "changeReason": "mobile app experience change",
+        "marketSignal": "mobile app experience change created a current decision point for shopping users",
+        "decisionContext": "Shopee needs a time-stamped review because mobile app experience change",
+        "historicalValue": true,
+        "currentUse": "current decision support",
+        "laterUse": "historical comparison record",
+        "reviewWindow": "30-90 days",
+        "sourceType": "curated trend seed design",
+        "intent": "review/compare-now"
+      },
+      "selectionCriteria": {
+        "recentUpdate": true,
+        "marketMovement": true,
+        "decisionRequired": true,
+        "historicalValue": true,
+        "timeStamped": true,
+        "changeReasonRequired": true,
+        "appTrendReview": true,
+        "notEvergreen": true,
+        "entityDistributed": true
+      },
+      "selectionMeta": {
+        "validated": true,
+        "sourceType": "app trend time-stamped decision redesign rule",
+        "selectionReason": "redesigned as review/compare-now because mobile app experience change",
+        "schema": "AOIA",
+        "mode": "trend",
+        "selectedAt": "2026-05-03T04:51:13.187Z"
+      },
+      "fingerprint": "fp1:e2c7a5170ffc870ed54fbd0abf6687fe9098af54"
+    },
+    {
+      "id": "ar-tr-047",
+      "title": "Is Amazon Shopping still worth using after market positioning change?",
+      "angle": "Judge whether Amazon Shopping still provides enough value after market positioning change.",
+      "audience": "Students",
+      "intent": "review/still-worth",
+      "environment": "education apps",
+      "timing": "academic season",
+      "goal": "decide whether Amazon Shopping is still worth using after market positioning change",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "AI Tutor Learning App",
+        "platform": "android",
+        "name": "Amazon Shopping"
+      },
+      "entity": {
+        "name": "Amazon Shopping",
+        "type": "app",
+        "category": "shopping",
+        "platform": [
+          "web",
+          "ios",
+          "android"
+        ]
+      },
+      "keyPoints": [
+        "whether market positioning change changes the value calculation",
+        "which users still benefit most",
+        "which users should reconsider"
+      ],
+      "decisionType": "keep",
+      "decisionSummary": "Amazon Shopping may still be worth using, but the value depends on how much market positioning change affects the user.",
+      "trendContext": {
+        "timing": "2026-Q4",
+        "contextDate": "2026-08",
+        "changeReason": "market positioning change",
+        "marketSignal": "market positioning change created a current decision point for shopping users",
+        "decisionContext": "Amazon Shopping needs a time-stamped review because market positioning change",
+        "historicalValue": true,
+        "currentUse": "current decision support",
+        "laterUse": "historical comparison record",
+        "reviewWindow": "30-90 days",
+        "sourceType": "curated trend seed design",
+        "intent": "review/still-worth"
+      },
+      "selectionCriteria": {
+        "recentUpdate": true,
+        "marketMovement": true,
+        "decisionRequired": true,
+        "historicalValue": true,
+        "timeStamped": true,
+        "changeReasonRequired": true,
+        "appTrendReview": true,
+        "notEvergreen": true,
+        "entityDistributed": true
+      },
+      "selectionMeta": {
+        "validated": true,
+        "sourceType": "app trend time-stamped decision redesign rule",
+        "selectionReason": "redesigned as review/still-worth because market positioning change",
+        "schema": "AOIA",
+        "mode": "trend",
+        "selectedAt": "2026-05-03T04:51:13.187Z"
+      },
+      "fingerprint": "fp1:f334f8cab53174ba3672475670b3e8a2c2cd5069"
+    },
+    {
+      "id": "ar-tr-020",
+      "title": "What changed in Google Drive after the 2026-09 mobile app experience change?",
+      "angle": "Review Google Drive as a time-stamped update record after the 2026-09 mobile app experience change.",
+      "audience": "Daily commuters",
+      "intent": "review/update",
+      "environment": "transport apps",
+      "timing": "seasonal",
+      "goal": "record what changed in Google Drive and how it affects current users",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Ride-Hailing App",
+        "platform": "android",
+        "name": "Google Drive"
+      },
+      "entity": {
+        "name": "Google Drive",
+        "type": "app",
+        "category": "cloud-storage",
+        "platform": [
+          "web",
+          "desktop",
+          "ios",
+          "android"
+        ]
+      },
+      "keyPoints": [
+        "what changed: mobile app experience change",
+        "who is affected by the change",
+        "whether the change alters the previous recommendation"
+      ],
+      "decisionType": "test",
+      "decisionSummary": "Google Drive should be re-evaluated because mobile app experience change may change the practical recommendation.",
+      "trendContext": {
+        "timing": "2026-Q1",
+        "contextDate": "2026-09",
+        "changeReason": "mobile app experience change",
+        "marketSignal": "mobile app experience change created a current decision point for cloud-storage users",
+        "decisionContext": "Google Drive needs a time-stamped review because mobile app experience change",
+        "historicalValue": true,
+        "currentUse": "current decision support",
+        "laterUse": "historical comparison record",
+        "reviewWindow": "30-90 days",
+        "sourceType": "curated trend seed design",
+        "intent": "review/update"
+      },
+      "selectionCriteria": {
+        "recentUpdate": true,
+        "marketMovement": true,
+        "decisionRequired": true,
+        "historicalValue": true,
+        "timeStamped": true,
+        "changeReasonRequired": true,
+        "appTrendReview": true,
+        "notEvergreen": true,
+        "entityDistributed": true
+      },
+      "selectionMeta": {
+        "validated": true,
+        "sourceType": "app trend time-stamped decision redesign rule",
+        "selectionReason": "redesigned as review/update because mobile app experience change",
+        "schema": "AOIA",
+        "mode": "trend",
+        "selectedAt": "2026-05-03T04:51:13.184Z"
+      },
+      "fingerprint": "fp1:635465c009b11b7e91130d2f5e23812e98c8e017"
+    },
+    {
+      "id": "ar-tr-023",
+      "title": "Should you recheck Dropbox after recent changes?",
+      "angle": "Recheck Dropbox because recent changes may affect the user’s previous decision.",
+      "audience": "Families and fitness users",
+      "intent": "review/recheck",
+      "environment": "meal planner",
+      "timing": "launch",
+      "goal": "decide whether Dropbox deserves a fresh look after market positioning change",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Meal Planning App",
+        "platform": "android",
+        "name": "Dropbox"
+      },
+      "entity": {
+        "name": "Dropbox",
+        "type": "app",
+        "category": "cloud-storage",
+        "platform": [
+          "web",
+          "desktop",
+          "ios",
+          "android"
+        ]
+      },
+      "keyPoints": [
+        "why the app deserves a fresh look now",
+        "which decision factor changed: market positioning change",
+        "whether existing users should keep their previous choice"
+      ],
+      "decisionType": "test",
+      "decisionSummary": "Dropbox remains a valid option, but users should recheck it because market positioning change changed the context.",
+      "trendContext": {
+        "timing": "2026-Q2",
+        "contextDate": "2026-10",
+        "changeReason": "market positioning change",
+        "marketSignal": "market positioning change created a current decision point for cloud-storage users",
+        "decisionContext": "Dropbox needs a time-stamped review because market positioning change",
+        "historicalValue": true,
+        "currentUse": "current decision support",
+        "laterUse": "historical comparison record",
+        "reviewWindow": "30-90 days",
+        "sourceType": "curated trend seed design",
+        "intent": "review/recheck"
+      },
+      "selectionCriteria": {
+        "recentUpdate": true,
+        "marketMovement": true,
+        "decisionRequired": true,
+        "historicalValue": true,
+        "timeStamped": true,
+        "changeReasonRequired": true,
+        "appTrendReview": true,
+        "notEvergreen": true,
+        "entityDistributed": true
+      },
+      "selectionMeta": {
+        "validated": true,
+        "sourceType": "app trend time-stamped decision redesign rule",
+        "selectionReason": "redesigned as review/recheck because market positioning change",
+        "schema": "AOIA",
+        "mode": "trend",
+        "selectedAt": "2026-05-03T04:51:13.184Z"
+      },
+      "fingerprint": "fp1:b46ef8189c401dd591496252a5c4abcdbd3f24b9"
+    },
+    {
+      "id": "ar-tr-034",
+      "title": "How does iCloud Drive compare now after recent feature update?",
+      "angle": "Compare iCloud Drive against alternatives in the current market context after recent feature update.",
+      "audience": "Health-conscious users",
+      "intent": "review/compare-now",
+      "environment": "fitness apps",
+      "timing": "trend",
+      "goal": "compare iCloud Drive with current alternatives after recent feature update",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Fitness Tracker App",
+        "platform": "android",
+        "name": "iCloud Drive"
+      },
+      "entity": {
+        "name": "iCloud Drive",
+        "type": "app",
+        "category": "cloud-storage",
+        "platform": [
+          "web",
+          "ios",
+          "mac"
+        ]
+      },
+      "keyPoints": [
+        "which alternatives now look stronger or weaker",
+        "how the comparison changed after recent feature update",
+        "what matters most for current users"
+      ],
+      "decisionType": "compare",
+      "decisionSummary": "iCloud Drive should be compared again because recent feature update may make alternatives more competitive.",
+      "trendContext": {
+        "timing": "2026-Q3",
+        "contextDate": "2026-11",
+        "changeReason": "recent feature update",
+        "marketSignal": "recent feature update created a current decision point for cloud-storage users",
+        "decisionContext": "iCloud Drive needs a time-stamped review because recent feature update",
+        "historicalValue": true,
+        "currentUse": "current decision support",
+        "laterUse": "historical comparison record",
+        "reviewWindow": "30-90 days",
+        "sourceType": "curated trend seed design",
+        "intent": "review/compare-now"
+      },
+      "selectionCriteria": {
+        "recentUpdate": true,
+        "marketMovement": true,
+        "decisionRequired": true,
+        "historicalValue": true,
+        "timeStamped": true,
+        "changeReasonRequired": true,
+        "appTrendReview": true,
+        "notEvergreen": true,
+        "entityDistributed": true
+      },
+      "selectionMeta": {
+        "validated": true,
+        "sourceType": "app trend time-stamped decision redesign rule",
+        "selectionReason": "redesigned as review/compare-now because recent feature update",
+        "schema": "AOIA",
+        "mode": "trend",
+        "selectedAt": "2026-05-03T04:51:13.185Z"
+      },
+      "fingerprint": "fp1:b0a903fd1f1486bf3394348f284346e60ae2bc00"
+    },
+    {
+      "id": "ar-tr-048",
+      "title": "Is Google Photos still worth using after free-tier limitation?",
+      "angle": "Judge whether Google Photos still provides enough value after free-tier limitation.",
+      "audience": "Researchers and power users",
+      "intent": "review/still-worth",
+      "environment": "bookmark tools",
+      "timing": "trend",
+      "goal": "decide whether Google Photos is still worth using after free-tier limitation",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Bookmark Manager App",
+        "platform": "android",
+        "name": "Google Photos"
+      },
+      "entity": {
+        "name": "Google Photos",
+        "type": "app",
+        "category": "photo-storage",
+        "platform": [
+          "web",
+          "ios",
+          "android"
+        ]
+      },
+      "keyPoints": [
+        "whether free-tier limitation changes the value calculation",
+        "which users still benefit most",
+        "which users should reconsider"
+      ],
+      "decisionType": "keep",
+      "decisionSummary": "Google Photos may still be worth using, but the value depends on how much free-tier limitation affects the user.",
+      "trendContext": {
+        "timing": "2026-Q4",
+        "contextDate": "2026-12",
+        "changeReason": "free-tier limitation",
+        "marketSignal": "free-tier limitation created a current decision point for photo-storage users",
+        "decisionContext": "Google Photos needs a time-stamped review because free-tier limitation",
+        "historicalValue": true,
+        "currentUse": "current decision support",
+        "laterUse": "historical comparison record",
+        "reviewWindow": "30-90 days",
+        "sourceType": "curated trend seed design",
+        "intent": "review/still-worth"
+      },
+      "selectionCriteria": {
+        "recentUpdate": true,
+        "marketMovement": true,
+        "decisionRequired": true,
+        "historicalValue": true,
+        "timeStamped": true,
+        "changeReasonRequired": true,
+        "appTrendReview": true,
+        "notEvergreen": true,
+        "entityDistributed": true
+      },
+      "selectionMeta": {
+        "validated": true,
+        "sourceType": "app trend time-stamped decision redesign rule",
+        "selectionReason": "redesigned as review/still-worth because free-tier limitation",
+        "schema": "AOIA",
+        "mode": "trend",
+        "selectedAt": "2026-05-03T04:51:13.187Z"
+      },
+      "fingerprint": "fp1:cd9204846ebebed0d7186d709ac960c39272cdf3"
+    },
+    {
+      "id": "ar-tr-032",
+      "title": "What changed in Strava after the 2026-01 recent feature update?",
+      "angle": "Review Strava as a time-stamped update record after the 2026-01 recent feature update.",
+      "audience": "Mobile users",
+      "intent": "review/update",
+      "environment": "phone apps",
+      "timing": "launch",
+      "goal": "record what changed in Strava and how it affects current users",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Smart Dialer App",
+        "platform": "android",
+        "name": "Strava"
+      },
+      "entity": {
+        "name": "Strava",
+        "type": "app",
+        "category": "fitness",
+        "platform": [
+          "web",
+          "ios",
+          "android"
+        ]
+      },
+      "keyPoints": [
+        "what changed: recent feature update",
+        "who is affected by the change",
+        "whether the change alters the previous recommendation"
+      ],
+      "decisionType": "test",
+      "decisionSummary": "Strava should be re-evaluated because recent feature update may change the practical recommendation.",
+      "trendContext": {
+        "timing": "2026-Q1",
+        "contextDate": "2026-01",
+        "changeReason": "recent feature update",
+        "marketSignal": "recent feature update created a current decision point for fitness users",
+        "decisionContext": "Strava needs a time-stamped review because recent feature update",
+        "historicalValue": true,
+        "currentUse": "current decision support",
+        "laterUse": "historical comparison record",
+        "reviewWindow": "30-90 days",
+        "sourceType": "curated trend seed design",
+        "intent": "review/update"
+      },
+      "selectionCriteria": {
+        "recentUpdate": true,
+        "marketMovement": true,
+        "decisionRequired": true,
+        "historicalValue": true,
+        "timeStamped": true,
+        "changeReasonRequired": true,
+        "appTrendReview": true,
+        "notEvergreen": true,
+        "entityDistributed": true
+      },
+      "selectionMeta": {
+        "validated": true,
+        "sourceType": "app trend time-stamped decision redesign rule",
+        "selectionReason": "redesigned as review/update because recent feature update",
+        "schema": "AOIA",
+        "mode": "trend",
+        "selectedAt": "2026-05-03T04:51:13.185Z"
+      },
+      "fingerprint": "fp1:92871f3f2a48a56fd3967c80addf01e0e0d3fb04"
     },
     {
       "id": "ar-tr-050",
-      "title": "Is the New Shopping Cashback App Legit?",
-      "angle": "Cashout reliability + merchant coverage",
+      "title": "Should you recheck MyFitnessPal after recent changes?",
+      "angle": "Recheck MyFitnessPal because recent changes may affect the user’s previous decision.",
       "audience": "Deal hunters",
-      "intent": "review/trust-check",
+      "intent": "review/recheck",
       "environment": "cashback apps",
       "timing": "launch",
-      "goal": "avoid unreliable cashback platforms",
+      "goal": "decide whether MyFitnessPal deserves a fresh look after free-tier limitation",
       "reviewEntity": {
         "type": "app",
         "appName": "Shopping Cashback App",
-        "platform": "android"
-      }
+        "platform": "android",
+        "name": "MyFitnessPal"
+      },
+      "entity": {
+        "name": "MyFitnessPal",
+        "type": "app",
+        "category": "fitness",
+        "platform": [
+          "web",
+          "ios",
+          "android"
+        ]
+      },
+      "keyPoints": [
+        "why the app deserves a fresh look now",
+        "which decision factor changed: free-tier limitation",
+        "whether existing users should keep their previous choice"
+      ],
+      "decisionType": "test",
+      "decisionSummary": "MyFitnessPal remains a valid option, but users should recheck it because free-tier limitation changed the context.",
+      "trendContext": {
+        "timing": "2026-Q2",
+        "contextDate": "2026-02",
+        "changeReason": "free-tier limitation",
+        "marketSignal": "free-tier limitation created a current decision point for fitness users",
+        "decisionContext": "MyFitnessPal needs a time-stamped review because free-tier limitation",
+        "historicalValue": true,
+        "currentUse": "current decision support",
+        "laterUse": "historical comparison record",
+        "reviewWindow": "30-90 days",
+        "sourceType": "curated trend seed design",
+        "intent": "review/recheck"
+      },
+      "selectionCriteria": {
+        "recentUpdate": true,
+        "marketMovement": true,
+        "decisionRequired": true,
+        "historicalValue": true,
+        "timeStamped": true,
+        "changeReasonRequired": true,
+        "appTrendReview": true,
+        "notEvergreen": true,
+        "entityDistributed": true
+      },
+      "selectionMeta": {
+        "validated": true,
+        "sourceType": "app trend time-stamped decision redesign rule",
+        "selectionReason": "redesigned as review/recheck because free-tier limitation",
+        "schema": "AOIA",
+        "mode": "trend",
+        "selectedAt": "2026-05-03T04:51:13.187Z"
+      },
+      "fingerprint": "fp1:84398836cffd50b6ba617d7cef50c2c050fae618"
+    },
+    {
+      "id": "ar-tr-041",
+      "title": "How does Calm compare now after privacy or account policy change?",
+      "angle": "Compare Calm against alternatives in the current market context after privacy or account policy change.",
+      "audience": "Travelers",
+      "intent": "review/compare-now",
+      "environment": "navigation",
+      "timing": "travel season",
+      "goal": "compare Calm with current alternatives after privacy or account policy change",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Offline Navigation App",
+        "platform": "android",
+        "name": "Calm"
+      },
+      "entity": {
+        "name": "Calm",
+        "type": "app",
+        "category": "wellness",
+        "platform": [
+          "ios",
+          "android"
+        ]
+      },
+      "keyPoints": [
+        "which alternatives now look stronger or weaker",
+        "how the comparison changed after privacy or account policy change",
+        "what matters most for current users"
+      ],
+      "decisionType": "compare",
+      "decisionSummary": "Calm should be compared again because privacy or account policy change may make alternatives more competitive.",
+      "trendContext": {
+        "timing": "2026-Q3",
+        "contextDate": "2026-03",
+        "changeReason": "privacy or account policy change",
+        "marketSignal": "privacy or account policy change created a current decision point for wellness users",
+        "decisionContext": "Calm needs a time-stamped review because privacy or account policy change",
+        "historicalValue": true,
+        "currentUse": "current decision support",
+        "laterUse": "historical comparison record",
+        "reviewWindow": "30-90 days",
+        "sourceType": "curated trend seed design",
+        "intent": "review/compare-now"
+      },
+      "selectionCriteria": {
+        "recentUpdate": true,
+        "marketMovement": true,
+        "decisionRequired": true,
+        "historicalValue": true,
+        "timeStamped": true,
+        "changeReasonRequired": true,
+        "appTrendReview": true,
+        "notEvergreen": true,
+        "entityDistributed": true
+      },
+      "selectionMeta": {
+        "validated": true,
+        "sourceType": "app trend time-stamped decision redesign rule",
+        "selectionReason": "redesigned as review/compare-now because privacy or account policy change",
+        "schema": "AOIA",
+        "mode": "trend",
+        "selectedAt": "2026-05-03T04:51:13.187Z"
+      },
+      "fingerprint": "fp1:ae3ccd3c058f500f0626ab301ee52dcf812b5475"
+    },
+    {
+      "id": "ar-tr-033",
+      "title": "What changed in Headspace after the 2026-04 competitor improvement?",
+      "angle": "Review Headspace as a time-stamped update record after the 2026-04 competitor improvement.",
+      "audience": "Professionals",
+      "intent": "review/update",
+      "environment": "cloud apps",
+      "timing": "update",
+      "goal": "record what changed in Headspace and how it affects current users",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Cloud Storage App",
+        "platform": "android",
+        "name": "Headspace"
+      },
+      "entity": {
+        "name": "Headspace",
+        "type": "app",
+        "category": "wellness",
+        "platform": [
+          "ios",
+          "android"
+        ]
+      },
+      "keyPoints": [
+        "what changed: competitor improvement",
+        "who is affected by the change",
+        "whether the change alters the previous recommendation"
+      ],
+      "decisionType": "test",
+      "decisionSummary": "Headspace should be re-evaluated because competitor improvement may change the practical recommendation.",
+      "trendContext": {
+        "timing": "2026-Q4",
+        "contextDate": "2026-04",
+        "changeReason": "competitor improvement",
+        "marketSignal": "competitor improvement created a current decision point for wellness users",
+        "decisionContext": "Headspace needs a time-stamped review because competitor improvement",
+        "historicalValue": true,
+        "currentUse": "current decision support",
+        "laterUse": "historical comparison record",
+        "reviewWindow": "30-90 days",
+        "sourceType": "curated trend seed design",
+        "intent": "review/update"
+      },
+      "selectionCriteria": {
+        "recentUpdate": true,
+        "marketMovement": true,
+        "decisionRequired": true,
+        "historicalValue": true,
+        "timeStamped": true,
+        "changeReasonRequired": true,
+        "appTrendReview": true,
+        "notEvergreen": true,
+        "entityDistributed": true
+      },
+      "selectionMeta": {
+        "validated": true,
+        "sourceType": "app trend time-stamped decision redesign rule",
+        "selectionReason": "redesigned as review/update because competitor improvement",
+        "schema": "AOIA",
+        "mode": "trend",
+        "selectedAt": "2026-05-03T04:51:13.185Z"
+      },
+      "fingerprint": "fp1:6db8f07a5fdb40ebcddd1219f6e6d240f6febfde"
+    },
+    {
+      "id": "ar-tr-044",
+      "title": "Should you recheck Notion after recent changes?",
+      "angle": "Recheck Notion because recent changes may affect the user’s previous decision.",
+      "audience": "Remote teams",
+      "intent": "review/recheck",
+      "environment": "whiteboard apps",
+      "timing": "update",
+      "goal": "decide whether Notion deserves a fresh look after user sentiment shift",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "AI Whiteboard App",
+        "platform": "android",
+        "name": "Notion"
+      },
+      "entity": {
+        "name": "Notion",
+        "type": "app",
+        "category": "productivity",
+        "platform": [
+          "web",
+          "ios",
+          "android"
+        ]
+      },
+      "keyPoints": [
+        "why the app deserves a fresh look now",
+        "which decision factor changed: user sentiment shift",
+        "whether existing users should keep their previous choice"
+      ],
+      "decisionType": "test",
+      "decisionSummary": "Notion remains a valid option, but users should recheck it because user sentiment shift changed the context.",
+      "trendContext": {
+        "timing": "2026-Q1",
+        "contextDate": "2026-05",
+        "changeReason": "user sentiment shift",
+        "marketSignal": "user sentiment shift created a current decision point for productivity users",
+        "decisionContext": "Notion needs a time-stamped review because user sentiment shift",
+        "historicalValue": true,
+        "currentUse": "current decision support",
+        "laterUse": "historical comparison record",
+        "reviewWindow": "30-90 days",
+        "sourceType": "curated trend seed design",
+        "intent": "review/recheck"
+      },
+      "selectionCriteria": {
+        "recentUpdate": true,
+        "marketMovement": true,
+        "decisionRequired": true,
+        "historicalValue": true,
+        "timeStamped": true,
+        "changeReasonRequired": true,
+        "appTrendReview": true,
+        "notEvergreen": true,
+        "entityDistributed": true
+      },
+      "selectionMeta": {
+        "validated": true,
+        "sourceType": "app trend time-stamped decision redesign rule",
+        "selectionReason": "redesigned as review/recheck because user sentiment shift",
+        "schema": "AOIA",
+        "mode": "trend",
+        "selectedAt": "2026-05-03T04:51:13.187Z"
+      },
+      "fingerprint": "fp1:81a995c46772624b8840568e6072e208ea35242a"
+    },
+    {
+      "id": "ar-tr-038",
+      "title": "What changed in Evernote after the 2026-06 user sentiment shift?",
+      "angle": "Review Evernote as a time-stamped update record after the 2026-06 user sentiment shift.",
+      "audience": "Photo-heavy users",
+      "intent": "review/update",
+      "environment": "gallery apps",
+      "timing": "trend",
+      "goal": "record what changed in Evernote and how it affects current users",
+      "reviewEntity": {
+        "type": "app",
+        "appName": "Photo Management App",
+        "platform": "android",
+        "name": "Evernote"
+      },
+      "entity": {
+        "name": "Evernote",
+        "type": "app",
+        "category": "productivity",
+        "platform": [
+          "web",
+          "ios",
+          "android"
+        ]
+      },
+      "keyPoints": [
+        "what changed: user sentiment shift",
+        "who is affected by the change",
+        "whether the change alters the previous recommendation"
+      ],
+      "decisionType": "test",
+      "decisionSummary": "Evernote should be re-evaluated because user sentiment shift may change the practical recommendation.",
+      "trendContext": {
+        "timing": "2026-Q2",
+        "contextDate": "2026-06",
+        "changeReason": "user sentiment shift",
+        "marketSignal": "user sentiment shift created a current decision point for productivity users",
+        "decisionContext": "Evernote needs a time-stamped review because user sentiment shift",
+        "historicalValue": true,
+        "currentUse": "current decision support",
+        "laterUse": "historical comparison record",
+        "reviewWindow": "30-90 days",
+        "sourceType": "curated trend seed design",
+        "intent": "review/update"
+      },
+      "selectionCriteria": {
+        "recentUpdate": true,
+        "marketMovement": true,
+        "decisionRequired": true,
+        "historicalValue": true,
+        "timeStamped": true,
+        "changeReasonRequired": true,
+        "appTrendReview": true,
+        "notEvergreen": true,
+        "entityDistributed": true
+      },
+      "selectionMeta": {
+        "validated": true,
+        "sourceType": "app trend time-stamped decision redesign rule",
+        "selectionReason": "redesigned as review/update because user sentiment shift",
+        "schema": "AOIA",
+        "mode": "trend",
+        "selectedAt": "2026-05-03T04:51:13.185Z"
+      },
+      "fingerprint": "fp1:0db870a252ffd812b8b8a54ed7637e8f0191f7d1"
     }
-  ]
+  ],
+  "schema": "AOIA",
+  "mode": "trend",
+  "trendSchema": {
+    "schema": "AOIA",
+    "label": "app-reviews",
+    "mode": "trend",
+    "requiredConcept": "time-stamped decision record",
+    "requiredFields": [
+      "entity",
+      "reviewEntity",
+      "intent",
+      "title",
+      "angle",
+      "goal",
+      "keyPoints",
+      "trendContext",
+      "decisionSummary",
+      "decisionType",
+      "selectionCriteria",
+      "selectionMeta",
+      "fingerprint"
+    ]
+  },
+  "updatedAt": "2026-05-03T07:59:54.071Z"
 }

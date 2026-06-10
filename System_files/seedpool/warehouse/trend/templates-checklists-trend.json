@@ -11,45 +11,7 @@
       "audience": "Creators",
       "intent": "template",
       "priority": 1,
-      "fingerprint": "fp1:76f9942e106b6ba5ab002538a4ce56ac1e159c0f",
-      "trendMode": "current-workflow-template",
-      "entity": {
-        "type": "template-use-case",
-        "name": "Content Creation Checklist",
-        "intentFamily": "trend-template"
-      },
-      "templateType": "current-use-template",
-      "trendTrigger": "Users need a reusable structure for a current digital task, workflow, or decision.",
-      "currentUseCase": "Help users complete a modern task with fewer missed steps and clearer review points.",
-      "riskIfIgnored": "Without a clear template, users may repeat the same task inconsistently or miss important steps.",
-      "templateFields": [
-        "task",
-        "status",
-        "owner",
-        "notes",
-        "review date"
-      ],
-      "useCases": [
-        "current workflow setup",
-        "repeatable task execution",
-        "AI-assisted organization"
-      ],
-      "expectedOutcome": "the user can complete a current digital task with a reusable and reviewable structure",
-      "selectionCriteria": {
-        "trendTemplate": true,
-        "reusableStructure": true,
-        "currentWorkflowRelevant": true,
-        "actionableFields": true,
-        "beginnerFriendly": true,
-        "notPureEvergreen": true,
-        "hasReviewStep": true
-      },
-      "selectionMeta": {
-        "schema": "AOIA",
-        "mode": "trend",
-        "sourceType": "templates-checklists trend normalization",
-        "selectedAt": "2026-06-08T13:06:22.630Z"
-      }
+      "fingerprint": "fp1:76f9942e106b6ba5ab002538a4ce56ac1e159c0f"
     },
     {
       "id": "tc-tr-009",
@@ -58,45 +20,7 @@
       "audience": "Students and analysts",
       "intent": "template",
       "priority": 1,
-      "fingerprint": "fp1:a8e6169d11a9a3cc852db860590f2489587ab0ed",
-      "trendMode": "current-workflow-template",
-      "entity": {
-        "type": "template-use-case",
-        "name": "AI Research Prompt Template",
-        "intentFamily": "trend-template"
-      },
-      "templateType": "ai-workflow-template",
-      "trendTrigger": "AI tools are now used in everyday research, writing, planning, and review workflows.",
-      "currentUseCase": "Help users make AI-assisted work more structured, reusable, and easier to verify.",
-      "riskIfIgnored": "AI output may become inconsistent, hard to check, or difficult to reuse.",
-      "templateFields": [
-        "goal",
-        "input",
-        "constraints",
-        "output format",
-        "verification"
-      ],
-      "useCases": [
-        "AI prompt setup",
-        "research validation",
-        "content review"
-      ],
-      "expectedOutcome": "the user can complete a current digital task with a reusable and reviewable structure",
-      "selectionCriteria": {
-        "trendTemplate": true,
-        "reusableStructure": true,
-        "currentWorkflowRelevant": true,
-        "actionableFields": true,
-        "beginnerFriendly": true,
-        "notPureEvergreen": true,
-        "hasReviewStep": true
-      },
-      "selectionMeta": {
-        "schema": "AOIA",
-        "mode": "trend",
-        "sourceType": "templates-checklists trend normalization",
-        "selectedAt": "2026-06-08T13:06:22.630Z"
-      }
+      "fingerprint": "fp1:a8e6169d11a9a3cc852db860590f2489587ab0ed"
     },
     {
       "id": "tc-tr-010",
@@ -105,45 +29,7 @@
       "audience": "General users",
       "intent": "template",
       "priority": 1,
-      "fingerprint": "fp1:6755be9f4ecbbe6767db5c2791af0f116fd56750",
-      "trendMode": "current-workflow-template",
-      "entity": {
-        "type": "template-use-case",
-        "name": "Cross-Device Privacy Hardening Checklist",
-        "intentFamily": "trend-template"
-      },
-      "templateType": "digital-safety-checklist",
-      "trendTrigger": "Account security, app permissions, device recovery, and privacy controls change frequently.",
-      "currentUseCase": "Help users review digital safety settings across apps, accounts, and devices.",
-      "riskIfIgnored": "Old permissions or weak recovery settings can expose accounts, data, or devices.",
-      "templateFields": [
-        "item",
-        "current setting",
-        "risk level",
-        "action needed",
-        "review date"
-      ],
-      "useCases": [
-        "permission audit",
-        "account recovery setup",
-        "device security review"
-      ],
-      "expectedOutcome": "the user can complete a current digital task with a reusable and reviewable structure",
-      "selectionCriteria": {
-        "trendTemplate": true,
-        "reusableStructure": true,
-        "currentWorkflowRelevant": true,
-        "actionableFields": true,
-        "beginnerFriendly": true,
-        "notPureEvergreen": true,
-        "hasReviewStep": true
-      },
-      "selectionMeta": {
-        "schema": "AOIA",
-        "mode": "trend",
-        "sourceType": "templates-checklists trend normalization",
-        "selectedAt": "2026-06-08T13:06:22.630Z"
-      }
+      "fingerprint": "fp1:6755be9f4ecbbe6767db5c2791af0f116fd56750"
     },
     {
       "id": "tc-tr-011",
@@ -152,45 +38,7 @@
       "audience": "Fitness users",
       "intent": "template",
       "priority": 1,
-      "fingerprint": "fp1:4f1eabe89bfe0a403531e6add1da6f3b7929e91b",
-      "trendMode": "current-workflow-template",
-      "entity": {
-        "type": "template-use-case",
-        "name": "AI-assisted Workout Planner Template",
-        "intentFamily": "trend-template"
-      },
-      "templateType": "ai-workflow-template",
-      "trendTrigger": "AI tools are now used in everyday research, writing, planning, and review workflows.",
-      "currentUseCase": "Help users make AI-assisted work more structured, reusable, and easier to verify.",
-      "riskIfIgnored": "AI output may become inconsistent, hard to check, or difficult to reuse.",
-      "templateFields": [
-        "goal",
-        "input",
-        "constraints",
-        "output format",
-        "verification"
-      ],
-      "useCases": [
-        "AI prompt setup",
-        "research validation",
-        "content review"
-      ],
-      "expectedOutcome": "the user can complete a current digital task with a reusable and reviewable structure",
-      "selectionCriteria": {
-        "trendTemplate": true,
-        "reusableStructure": true,
-        "currentWorkflowRelevant": true,
-        "actionableFields": true,
-        "beginnerFriendly": true,
-        "notPureEvergreen": true,
-        "hasReviewStep": true
-      },
-      "selectionMeta": {
-        "schema": "AOIA",
-        "mode": "trend",
-        "sourceType": "templates-checklists trend normalization",
-        "selectedAt": "2026-06-08T13:06:22.630Z"
-      }
+      "fingerprint": "fp1:4f1eabe89bfe0a403531e6add1da6f3b7929e91b"
     },
     {
       "id": "tc-tr-012",
@@ -199,45 +47,7 @@
       "audience": "All new users",
       "intent": "template",
       "priority": 1,
-      "fingerprint": "fp1:95c8c6ad8ceb7132f28cd9ae40901ce87900aba6",
-      "trendMode": "current-workflow-template",
-      "entity": {
-        "type": "template-use-case",
-        "name": "Software Onboarding Checklist",
-        "intentFamily": "trend-template"
-      },
-      "templateType": "current-use-template",
-      "trendTrigger": "Users need a reusable structure for a current digital task, workflow, or decision.",
-      "currentUseCase": "Help users complete a modern task with fewer missed steps and clearer review points.",
-      "riskIfIgnored": "Without a clear template, users may repeat the same task inconsistently or miss important steps.",
-      "templateFields": [
-        "task",
-        "status",
-        "owner",
-        "notes",
-        "review date"
-      ],
-      "useCases": [
-        "current workflow setup",
-        "repeatable task execution",
-        "AI-assisted organization"
-      ],
-      "expectedOutcome": "the user can complete a current digital task with a reusable and reviewable structure",
-      "selectionCriteria": {
-        "trendTemplate": true,
-        "reusableStructure": true,
-        "currentWorkflowRelevant": true,
-        "actionableFields": true,
-        "beginnerFriendly": true,
-        "notPureEvergreen": true,
-        "hasReviewStep": true
-      },
-      "selectionMeta": {
-        "schema": "AOIA",
-        "mode": "trend",
-        "sourceType": "templates-checklists trend normalization",
-        "selectedAt": "2026-06-08T13:06:22.630Z"
-      }
+      "fingerprint": "fp1:95c8c6ad8ceb7132f28cd9ae40901ce87900aba6"
     },
     {
       "id": "tc-tr-013",
@@ -246,45 +56,7 @@
       "audience": "Busy workers",
       "intent": "template",
       "priority": 1,
-      "fingerprint": "fp1:23914db4ccbef3f2e610e2bb503abdd4e385a9ec",
-      "trendMode": "current-workflow-template",
-      "entity": {
-        "type": "template-use-case",
-        "name": "Digital Calendar Planning Template",
-        "intentFamily": "trend-template"
-      },
-      "templateType": "ai-workflow-template",
-      "trendTrigger": "AI tools are now used in everyday research, writing, planning, and review workflows.",
-      "currentUseCase": "Help users make AI-assisted work more structured, reusable, and easier to verify.",
-      "riskIfIgnored": "AI output may become inconsistent, hard to check, or difficult to reuse.",
-      "templateFields": [
-        "goal",
-        "input",
-        "constraints",
-        "output format",
-        "verification"
-      ],
-      "useCases": [
-        "AI prompt setup",
-        "research validation",
-        "content review"
-      ],
-      "expectedOutcome": "the user can complete a current digital task with a reusable and reviewable structure",
-      "selectionCriteria": {
-        "trendTemplate": true,
-        "reusableStructure": true,
-        "currentWorkflowRelevant": true,
-        "actionableFields": true,
-        "beginnerFriendly": true,
-        "notPureEvergreen": true,
-        "hasReviewStep": true
-      },
-      "selectionMeta": {
-        "schema": "AOIA",
-        "mode": "trend",
-        "sourceType": "templates-checklists trend normalization",
-        "selectedAt": "2026-06-08T13:06:22.630Z"
-      }
+      "fingerprint": "fp1:23914db4ccbef3f2e610e2bb503abdd4e385a9ec"
     },
     {
       "id": "tc-tr-014",
@@ -293,45 +65,7 @@
       "audience": "Homeowners",
       "intent": "template",
       "priority": 1,
-      "fingerprint": "fp1:6c931f2bb950629d98765700263383255b8303c7",
-      "trendMode": "current-workflow-template",
-      "entity": {
-        "type": "template-use-case",
-        "name": "Smart Home Setup Checklist ( universal)",
-        "intentFamily": "trend-template"
-      },
-      "templateType": "current-use-template",
-      "trendTrigger": "Users need a reusable structure for a current digital task, workflow, or decision.",
-      "currentUseCase": "Help users complete a modern task with fewer missed steps and clearer review points.",
-      "riskIfIgnored": "Without a clear template, users may repeat the same task inconsistently or miss important steps.",
-      "templateFields": [
-        "task",
-        "status",
-        "owner",
-        "notes",
-        "review date"
-      ],
-      "useCases": [
-        "current workflow setup",
-        "repeatable task execution",
-        "AI-assisted organization"
-      ],
-      "expectedOutcome": "the user can complete a current digital task with a reusable and reviewable structure",
-      "selectionCriteria": {
-        "trendTemplate": true,
-        "reusableStructure": true,
-        "currentWorkflowRelevant": true,
-        "actionableFields": true,
-        "beginnerFriendly": true,
-        "notPureEvergreen": true,
-        "hasReviewStep": true
-      },
-      "selectionMeta": {
-        "schema": "AOIA",
-        "mode": "trend",
-        "sourceType": "templates-checklists trend normalization",
-        "selectedAt": "2026-06-08T13:06:22.630Z"
-      }
+      "fingerprint": "fp1:6c931f2bb950629d98765700263383255b8303c7"
     },
     {
       "id": "tc-tr-015",
@@ -340,45 +74,7 @@
       "audience": "Workers and students",
       "intent": "template",
       "priority": 1,
-      "fingerprint": "fp1:6c72463ba0a6e58c9a59509439cf52f5deed3d41",
-      "trendMode": "current-workflow-template",
-      "entity": {
-        "type": "template-use-case",
-        "name": "AI-assisted Email Inbox Cleanup Template",
-        "intentFamily": "trend-template"
-      },
-      "templateType": "ai-workflow-template",
-      "trendTrigger": "AI tools are now used in everyday research, writing, planning, and review workflows.",
-      "currentUseCase": "Help users make AI-assisted work more structured, reusable, and easier to verify.",
-      "riskIfIgnored": "AI output may become inconsistent, hard to check, or difficult to reuse.",
-      "templateFields": [
-        "goal",
-        "input",
-        "constraints",
-        "output format",
-        "verification"
-      ],
-      "useCases": [
-        "AI prompt setup",
-        "research validation",
-        "content review"
-      ],
-      "expectedOutcome": "the user can complete a current digital task with a reusable and reviewable structure",
-      "selectionCriteria": {
-        "trendTemplate": true,
-        "reusableStructure": true,
-        "currentWorkflowRelevant": true,
-        "actionableFields": true,
-        "beginnerFriendly": true,
-        "notPureEvergreen": true,
-        "hasReviewStep": true
-      },
-      "selectionMeta": {
-        "schema": "AOIA",
-        "mode": "trend",
-        "sourceType": "templates-checklists trend normalization",
-        "selectedAt": "2026-06-08T13:06:22.630Z"
-      }
+      "fingerprint": "fp1:6c72463ba0a6e58c9a59509439cf52f5deed3d41"
     },
     {
       "id": "tc-tr-016",
@@ -387,45 +83,7 @@
       "audience": "People switching phones",
       "intent": "template",
       "priority": 1,
-      "fingerprint": "fp1:3381b5d98dee26a79a848343423303df89a01ea3",
-      "trendMode": "current-workflow-template",
-      "entity": {
-        "type": "template-use-case",
-        "name": "Device Migration Checklist (Android ↔ iPhone)",
-        "intentFamily": "trend-template"
-      },
-      "templateType": "device-transition-checklist",
-      "trendTrigger": "Users frequently move between devices, reset phones, or extend the life of older hardware.",
-      "currentUseCase": "Help users avoid missing backups, sync steps, account logouts, and setup checks.",
-      "riskIfIgnored": "Device changes can cause data loss, login problems, or unfinished setup.",
-      "templateFields": [
-        "device",
-        "backup status",
-        "account status",
-        "transfer step",
-        "final check"
-      ],
-      "useCases": [
-        "phone migration",
-        "factory reset preparation",
-        "old device safety"
-      ],
-      "expectedOutcome": "the user can complete a current digital task with a reusable and reviewable structure",
-      "selectionCriteria": {
-        "trendTemplate": true,
-        "reusableStructure": true,
-        "currentWorkflowRelevant": true,
-        "actionableFields": true,
-        "beginnerFriendly": true,
-        "notPureEvergreen": true,
-        "hasReviewStep": true
-      },
-      "selectionMeta": {
-        "schema": "AOIA",
-        "mode": "trend",
-        "sourceType": "templates-checklists trend normalization",
-        "selectedAt": "2026-06-08T13:06:22.630Z"
-      }
+      "fingerprint": "fp1:3381b5d98dee26a79a848343423303df89a01ea3"
     },
     {
       "id": "tc-tr-017",
@@ -434,45 +92,7 @@
       "audience": "General users",
       "intent": "template",
       "priority": 1,
-      "fingerprint": "fp1:c4823208ef7af42aec5a5b5a5bfdae34c50bf7c9",
-      "trendMode": "current-workflow-template",
-      "entity": {
-        "type": "template-use-case",
-        "name": "Personal Finance Weekly Review Template",
-        "intentFamily": "trend-template"
-      },
-      "templateType": "productivity-planning-template",
-      "trendTrigger": "Hybrid work, AI reminders, and multi-app task systems make planning more complex.",
-      "currentUseCase": "Help users turn scattered tasks into a repeatable weekly or daily planning structure.",
-      "riskIfIgnored": "Tasks may remain scattered across apps, causing missed work and weak follow-through.",
-      "templateFields": [
-        "task",
-        "priority",
-        "time block",
-        "tool/app",
-        "follow-up"
-      ],
-      "useCases": [
-        "weekly planning",
-        "remote work routine",
-        "task prioritization"
-      ],
-      "expectedOutcome": "the user can complete a current digital task with a reusable and reviewable structure",
-      "selectionCriteria": {
-        "trendTemplate": true,
-        "reusableStructure": true,
-        "currentWorkflowRelevant": true,
-        "actionableFields": true,
-        "beginnerFriendly": true,
-        "notPureEvergreen": true,
-        "hasReviewStep": true
-      },
-      "selectionMeta": {
-        "schema": "AOIA",
-        "mode": "trend",
-        "sourceType": "templates-checklists trend normalization",
-        "selectedAt": "2026-06-08T13:06:22.631Z"
-      }
+      "fingerprint": "fp1:c4823208ef7af42aec5a5b5a5bfdae34c50bf7c9"
     },
     {
       "id": "tc-tr-018",
@@ -481,45 +101,7 @@
       "audience": "Remote workers",
       "intent": "template",
       "priority": 1,
-      "fingerprint": "fp1:b0d3d7912435d1b9a6ad5ff8f842b995caf7b257",
-      "trendMode": "current-workflow-template",
-      "entity": {
-        "type": "template-use-case",
-        "name": "Remote Work Productivity Template",
-        "intentFamily": "trend-template"
-      },
-      "templateType": "productivity-planning-template",
-      "trendTrigger": "Hybrid work, AI reminders, and multi-app task systems make planning more complex.",
-      "currentUseCase": "Help users turn scattered tasks into a repeatable weekly or daily planning structure.",
-      "riskIfIgnored": "Tasks may remain scattered across apps, causing missed work and weak follow-through.",
-      "templateFields": [
-        "task",
-        "priority",
-        "time block",
-        "tool/app",
-        "follow-up"
-      ],
-      "useCases": [
-        "weekly planning",
-        "remote work routine",
-        "task prioritization"
-      ],
-      "expectedOutcome": "the user can complete a current digital task with a reusable and reviewable structure",
-      "selectionCriteria": {
-        "trendTemplate": true,
-        "reusableStructure": true,
-        "currentWorkflowRelevant": true,
-        "actionableFields": true,
-        "beginnerFriendly": true,
-        "notPureEvergreen": true,
-        "hasReviewStep": true
-      },
-      "selectionMeta": {
-        "schema": "AOIA",
-        "mode": "trend",
-        "sourceType": "templates-checklists trend normalization",
-        "selectedAt": "2026-06-08T13:06:22.631Z"
-      }
+      "fingerprint": "fp1:b0d3d7912435d1b9a6ad5ff8f842b995caf7b257"
     },
     {
       "id": "tc-tr-019",
@@ -528,45 +110,7 @@
       "audience": "General public",
       "intent": "template",
       "priority": 1,
-      "fingerprint": "fp1:89776daa7adcc73588c68e79e8756bdef3b231fd",
-      "trendMode": "current-workflow-template",
-      "entity": {
-        "type": "template-use-case",
-        "name": "Digital Safety Checklist for Older Devices",
-        "intentFamily": "trend-template"
-      },
-      "templateType": "digital-safety-checklist",
-      "trendTrigger": "Account security, app permissions, device recovery, and privacy controls change frequently.",
-      "currentUseCase": "Help users review digital safety settings across apps, accounts, and devices.",
-      "riskIfIgnored": "Old permissions or weak recovery settings can expose accounts, data, or devices.",
-      "templateFields": [
-        "item",
-        "current setting",
-        "risk level",
-        "action needed",
-        "review date"
-      ],
-      "useCases": [
-        "permission audit",
-        "account recovery setup",
-        "device security review"
-      ],
-      "expectedOutcome": "the user can complete a current digital task with a reusable and reviewable structure",
-      "selectionCriteria": {
-        "trendTemplate": true,
-        "reusableStructure": true,
-        "currentWorkflowRelevant": true,
-        "actionableFields": true,
-        "beginnerFriendly": true,
-        "notPureEvergreen": true,
-        "hasReviewStep": true
-      },
-      "selectionMeta": {
-        "schema": "AOIA",
-        "mode": "trend",
-        "sourceType": "templates-checklists trend normalization",
-        "selectedAt": "2026-06-08T13:06:22.631Z"
-      }
+      "fingerprint": "fp1:89776daa7adcc73588c68e79e8756bdef3b231fd"
     },
     {
       "id": "tc-tr-020",
@@ -575,45 +119,7 @@
       "audience": "Students and analysts",
       "intent": "template",
       "priority": 1,
-      "fingerprint": "fp1:f593aef72909fa6099e1dbfae46837ec677538dd",
-      "trendMode": "current-workflow-template",
-      "entity": {
-        "type": "template-use-case",
-        "name": "Smart Notetaking Framework Template",
-        "intentFamily": "trend-template"
-      },
-      "templateType": "knowledge-work-template",
-      "trendTrigger": "Creators, students, and analysts increasingly use AI and structured notes to manage knowledge work.",
-      "currentUseCase": "Help users capture ideas, organize references, and turn information into useful outputs.",
-      "riskIfIgnored": "Ideas and research may remain scattered, duplicated, or hard to turn into action.",
-      "templateFields": [
-        "idea",
-        "source",
-        "insight",
-        "next action",
-        "output"
-      ],
-      "useCases": [
-        "project planning",
-        "knowledge review",
-        "creative workflow"
-      ],
-      "expectedOutcome": "the user can complete a current digital task with a reusable and reviewable structure",
-      "selectionCriteria": {
-        "trendTemplate": true,
-        "reusableStructure": true,
-        "currentWorkflowRelevant": true,
-        "actionableFields": true,
-        "beginnerFriendly": true,
-        "notPureEvergreen": true,
-        "hasReviewStep": true
-      },
-      "selectionMeta": {
-        "schema": "AOIA",
-        "mode": "trend",
-        "sourceType": "templates-checklists trend normalization",
-        "selectedAt": "2026-06-08T13:06:22.631Z"
-      }
+      "fingerprint": "fp1:f593aef72909fa6099e1dbfae46837ec677538dd"
     },
     {
       "id": "tc-tr-021",
@@ -622,45 +128,7 @@
       "audience": "Productivity users",
       "intent": "template",
       "priority": 1,
-      "fingerprint": "fp1:9df9f2d206db28dc8d3559bd969756196e6378b7",
-      "trendMode": "current-workflow-template",
-      "entity": {
-        "type": "template-use-case",
-        "name": "AI Project Planning Template",
-        "intentFamily": "trend-template"
-      },
-      "templateType": "ai-workflow-template",
-      "trendTrigger": "AI tools are now used in everyday research, writing, planning, and review workflows.",
-      "currentUseCase": "Help users make AI-assisted work more structured, reusable, and easier to verify.",
-      "riskIfIgnored": "AI output may become inconsistent, hard to check, or difficult to reuse.",
-      "templateFields": [
-        "goal",
-        "input",
-        "constraints",
-        "output format",
-        "verification"
-      ],
-      "useCases": [
-        "AI prompt setup",
-        "research validation",
-        "content review"
-      ],
-      "expectedOutcome": "the user can complete a current digital task with a reusable and reviewable structure",
-      "selectionCriteria": {
-        "trendTemplate": true,
-        "reusableStructure": true,
-        "currentWorkflowRelevant": true,
-        "actionableFields": true,
-        "beginnerFriendly": true,
-        "notPureEvergreen": true,
-        "hasReviewStep": true
-      },
-      "selectionMeta": {
-        "schema": "AOIA",
-        "mode": "trend",
-        "sourceType": "templates-checklists trend normalization",
-        "selectedAt": "2026-06-08T13:06:22.631Z"
-      }
+      "fingerprint": "fp1:9df9f2d206db28dc8d3559bd969756196e6378b7"
     },
     {
       "id": "tc-tr-022",
@@ -669,45 +137,7 @@
       "audience": "General users",
       "intent": "template",
       "priority": 1,
-      "fingerprint": "fp1:6d0ce77077130d607079959c802e4b7bb4737471",
-      "trendMode": "current-workflow-template",
-      "entity": {
-        "type": "template-use-case",
-        "name": "Browser Cleanup Checklist",
-        "intentFamily": "trend-template"
-      },
-      "templateType": "digital-safety-checklist",
-      "trendTrigger": "Account security, app permissions, device recovery, and privacy controls change frequently.",
-      "currentUseCase": "Help users review digital safety settings across apps, accounts, and devices.",
-      "riskIfIgnored": "Old permissions or weak recovery settings can expose accounts, data, or devices.",
-      "templateFields": [
-        "item",
-        "current setting",
-        "risk level",
-        "action needed",
-        "review date"
-      ],
-      "useCases": [
-        "permission audit",
-        "account recovery setup",
-        "device security review"
-      ],
-      "expectedOutcome": "the user can complete a current digital task with a reusable and reviewable structure",
-      "selectionCriteria": {
-        "trendTemplate": true,
-        "reusableStructure": true,
-        "currentWorkflowRelevant": true,
-        "actionableFields": true,
-        "beginnerFriendly": true,
-        "notPureEvergreen": true,
-        "hasReviewStep": true
-      },
-      "selectionMeta": {
-        "schema": "AOIA",
-        "mode": "trend",
-        "sourceType": "templates-checklists trend normalization",
-        "selectedAt": "2026-06-08T13:06:22.631Z"
-      }
+      "fingerprint": "fp1:6d0ce77077130d607079959c802e4b7bb4737471"
     },
     {
       "id": "tc-tr-023",
@@ -716,45 +146,7 @@
       "audience": "Creators",
       "intent": "template",
       "priority": 1,
-      "fingerprint": "fp1:9529dcd2febd1544fbf72da8f00a63e6c99d64b3",
-      "trendMode": "current-workflow-template",
-      "entity": {
-        "type": "template-use-case",
-        "name": "Social Media Productivity Template",
-        "intentFamily": "trend-template"
-      },
-      "templateType": "productivity-planning-template",
-      "trendTrigger": "Hybrid work, AI reminders, and multi-app task systems make planning more complex.",
-      "currentUseCase": "Help users turn scattered tasks into a repeatable weekly or daily planning structure.",
-      "riskIfIgnored": "Tasks may remain scattered across apps, causing missed work and weak follow-through.",
-      "templateFields": [
-        "task",
-        "priority",
-        "time block",
-        "tool/app",
-        "follow-up"
-      ],
-      "useCases": [
-        "weekly planning",
-        "remote work routine",
-        "task prioritization"
-      ],
-      "expectedOutcome": "the user can complete a current digital task with a reusable and reviewable structure",
-      "selectionCriteria": {
-        "trendTemplate": true,
-        "reusableStructure": true,
-        "currentWorkflowRelevant": true,
-        "actionableFields": true,
-        "beginnerFriendly": true,
-        "notPureEvergreen": true,
-        "hasReviewStep": true
-      },
-      "selectionMeta": {
-        "schema": "AOIA",
-        "mode": "trend",
-        "sourceType": "templates-checklists trend normalization",
-        "selectedAt": "2026-06-08T13:06:22.631Z"
-      }
+      "fingerprint": "fp1:9529dcd2febd1544fbf72da8f00a63e6c99d64b3"
     },
     {
       "id": "tc-tr-024",
@@ -763,45 +155,7 @@
       "audience": "General users",
       "intent": "template",
       "priority": 1,
-      "fingerprint": "fp1:32d457f0f769df99939bbe3a22aaf4f326856cb0",
-      "trendMode": "current-workflow-template",
-      "entity": {
-        "type": "template-use-case",
-        "name": "Digital Photo Library Cleanup Template",
-        "intentFamily": "trend-template"
-      },
-      "templateType": "digital-cleanup-template",
-      "trendTrigger": "Digital clutter grows faster as users rely on more apps, cloud folders, AI tools, and browsers.",
-      "currentUseCase": "Help users clean and organize files, notes, inboxes, photos, browsers, and workspaces.",
-      "riskIfIgnored": "Clutter can slow work, hide important files, and increase repeated searching.",
-      "templateFields": [
-        "area",
-        "problem found",
-        "cleanup action",
-        "keep/delete/archive",
-        "review date"
-      ],
-      "useCases": [
-        "file cleanup",
-        "browser cleanup",
-        "photo and note organization"
-      ],
-      "expectedOutcome": "the user can complete a current digital task with a reusable and reviewable structure",
-      "selectionCriteria": {
-        "trendTemplate": true,
-        "reusableStructure": true,
-        "currentWorkflowRelevant": true,
-        "actionableFields": true,
-        "beginnerFriendly": true,
-        "notPureEvergreen": true,
-        "hasReviewStep": true
-      },
-      "selectionMeta": {
-        "schema": "AOIA",
-        "mode": "trend",
-        "sourceType": "templates-checklists trend normalization",
-        "selectedAt": "2026-06-08T13:06:22.631Z"
-      }
+      "fingerprint": "fp1:32d457f0f769df99939bbe3a22aaf4f326856cb0"
     },
     {
       "id": "tc-tr-025",
@@ -810,45 +164,7 @@
       "audience": "Workers and students",
       "intent": "template",
       "priority": 1,
-      "fingerprint": "fp1:14d8aea5899d3a01e77639bb8539cb698398404f",
-      "trendMode": "current-workflow-template",
-      "entity": {
-        "type": "template-use-case",
-        "name": "Career Growth Planning Template",
-        "intentFamily": "trend-template"
-      },
-      "templateType": "current-use-template",
-      "trendTrigger": "Users need a reusable structure for a current digital task, workflow, or decision.",
-      "currentUseCase": "Help users complete a modern task with fewer missed steps and clearer review points.",
-      "riskIfIgnored": "Without a clear template, users may repeat the same task inconsistently or miss important steps.",
-      "templateFields": [
-        "task",
-        "status",
-        "owner",
-        "notes",
-        "review date"
-      ],
-      "useCases": [
-        "current workflow setup",
-        "repeatable task execution",
-        "AI-assisted organization"
-      ],
-      "expectedOutcome": "the user can complete a current digital task with a reusable and reviewable structure",
-      "selectionCriteria": {
-        "trendTemplate": true,
-        "reusableStructure": true,
-        "currentWorkflowRelevant": true,
-        "actionableFields": true,
-        "beginnerFriendly": true,
-        "notPureEvergreen": true,
-        "hasReviewStep": true
-      },
-      "selectionMeta": {
-        "schema": "AOIA",
-        "mode": "trend",
-        "sourceType": "templates-checklists trend normalization",
-        "selectedAt": "2026-06-08T13:06:22.631Z"
-      }
+      "fingerprint": "fp1:14d8aea5899d3a01e77639bb8539cb698398404f"
     },
     {
       "id": "tc-tr-026",
@@ -857,45 +173,7 @@
       "audience": "All AI users",
       "intent": "template",
       "priority": 1,
-      "fingerprint": "fp1:bb3f6173cd280df94b8833eaae6f1ed4c9f3e4d1",
-      "trendMode": "current-workflow-template",
-      "entity": {
-        "type": "template-use-case",
-        "name": "AI-Ready Prompting Checklist",
-        "intentFamily": "trend-template"
-      },
-      "templateType": "ai-workflow-template",
-      "trendTrigger": "AI tools are now used in everyday research, writing, planning, and review workflows.",
-      "currentUseCase": "Help users make AI-assisted work more structured, reusable, and easier to verify.",
-      "riskIfIgnored": "AI output may become inconsistent, hard to check, or difficult to reuse.",
-      "templateFields": [
-        "goal",
-        "input",
-        "constraints",
-        "output format",
-        "verification"
-      ],
-      "useCases": [
-        "AI prompt setup",
-        "research validation",
-        "content review"
-      ],
-      "expectedOutcome": "the user can complete a current digital task with a reusable and reviewable structure",
-      "selectionCriteria": {
-        "trendTemplate": true,
-        "reusableStructure": true,
-        "currentWorkflowRelevant": true,
-        "actionableFields": true,
-        "beginnerFriendly": true,
-        "notPureEvergreen": true,
-        "hasReviewStep": true
-      },
-      "selectionMeta": {
-        "schema": "AOIA",
-        "mode": "trend",
-        "sourceType": "templates-checklists trend normalization",
-        "selectedAt": "2026-06-08T13:06:22.631Z"
-      }
+      "fingerprint": "fp1:bb3f6173cd280df94b8833eaae6f1ed4c9f3e4d1"
     },
     {
       "id": "tc-tr-027",
@@ -904,45 +182,7 @@
       "audience": "General users",
       "intent": "template",
       "priority": 1,
-      "fingerprint": "fp1:0bf031397d2d71c2b7a2cdfbcfd4eafa019931fa",
-      "trendMode": "current-workflow-template",
-      "entity": {
-        "type": "template-use-case",
-        "name": "Device Security Template",
-        "intentFamily": "trend-template"
-      },
-      "templateType": "digital-safety-checklist",
-      "trendTrigger": "Account security, app permissions, device recovery, and privacy controls change frequently.",
-      "currentUseCase": "Help users review digital safety settings across apps, accounts, and devices.",
-      "riskIfIgnored": "Old permissions or weak recovery settings can expose accounts, data, or devices.",
-      "templateFields": [
-        "item",
-        "current setting",
-        "risk level",
-        "action needed",
-        "review date"
-      ],
-      "useCases": [
-        "permission audit",
-        "account recovery setup",
-        "device security review"
-      ],
-      "expectedOutcome": "the user can complete a current digital task with a reusable and reviewable structure",
-      "selectionCriteria": {
-        "trendTemplate": true,
-        "reusableStructure": true,
-        "currentWorkflowRelevant": true,
-        "actionableFields": true,
-        "beginnerFriendly": true,
-        "notPureEvergreen": true,
-        "hasReviewStep": true
-      },
-      "selectionMeta": {
-        "schema": "AOIA",
-        "mode": "trend",
-        "sourceType": "templates-checklists trend normalization",
-        "selectedAt": "2026-06-08T13:06:22.631Z"
-      }
+      "fingerprint": "fp1:0bf031397d2d71c2b7a2cdfbcfd4eafa019931fa"
     },
     {
       "id": "tc-tr-028",
@@ -951,45 +191,7 @@
       "audience": "Creators and marketers",
       "intent": "template",
       "priority": 1,
-      "fingerprint": "fp1:ffcb547d8c6a664c5272c97d5dd3e362d7041bf0",
-      "trendMode": "current-workflow-template",
-      "entity": {
-        "type": "template-use-case",
-        "name": "Structured Brainstorming Template for Creators",
-        "intentFamily": "trend-template"
-      },
-      "templateType": "ai-workflow-template",
-      "trendTrigger": "AI tools are now used in everyday research, writing, planning, and review workflows.",
-      "currentUseCase": "Help users make AI-assisted work more structured, reusable, and easier to verify.",
-      "riskIfIgnored": "AI output may become inconsistent, hard to check, or difficult to reuse.",
-      "templateFields": [
-        "goal",
-        "input",
-        "constraints",
-        "output format",
-        "verification"
-      ],
-      "useCases": [
-        "AI prompt setup",
-        "research validation",
-        "content review"
-      ],
-      "expectedOutcome": "the user can complete a current digital task with a reusable and reviewable structure",
-      "selectionCriteria": {
-        "trendTemplate": true,
-        "reusableStructure": true,
-        "currentWorkflowRelevant": true,
-        "actionableFields": true,
-        "beginnerFriendly": true,
-        "notPureEvergreen": true,
-        "hasReviewStep": true
-      },
-      "selectionMeta": {
-        "schema": "AOIA",
-        "mode": "trend",
-        "sourceType": "templates-checklists trend normalization",
-        "selectedAt": "2026-06-08T13:06:22.631Z"
-      }
+      "fingerprint": "fp1:ffcb547d8c6a664c5272c97d5dd3e362d7041bf0"
     },
     {
       "id": "tc-tr-029",
@@ -998,45 +200,7 @@
       "audience": "Tech users",
       "intent": "template",
       "priority": 1,
-      "fingerprint": "fp1:68bba8fedf5cca1916516e0f3004b2b0a3d140a5",
-      "trendMode": "current-workflow-template",
-      "entity": {
-        "type": "template-use-case",
-        "name": "Device Reset Preparation Checklist",
-        "intentFamily": "trend-template"
-      },
-      "templateType": "device-transition-checklist",
-      "trendTrigger": "Users frequently move between devices, reset phones, or extend the life of older hardware.",
-      "currentUseCase": "Help users avoid missing backups, sync steps, account logouts, and setup checks.",
-      "riskIfIgnored": "Device changes can cause data loss, login problems, or unfinished setup.",
-      "templateFields": [
-        "device",
-        "backup status",
-        "account status",
-        "transfer step",
-        "final check"
-      ],
-      "useCases": [
-        "phone migration",
-        "factory reset preparation",
-        "old device safety"
-      ],
-      "expectedOutcome": "the user can complete a current digital task with a reusable and reviewable structure",
-      "selectionCriteria": {
-        "trendTemplate": true,
-        "reusableStructure": true,
-        "currentWorkflowRelevant": true,
-        "actionableFields": true,
-        "beginnerFriendly": true,
-        "notPureEvergreen": true,
-        "hasReviewStep": true
-      },
-      "selectionMeta": {
-        "schema": "AOIA",
-        "mode": "trend",
-        "sourceType": "templates-checklists trend normalization",
-        "selectedAt": "2026-06-08T13:06:22.631Z"
-      }
+      "fingerprint": "fp1:68bba8fedf5cca1916516e0f3004b2b0a3d140a5"
     },
     {
       "id": "tc-tr-030",
@@ -1045,45 +209,7 @@
       "audience": "Learners",
       "intent": "template",
       "priority": 1,
-      "fingerprint": "fp1:ca8a68a04f17446e60709156b2fa24544ad042f5",
-      "trendMode": "current-workflow-template",
-      "entity": {
-        "type": "template-use-case",
-        "name": "Knowledge Review Template",
-        "intentFamily": "trend-template"
-      },
-      "templateType": "productivity-planning-template",
-      "trendTrigger": "Hybrid work, AI reminders, and multi-app task systems make planning more complex.",
-      "currentUseCase": "Help users turn scattered tasks into a repeatable weekly or daily planning structure.",
-      "riskIfIgnored": "Tasks may remain scattered across apps, causing missed work and weak follow-through.",
-      "templateFields": [
-        "task",
-        "priority",
-        "time block",
-        "tool/app",
-        "follow-up"
-      ],
-      "useCases": [
-        "weekly planning",
-        "remote work routine",
-        "task prioritization"
-      ],
-      "expectedOutcome": "the user can complete a current digital task with a reusable and reviewable structure",
-      "selectionCriteria": {
-        "trendTemplate": true,
-        "reusableStructure": true,
-        "currentWorkflowRelevant": true,
-        "actionableFields": true,
-        "beginnerFriendly": true,
-        "notPureEvergreen": true,
-        "hasReviewStep": true
-      },
-      "selectionMeta": {
-        "schema": "AOIA",
-        "mode": "trend",
-        "sourceType": "templates-checklists trend normalization",
-        "selectedAt": "2026-06-08T13:06:22.631Z"
-      }
+      "fingerprint": "fp1:ca8a68a04f17446e60709156b2fa24544ad042f5"
     },
     {
       "id": "tc-tr-031",
@@ -1092,45 +218,7 @@
       "audience": "Writers/students",
       "intent": "template",
       "priority": 1,
-      "fingerprint": "fp1:97484813c4633a358085160c54c6912c6e3d54cf",
-      "trendMode": "current-workflow-template",
-      "entity": {
-        "type": "template-use-case",
-        "name": "AI-Optimized Writing Workflow Template",
-        "intentFamily": "trend-template"
-      },
-      "templateType": "ai-workflow-template",
-      "trendTrigger": "AI tools are now used in everyday research, writing, planning, and review workflows.",
-      "currentUseCase": "Help users make AI-assisted work more structured, reusable, and easier to verify.",
-      "riskIfIgnored": "AI output may become inconsistent, hard to check, or difficult to reuse.",
-      "templateFields": [
-        "goal",
-        "input",
-        "constraints",
-        "output format",
-        "verification"
-      ],
-      "useCases": [
-        "AI prompt setup",
-        "research validation",
-        "content review"
-      ],
-      "expectedOutcome": "the user can complete a current digital task with a reusable and reviewable structure",
-      "selectionCriteria": {
-        "trendTemplate": true,
-        "reusableStructure": true,
-        "currentWorkflowRelevant": true,
-        "actionableFields": true,
-        "beginnerFriendly": true,
-        "notPureEvergreen": true,
-        "hasReviewStep": true
-      },
-      "selectionMeta": {
-        "schema": "AOIA",
-        "mode": "trend",
-        "sourceType": "templates-checklists trend normalization",
-        "selectedAt": "2026-06-08T13:06:22.631Z"
-      }
+      "fingerprint": "fp1:97484813c4633a358085160c54c6912c6e3d54cf"
     },
     {
       "id": "tc-tr-032",
@@ -1139,45 +227,7 @@
       "audience": "Workers",
       "intent": "template",
       "priority": 1,
-      "fingerprint": "fp1:a8e8f8122469ba723de87cf8b17a1e272f56f4d3",
-      "trendMode": "current-workflow-template",
-      "entity": {
-        "type": "template-use-case",
-        "name": "Digital Workspace Setup Template",
-        "intentFamily": "trend-template"
-      },
-      "templateType": "digital-cleanup-template",
-      "trendTrigger": "Digital clutter grows faster as users rely on more apps, cloud folders, AI tools, and browsers.",
-      "currentUseCase": "Help users clean and organize files, notes, inboxes, photos, browsers, and workspaces.",
-      "riskIfIgnored": "Clutter can slow work, hide important files, and increase repeated searching.",
-      "templateFields": [
-        "area",
-        "problem found",
-        "cleanup action",
-        "keep/delete/archive",
-        "review date"
-      ],
-      "useCases": [
-        "file cleanup",
-        "browser cleanup",
-        "photo and note organization"
-      ],
-      "expectedOutcome": "the user can complete a current digital task with a reusable and reviewable structure",
-      "selectionCriteria": {
-        "trendTemplate": true,
-        "reusableStructure": true,
-        "currentWorkflowRelevant": true,
-        "actionableFields": true,
-        "beginnerFriendly": true,
-        "notPureEvergreen": true,
-        "hasReviewStep": true
-      },
-      "selectionMeta": {
-        "schema": "AOIA",
-        "mode": "trend",
-        "sourceType": "templates-checklists trend normalization",
-        "selectedAt": "2026-06-08T13:06:22.631Z"
-      }
+      "fingerprint": "fp1:a8e8f8122469ba723de87cf8b17a1e272f56f4d3"
     },
     {
       "id": "tc-tr-033",
@@ -1186,45 +236,7 @@
       "audience": "General users",
       "intent": "template",
       "priority": 1,
-      "fingerprint": "fp1:8e3aefedb3c798182cc1903544eece39110efa1e",
-      "trendMode": "current-workflow-template",
-      "entity": {
-        "type": "template-use-case",
-        "name": "Error Diagnosis Template",
-        "intentFamily": "trend-template"
-      },
-      "templateType": "diagnosis-checklist",
-      "trendTrigger": "Users face more cross-device and cross-app issues as digital systems become more connected.",
-      "currentUseCase": "Help users identify symptoms, isolate causes, and record attempted fixes.",
-      "riskIfIgnored": "Users may repeat random fixes without finding the real cause.",
-      "templateFields": [
-        "symptom",
-        "environment",
-        "possible cause",
-        "test result",
-        "next fix"
-      ],
-      "useCases": [
-        "tech troubleshooting",
-        "error diagnosis",
-        "support preparation"
-      ],
-      "expectedOutcome": "the user can complete a current digital task with a reusable and reviewable structure",
-      "selectionCriteria": {
-        "trendTemplate": true,
-        "reusableStructure": true,
-        "currentWorkflowRelevant": true,
-        "actionableFields": true,
-        "beginnerFriendly": true,
-        "notPureEvergreen": true,
-        "hasReviewStep": true
-      },
-      "selectionMeta": {
-        "schema": "AOIA",
-        "mode": "trend",
-        "sourceType": "templates-checklists trend normalization",
-        "selectedAt": "2026-06-08T13:06:22.631Z"
-      }
+      "fingerprint": "fp1:8e3aefedb3c798182cc1903544eece39110efa1e"
     },
     {
       "id": "tc-tr-034",
@@ -1233,45 +245,7 @@
       "audience": "Students/analysts",
       "intent": "template",
       "priority": 1,
-      "fingerprint": "fp1:df85a8e14df667ed39cce51f73a54131e5122c7b",
-      "trendMode": "current-workflow-template",
-      "entity": {
-        "type": "template-use-case",
-        "name": "Personal Knowledge Management Template",
-        "intentFamily": "trend-template"
-      },
-      "templateType": "knowledge-work-template",
-      "trendTrigger": "Creators, students, and analysts increasingly use AI and structured notes to manage knowledge work.",
-      "currentUseCase": "Help users capture ideas, organize references, and turn information into useful outputs.",
-      "riskIfIgnored": "Ideas and research may remain scattered, duplicated, or hard to turn into action.",
-      "templateFields": [
-        "idea",
-        "source",
-        "insight",
-        "next action",
-        "output"
-      ],
-      "useCases": [
-        "project planning",
-        "knowledge review",
-        "creative workflow"
-      ],
-      "expectedOutcome": "the user can complete a current digital task with a reusable and reviewable structure",
-      "selectionCriteria": {
-        "trendTemplate": true,
-        "reusableStructure": true,
-        "currentWorkflowRelevant": true,
-        "actionableFields": true,
-        "beginnerFriendly": true,
-        "notPureEvergreen": true,
-        "hasReviewStep": true
-      },
-      "selectionMeta": {
-        "schema": "AOIA",
-        "mode": "trend",
-        "sourceType": "templates-checklists trend normalization",
-        "selectedAt": "2026-06-08T13:06:22.631Z"
-      }
+      "fingerprint": "fp1:df85a8e14df667ed39cce51f73a54131e5122c7b"
     },
     {
       "id": "tc-tr-035",
@@ -1280,45 +254,7 @@
       "audience": "Workers",
       "intent": "template",
       "priority": 1,
-      "fingerprint": "fp1:a021d2b28ea33f52f5e4f2662e8e21f840e9c9b5",
-      "trendMode": "current-workflow-template",
-      "entity": {
-        "type": "template-use-case",
-        "name": "AI-Friendly Task Prioritization Template",
-        "intentFamily": "trend-template"
-      },
-      "templateType": "ai-workflow-template",
-      "trendTrigger": "AI tools are now used in everyday research, writing, planning, and review workflows.",
-      "currentUseCase": "Help users make AI-assisted work more structured, reusable, and easier to verify.",
-      "riskIfIgnored": "AI output may become inconsistent, hard to check, or difficult to reuse.",
-      "templateFields": [
-        "goal",
-        "input",
-        "constraints",
-        "output format",
-        "verification"
-      ],
-      "useCases": [
-        "AI prompt setup",
-        "research validation",
-        "content review"
-      ],
-      "expectedOutcome": "the user can complete a current digital task with a reusable and reviewable structure",
-      "selectionCriteria": {
-        "trendTemplate": true,
-        "reusableStructure": true,
-        "currentWorkflowRelevant": true,
-        "actionableFields": true,
-        "beginnerFriendly": true,
-        "notPureEvergreen": true,
-        "hasReviewStep": true
-      },
-      "selectionMeta": {
-        "schema": "AOIA",
-        "mode": "trend",
-        "sourceType": "templates-checklists trend normalization",
-        "selectedAt": "2026-06-08T13:06:22.631Z"
-      }
+      "fingerprint": "fp1:a021d2b28ea33f52f5e4f2662e8e21f840e9c9b5"
     },
     {
       "id": "tc-tr-036",
@@ -1327,45 +263,7 @@
       "audience": "General users",
       "intent": "template",
       "priority": 1,
-      "fingerprint": "fp1:23b198ab853e4101dcb0fe563a4d4c81bab7d4fe",
-      "trendMode": "current-workflow-template",
-      "entity": {
-        "type": "template-use-case",
-        "name": "Cross-App Notification Cleanup Checklist",
-        "intentFamily": "trend-template"
-      },
-      "templateType": "digital-cleanup-template",
-      "trendTrigger": "Digital clutter grows faster as users rely on more apps, cloud folders, AI tools, and browsers.",
-      "currentUseCase": "Help users clean and organize files, notes, inboxes, photos, browsers, and workspaces.",
-      "riskIfIgnored": "Clutter can slow work, hide important files, and increase repeated searching.",
-      "templateFields": [
-        "area",
-        "problem found",
-        "cleanup action",
-        "keep/delete/archive",
-        "review date"
-      ],
-      "useCases": [
-        "file cleanup",
-        "browser cleanup",
-        "photo and note organization"
-      ],
-      "expectedOutcome": "the user can complete a current digital task with a reusable and reviewable structure",
-      "selectionCriteria": {
-        "trendTemplate": true,
-        "reusableStructure": true,
-        "currentWorkflowRelevant": true,
-        "actionableFields": true,
-        "beginnerFriendly": true,
-        "notPureEvergreen": true,
-        "hasReviewStep": true
-      },
-      "selectionMeta": {
-        "schema": "AOIA",
-        "mode": "trend",
-        "sourceType": "templates-checklists trend normalization",
-        "selectedAt": "2026-06-08T13:06:22.631Z"
-      }
+      "fingerprint": "fp1:23b198ab853e4101dcb0fe563a4d4c81bab7d4fe"
     },
     {
       "id": "tc-tr-037",
@@ -1374,45 +272,7 @@
       "audience": "All users",
       "intent": "template",
       "priority": 1,
-      "fingerprint": "fp1:52e5ddea279585aeaec52ec6b8e315b14b69bc09",
-      "trendMode": "current-workflow-template",
-      "entity": {
-        "type": "template-use-case",
-        "name": "Digital Life Safety Template",
-        "intentFamily": "trend-template"
-      },
-      "templateType": "digital-safety-checklist",
-      "trendTrigger": "Account security, app permissions, device recovery, and privacy controls change frequently.",
-      "currentUseCase": "Help users review digital safety settings across apps, accounts, and devices.",
-      "riskIfIgnored": "Old permissions or weak recovery settings can expose accounts, data, or devices.",
-      "templateFields": [
-        "item",
-        "current setting",
-        "risk level",
-        "action needed",
-        "review date"
-      ],
-      "useCases": [
-        "permission audit",
-        "account recovery setup",
-        "device security review"
-      ],
-      "expectedOutcome": "the user can complete a current digital task with a reusable and reviewable structure",
-      "selectionCriteria": {
-        "trendTemplate": true,
-        "reusableStructure": true,
-        "currentWorkflowRelevant": true,
-        "actionableFields": true,
-        "beginnerFriendly": true,
-        "notPureEvergreen": true,
-        "hasReviewStep": true
-      },
-      "selectionMeta": {
-        "schema": "AOIA",
-        "mode": "trend",
-        "sourceType": "templates-checklists trend normalization",
-        "selectedAt": "2026-06-08T13:06:22.631Z"
-      }
+      "fingerprint": "fp1:52e5ddea279585aeaec52ec6b8e315b14b69bc09"
     },
     {
       "id": "tc-tr-038",
@@ -1421,45 +281,7 @@
       "audience": "Workers/students",
       "intent": "template",
       "priority": 1,
-      "fingerprint": "fp1:ccc56e67c14da089e4ce0f1e597f6075a6cdb902",
-      "trendMode": "current-workflow-template",
-      "entity": {
-        "type": "template-use-case",
-        "name": "Clean Slate Template",
-        "intentFamily": "trend-template"
-      },
-      "templateType": "device-transition-checklist",
-      "trendTrigger": "Users frequently move between devices, reset phones, or extend the life of older hardware.",
-      "currentUseCase": "Help users avoid missing backups, sync steps, account logouts, and setup checks.",
-      "riskIfIgnored": "Device changes can cause data loss, login problems, or unfinished setup.",
-      "templateFields": [
-        "device",
-        "backup status",
-        "account status",
-        "transfer step",
-        "final check"
-      ],
-      "useCases": [
-        "phone migration",
-        "factory reset preparation",
-        "old device safety"
-      ],
-      "expectedOutcome": "the user can complete a current digital task with a reusable and reviewable structure",
-      "selectionCriteria": {
-        "trendTemplate": true,
-        "reusableStructure": true,
-        "currentWorkflowRelevant": true,
-        "actionableFields": true,
-        "beginnerFriendly": true,
-        "notPureEvergreen": true,
-        "hasReviewStep": true
-      },
-      "selectionMeta": {
-        "schema": "AOIA",
-        "mode": "trend",
-        "sourceType": "templates-checklists trend normalization",
-        "selectedAt": "2026-06-08T13:06:22.631Z"
-      }
+      "fingerprint": "fp1:ccc56e67c14da089e4ce0f1e597f6075a6cdb902"
     },
     {
       "id": "tc-tr-039",
@@ -1468,45 +290,7 @@
       "audience": "Creators and analysts",
       "intent": "template",
       "priority": 1,
-      "fingerprint": "fp1:163bba4a3fa86b9433e78adc0e784bd3b436418c",
-      "trendMode": "current-workflow-template",
-      "entity": {
-        "type": "template-use-case",
-        "name": "AI Content Review Checklist",
-        "intentFamily": "trend-template"
-      },
-      "templateType": "ai-workflow-template",
-      "trendTrigger": "AI tools are now used in everyday research, writing, planning, and review workflows.",
-      "currentUseCase": "Help users make AI-assisted work more structured, reusable, and easier to verify.",
-      "riskIfIgnored": "AI output may become inconsistent, hard to check, or difficult to reuse.",
-      "templateFields": [
-        "goal",
-        "input",
-        "constraints",
-        "output format",
-        "verification"
-      ],
-      "useCases": [
-        "AI prompt setup",
-        "research validation",
-        "content review"
-      ],
-      "expectedOutcome": "the user can complete a current digital task with a reusable and reviewable structure",
-      "selectionCriteria": {
-        "trendTemplate": true,
-        "reusableStructure": true,
-        "currentWorkflowRelevant": true,
-        "actionableFields": true,
-        "beginnerFriendly": true,
-        "notPureEvergreen": true,
-        "hasReviewStep": true
-      },
-      "selectionMeta": {
-        "schema": "AOIA",
-        "mode": "trend",
-        "sourceType": "templates-checklists trend normalization",
-        "selectedAt": "2026-06-08T13:06:22.631Z"
-      }
+      "fingerprint": "fp1:163bba4a3fa86b9433e78adc0e784bd3b436418c"
     },
     {
       "id": "tc-tr-040",
@@ -1515,45 +299,7 @@
       "audience": "Remote teams",
       "intent": "template",
       "priority": 1,
-      "fingerprint": "fp1:5b625b17c4b4416bb1e88d59d4bcde8f1554b21f",
-      "trendMode": "current-workflow-template",
-      "entity": {
-        "type": "template-use-case",
-        "name": "Team Communication Template",
-        "intentFamily": "trend-template"
-      },
-      "templateType": "team-workflow-template",
-      "trendTrigger": "Teams now work across async updates, shared tools, chat, documents, and task apps.",
-      "currentUseCase": "Help teams align updates, responsibilities, status, and next actions.",
-      "riskIfIgnored": "Work can split across apps without clear ownership or status.",
-      "templateFields": [
-        "topic",
-        "owner",
-        "status",
-        "blocker",
-        "next action"
-      ],
-      "useCases": [
-        "async update",
-        "team workflow sync",
-        "multi-app coordination"
-      ],
-      "expectedOutcome": "the user can complete a current digital task with a reusable and reviewable structure",
-      "selectionCriteria": {
-        "trendTemplate": true,
-        "reusableStructure": true,
-        "currentWorkflowRelevant": true,
-        "actionableFields": true,
-        "beginnerFriendly": true,
-        "notPureEvergreen": true,
-        "hasReviewStep": true
-      },
-      "selectionMeta": {
-        "schema": "AOIA",
-        "mode": "trend",
-        "sourceType": "templates-checklists trend normalization",
-        "selectedAt": "2026-06-08T13:06:22.631Z"
-      }
+      "fingerprint": "fp1:5b625b17c4b4416bb1e88d59d4bcde8f1554b21f"
     },
     {
       "id": "tc-tr-041",
@@ -1562,45 +308,7 @@
       "audience": "Students/writers",
       "intent": "template",
       "priority": 1,
-      "fingerprint": "fp1:d33b826a2e689ab8ef4f9dda8534129a4295fa62",
-      "trendMode": "current-workflow-template",
-      "entity": {
-        "type": "template-use-case",
-        "name": "Digital Note Audit Template",
-        "intentFamily": "trend-template"
-      },
-      "templateType": "digital-cleanup-template",
-      "trendTrigger": "Digital clutter grows faster as users rely on more apps, cloud folders, AI tools, and browsers.",
-      "currentUseCase": "Help users clean and organize files, notes, inboxes, photos, browsers, and workspaces.",
-      "riskIfIgnored": "Clutter can slow work, hide important files, and increase repeated searching.",
-      "templateFields": [
-        "area",
-        "problem found",
-        "cleanup action",
-        "keep/delete/archive",
-        "review date"
-      ],
-      "useCases": [
-        "file cleanup",
-        "browser cleanup",
-        "photo and note organization"
-      ],
-      "expectedOutcome": "the user can complete a current digital task with a reusable and reviewable structure",
-      "selectionCriteria": {
-        "trendTemplate": true,
-        "reusableStructure": true,
-        "currentWorkflowRelevant": true,
-        "actionableFields": true,
-        "beginnerFriendly": true,
-        "notPureEvergreen": true,
-        "hasReviewStep": true
-      },
-      "selectionMeta": {
-        "schema": "AOIA",
-        "mode": "trend",
-        "sourceType": "templates-checklists trend normalization",
-        "selectedAt": "2026-06-08T13:06:22.631Z"
-      }
+      "fingerprint": "fp1:d33b826a2e689ab8ef4f9dda8534129a4295fa62"
     },
     {
       "id": "tc-tr-042",
@@ -1609,45 +317,7 @@
       "audience": "General users",
       "intent": "template",
       "priority": 1,
-      "fingerprint": "fp1:9814eb4ef659704b985a0d32218d72b4d3e451dd",
-      "trendMode": "current-workflow-template",
-      "entity": {
-        "type": "template-use-case",
-        "name": "App Permission Audit Checklist",
-        "intentFamily": "trend-template"
-      },
-      "templateType": "digital-safety-checklist",
-      "trendTrigger": "Account security, app permissions, device recovery, and privacy controls change frequently.",
-      "currentUseCase": "Help users review digital safety settings across apps, accounts, and devices.",
-      "riskIfIgnored": "Old permissions or weak recovery settings can expose accounts, data, or devices.",
-      "templateFields": [
-        "item",
-        "current setting",
-        "risk level",
-        "action needed",
-        "review date"
-      ],
-      "useCases": [
-        "permission audit",
-        "account recovery setup",
-        "device security review"
-      ],
-      "expectedOutcome": "the user can complete a current digital task with a reusable and reviewable structure",
-      "selectionCriteria": {
-        "trendTemplate": true,
-        "reusableStructure": true,
-        "currentWorkflowRelevant": true,
-        "actionableFields": true,
-        "beginnerFriendly": true,
-        "notPureEvergreen": true,
-        "hasReviewStep": true
-      },
-      "selectionMeta": {
-        "schema": "AOIA",
-        "mode": "trend",
-        "sourceType": "templates-checklists trend normalization",
-        "selectedAt": "2026-06-08T13:06:22.631Z"
-      }
+      "fingerprint": "fp1:9814eb4ef659704b985a0d32218d72b4d3e451dd"
     },
     {
       "id": "tc-tr-043",
@@ -1656,45 +326,7 @@
       "audience": "All users",
       "intent": "template",
       "priority": 1,
-      "fingerprint": "fp1:c52547393948f240f9be53f645c66bba7be01027",
-      "trendMode": "current-workflow-template",
-      "entity": {
-        "type": "template-use-case",
-        "name": "Subscription Value Audit Template",
-        "intentFamily": "trend-template"
-      },
-      "templateType": "spending-review-template",
-      "trendTrigger": "Subscription, software, and digital spending decisions change as prices and bundles shift.",
-      "currentUseCase": "Help users review recurring costs, value, usage, and cancellation decisions.",
-      "riskIfIgnored": "Recurring costs may continue without clear value or review.",
-      "templateFields": [
-        "service",
-        "cost",
-        "usage",
-        "value score",
-        "next action"
-      ],
-      "useCases": [
-        "subscription audit",
-        "weekly finance review",
-        "value decision"
-      ],
-      "expectedOutcome": "the user can complete a current digital task with a reusable and reviewable structure",
-      "selectionCriteria": {
-        "trendTemplate": true,
-        "reusableStructure": true,
-        "currentWorkflowRelevant": true,
-        "actionableFields": true,
-        "beginnerFriendly": true,
-        "notPureEvergreen": true,
-        "hasReviewStep": true
-      },
-      "selectionMeta": {
-        "schema": "AOIA",
-        "mode": "trend",
-        "sourceType": "templates-checklists trend normalization",
-        "selectedAt": "2026-06-08T13:06:22.631Z"
-      }
+      "fingerprint": "fp1:c52547393948f240f9be53f645c66bba7be01027"
     },
     {
       "id": "tc-tr-044",
@@ -1703,45 +335,7 @@
       "audience": "Workers",
       "intent": "template",
       "priority": 1,
-      "fingerprint": "fp1:6f08e6035f13c4fe303548823741b9a7e8334f15",
-      "trendMode": "current-workflow-template",
-      "entity": {
-        "type": "template-use-case",
-        "name": "Digital Time Blocking Template",
-        "intentFamily": "trend-template"
-      },
-      "templateType": "productivity-planning-template",
-      "trendTrigger": "Hybrid work, AI reminders, and multi-app task systems make planning more complex.",
-      "currentUseCase": "Help users turn scattered tasks into a repeatable weekly or daily planning structure.",
-      "riskIfIgnored": "Tasks may remain scattered across apps, causing missed work and weak follow-through.",
-      "templateFields": [
-        "task",
-        "priority",
-        "time block",
-        "tool/app",
-        "follow-up"
-      ],
-      "useCases": [
-        "weekly planning",
-        "remote work routine",
-        "task prioritization"
-      ],
-      "expectedOutcome": "the user can complete a current digital task with a reusable and reviewable structure",
-      "selectionCriteria": {
-        "trendTemplate": true,
-        "reusableStructure": true,
-        "currentWorkflowRelevant": true,
-        "actionableFields": true,
-        "beginnerFriendly": true,
-        "notPureEvergreen": true,
-        "hasReviewStep": true
-      },
-      "selectionMeta": {
-        "schema": "AOIA",
-        "mode": "trend",
-        "sourceType": "templates-checklists trend normalization",
-        "selectedAt": "2026-06-08T13:06:22.631Z"
-      }
+      "fingerprint": "fp1:6f08e6035f13c4fe303548823741b9a7e8334f15"
     },
     {
       "id": "tc-tr-045",
@@ -1750,45 +344,7 @@
       "audience": "Students/researchers",
       "intent": "template",
       "priority": 1,
-      "fingerprint": "fp1:9b0dd277b770536f73883f3bc2661717594e8005",
-      "trendMode": "current-workflow-template",
-      "entity": {
-        "type": "template-use-case",
-        "name": "AI-assisted Research Validation Template",
-        "intentFamily": "trend-template"
-      },
-      "templateType": "ai-workflow-template",
-      "trendTrigger": "AI tools are now used in everyday research, writing, planning, and review workflows.",
-      "currentUseCase": "Help users make AI-assisted work more structured, reusable, and easier to verify.",
-      "riskIfIgnored": "AI output may become inconsistent, hard to check, or difficult to reuse.",
-      "templateFields": [
-        "goal",
-        "input",
-        "constraints",
-        "output format",
-        "verification"
-      ],
-      "useCases": [
-        "AI prompt setup",
-        "research validation",
-        "content review"
-      ],
-      "expectedOutcome": "the user can complete a current digital task with a reusable and reviewable structure",
-      "selectionCriteria": {
-        "trendTemplate": true,
-        "reusableStructure": true,
-        "currentWorkflowRelevant": true,
-        "actionableFields": true,
-        "beginnerFriendly": true,
-        "notPureEvergreen": true,
-        "hasReviewStep": true
-      },
-      "selectionMeta": {
-        "schema": "AOIA",
-        "mode": "trend",
-        "sourceType": "templates-checklists trend normalization",
-        "selectedAt": "2026-06-08T13:06:22.631Z"
-      }
+      "fingerprint": "fp1:9b0dd277b770536f73883f3bc2661717594e8005"
     },
     {
       "id": "tc-tr-046",
@@ -1797,45 +353,7 @@
       "audience": "General users",
       "intent": "template",
       "priority": 1,
-      "fingerprint": "fp1:590b6cab0595b7e605e5a56f4197848fe4e37663",
-      "trendMode": "current-workflow-template",
-      "entity": {
-        "type": "template-use-case",
-        "name": "Workspace Cleanup Template",
-        "intentFamily": "trend-template"
-      },
-      "templateType": "digital-cleanup-template",
-      "trendTrigger": "Digital clutter grows faster as users rely on more apps, cloud folders, AI tools, and browsers.",
-      "currentUseCase": "Help users clean and organize files, notes, inboxes, photos, browsers, and workspaces.",
-      "riskIfIgnored": "Clutter can slow work, hide important files, and increase repeated searching.",
-      "templateFields": [
-        "area",
-        "problem found",
-        "cleanup action",
-        "keep/delete/archive",
-        "review date"
-      ],
-      "useCases": [
-        "file cleanup",
-        "browser cleanup",
-        "photo and note organization"
-      ],
-      "expectedOutcome": "the user can complete a current digital task with a reusable and reviewable structure",
-      "selectionCriteria": {
-        "trendTemplate": true,
-        "reusableStructure": true,
-        "currentWorkflowRelevant": true,
-        "actionableFields": true,
-        "beginnerFriendly": true,
-        "notPureEvergreen": true,
-        "hasReviewStep": true
-      },
-      "selectionMeta": {
-        "schema": "AOIA",
-        "mode": "trend",
-        "sourceType": "templates-checklists trend normalization",
-        "selectedAt": "2026-06-08T13:06:22.631Z"
-      }
+      "fingerprint": "fp1:590b6cab0595b7e605e5a56f4197848fe4e37663"
     },
     {
       "id": "tc-tr-047",
@@ -1844,45 +362,7 @@
       "audience": "All users",
       "intent": "template",
       "priority": 1,
-      "fingerprint": "fp1:24a66b3473b08bb2d10d3afe5dd0a5c500492b5e",
-      "trendMode": "current-workflow-template",
-      "entity": {
-        "type": "template-use-case",
-        "name": "Recovery Preparation Checklist",
-        "intentFamily": "trend-template"
-      },
-      "templateType": "digital-safety-checklist",
-      "trendTrigger": "Account security, app permissions, device recovery, and privacy controls change frequently.",
-      "currentUseCase": "Help users review digital safety settings across apps, accounts, and devices.",
-      "riskIfIgnored": "Old permissions or weak recovery settings can expose accounts, data, or devices.",
-      "templateFields": [
-        "item",
-        "current setting",
-        "risk level",
-        "action needed",
-        "review date"
-      ],
-      "useCases": [
-        "permission audit",
-        "account recovery setup",
-        "device security review"
-      ],
-      "expectedOutcome": "the user can complete a current digital task with a reusable and reviewable structure",
-      "selectionCriteria": {
-        "trendTemplate": true,
-        "reusableStructure": true,
-        "currentWorkflowRelevant": true,
-        "actionableFields": true,
-        "beginnerFriendly": true,
-        "notPureEvergreen": true,
-        "hasReviewStep": true
-      },
-      "selectionMeta": {
-        "schema": "AOIA",
-        "mode": "trend",
-        "sourceType": "templates-checklists trend normalization",
-        "selectedAt": "2026-06-08T13:06:22.631Z"
-      }
+      "fingerprint": "fp1:24a66b3473b08bb2d10d3afe5dd0a5c500492b5e"
     },
     {
       "id": "tc-tr-048",
@@ -1891,45 +371,7 @@
       "audience": "Workers and creators",
       "intent": "template",
       "priority": 1,
-      "fingerprint": "fp1:bd2c168526a5cbd8eb0a368c59b18f206543fc8b",
-      "trendMode": "current-workflow-template",
-      "entity": {
-        "type": "template-use-case",
-        "name": "Multi-App Workflow Sync Template",
-        "intentFamily": "trend-template"
-      },
-      "templateType": "team-workflow-template",
-      "trendTrigger": "Teams now work across async updates, shared tools, chat, documents, and task apps.",
-      "currentUseCase": "Help teams align updates, responsibilities, status, and next actions.",
-      "riskIfIgnored": "Work can split across apps without clear ownership or status.",
-      "templateFields": [
-        "topic",
-        "owner",
-        "status",
-        "blocker",
-        "next action"
-      ],
-      "useCases": [
-        "async update",
-        "team workflow sync",
-        "multi-app coordination"
-      ],
-      "expectedOutcome": "the user can complete a current digital task with a reusable and reviewable structure",
-      "selectionCriteria": {
-        "trendTemplate": true,
-        "reusableStructure": true,
-        "currentWorkflowRelevant": true,
-        "actionableFields": true,
-        "beginnerFriendly": true,
-        "notPureEvergreen": true,
-        "hasReviewStep": true
-      },
-      "selectionMeta": {
-        "schema": "AOIA",
-        "mode": "trend",
-        "sourceType": "templates-checklists trend normalization",
-        "selectedAt": "2026-06-08T13:06:22.631Z"
-      }
+      "fingerprint": "fp1:bd2c168526a5cbd8eb0a368c59b18f206543fc8b"
     },
     {
       "id": "tc-tr-049",
@@ -1938,45 +380,7 @@
       "audience": "General users",
       "intent": "template",
       "priority": 1,
-      "fingerprint": "fp1:c0dfe6e7be3872d4aa90d4a3b08ba6ebc07fcb0b",
-      "trendMode": "current-workflow-template",
-      "entity": {
-        "type": "template-use-case",
-        "name": "Fast Troubleshooting Template for Everyday Tech Issues",
-        "intentFamily": "trend-template"
-      },
-      "templateType": "diagnosis-checklist",
-      "trendTrigger": "Users face more cross-device and cross-app issues as digital systems become more connected.",
-      "currentUseCase": "Help users identify symptoms, isolate causes, and record attempted fixes.",
-      "riskIfIgnored": "Users may repeat random fixes without finding the real cause.",
-      "templateFields": [
-        "symptom",
-        "environment",
-        "possible cause",
-        "test result",
-        "next fix"
-      ],
-      "useCases": [
-        "tech troubleshooting",
-        "error diagnosis",
-        "support preparation"
-      ],
-      "expectedOutcome": "the user can complete a current digital task with a reusable and reviewable structure",
-      "selectionCriteria": {
-        "trendTemplate": true,
-        "reusableStructure": true,
-        "currentWorkflowRelevant": true,
-        "actionableFields": true,
-        "beginnerFriendly": true,
-        "notPureEvergreen": true,
-        "hasReviewStep": true
-      },
-      "selectionMeta": {
-        "schema": "AOIA",
-        "mode": "trend",
-        "sourceType": "templates-checklists trend normalization",
-        "selectedAt": "2026-06-08T13:06:22.631Z"
-      }
+      "fingerprint": "fp1:c0dfe6e7be3872d4aa90d4a3b08ba6ebc07fcb0b"
     },
     {
       "id": "tc-tr-050",
@@ -1985,72 +389,194 @@
       "audience": "Workers/creators",
       "intent": "template",
       "priority": 1,
-      "fingerprint": "fp1:76cb3be3cc3d1fc2d1eae3438f1aa9712449827f",
-      "trendMode": "current-workflow-template",
-      "entity": {
-        "type": "template-use-case",
-        "name": "AI-assisted Project Review Template",
-        "intentFamily": "trend-template"
-      },
-      "templateType": "ai-workflow-template",
-      "trendTrigger": "AI tools are now used in everyday research, writing, planning, and review workflows.",
-      "currentUseCase": "Help users make AI-assisted work more structured, reusable, and easier to verify.",
-      "riskIfIgnored": "AI output may become inconsistent, hard to check, or difficult to reuse.",
-      "templateFields": [
-        "goal",
-        "input",
-        "constraints",
-        "output format",
-        "verification"
-      ],
-      "useCases": [
-        "AI prompt setup",
-        "research validation",
-        "content review"
-      ],
-      "expectedOutcome": "the user can complete a current digital task with a reusable and reviewable structure",
-      "selectionCriteria": {
-        "trendTemplate": true,
-        "reusableStructure": true,
-        "currentWorkflowRelevant": true,
-        "actionableFields": true,
-        "beginnerFriendly": true,
-        "notPureEvergreen": true,
-        "hasReviewStep": true
-      },
-      "selectionMeta": {
-        "schema": "AOIA",
-        "mode": "trend",
-        "sourceType": "templates-checklists trend normalization",
-        "selectedAt": "2026-06-08T13:06:22.631Z"
-      }
+      "fingerprint": "fp1:76cb3be3cc3d1fc2d1eae3438f1aa9712449827f"
+    },
+    {
+      "id": "templates-checklists-trend-1772546046920-313048374",
+      "title": "AUTO GENERATED: templates-checklists (trend)",
+      "angle": "Auto angle (trend)",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-03T13:54:06.920Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:95a734475ced8517ce46af0bbe6f326d8724d8e3"
+    },
+    {
+      "id": "templates-checklists-trend-1772628477195-675981394",
+      "title": "AUTO GENERATED: templates-checklists (trend)",
+      "angle": "Auto angle (trend)",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T12:47:57.195Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:95a734475ced8517ce46af0bbe6f326d8724d8e3"
+    },
+    {
+      "id": "templates-checklists-trend-1772629569182-215383188",
+      "title": "AUTO GENERATED: templates-checklists (trend)",
+      "angle": "Auto angle (trend)",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:06:09.182Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:95a734475ced8517ce46af0bbe6f326d8724d8e3"
+    },
+    {
+      "id": "templates-checklists-trend-1772630313932-53282483",
+      "title": "AUTO GENERATED: templates-checklists (trend) #1772630313932-53282483",
+      "angle": "Auto angle (trend) var=1772630313932-53282483",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.932Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:4ff16773149740f1095f941c2811f6b3ec760cae"
+    },
+    {
+      "id": "templates-checklists-trend-1772630313932-893510182",
+      "title": "AUTO GENERATED: templates-checklists (trend) #1772630313932-893510182",
+      "angle": "Auto angle (trend) var=1772630313932-893510182",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.932Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:b5392c3f734fc0257db00a2ede16f23b41631441"
+    },
+    {
+      "id": "templates-checklists-trend-1772630313932-643604672",
+      "title": "AUTO GENERATED: templates-checklists (trend) #1772630313932-643604672",
+      "angle": "Auto angle (trend) var=1772630313932-643604672",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.932Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:91a7344967018f36e666b91fff652a594e33404f"
+    },
+    {
+      "id": "templates-checklists-trend-1772630313932-851615262",
+      "title": "AUTO GENERATED: templates-checklists (trend) #1772630313932-851615262",
+      "angle": "Auto angle (trend) var=1772630313932-851615262",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.932Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:02c7f608d3f03d956c3af1382e9e29376af294b5"
+    },
+    {
+      "id": "templates-checklists-trend-1772630313932-492600799",
+      "title": "AUTO GENERATED: templates-checklists (trend) #1772630313932-492600799",
+      "angle": "Auto angle (trend) var=1772630313932-492600799",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.932Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:d7c3ed5f00a72cb41ff98c5d5086e0390cfaf02f"
+    },
+    {
+      "id": "templates-checklists-trend-1772630313932-516380682",
+      "title": "AUTO GENERATED: templates-checklists (trend) #1772630313932-516380682",
+      "angle": "Auto angle (trend) var=1772630313932-516380682",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.932Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:57e315817a5d9040589823e82a90fa1ce33b4314"
+    },
+    {
+      "id": "templates-checklists-trend-1772630313932-345339612",
+      "title": "AUTO GENERATED: templates-checklists (trend) #1772630313932-345339612",
+      "angle": "Auto angle (trend) var=1772630313932-345339612",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-04T13:18:33.932Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:7cabb79a7ebf05dee60851a45916403284fa68d5"
+    },
+    {
+      "id": "templates-checklists-trend-1774530180310-42735330",
+      "title": "AUTO GENERATED: templates-checklists (trend) #1774530180310-42735330",
+      "angle": "Auto angle (trend) var=1774530180310-42735330",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-26T13:03:00.310Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:363186f3684b0a1d9e97742eb7dfdf5bb3600a46"
+    },
+    {
+      "id": "templates-checklists-trend-1774530180311-702345179",
+      "title": "AUTO GENERATED: templates-checklists (trend) #1774530180311-702345179",
+      "angle": "Auto angle (trend) var=1774530180311-702345179",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-26T13:03:00.311Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:c321f0b0ab96b421004ce0e1a8d029005de5aafc"
+    },
+    {
+      "id": "templates-checklists-trend-1774530180311-210043615",
+      "title": "AUTO GENERATED: templates-checklists (trend) #1774530180311-210043615",
+      "angle": "Auto angle (trend) var=1774530180311-210043615",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-26T13:03:00.311Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:39324fa05beea392e7d69802224150e3af9656d4"
+    },
+    {
+      "id": "templates-checklists-trend-1774530180312-594862594",
+      "title": "AUTO GENERATED: templates-checklists (trend) #1774530180312-594862594",
+      "angle": "Auto angle (trend) var=1774530180312-594862594",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-26T13:03:00.312Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:2566b4dbd1d956e0b65afef8fd74a13bf5952bdf"
+    },
+    {
+      "id": "templates-checklists-trend-1774530180312-441692216",
+      "title": "AUTO GENERATED: templates-checklists (trend) #1774530180312-441692216",
+      "angle": "Auto angle (trend) var=1774530180312-441692216",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-26T13:03:00.312Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:5d622a23acdb7fa900e0d5a000ef1ac2a682956d"
+    },
+    {
+      "id": "templates-checklists-trend-1774530180313-493419002",
+      "title": "AUTO GENERATED: templates-checklists (trend) #1774530180313-493419002",
+      "angle": "Auto angle (trend) var=1774530180313-493419002",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-26T13:03:00.313Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:db8be7bbc26358c7c6a0aad1f416e5adb9fb86e9"
+    },
+    {
+      "id": "templates-checklists-trend-1774530180313-802046746",
+      "title": "AUTO GENERATED: templates-checklists (trend) #1774530180313-802046746",
+      "angle": "Auto angle (trend) var=1774530180313-802046746",
+      "audience": "General",
+      "intent": "trend",
+      "priority": 5,
+      "createdAt": "2026-03-26T13:03:00.313Z",
+      "notes": "Replace with real LLM generation.",
+      "fingerprint": "fp1:332eb2404e613f1bda9fbd7142e536b22ed4915f"
     }
-  ],
-  "schema": "AOIA",
-  "mode": "trend",
-  "updatedAt": "2026-06-08T13:06:22.631Z",
-  "trendSchema": {
-    "schema": "AOIA",
-    "label": "templates-checklists",
-    "mode": "trend",
-    "requiredConcept": "current reusable execution tool",
-    "requiredFields": [
-      "title",
-      "angle",
-      "audience",
-      "intent",
-      "entity",
-      "trendMode",
-      "templateType",
-      "trendTrigger",
-      "currentUseCase",
-      "riskIfIgnored",
-      "templateFields",
-      "useCases",
-      "expectedOutcome",
-      "selectionCriteria",
-      "selectionMeta",
-      "fingerprint"
-    ]
-  }
+  ]
 }
