@@ -73,6 +73,50 @@ function uniqueArray(values) {
   return [...new Set(toArray(values).map(normText).filter(Boolean))];
 }
 
+function identityKey(value) {
+  return slugify(value);
+}
+
+function sameIdentity(a, b) {
+  const ka = identityKey(a);
+  const kb = identityKey(b);
+  return Boolean(ka && kb && ka === kb);
+}
+
+function collectIdentityCandidates(seed) {
+  const reviewEntity = seed.reviewEntity || {};
+  const entity = seed.entity || {};
+
+  return [
+    { source: "entity.name", value: entity.name },
+    { source: "reviewEntity.name", value: reviewEntity.name },
+    { source: "reviewEntity.appName", value: reviewEntity.appName },
+    { source: "reviewEntity.service", value: reviewEntity.service },
+    { source: "reviewEntity.model", value: reviewEntity.model },
+    { source: "reviewEntity.productName", value: reviewEntity.productName },
+    { source: "seed.name", value: seed.name }
+  ]
+    .map(item => ({
+      source: item.source,
+      value: normText(item.value)
+    }))
+    .filter(item => item.value);
+}
+
+function detectIdentityConflicts(seed, canonicalName) {
+  const base = normText(canonicalName);
+  if (!base) return [];
+
+  return collectIdentityCandidates(seed)
+    .filter(item => !sameIdentity(item.value, base))
+    .map(item => ({
+      field: item.source,
+      expected: base,
+      actual: item.value,
+      severity: "warn"
+    }));
+}
+
 function detectGroup(filePath) {
   const rel = path.relative(WAREHOUSE_DIR, filePath).replace(/\\/g, "/");
   return rel.split("/")[0] || "";
@@ -219,6 +263,7 @@ function createProfile({ entityKey, name, type, category, label }) {
   return {
     entityKey,
     name,
+    canonicalName: name,
     type,
     category: category || "",
     labels: uniqueArray([label]),
@@ -228,6 +273,7 @@ function createProfile({ entityKey, name, type, category, label }) {
     reviewEntities: [],
     entities: [],
     classificationHints: [],
+    identityConflicts: [],
     seedSamples: [],
     stats: {
       seedCount: 0,
@@ -258,6 +304,7 @@ function updateProfile(profile, context) {
   const reviewEntity = seed.reviewEntity || null;
   const entity = seed.entity || null;
   const classificationHints = seed.classificationHints || null;
+  const identityConflicts = detectIdentityConflicts(seed, profile.canonicalName || profile.name);
 
   profile.labels = uniqueArray([...profile.labels, label]);
   profile.modes = uniqueArray([...profile.modes, mode]);
@@ -273,6 +320,17 @@ function updateProfile(profile, context) {
   mergeObjectList(profile.reviewEntities, reviewEntity);
   mergeObjectList(profile.entities, entity);
   mergeObjectList(profile.classificationHints, classificationHints);
+
+  for (const conflict of identityConflicts) {
+    mergeObjectList(profile.identityConflicts, {
+      ...conflict,
+      label,
+      mode,
+      file,
+      seedId: seed.id || null,
+      fingerprint: seed.fingerprint || null
+    });
+  }
 
   if (profile.seedSamples.length < 5) {
     profile.seedSamples.push(compactSeed(seed));
@@ -301,11 +359,13 @@ function finalizeProfile(profile) {
   profile.meta.profileHash = sha1(JSON.stringify({
     entityKey: profile.entityKey,
     name: profile.name,
+    canonicalName: profile.canonicalName,
     type: profile.type,
     category: profile.category,
     labels: profile.labels,
     modes: profile.modes,
-    sources: profile.sources
+    sources: profile.sources,
+    identityConflictCount: profile.identityConflicts.length
   }));
 
   return profile;
@@ -346,6 +406,7 @@ function buildEntityProfiles() {
     checkedSeeds: 0,
     profiles: 0,
     skippedSeeds: 0,
+    identityConflicts: 0,
     errors: [],
     skipped: []
   };
@@ -418,6 +479,10 @@ function buildEntityProfiles() {
     .sort((a, b) => a.entityKey.localeCompare(b.entityKey));
 
   report.profiles = rows.length;
+  report.identityConflicts = rows.reduce(
+    (sum, profile) => sum + profile.identityConflicts.length,
+    0
+  );
 
   const output = {
     schema: "AOIA",
@@ -431,6 +496,7 @@ function buildEntityProfiles() {
       checkedFiles: report.checkedFiles,
       checkedSeeds: report.checkedSeeds,
       skippedSeeds: report.skippedSeeds,
+      identityConflicts: report.identityConflicts,
       errors: report.errors.length
     }
   };
@@ -459,6 +525,7 @@ function main() {
   console.log("checkedSeeds  =", report.checkedSeeds);
   console.log("profiles      =", output.profileCount);
   console.log("skippedSeeds  =", report.skippedSeeds);
+  console.log("conflicts     =", report.identityConflicts);
   console.log("errors        =", report.errors.length);
   console.log("────────────────────────────────────────────");
 
@@ -475,5 +542,6 @@ module.exports = {
   buildEntityProfiles,
   buildEntityKey,
   pickEntityName,
-  pickEntityType
+  pickEntityType,
+  detectIdentityConflicts
 };
