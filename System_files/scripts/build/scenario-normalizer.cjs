@@ -19,6 +19,7 @@ const INPUT_JSON = path.join(ROOT, 'seedpool', 'profiles', 'scenario-candidates.
 const SNAPSHOT_JSON = path.join(ROOT, 'seedpool', 'profiles', 'scenario-web-snapshots.json');
 const SNAPSHOT_JSONL = path.join(ROOT, 'seedpool', 'profiles', 'scenario-web-snapshots.jsonl');
 const SNAPSHOT_LEDGER_JSONL = path.join(ROOT, 'seedpool', 'profiles', 'scenario-web-snapshots-ledger.jsonl');
+const SCENE_LEDGER_JSONL = path.join(ROOT, 'seedpool', 'profiles', 'scenario-scene-ledger.jsonl');
 const OUT_JSON = path.join(ROOT, 'seedpool', 'profiles', 'scenario-normalized.json');
 const OUT_JSONL = path.join(ROOT, 'seedpool', 'profiles', 'scenario-normalized.jsonl');
 const REPORT_JSON = path.join(ROOT, 'logs', 'scenario-normalizer-report.json');
@@ -212,6 +213,170 @@ function appendSnapshotLedger(filePath, snapshots, runId, generatedAt) {
     ledgerRowsAfter: existingRows.filter((row) => row && !row._parseError).length + rows.length,
   };
 }
+
+function buildSceneLedgerRows(scenes, runId, recordedAt, existingRows) {
+  const ledgerMap = new Map();
+
+  for (const row of toArray(existingRows)) {
+    if (!row || typeof row !== 'object') continue;
+
+    const sceneKey = normalizeText(row.sceneKey);
+    if (!sceneKey) continue;
+
+    ledgerMap.set(sceneKey, {
+      ledgerId: normalizeText(row.ledgerId) || `scene-ledger:${sha1(sceneKey).slice(0, 24)}`,
+      sceneKey,
+      entityKey: normalizeText(row.entityKey),
+      canonicalName: normalizeText(row.canonicalName),
+      scene: normalizeText(row.scene),
+      sceneType: normalizeText(row.sceneType),
+      firstSeenAt: normalizeText(row.firstSeenAt) || recordedAt,
+      lastSeenAt: normalizeText(row.lastSeenAt) || recordedAt,
+      occurrenceCount: Number.isFinite(Number(row.occurrenceCount)) ? Number(row.occurrenceCount) : 0,
+      runCount: Number.isFinite(Number(row.runCount)) ? Number(row.runCount) : 0,
+      lastRunId: normalizeText(row.lastRunId),
+      sourceTypes: uniqueArray(row.sourceTypes),
+      sourceHosts: uniqueArray(row.sourceHosts),
+      purposes: uniqueArray(row.purposes),
+      queries: uniqueArray(row.queries).slice(0, 24),
+      confidenceLatest: Number.isFinite(Number(row.confidenceLatest)) ? Number(row.confidenceLatest) : 0,
+      confidenceMax: Number.isFinite(Number(row.confidenceMax)) ? Number(row.confidenceMax) : 0,
+      lastFrequency: Number.isFinite(Number(row.lastFrequency)) ? Number(row.lastFrequency) : 0,
+      safety: row.safety && typeof row.safety === 'object' ? row.safety : {
+        directClaimAllowed: false,
+        recommendedWording: 'Use as a repeated experience pattern, not as a direct product claim.',
+      },
+      meta: {
+        schema: 'AOIA',
+        layer: 'scenario-scene-ledger',
+        writer: 'scenario-normalizer.cjs',
+        normalizerVersion: NORMALIZER_VERSION,
+        ledgerHash: normalizeText(row.meta && row.meta.ledgerHash),
+      },
+    });
+  }
+
+  let updatedRows = 0;
+  let createdRows = 0;
+
+  for (const scene of toArray(scenes)) {
+    if (!scene || typeof scene !== 'object') continue;
+
+    const sceneKey = normalizeText(scene.sceneKey);
+    if (!sceneKey) continue;
+
+    const previous = ledgerMap.get(sceneKey);
+    const frequency = Number.isFinite(Number(scene.frequency)) ? Number(scene.frequency) : 0;
+    const confidence = Number.isFinite(Number(scene.confidence)) ? Number(scene.confidence) : 0;
+
+    if (!previous) {
+      const row = {
+        ledgerId: `scene-ledger:${sha1(sceneKey).slice(0, 24)}`,
+        sceneKey,
+        entityKey: normalizeText(scene.entityKey),
+        canonicalName: normalizeText(scene.canonicalName),
+        scene: normalizeText(scene.scene),
+        sceneType: normalizeText(scene.sceneType),
+        firstSeenAt: recordedAt,
+        lastSeenAt: recordedAt,
+        occurrenceCount: frequency,
+        runCount: 1,
+        lastRunId: runId,
+        sourceTypes: uniqueArray(scene.sourceTypes),
+        sourceHosts: uniqueArray(scene.sourceHosts),
+        purposes: uniqueArray(scene.purposes),
+        queries: uniqueArray(scene.queries).slice(0, 24),
+        confidenceLatest: confidence,
+        confidenceMax: confidence,
+        lastFrequency: frequency,
+        safety: scene.safety && typeof scene.safety === 'object' ? scene.safety : {
+          directClaimAllowed: false,
+          recommendedWording: 'Use as a repeated experience pattern, not as a direct product claim.',
+        },
+        meta: {
+          schema: 'AOIA',
+          layer: 'scenario-scene-ledger',
+          writer: 'scenario-normalizer.cjs',
+          normalizerVersion: NORMALIZER_VERSION,
+          ledgerHash: '',
+        },
+      };
+
+      row.meta.ledgerHash = sha1(JSON.stringify({
+        sceneKey: row.sceneKey,
+        entityKey: row.entityKey,
+        scene: row.scene,
+        sceneType: row.sceneType,
+        firstSeenAt: row.firstSeenAt,
+        lastSeenAt: row.lastSeenAt,
+        occurrenceCount: row.occurrenceCount,
+        runCount: row.runCount,
+        confidenceMax: row.confidenceMax,
+      }));
+
+      ledgerMap.set(sceneKey, row);
+      createdRows += 1;
+      continue;
+    }
+
+    previous.entityKey = previous.entityKey || normalizeText(scene.entityKey);
+    previous.canonicalName = previous.canonicalName || normalizeText(scene.canonicalName);
+    previous.scene = previous.scene || normalizeText(scene.scene);
+    previous.sceneType = previous.sceneType || normalizeText(scene.sceneType);
+    previous.lastSeenAt = recordedAt;
+    previous.occurrenceCount += frequency;
+    previous.runCount += 1;
+    previous.lastRunId = runId;
+    previous.sourceTypes = uniqueArray([...previous.sourceTypes, ...toArray(scene.sourceTypes)]);
+    previous.sourceHosts = uniqueArray([...previous.sourceHosts, ...toArray(scene.sourceHosts)]);
+    previous.purposes = uniqueArray([...previous.purposes, ...toArray(scene.purposes)]);
+    previous.queries = uniqueArray([...previous.queries, ...toArray(scene.queries)]).slice(0, 24);
+    previous.confidenceLatest = confidence;
+    previous.confidenceMax = Math.max(previous.confidenceMax, confidence);
+    previous.lastFrequency = frequency;
+    previous.safety = scene.safety && typeof scene.safety === 'object' ? scene.safety : previous.safety;
+    previous.meta.ledgerHash = sha1(JSON.stringify({
+      sceneKey: previous.sceneKey,
+      entityKey: previous.entityKey,
+      scene: previous.scene,
+      sceneType: previous.sceneType,
+      firstSeenAt: previous.firstSeenAt,
+      lastSeenAt: previous.lastSeenAt,
+      occurrenceCount: previous.occurrenceCount,
+      runCount: previous.runCount,
+      confidenceMax: previous.confidenceMax,
+    }));
+
+    updatedRows += 1;
+  }
+
+  const rows = [...ledgerMap.values()].sort((a, b) => {
+    if (b.occurrenceCount !== a.occurrenceCount) return b.occurrenceCount - a.occurrenceCount;
+    if (b.confidenceMax !== a.confidenceMax) return b.confidenceMax - a.confidenceMax;
+    return a.sceneKey.localeCompare(b.sceneKey);
+  });
+
+  return {
+    rows,
+    createdRows,
+    updatedRows,
+  };
+}
+
+function writeSceneLedger(filePath, scenes, runId, recordedAt) {
+  const existing = readJsonl(filePath);
+  const built = buildSceneLedgerRows(scenes, runId, recordedAt, existing.rows);
+
+  writeJsonl(filePath, built.rows);
+
+  return {
+    sceneLedgerRowsCreated: built.createdRows,
+    sceneLedgerRowsUpdated: built.updatedRows,
+    sceneLedgerRowsAfter: built.rows.length,
+    sceneLedgerParseErrors: existing.errors.length,
+  };
+}
+
 
 function normalizeText(value) {
   return String(value || '').trim();
@@ -760,6 +925,7 @@ async function buildScenarioNormalized() {
     snapshotJson: SNAPSHOT_JSON,
     snapshotJsonl: SNAPSHOT_JSONL,
     snapshotLedgerJsonl: SNAPSHOT_LEDGER_JSONL,
+    sceneLedgerJsonl: SCENE_LEDGER_JSONL,
     outputJson: OUT_JSON,
     availableCandidates: candidates.length,
     checkedCandidates: selectedCandidates.length,
@@ -768,6 +934,10 @@ async function buildScenarioNormalized() {
     snapshotLedgerRowsAppended: 0,
     snapshotLedgerRowsAfter: 0,
     snapshotLedgerParseErrors: 0,
+    sceneLedgerRowsCreated: 0,
+    sceneLedgerRowsUpdated: 0,
+    sceneLedgerRowsAfter: 0,
+    sceneLedgerParseErrors: 0,
     fetchedQueries: 0,
     fetchedResults: 0,
     fetchErrors: 0,
@@ -817,6 +987,13 @@ async function buildScenarioNormalized() {
   report.snapshotLedgerRowsAfter = ledgerInfo.ledgerRowsAfter;
   report.snapshotLedgerParseErrors = ledgerInfo.parseErrors;
 
+  const sceneLedgerInfo = writeSceneLedger(SCENE_LEDGER_JSONL, scenes, runId, generatedAt);
+
+  report.sceneLedgerRowsCreated = sceneLedgerInfo.sceneLedgerRowsCreated;
+  report.sceneLedgerRowsUpdated = sceneLedgerInfo.sceneLedgerRowsUpdated;
+  report.sceneLedgerRowsAfter = sceneLedgerInfo.sceneLedgerRowsAfter;
+  report.sceneLedgerParseErrors = sceneLedgerInfo.sceneLedgerParseErrors;
+
   const output = {
     schema: 'AOIA',
     schemaVersion: '1.0.0',
@@ -837,6 +1014,10 @@ async function buildScenarioNormalized() {
       snapshotLedgerRowsAppended: report.snapshotLedgerRowsAppended,
       snapshotLedgerRowsAfter: report.snapshotLedgerRowsAfter,
       snapshotLedgerParseErrors: report.snapshotLedgerParseErrors,
+      sceneLedgerRowsCreated: report.sceneLedgerRowsCreated,
+      sceneLedgerRowsUpdated: report.sceneLedgerRowsUpdated,
+      sceneLedgerRowsAfter: report.sceneLedgerRowsAfter,
+      sceneLedgerParseErrors: report.sceneLedgerParseErrors,
       evidenceRows: report.evidenceRows,
       normalizedScenes: report.normalizedScenes,
       normalizedEntities: report.normalizedEntities,
@@ -863,6 +1044,7 @@ async function main() {
   console.log('INPUT_JSON        =', INPUT_JSON);
   console.log('SNAPSHOT_JSON     =', SNAPSHOT_JSON);
   console.log('SNAPSHOT_LEDGER   =', SNAPSHOT_LEDGER_JSONL);
+  console.log('SCENE_LEDGER      =', SCENE_LEDGER_JSONL);
   console.log('OUT_JSON          =', OUT_JSON);
   console.log('OUT_JSONL         =', OUT_JSONL);
   console.log('REPORT            =', REPORT_JSON);
@@ -873,6 +1055,9 @@ async function main() {
   console.log('snapshotRows      =', snapshotOutput.snapshotCount);
   console.log('ledgerAppended    =', report.snapshotLedgerRowsAppended);
   console.log('ledgerRowsAfter   =', report.snapshotLedgerRowsAfter);
+  console.log('sceneLedgerCreated=', report.sceneLedgerRowsCreated);
+  console.log('sceneLedgerUpdated=', report.sceneLedgerRowsUpdated);
+  console.log('sceneLedgerRows   =', report.sceneLedgerRowsAfter);
   console.log('fetchedQueries    =', report.fetchedQueries);
   console.log('fetchedResults    =', report.fetchedResults);
   console.log('evidenceRows      =', report.evidenceRows);
@@ -898,5 +1083,6 @@ module.exports = {
   collectScenarioSnapshots,
   normalizeScenarioScenes,
   appendSnapshotLedger,
+  writeSceneLedger,
   selectQueryBatch,
 };
