@@ -364,8 +364,10 @@ function buildSceneLedgerRows(scenes, runId, recordedAt, existingRows) {
 }
 
 function writeSceneLedger(filePath, scenes, runId, recordedAt) {
-  const existing = readJsonl(filePath);
-  const built = buildSceneLedgerRows(scenes, runId, recordedAt, existing.rows);
+  const existingRows = readJsonl(filePath);
+  const parseErrors = existingRows.filter(row => row && row._parseError).length;
+  const validExistingRows = existingRows.filter(row => row && !row._parseError);
+  const built = buildSceneLedgerRows(scenes, runId, recordedAt, validExistingRows);
 
   writeJsonl(filePath, built.rows);
 
@@ -373,7 +375,7 @@ function writeSceneLedger(filePath, scenes, runId, recordedAt) {
     sceneLedgerRowsCreated: built.createdRows,
     sceneLedgerRowsUpdated: built.updatedRows,
     sceneLedgerRowsAfter: built.rows.length,
-    sceneLedgerParseErrors: existing.errors.length,
+    sceneLedgerParseErrors: parseErrors,
   };
 }
 
