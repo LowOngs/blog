@@ -18,6 +18,7 @@ const ROOT = path.resolve(__dirname, '../..');
 const INPUT_JSON = path.join(ROOT, 'seedpool', 'profiles', 'scenario-candidates.json');
 const SNAPSHOT_JSON = path.join(ROOT, 'seedpool', 'profiles', 'scenario-web-snapshots.json');
 const SNAPSHOT_JSONL = path.join(ROOT, 'seedpool', 'profiles', 'scenario-web-snapshots.jsonl');
+const SNAPSHOT_LEDGER_JSONL = path.join(ROOT, 'seedpool', 'profiles', 'scenario-web-snapshots-ledger.jsonl');
 const OUT_JSON = path.join(ROOT, 'seedpool', 'profiles', 'scenario-normalized.json');
 const OUT_JSONL = path.join(ROOT, 'seedpool', 'profiles', 'scenario-normalized.jsonl');
 const REPORT_JSON = path.join(ROOT, 'logs', 'scenario-normalizer-report.json');
@@ -123,6 +124,93 @@ function writeJson(filePath, data) {
 function writeJsonl(filePath, rows) {
   ensureDir(path.dirname(filePath));
   fs.writeFileSync(filePath, rows.map((row) => JSON.stringify(row)).join('\n') + (rows.length ? '\n' : ''), 'utf8');
+}
+
+function readJsonl(filePath) {
+  if (!fs.existsSync(filePath)) return [];
+
+  const raw = fs.readFileSync(filePath, 'utf8').trim();
+  if (!raw) return [];
+
+  const rows = [];
+
+  raw.split(/\r?\n/).forEach((line, index) => {
+    const text = normalizeText(line);
+    if (!text) return;
+
+    try {
+      rows.push(JSON.parse(text));
+    } catch (error) {
+      rows.push({
+        _parseError: true,
+        line: index + 1,
+        message: error.message || String(error),
+        raw: text.slice(0, 300),
+      });
+    }
+  });
+
+  return rows;
+}
+
+function appendJsonl(filePath, rows) {
+  if (!rows.length) return;
+
+  ensureDir(path.dirname(filePath));
+  fs.appendFileSync(filePath, rows.map((row) => JSON.stringify(row)).join('\n') + '\n', 'utf8');
+}
+
+function buildSnapshotLedgerRows(snapshots, runId, generatedAt) {
+  return snapshots.map((snapshot) => ({
+    ledgerId: `snap-ledger:${sha1(`${runId}|${snapshot.snapshotId}`).slice(0, 24)}`,
+    runId,
+    recordedAt: generatedAt,
+    snapshotId: snapshot.snapshotId,
+    entityKey: snapshot.entityKey,
+    canonicalName: snapshot.canonicalName,
+    purpose: snapshot.purpose,
+    query: snapshot.query,
+    queryPriority: snapshot.queryPriority,
+    planPriority: snapshot.planPriority,
+    resultRank: snapshot.resultRank,
+    title: snapshot.title,
+    url: snapshot.url,
+    host: snapshot.host,
+    sourceType: snapshot.sourceType,
+    snippet: snapshot.snippet,
+    textSample: snapshot.textSample,
+    fetchedAt: snapshot.fetchedAt,
+    fetchMode: snapshot.fetchMode,
+    evidenceType: snapshot.evidenceType,
+    tags: snapshot.tags,
+    meta: {
+      schema: 'AOIA',
+      layer: 'scenario-web-snapshot-ledger',
+      writer: 'scenario-normalizer.cjs',
+      collectorVersion: COLLECTOR_VERSION,
+    },
+  }));
+}
+
+function appendSnapshotLedger(filePath, snapshots, runId, generatedAt) {
+  const existingRows = readJsonl(filePath);
+  const existingIds = new Set(
+    existingRows
+      .filter((row) => row && !row._parseError && row.snapshotId)
+      .map((row) => row.snapshotId)
+  );
+
+  const rows = buildSnapshotLedgerRows(snapshots, runId, generatedAt)
+    .filter((row) => !existingIds.has(row.snapshotId));
+
+  appendJsonl(filePath, rows);
+
+  return {
+    existingRows: existingRows.filter((row) => row && !row._parseError).length,
+    parseErrors: existingRows.filter((row) => row && row._parseError).length,
+    appendedRows: rows.length,
+    ledgerRowsAfter: existingRows.filter((row) => row && !row._parseError).length + rows.length,
+  };
 }
 
 function normalizeText(value) {
@@ -657,6 +745,7 @@ function groupScenesByEntity(scenes) {
 
 async function buildScenarioNormalized() {
   const generatedAt = new Date().toISOString();
+  const runId = `scenario-run:${sha1(`${generatedAt}|${FETCH_MODE}|${INPUT_JSON}`).slice(0, 20)}`;
   const candidates = loadCandidates();
   const selectedCandidates = selectCandidateBatch(candidates);
   const queryRows = selectQueryBatch(candidates);
@@ -665,14 +754,20 @@ async function buildScenarioNormalized() {
     schema: 'AOIA',
     builder: 'scenario-normalizer.cjs',
     generatedAt,
+    runId,
     fetchMode: FETCH_MODE,
     inputJson: INPUT_JSON,
     snapshotJson: SNAPSHOT_JSON,
+    snapshotJsonl: SNAPSHOT_JSONL,
+    snapshotLedgerJsonl: SNAPSHOT_LEDGER_JSONL,
     outputJson: OUT_JSON,
     availableCandidates: candidates.length,
     checkedCandidates: selectedCandidates.length,
     selectedQueries: queryRows.length,
     snapshotRows: 0,
+    snapshotLedgerRowsAppended: 0,
+    snapshotLedgerRowsAfter: 0,
+    snapshotLedgerParseErrors: 0,
     fetchedQueries: 0,
     fetchedResults: 0,
     fetchErrors: 0,
@@ -708,6 +803,7 @@ async function buildScenarioNormalized() {
     schemaVersion: '1.0.0',
     type: 'scenarioWebSnapshots',
     generatedAt,
+    runId,
     fetchMode: FETCH_MODE,
     collector: 'scenario-normalizer.cjs#scenario-collector',
     collectorVersion: COLLECTOR_VERSION,
@@ -715,11 +811,18 @@ async function buildScenarioNormalized() {
     snapshots,
   };
 
+  const ledgerInfo = appendSnapshotLedger(SNAPSHOT_LEDGER_JSONL, snapshots, runId, generatedAt);
+
+  report.snapshotLedgerRowsAppended = ledgerInfo.appendedRows;
+  report.snapshotLedgerRowsAfter = ledgerInfo.ledgerRowsAfter;
+  report.snapshotLedgerParseErrors = ledgerInfo.parseErrors;
+
   const output = {
     schema: 'AOIA',
     schemaVersion: '1.0.0',
     type: 'scenarioNormalized',
     generatedAt,
+    runId,
     source: 'scenario-candidates',
     fetchMode: FETCH_MODE,
     sceneCount: scenes.length,
@@ -731,6 +834,9 @@ async function buildScenarioNormalized() {
       checkedCandidates: report.checkedCandidates,
       selectedQueries: report.selectedQueries,
       snapshotRows: report.snapshotRows,
+      snapshotLedgerRowsAppended: report.snapshotLedgerRowsAppended,
+      snapshotLedgerRowsAfter: report.snapshotLedgerRowsAfter,
+      snapshotLedgerParseErrors: report.snapshotLedgerParseErrors,
       evidenceRows: report.evidenceRows,
       normalizedScenes: report.normalizedScenes,
       normalizedEntities: report.normalizedEntities,
@@ -756,6 +862,7 @@ async function main() {
   console.log('ROOT              =', ROOT);
   console.log('INPUT_JSON        =', INPUT_JSON);
   console.log('SNAPSHOT_JSON     =', SNAPSHOT_JSON);
+  console.log('SNAPSHOT_LEDGER   =', SNAPSHOT_LEDGER_JSONL);
   console.log('OUT_JSON          =', OUT_JSON);
   console.log('OUT_JSONL         =', OUT_JSONL);
   console.log('REPORT            =', REPORT_JSON);
@@ -764,6 +871,8 @@ async function main() {
   console.log('checkedCandidates =', report.checkedCandidates);
   console.log('selectedQueries   =', report.selectedQueries);
   console.log('snapshotRows      =', snapshotOutput.snapshotCount);
+  console.log('ledgerAppended    =', report.snapshotLedgerRowsAppended);
+  console.log('ledgerRowsAfter   =', report.snapshotLedgerRowsAfter);
   console.log('fetchedQueries    =', report.fetchedQueries);
   console.log('fetchedResults    =', report.fetchedResults);
   console.log('evidenceRows      =', report.evidenceRows);
@@ -788,5 +897,6 @@ module.exports = {
   buildScenarioNormalized,
   collectScenarioSnapshots,
   normalizeScenarioScenes,
+  appendSnapshotLedger,
   selectQueryBatch,
 };
